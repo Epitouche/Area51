@@ -5,7 +5,7 @@ import Input from "@/components/Input.vue";
 
 <template>
   <div
-    class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-fontBlack"
+    class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-primaryDark-500"
   >
     <div
       class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
