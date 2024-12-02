@@ -8,7 +8,7 @@ import Input from "@/components/Input.vue";
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-fontBlack"
   >
     <div
-      class="w-full max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
+      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
     >
       <h2 class="text-2xl font-bold text-center">LOG IN</h2>
       <form class="space-y-6">
