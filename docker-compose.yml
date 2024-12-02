@@ -1,12 +1,12 @@
 services:
   nuxt:
     build:
-      context: ./NuxtJs
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./NuxtJs:/app
+      - ./frontend:/app
       - /app/node_modules
     environment:
       NODE_ENV: production
