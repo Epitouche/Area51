@@ -1,0 +1,30 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/go
+{
+  "name": "Backend",
+  "dockerComposeFile": "../../compose.dev.yaml",
+  "service": "server",
+  // "shutdownAction": "none",
+  "workspaceFolder": "/workspace/backend",
+  "postCreateCommand": "sudo chown vscode -R /home/vscode/.oh-my-zsh && sudo chown vscode -R /home/vscode/.zsh_history && sudo chown vscode -R /home/vscode/.ssh && go mod download",
+  "postStartCommand": "air main.go",
+  "customizations": {
+      "vscode": {
+          "settings": {
+              "editor.formatOnSave": true
+          },
+          "extensions": [
+              "golang.Go",
+              "Dhikilabs.gin-snippets",
+              "766b.go-outliner",
+              "premparihar.gotestexplorer",
+              "aleksandra.go-group-imports",
+              "Cardinal90.multi-cursor-case-preserve"
+          ]
+      }
+  },
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [
+      8080
+  ]
+}
