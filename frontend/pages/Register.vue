@@ -13,11 +13,11 @@ import Input from "@/components/Input.vue";
       <h2 class="text-2xl font-bold text-center">REGISTER</h2>
       <form class="space-y-6">
         <div class="flex justify-around">
-          <Input id="name" type="text" label="Name" icon="fas fa-user" />
+          <Input id="firstname" type="text" label="First Name" icon="fas fa-user" />
           <Input
             id="lastname"
             type="text"
-            label="Lastname"
+            label="Last Name"
             icon="fas fa-user"
           />
         </div>
