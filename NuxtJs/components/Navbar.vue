@@ -5,13 +5,13 @@
           <div class="text-lg font-bold">
             <NuxtLink to="/">MyLogo</NuxtLink>
           </div>
-          <div class="space-x-4">
+          <div class="space-x-9">
             <NuxtLink to="/">Home</NuxtLink>
             <!-- <NuxtLink to="/services">Services</NuxtLink> -->
             <NuxtLink to="/login">Login</NuxtLink>
-            <!-- <NuxtLink to="/login"> -->
-                <!-- <button class="bg-[#B454FD] px-4 py-2 rounded-full">Sign up</button> -->
-            <!-- </NuxtLink> -->
+            <NuxtLink to="/login">
+                <button class="bg-[#B454FD] px-4 py-2 text-white rounded-full">Sign up</button>
+            </NuxtLink>
           </div>
         </div>
       </nav>
