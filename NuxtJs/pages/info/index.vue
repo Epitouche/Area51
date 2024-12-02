@@ -1,5 +1,5 @@
 <template>
-    <Header/>
+    <Navbar/>
     <h1>Info page</h1>
     <article v-for="post in posts" :key="post.id">
         <p>{{ post.title }}</p>

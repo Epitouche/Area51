@@ -1,5 +1,5 @@
 <template>
-    <Header/>
+    <Navbar/>
     <main>
         <h1>Info of n°{{ post.id }}</h1>
         <h2>{{ post.title }}</h2>
