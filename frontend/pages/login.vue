@@ -1,5 +1,6 @@
 <script>
 import Button from "@/components/Button.vue";
+import Input from "@/components/Input.vue";
 </script>
 
 <template>
@@ -12,21 +13,19 @@ import Button from "@/components/Button.vue";
       <h2 class="text-2xl font-bold text-center">LOG IN</h2>
       <form class="space-y-6">
         <div>
-          <label for="email" class="block text-sm font-medium">Email</label>
-          <input
+          <Input
             id="email"
             type="email"
-            class="w-full px-4 py-2 mt-1 dark:text-fontBlack bg-primaryWhite-300 border border-primaryWhite-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+            label="Email"
+            icon="fas fa-user"
           />
         </div>
         <div>
-          <label for="password" class="block text-sm font-medium"
-            >Password</label
-          >
-          <input
+          <Input
             id="password"
             type="password"
-            class="w-full px-4 py-2 mt-1 dark:text-fontBlack bg-primaryWhite-300 border border-primaryWhite-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+            label="Password"
+            icon="fas fa-lock"
           />
         </div>
       </form>
@@ -63,9 +62,14 @@ import Button from "@/components/Button.vue";
           textColor="text-fontBlack"
         />
       </div>
-      <p class="text-center text-sm">
-        <a href="#" class="text-fontWhite underline">Forgot password?</a>
-      </p>
+      <div class="flex justify-around">
+        <p class="text-center text-sm">
+          <a href="#" class="text-fontWhite underline">Create an account</a>
+        </p>
+        <p class="text-center text-sm">
+          <a href="#" class="text-fontWhite underline">Forgot password?</a>
+        </p>
+      </div>
     </div>
   </div>
 </template>
