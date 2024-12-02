@@ -1,9 +1,13 @@
+<script>
+import Button from "@/components/Button.vue";
+</script>
+
 <template>
   <div
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-fontBlack"
   >
     <div
-      class="w-full max-w-md p-8 space-y-16 bg-gradient-to-b from-tertiary-300 to-tertiary-500 dark:from-primaryDark-600 dark:to-primaryDark-800 text-fontWhite rounded-lg shadow-lg"
+      class="w-full max-w-md p-8 space-y-16 bg-gradient-to-b from-tertiary-300 to-tertiary-500 dark:from-tertiary-500 dark:to-tertiary-300 text-fontWhite rounded-lg shadow-lg"
     >
       <h2 class="text-2xl font-bold text-center">LOG IN</h2>
       <form class="space-y-6">
@@ -33,30 +37,30 @@
           />
           <label for="remember" class="ml-2 text-sm">Remember me</label>
         </div>
-        <button
-          type="submit"
-          class="w-full px-4 py-2 text-lg font-semibold dark:text-fontBlack bg-accent-500 rounded-lg shadow-md hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500"
-        >
-          Login
-        </button>
+        <div class="flex justify-center">
+          <Button
+            text="Log In"
+            bgColor="bg-primaryWhite-500"
+            hoverColor="hover:bg-secondaryWhite-500"
+            textColor="text-fontBlack"
+          />
+        </div>
       </form>
-      <div class="flex justify-between space-x-4">
-        <button
-          class="flex items-center justify-center w-1/2 px-4 py-2 space-x-2 text-fontWhite dark:bg-secondaryDark-600 rounded-lg dark:hover:bg-secondaryDark-500"
-        >
-          <span>
-            <i class="fab fa-github"></i>
-          </span>
-          <span>GitHub</span>
-        </button>
-        <button
-          class="flex items-center justify-center w-1/2 px-4 py-2 space-x-2 text-fontWhite dark:bg-secondaryDark-500 rounded-lg dark:hover:bg-secondaryDark-400"
-        >
-          <span>
-            <i class="fab fa-google"></i>
-          </span>
-          <span>Google</span>
-        </button>
+      <div class="flex justify-around space-x-4">
+        <Button
+          text="Github"
+          class="w-full"
+          bgColor="bg-primaryWhite-500"
+          hoverColor="hover:bg-secondaryWhite-500"
+          textColor="text-fontBlack"
+        />
+        <Button
+          text="Google"
+          class="w-full"
+          bgColor="bg-primaryWhite-500"
+          hoverColor="hover:bg-secondaryWhite-500"
+          textColor="text-fontBlack"
+        />
       </div>
       <p class="text-center text-sm mt-4">
         <a href="#" class="text-fontWhite underline">Forgot password?</a>
@@ -64,13 +68,3 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: "LoginCard",
-};
-</script>
-
-<style scoped>
-/* Vous pouvez ajouter des styles supplémentaires si nécessaire */
-</style>
