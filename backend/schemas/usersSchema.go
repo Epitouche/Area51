@@ -7,9 +7,7 @@ type User struct {
 	Username		string		`json:"username" gorm:"type:varchar(100);unique"`
 	Email			string		`json:"email" binding:"requiredcredentials" gorm:"type:varchar(100);unique"`
 	Password		string		`json:"password" gorm:"type:varchar(100)"` // can be null for Oauth2 user
-	Image			string		`json:"image"`
+	Image			string		`json:"image" gorm:"type:BYTEA"`
 	IsAdmin			bool		`json:"is_admin" gorm:"type:boolean"`
-	UserRole		uint64		`json:"user_role"`
-
 	UserRoleID		Role		`json:"user_role_id" gorm:"foreignkey:UserRole;references:Id"`
 }
