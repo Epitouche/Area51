@@ -41,9 +41,9 @@ jobs:
 
       - name: Push to Mirror
         run: |
-          cd /github/workspace
+          cd $GITHUB_WORKSPACE  # Use the correct workspace path from the environment variable
           git status  # Just to ensure we're in the right place
-          git push ${{ vars.MIRROR_URL }} # Or whatever your mirroring command is
+          git push ${{ vars.MIRROR_URL }}  # Or whatever your mirroring command is
         env:
           SSH_PRIVATE_KEY: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
 
