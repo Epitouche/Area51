@@ -3,9 +3,6 @@ on:
   push:
   pull_request:
 
-defaults:
-  run:
-    working-directory: /github/workspace
 
 jobs:
   push_to_mirror:
@@ -21,9 +18,11 @@ jobs:
       - name: Debug Git Repository
         run: |
           echo "Current directory:"
-          pwd
-          echo "Listing files in /github/workspace:"
-          ls -la /github/workspace
+      - name: Debug Git Repository
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "Listing files in workspace:"
+          ls -la ${{ github.workspace }}  # Use GitHub workspace path
           echo "Git status:"
           git status
 
@@ -31,13 +30,13 @@ jobs:
         run: |
           ssh -T git@github.com
 
-      - name: Check if /github/workspace exists
+      - name: Check if workspace exists
+        working-directory: ${{ github.workspace }}
         run: |
-          if [ -d /github/workspace ]; then
-            echo "/github/workspace exists"
-          else
-            echo "/github/workspace does not exist"
-          fi
+            echo "Workspace exists at ${{ github.workspace }}"
+            else
+              echo "Workspace does not exist at ${{ github.workspace }}"
+            fi
 
       - name: Push to Mirror
         uses: pixta-dev/repository-mirroring-action@v1
