@@ -1,0 +1,61 @@
+name: lint backend
+
+on:
+  push:
+    branches:
+      - dev
+      - backend
+  pull_request:
+    branches:
+      - dev
+      - backend
+
+env:
+  GO_VERSION: stable
+  GOLANGCI_LINT_VERSION: v1.60
+
+jobs:
+    detection-of-golang-modules:
+        name: Detection of Golang Modules
+        runs-on: self-hosted
+        outputs:
+            modules: ${{ steps.set-golang-module.outputs.modules }}
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+              with:
+                    fetch-depth: 0
+
+            - name: Set Golang Module
+              uses: actions/setup-go@v5
+              with:
+                go-version: ${{ env.GO_VERSION }}
+            - id: set-golang-module
+              run: |
+                echo "modules=$(go list -m -json | jq -s '.' | jq -c '[.[].Dir]')" >> $GITHUB_OUTPUT
+
+    run-backend-linter:
+        name: Run Backend Linter
+        needs: detection-of-golang-modules
+        runs-on: self-hosted
+        strategy:
+            matrix:
+                modules: ${{ fromJSON(needs.detection-of-golang-modules.outputs.modules) }}
+        permissions:
+            contents: write
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+              with:
+                    fetch-depth: 0
+
+            - name: Set Golang Module
+              uses: actions/setup-go@v5
+              with:
+                go-version: ${{ env.GO_VERSION }}
+
+            - name: golangci-lint ${{ matrix.modules }}
+              uses: golangci/golangci-lint-action@v6
+              with:
+                version: ${{ env.GOLANGCI_LINT_VERSION }}
+                working-directory: ${{ matrix.modules }}
