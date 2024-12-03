@@ -33,10 +33,11 @@ jobs:
       - name: Check if workspace exists
         working-directory: ${{ github.workspace }}
         run: |
+          if [ -d ${{ github.workspace }} ]; then
             echo "Workspace exists at ${{ github.workspace }}"
-            else
+          else
               echo "Workspace does not exist at ${{ github.workspace }}"
-            fi
+          fi
 
       - name: Push to Mirror
         uses: pixta-dev/repository-mirroring-action@v1
