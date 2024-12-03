@@ -40,7 +40,10 @@ jobs:
           fi
 
       - name: Push to Mirror
-        uses: pixta-dev/repository-mirroring-action@v1
-        with:
-          target_repo_url: ${{ vars.MIRROR_URL }}
-          ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+        run: |
+          cd /github/workspace
+          git status  # Just to ensure we're in the right place
+          git push ${{ vars.MIRROR_URL }} # Or whatever your mirroring command is
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+
