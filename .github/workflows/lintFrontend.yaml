@@ -1,0 +1,40 @@
+name: lint frontend
+
+on:
+  push:
+    branches:
+      - dev
+      - frontend
+  pull_request:
+    branches:
+      - dev
+      - frontend
+
+defaults:
+  run:
+    working-directory: ./frontend
+
+
+permissions:
+    contents: write
+
+jobs:
+    run-frontend-linter:
+        name: Run Frontend Linter
+        runs-on: self-hosted
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+              with:
+                    fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20'
+
+            - name: Install Dependencies
+              run: npm ci
+
+            - name: Run Linter
+              run: npx eslint --fix --ignore-pattern .nuxt --ignore-pattern dist
