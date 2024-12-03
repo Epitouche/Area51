@@ -1,0 +1,28 @@
+name: Mirroring
+run-name: mirroring
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    push_to_mirror:
+        name: Push to Mirror
+        runs-on: self-hosted
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+              with:
+                    fetch-depth: 0
+
+            - name: Push to Mirror
+              run: |
+                mkdir -p ~/.ssh
+                echo "${{ secrets.GIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa
+                ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+                git remote set-url mirror ${{ vars.MIRROR_URL }}
+                git remote -v
+                git push mirror --all --force
+
+
