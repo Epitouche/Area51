@@ -9,20 +9,15 @@ jobs:
     push_to_mirror:
         name: Push to Mirror
         runs-on: self-hosted
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
         steps:
-            - name: Checkout Repo
-              uses: actions/checkout@v3
-              with:
-                    fetch-depth: 0
-
-            - name: Push to Mirror
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.GIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-                git remote set-url mirror ${{ vars.MIRROR_URL }}
-                git remote -v
-                git push mirror --all --force
+          - uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
+          - uses: pixta-dev/repository-mirroring-action@v1
+            with:
+              target_repo_url: ${{ vars.MIRROR_URL }}
+              ssh_private_key: # <-- use 'secrets' to pass credential information.
+                ${{ secrets.GIT_SSH_PRIVATE_KEY }}
 
 
