@@ -3,12 +3,18 @@ run-name: mirroring
 
 on:
     push:
+      branches:
+        - main
+        - dev
     pull_request:
+      branches:
+        - main
+        - dev
 
 jobs:
     push_to_mirror:
         name: Push to Mirror
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
         if: github.event_name == 'push' || github.event_name == 'pull_request'
         steps:
           - uses: actions/checkout@v4
