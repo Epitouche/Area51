@@ -26,17 +26,17 @@ jobs:
           echo "Git status:"
           git status
 
-      # - name: Test SSH Connection
-      #   run: |
-      #     ssh -T git@github.com
+      - name: Test SSH Connection
+        run: |
+          ssh -T git@github.com || true
 
-      # - name: Check if workspace exists
-      #   working-directory: ${{ github.workspace }}
-      #   run: |
-      #       echo "Workspace exists at ${{ github.workspace }}"
-      #       else
-      #         echo "Workspace does not exist at ${{ github.workspace }}"
-      #       fi
+      - name: Check if workspace exists
+        working-directory: ${{ github.workspace }}
+        run: |
+            echo "Workspace exists at ${{ github.workspace }}"
+            else
+              echo "Workspace does not exist at ${{ github.workspace }}"
+            fi
 
       - name: Push to Mirror
         uses: pixta-dev/repository-mirroring-action@v1
