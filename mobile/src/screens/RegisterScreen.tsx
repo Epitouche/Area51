@@ -14,16 +14,34 @@ import LinearGradient from 'react-native-linear-gradient';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [lastName, setLastName] = useState('');
   // const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = () => {
-    console.log('Logging in with', email, password);
+    console.log('Logging in with', email, password, name, lastName);
   };
 
   return (
     <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.container}>
-      <Text style={styles.header}>LOG IN</Text>
+      <Text style={styles.header}>REGISTER IN</Text>
       <View style={styles.inputBox}>
+        <View style={styles.nameBox}>
+          <TextInput
+            style={styles.nameInput}
+            placeholder="First Name"
+            keyboardType="default"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.nameInput}
+            placeholder="Last Name"
+            keyboardType="default"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -34,8 +52,8 @@ export default function LoginPage() {
         <TextInput
           style={styles.input}
           secureTextEntry
-          value={password}
           placeholder="Password"
+          value={password}
           onChangeText={setPassword}
           autoCapitalize="none"
         />
@@ -94,28 +112,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: '3%',
-    gap: 40,
+    gap: 30,
   },
   header: {
     fontSize: 32,
     color: '#fff',
     fontWeight: 'bold',
     marginTop: '20%',
-  },
-  inputBox: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 30,
-    marginTop: '10%',
-  },
-  input: {
-    width: '90%',
-    borderBottomWidth: 1,
-    borderColor: '#F7FAFB',
-    padding: 5,
-    marginVertical: 10,
-    fontSize: 16,
-    color: 'white',
   },
   // checkboxContainer: {
   //   flexDirection: 'row',
@@ -140,6 +143,39 @@ const styles = StyleSheet.create({
   //   color: '#fff',
   //   fontSize: 16,
   // },
+
+  // Input Section
+  inputBox: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 30,
+    marginTop: '10%',
+  },
+  input: {
+    width: '100%',
+    borderBottomWidth: 1,
+    borderColor: '#F7FAFB',
+    padding: 5,
+    marginVertical: 10,
+    fontSize: 16,
+    color: 'white',
+  },
+  nameBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  nameInput: {
+    width: '48%',
+    borderBottomWidth: 1,
+    borderColor: '#F7FAFB',
+    padding: 5,
+    marginVertical: 10,
+    fontSize: 16,
+    color: 'white',
+  },
+
+  // Button Section
   loginButton: {
     width: '35%',
     backgroundColor: '#F7FAFB',

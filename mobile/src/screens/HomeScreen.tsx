@@ -15,6 +15,7 @@ export default function HomeScreen({ navigation }: Props){
     <View>
       <Text>Home Screen</Text>
       <Button title="Connexion" onPress={() => navigation.navigate('Login')} />
+      <Button title="Inscription" onPress={() => navigation.navigate('Register')} />
     </View>
   );
 };
