@@ -1,0 +1,79 @@
+name: area51
+services:
+  server:
+    container_name: server
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: run
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "0.0.0.0:8080:8080"
+    networks:
+      - app-networks
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/about.json || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  database:
+    image: postgres:17
+    container_name: database
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: ${DB_HOST}
+    networks:
+      - app-networks
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web_app:
+    container_name: web_app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: run
+    environment:
+      - PORT=8081
+    ports:
+      - "0.0.0.0:8081:8081"
+    networks:
+      - app-networks
+    depends_on:
+      mobile_app:
+        condition: service_started
+      service:
+        condition: service_healthy
+    volumes:
+      - apk:app/public/apk
+
+
+  mobile_app:
+    container_name: mobile_app
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+      target: build-apk
+    volumes:
+      - apk:/app/public/apk
+    networks:
+      - app-networks
+
+networks:
+  app-networks:
+
+volumes:
+  database-data:
+  apk:
