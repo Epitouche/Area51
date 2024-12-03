@@ -14,7 +14,7 @@
         "@nuxt/eslint": "^0.7.2",
         "eslint": "^9.16.0",
         "nuxt": "^3.14.1592",
-        "vite": "^6.0.2",
+        "vite": "^5.4.11",
         "vue": "latest",
         "vue-router": "latest"
     },

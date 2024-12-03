@@ -9,4 +9,5 @@ export default defineNuxtConfig({
   },
 
   modules: ['@nuxt/devtools', '@nuxt/eslint'],
+  compatibilityDate: '2024-12-03',
 });
