@@ -3,6 +3,10 @@ on:
   push:
   pull_request:
 
+defaults:
+  run:
+    working-directory: /github/workspace
+
 jobs:
   push_to_mirror:
     name: Push to Mirror
@@ -27,4 +31,3 @@ jobs:
         with:
           target_repo_url: ${{ vars.MIRROR_URL }}
           ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
-        working-directory: /github/workspace
