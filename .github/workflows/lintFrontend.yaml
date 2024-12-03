@@ -10,6 +10,11 @@ on:
       - dev
       - frontend
 
+defaults:
+  run:
+    working-directory: ./frontend
+
+
 permissions:
     contents: write
 
