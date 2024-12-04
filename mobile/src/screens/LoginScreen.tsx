@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   TextInput,
@@ -7,17 +7,21 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import {Button} from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
+import { AppContext } from '../context/AppContext';
+import { exempleApiCall } from '../service/callTest';
 // import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { serverIp } = useContext(AppContext);
+  const [isWorking, setIsWorking] = useState(false);
   // const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = () => {
-    console.log('Logging in with', email, password);
+    exempleApiCall(serverIp, setIsWorking);
   };
 
   return (
@@ -80,6 +84,7 @@ export default function LoginPage() {
           </View>
         </Button>
       </View>
+      {isWorking && <Text style={styles.passwordText}>Working...</Text>}
       <View style={styles.forgotPasswordBox}>
         <TouchableOpacity>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
