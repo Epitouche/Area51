@@ -9,5 +9,5 @@ type User struct {
 	Password		string		`json:"password" gorm:"type:varchar(100)"` // can be null for Oauth2 user
 	Image			string		`json:"image" gorm:"type:BYTEA"`
 	IsAdmin			bool		`json:"is_admin" gorm:"type:boolean"`
-	UserRoleID		Role		`json:"user_role_id" gorm:"foreignkey:UserRole;references:Id"`
+	// UserRoleID		Role		`json:"user_role_id" gorm:"foreignkey:UserRole;references:Id"`
 }
