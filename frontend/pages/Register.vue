@@ -1,7 +1,4 @@
-<script>
-import Button from "@/components/Button.vue";
-import Input from "@/components/Input.vue";
-</script>
+<script></script>
 
 <template>
   <div
@@ -12,25 +9,14 @@ import Input from "@/components/Input.vue";
     >
       <h2 class="text-2xl font-bold text-center">REGISTER</h2>
       <form class="space-y-6">
-        <div class="flex justify-around">
-          <Input id="firstname" type="text" label="First Name" icon="fas fa-user" />
-          <Input
-            id="lastname"
-            type="text"
-            label="Last Name"
-            icon="fas fa-user"
-          />
+        <div>
+          <Input id="username" type="text" label="Username" />
         </div>
         <div>
-          <Input id="email" type="email" label="Email" icon="fas fa-user" />
+          <Input id="email" type="email" label="Email" />
         </div>
         <div>
-          <Input
-            id="password"
-            type="password"
-            label="Password"
-            icon="fas fa-lock"
-          />
+          <Input id="password" type="password" label="Password" />
         </div>
       </form>
       <div class="flex items-center">
