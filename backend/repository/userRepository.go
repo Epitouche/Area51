@@ -58,7 +58,7 @@ func (r *userRepository) FindAll() []schemas.User {
 	var users []schemas.User
 	err := r.db.Connection.Find(&users)
 	if err.Error != nil {
-		panic(err.Error)
+		return []schemas.User{}
 	}
 	return users
 }
@@ -67,7 +67,7 @@ func (r *userRepository) FindByID(id uint64) schemas.User {
 	var user schemas.User
 	err := r.db.Connection.First(&user, id)
 	if err.Error != nil {
-		panic(err.Error)
+		return schemas.User{}
 	}
 	return user
 }
@@ -76,7 +76,7 @@ func (r *userRepository) FindByUsername(username string) schemas.User {
 	var user schemas.User
 	err := r.db.Connection.Where(&schemas.User{Username: username}).First(&user)
 	if err.Error != nil {
-		panic(err.Error)
+		return schemas.User{}
 	}
 	return user
 }
@@ -85,7 +85,7 @@ func (r *userRepository) FindByEmail(email string) schemas.User {
 	var user schemas.User
 	err := r.db.Connection.Where(&schemas.User{Email: email}).First(&user)
 	if err.Error != nil {
-		panic(err.Error)
+		return schemas.User{}
 	}
 	return user
 }

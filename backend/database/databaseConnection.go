@@ -8,25 +8,25 @@ import (
 )
 
 func Connection() *gorm.DB {
-	host := os.Getenv("DB_HOST")
+	host := os.Getenv("POSTGRES_DB")
 	if host == "" {
-		panic("DB_HOST is not set")
+		panic("POSTGRES_DB is not set")
 	}
 	port := os.Getenv("DB_PORT")
 	if port == "" {
 		panic("DB_PORT is not set")
 	}
-	user := os.Getenv("DB_USER")
+	user := os.Getenv("POSTGRES_USER")
 	if user == "" {
-		panic("DB_USER is not set")
+		panic("POSTGRES_USER is not set")
 	}
-	password := os.Getenv("DB_PASSWORD")
+	password := os.Getenv("POSTGRES_PASSWORD")
 	if password == "" {
-		panic("DB_PASSWORD is not set")
+		panic("POSTGRES_PASSWORD is not set")
 	}
-	dbname := os.Getenv("DB_NAME")
+	dbname := os.Getenv("POSTGRES_DB")
 	if dbname == "" {
-		panic("DB_NAME is not set")
+		panic("POSTGRES_DB is not set")
 	}
 
 	dsn := "host=" + host + " port=" + port + " user=" + user + " password=" + password + " dbname=" + dbname + " sslmode=disable TimeZone=Europe/Paris"

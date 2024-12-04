@@ -2,8 +2,8 @@ package services
 
 import (
 	"errors"
-
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"strconv"
 
 	"area51/database"
 	"area51/repository"
@@ -11,8 +11,8 @@ import (
 )
 
 type UserService interface {
-	Login(user schemas.User) (schemas.JWT, error)
-	Register(ctx *gin.Context) (string, error)
+	Login(user schemas.User) (JWTtoken string, err error)
+	Register(newUser schemas.User) (JWTtoken string, err error)
 }
 
 type userService struct {
@@ -32,20 +32,38 @@ func NewUserService(repository repository.UserRepository, serviceJWT JWTService)
 	}
 }
 
-func (service *userService) Login(newUser schemas.User) (schemas.JWT, error) {
-	user := service.repository.FindByEmail(newUser.Email)
-	if user.Email == "" {
-		return schemas.JWT{}, errors.New("User not found")
+func (service *userService) Login(newUser schemas.User) (JWTtoken string, err error) {
+	user := service.repository.FindByUsername(newUser.Username)
+	if user.Username == "" {
+		return "", errors.New("User not found")
 	}
-
 	if database.CompareHashAndPassword(user.Password, newUser.Password) {
-		// return service.serviceJWT.GenerateJWTToken(fmt.Sprint(user.Id), user.Email, user.IsAdmin), nil
+		return service.serviceJWT.GenerateJWTToken(
+			strconv.FormatUint(user.Id, 10),
+			user.Username,
+			user.IsAdmin,
+		), nil
 	}
 
-	return schemas.JWT{}, errors.New("Invalid password")
+
+	return "", errors.New("Invalid password")
 
 }
 
-func (service *userService) Register(ctx *gin.Context) (string, error) {
-	return "Register", nil
+func (service *userService) Register(newUser schemas.User) (JWTtoken string, err error) {
+	user := service.repository.FindByEmail(newUser.Email)
+	if user.Email != "" {
+		return "", errors.New("email already in use")
+	}
+
+	if newUser.Password != "" {
+		hashedPassword, err := database.HashPassword(newUser.Password)
+		if err != nil {
+			return "", errors.New("error while hashing the password")
+		}
+		newUser.Password = hashedPassword
+	}
+
+	service.repository.Save(newUser)
+	return service.serviceJWT.GenerateJWTToken(fmt.Sprint(newUser.Id), newUser.Username, false), nil
 }
