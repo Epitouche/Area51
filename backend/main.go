@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"github.com/gin-contrib/cors"
 
 	"area51/api"
 	"area51/controllers"
@@ -30,6 +30,7 @@ func setupRouter() *gin.Engine {
 		auth := apiRoutes.Group("/auth")
 		{
 			auth.POST("/login", userApi.Login)
+			auth.POST("/register", userApi.Register)
 		}
 	}
 

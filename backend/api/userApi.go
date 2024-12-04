@@ -35,3 +35,17 @@ func (api *UserApi) Login(ctx *gin.Context) {
 		Token: token,
 	})
 }
+
+func (api *UserApi) Register(ctx *gin.Context) {
+	token, err := api.userController.Register(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusConflict, &schemas.Response{
+			Message: err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, &schemas.JWT{
+		Token: token,
+	})
+}
+

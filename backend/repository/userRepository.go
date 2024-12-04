@@ -33,8 +33,8 @@ func NewUserRepository(conn *gorm.DB) UserRepository {
 	}
 }
 
-func (r *userRepository) Save(user schemas.User) {
-	err := r.db.Connection.Create(&user)
+func (repo *userRepository) Save(user schemas.User) {
+	err := repo.db.Connection.Create(&user)
 	if err.Error != nil {
 		panic(err.Error)
 	}
