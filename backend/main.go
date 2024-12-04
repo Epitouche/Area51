@@ -30,11 +30,23 @@ func setupRouter() *gin.Engine {
 	userController := controllers.NewUserController(userService, jwtService)
 	userApi := api.NewUserAPI(userController)
 
+	githubTokenRepository := repository.NewGithubTokenRepository(databaseConnection)
+	githubTokenService := services.NewGithubTokenService(githubTokenRepository)
+	githubTokenController := controllers.NewGithubTokenController(githubTokenService, userService)
+	githubApi := api.NewGithubAPI(githubTokenController)
+
 	apiRoutes := router.Group("/")
 	{
 		auth := apiRoutes.Group("/auth")
 		{
 			auth.POST("/register", userApi.Register)
+		}
+
+		github := apiRoutes.Group("/github")
+		{
+			github.GET("/auth", func (ctx *gin.Context) {
+				githubApi.RedirectToGithub(ctx, github.BasePath()+"/auth/callback")
+			})
 		}
 	}
 
