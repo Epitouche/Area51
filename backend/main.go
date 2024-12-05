@@ -32,6 +32,13 @@ func setupRouter() *gin.Engine {
 			auth.POST("/login", userApi.Login)
 			auth.POST("/register", userApi.Register)
 		}
+
+		github := apiRoutes.Group("/github")
+		{
+			github.GET("/auth", func (ctx *gin.Context) {
+				githubApi.RedirectToGithub(ctx, github.BasePath()+"/callback")
+			})
+		}
 	}
 
 	return router
@@ -42,15 +49,19 @@ var (
 	databaseConnection *gorm.DB = database.Connection()
 	// Repositories
 	userRepository        repository.UserRepository        = repository.NewUserRepository(databaseConnection)
+	githubRepository        repository.GithubTokenRepository        = repository.NewGithubTokenRepository(databaseConnection)
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
+	githubService        services.GithubTokenService        = services.NewGithubTokenService(githubRepository)
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
+	githubController        controllers.GitHubController        = controllers.NewGithubTokenController(githubService, userService)
 )
 
 var (
 userApi       *api.UserApi        = api.NewUserApi(userController)
+githubApi       *api.GithubApi        = api.NewGithubAPI(githubController)
 )
 
 
