@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   isOpen: { type: Boolean, required: true },
   title: { type: String, required: true },
   showFooter: { type: Boolean, default: true },
