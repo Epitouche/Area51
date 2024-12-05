@@ -20,10 +20,7 @@ type githubTokenControllerStruct struct {
 	serviceUser services.UserService
 }
 
-var validateGithubToken *validator.Validate
-
 func NewGithubTokenController(service services.GithubTokenService, serviceUser services.UserService) GitHubController {
-	validateGithubToken = validator.New()
 	return &githubTokenControllerStruct{
 		service: service,
 		serviceUser: serviceUser,
