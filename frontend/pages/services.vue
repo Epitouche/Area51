@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import ListTable from "~/components/ListTableComponent.vue";
-import Modal from "~/components/ModalComponent.vue";
-
 const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
 
 const rows = [
@@ -78,35 +75,35 @@ const confirmModalReaction = () => {
       />
     </div>
     <div class="flex justify-center m-16 gap-10">
-      <Button
+      <ButtonComponent
         text="Choose an action"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
         hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
         :onClick="openModalAction"
       >
-      </Button>
-      <Modal
+      </ButtonComponent>
+      <ModalComponent
         :isOpen="isModalActionOpen"
         title="Choose an action"
         @close="closeModalAction"
         @confirm="confirmModalAction"
       >
-      </Modal>
-      <Button
+      </ModalComponent>
+      <ButtonComponent
         text="Choose a reaction"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
         hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
         :onClick="openModalReaction"
-      ></Button>
-      <Modal
+      ></ButtonComponent>
+      <ModalComponent
         :isOpen="isModalReactionOpen"
         title="Choose a reaction"
         @close="closeModalReaction"
         @confirm="confirmModalReaction"
       >
-      </Modal>
+      </ModalComponent>
 
     </div>
     <div class="flex justify-center">
@@ -115,20 +112,20 @@ const confirmModalReaction = () => {
       />
     </div>
     <div class="flex justify-start gap-5 m-20">
-      <Button
+      <ButtonComponent
         text="Filter"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
         hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
-      ></Button>
-      <!-- do dropdown to replace the button "all status"-->
-      <Button
+      ></ButtonComponent>
+      <!-- do dropdown to replace the buttonComponent "all status"-->
+      <ButtonComponent
         text="All Status"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
         hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
-      ></Button>
+      ></ButtonComponent>
     </div>
-    <ListTable v-show="columns && rows" :columns="columns" :rows="rows" />
+    <ListTableComponent v-show="columns && rows" :columns="columns" :rows="rows" />
   </div>
 </template>

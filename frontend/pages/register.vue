@@ -1,4 +1,5 @@
-<script></script>
+<script>
+</script>
 
 <template>
   <div
@@ -10,17 +11,17 @@
       <h2 class="text-2xl font-bold text-center">REGISTER</h2>
       <form class="space-y-6">
         <div>
-          <Input id="username" type="text" label="Username" />
+          <InputComponent id="username" type="text" label="Username" />
         </div>
         <div>
-          <Input id="email" type="email" label="Email" />
+          <InputComponent id="email" type="email" label="Email" />
         </div>
         <div>
-          <Input id="password" type="password" label="Password" />
+          <InputComponent id="password" type="password" label="Password" />
         </div>
       </form>
       <div class="flex items-center">
-        <input
+        <InputComponent
           id="remember"
           type="checkbox"
           class="w-4 h-4 text-accent-500 border-primaryWhite-300 rounded focus:ring-accent-500"
@@ -28,7 +29,7 @@
         <label for="remember" class="ml-2 text-sm">Remember me</label>
       </div>
       <div class="flex justify-center">
-        <Button
+        <ButtonComponent
           text="Create Account"
           bgColor="bg-primaryWhite-500"
           hoverColor="hover:bg-secondaryWhite-500"
@@ -37,14 +38,14 @@
       </div>
       <hr class="border-primaryWhite-400" />
       <div class="flex justify-around space-x-4">
-        <Button
+        <ButtonComponent
           text="Github"
           class="w-full"
           bgColor="bg-primaryWhite-500"
           hoverColor="hover:bg-secondaryWhite-500"
           textColor="text-fontBlack"
         />
-        <Button
+        <ButtonComponent
           text="Google"
           class="w-full"
           bgColor="bg-primaryWhite-500"
