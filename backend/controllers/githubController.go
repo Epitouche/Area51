@@ -12,25 +12,28 @@ import (
 
 type GithubController interface {
 	RedirectionToGithubService(ctx *gin.Context, path string) (string, error)
-	serviceCallback(ctx *gin.Context, path string) (string, error)
+	ServiceCallback(ctx *gin.Context, path string) (string, error)
 	GetUserInfos(ctx *gin.Context) (userInfos schemas.GithubUserInfo, err error)
 }
 
 type githubController struct {
-	service 	services.GithubService
-	userService services.UserService
-	serviceToken services.TokenService
+	service 		services.GithubService
+	userService 	services.UserService
+	serviceToken 	services.TokenService
+	servicesService services.ServicesService
 }
 
 func NewGithubController(
 	service services.GithubService,
 	userService services.UserService,
 	serviceToken services.TokenService,
+	servicesService services.ServicesService,
 ) GithubController {
 	return &githubController{
-		service: services.NewGithubService(),
-		userService: services.NewUserService(),
-		serviceToken: services.NewTokenService(),
+		service: service,
+		userService: userService,
+		serviceToken: serviceToken,
+		servicesService: servicesService,
 	}
 }
 
@@ -38,7 +41,7 @@ func NewGithubController(
 func (controller *githubController) RedirectionToGithubService(ctx *gin.Context, path string) (string, error) {
 	clientId := toolbox.GetInEnv("GITHUB_CLIENT_ID")
 	appPort := toolbox.GetInEnv("APP_PORT")
-	appAdressHost := toolbox.GetInEnv("APP_ADRESS_HOST")
+	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	state, err := toolbox.GenerateCSRFToken()
 	if err != nil {
@@ -46,7 +49,6 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 	}
 
 	ctx.SetCookie("latestCSRFToken", state, 3600, "/", "localhost", false, true)
-
 	redirectUri := appAdressHost + appPort + path
 	authUrl := "https://github.com/login/oauth/authorize" +
 		"?client_id=" + clientId +
@@ -57,31 +59,42 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 	return authUrl, nil
 }
 
-func (controller *githubController) serviceCallback(ctx *gin.Context, path string) (string, error) {
+func (controller *githubController) ServiceCallback(ctx *gin.Context, path string) (string, error) {
+	fmt.Printf("I enter in the Controller!!!!!!!!!\n")
 	code := ctx.Query("code")
 	if code == "" {
 		return "", nil
 	}
 	state := ctx.Query("state")
-	latestCSRFToken, err := ctx.Cookie("latestCSRFToken")
+	// latestCSRFToken, err := ctx.Cookie("latestCSRFToken")
 	if state == "" {
 		return "", nil
 	}
-	if state != latestCSRFToken {
-		return "", nil
-	}
+	fmt.Printf("state Passed !!!!!!!!!\n")
+	// if state != latestCSRFToken {
+	// 	return "", nil
+	// }
+	fmt.Printf("CSRF token passed !!!!!!!!!")
 	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(code, path)
+	fmt.Printf("githubTokenResponse Passed !!!!!!!!!")
 	if err != nil {
 		return "", err
 	}
+
+	githubService := controller.servicesService.FindByName(schemas.Github)
+	fmt.Printf("githubService Passed !!!!!!!!!")
+
 	newGithubToken := schemas.ServiceToken{
 		Token:   githubTokenResponse.AccessToken,
-		// Service: githubController.service,
+		Service: githubService,
 		UserId:  1,
 	}
-	controller.serviceToken.SaveToken(newGithubToken)
-
+	fmt.Printf("newGithubToken Passed !!!!!!!!!")
+	tokenId, err := controller.serviceToken.SaveToken(newGithubToken)
 	userAlreadExists := false
+
+	fmt.Printf("MON BOEUF\n")
+
 	if err != nil {
 		if err.Error() == "token already exists" {
 			userAlreadExists = true
@@ -95,19 +108,27 @@ func (controller *githubController) serviceCallback(ctx *gin.Context, path strin
 		return "", fmt.Errorf("unable to get user info because %w", err)
 	}
 
+
 	newUser := schemas.User{
 		Username: userInfo.Login,
 		Email:    userInfo.Email,
-		// TokenId:  token,
+		TokenId:  tokenId,
 	}
+	fmt.Printf("newUser username: %v\n", newUser.Username)
+	fmt.Printf("newUser email: %v\n", newUser.Email)
+	fmt.Printf("newUser tokenId: %v\n", newUser.TokenId)
+
 
 	if userAlreadExists {
+		fmt.Printf("user already exists")
 		token, err := controller.userService.Login(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to login user because %w", err)
 		}
 		return token, nil
 	} else {
+		fmt.Printf("Creating new user")
+
 		token, err := controller.userService.Register(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to register user because %w", err)
@@ -120,6 +141,15 @@ func (controller *githubController) GetUserInfos(ctx *gin.Context) (userInfos sc
 	authHeader := ctx.GetHeader("Authorization")
 	tokenString := authHeader[len("Bearer "):]
 
-	user, err := controller.userService.
+	user, err := controller.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return schemas.GithubUserInfo{}, err
+	}
+	token, err := controller.serviceToken.GetTokenById(user.TokenId)
 
+	githubUserInfos, err := controller.service.GetUserInfo(token.Token)
+	if err != nil {
+		return schemas.GithubUserInfo{}, err
+	}
+	return githubUserInfos, nil
 }

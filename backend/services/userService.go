@@ -14,6 +14,8 @@ type UserService interface {
 	Login(user schemas.User) (JWTtoken string, err error)
 	Register(newUser schemas.User) (JWTtoken string, err error)
 	GetUserInfos(token string) (userInfos schemas.User, err error)
+	UpdateUserInfos(newUser schemas.User) error
+	GetUserById(userId uint64) schemas.User
 }
 
 type userService struct {
@@ -45,7 +47,16 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 			user.IsAdmin,
 		), nil
 	}
-
+	print("I PASS HERE")
+	if user.Email == newUser.Email {
+		if newUser.TokenId != 0 {
+			return service.serviceJWT.GenerateJWTToken(
+				strconv.FormatUint(user.Id, 10),
+				user.Username,
+				false,
+			), nil
+		}
+	}
 
 	return "", errors.New("Invalid password")
 
@@ -74,6 +85,15 @@ func (service *userService) GetUserInfos(token string) (userInfos schemas.User, 
 	if err != nil {
 		return schemas.User{}, err
 	}
-	userInfos = service.repository.FindByID(userId)
+	userInfos = service.repository.FindById(userId)
 	return userInfos, nil
+}
+
+func (service *userService) UpdateUserInfos(newUser schemas.User) error {
+	service.repository.Update(newUser)
+	return nil
+}
+
+func (service *userService) GetUserById(userId uint64) schemas.User {
+	return service.repository.FindById(userId)
 }

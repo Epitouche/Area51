@@ -12,7 +12,7 @@ type UserRepository interface {
 	Delete(user schemas.User)
 
 	FindAll() []schemas.User
-	FindByID(id uint64) schemas.User
+	FindById(id uint64) schemas.User
 	FindByUsername(username string) schemas.User
 	FindByEmail(email string) schemas.User
 }
@@ -63,7 +63,7 @@ func (r *userRepository) FindAll() []schemas.User {
 	return users
 }
 
-func (r *userRepository) FindByID(id uint64) schemas.User {
+func (r *userRepository) FindById(id uint64) schemas.User {
 	var user schemas.User
 	err := r.db.Connection.First(&user, id)
 	if err.Error != nil {

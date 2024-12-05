@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
@@ -35,7 +36,13 @@ func setupRouter() *gin.Engine {
 
 		github := apiRoutes.Group("/github")
 		{
-			github.GET("/auth", )
+			github.GET("/auth", func(c *gin.Context) {
+				githubApi.RedirectToGithub(c, github.BasePath()+"/callback")
+			})
+			github.GET("/callback", func(c *gin.Context) {
+				fmt.Printf("I enter the callback route!!!!!!!\n")
+				githubApi.HandleGithubTokenCallback(c, github.BasePath()+"/callback")
+			})
 		}
 	}
 
@@ -49,14 +56,16 @@ var (
 	userRepository        repository.UserRepository        = repository.NewUserRepository(databaseConnection)
 	githubRepository      repository.GithubRepository      = repository.NewGithubRepository(databaseConnection)
 	tokenRepository       repository.TokenRepository       = repository.NewTokenRepository(databaseConnection)
+	servicesRepository    repository.ServiceRepository     = repository.NewServiceRepository(databaseConnection)
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
 	githubService      services.GithubService      = services.NewGithubService(githubRepository)
 	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
+	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
-	githubController	  controllers.GithubController      = controllers.NewGithubController(githubService, userService, serviceToken)
+	githubController	  controllers.GithubController      = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
 )
 
 var (

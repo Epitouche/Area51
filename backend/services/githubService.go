@@ -1,11 +1,11 @@
 package services
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/gin-gonic/gin/internal/json"
 
 	"area51/repository"
 	"area51/schemas"
@@ -29,9 +29,9 @@ func NewGithubService(repository repository.GithubRepository) GithubService {
 
 func (service *githubService) AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error) {
 	clientId := toolbox.GetInEnv("GITHUB_CLIENT_ID")
-	clientSecret := toolbox.GetInEnv("GITHUB_CLIENT_SECRET")
+	clientSecret := toolbox.GetInEnv("GITHUB_SECRET")
 	appPort := toolbox.GetInEnv("APP_PORT")
-	appAdressHost := toolbox.GetInEnv("APP_ADRESS_HOST")
+	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	redirectUri := appAdressHost + appPort + path
 
@@ -57,12 +57,14 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
+	fmt.Printf("response body: %v\n", response.Body)
 	var resultToken schemas.GitHubResponseToken
 	err = json.NewDecoder(response.Body).Decode(&resultToken)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
 	response.Body.Close()
+	fmt.Printf("resultToken: %v\n", resultToken)
 	return resultToken, nil
 }
 
@@ -71,7 +73,8 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
-	request.Header.Set("Authorization", "Bearer "+ accessToken)
+	fmt.Printf("accessToken: %s\n", accessToken)
+	request.Header.Set("Authorization", "Bearer "+accessToken)
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
