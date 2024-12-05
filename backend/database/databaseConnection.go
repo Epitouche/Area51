@@ -9,7 +9,7 @@ import (
 )
 
 func Connection() *gorm.DB {
-	host := tools.GetInEnv("DB_HOST")
+	host := tools.GetInEnv("POSTGRES_DB_HOST")
 	user := tools.GetInEnv("POSTGRES_USER")
 	password := tools.GetInEnv("POSTGRES_PASSWORD")
 	dbname := tools.GetInEnv("POSTGRES_DB")

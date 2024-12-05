@@ -1,5 +1,5 @@
 package schemas
 
-type Response struct {
+type BasicResponse struct {
 	Message string `json:"message"`
 }

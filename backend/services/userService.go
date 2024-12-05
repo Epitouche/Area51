@@ -1,36 +1,58 @@
 package services
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
+
 	"area51/database"
 	"area51/repository"
 	"area51/schemas"
-	"errors"
-	"fmt"
 )
 
 type UserService interface {
+	Login(user schemas.User) (JWTtoken string, err error)
 	Register(newUser schemas.User) (JWTtoken string, err error)
 }
 
-type userServiceStruct struct {
+type userService struct {
 	authorizedUsername string
 	authorizedPassword string
-	repository repository.UserRepository
-	serviceJWT JWTService
+	repository         repository.UserRepository
+	serviceJWT         JWTService
 }
 
-func NewUserService(userRepository repository.UserRepository, serviceJWT JWTService) UserService {
-	return &userServiceStruct{
+
+func NewUserService(repository repository.UserRepository, serviceJWT JWTService) UserService {
+	return &userService{
 		authorizedUsername: "root",
 		authorizedPassword: "password",
-		repository: userRepository,
-		serviceJWT: serviceJWT,
+		repository:         repository,
+		serviceJWT:         serviceJWT,
 	}
 }
 
-func (service *userServiceStruct) Register(newUser schemas.User) (JWTtoken string, err error) {
+func (service *userService) Login(newUser schemas.User) (JWTtoken string, err error) {
+	user := service.repository.FindByUsername(newUser.Username)
+	if user.Username == "" {
+		return "", errors.New("User not found")
+	}
+	if database.CompareHashAndPassword(user.Password, newUser.Password) {
+		return service.serviceJWT.GenerateJWTToken(
+			strconv.FormatUint(user.Id, 10),
+			user.Username,
+			user.IsAdmin,
+		), nil
+	}
+
+
+	return "", errors.New("Invalid password")
+
+}
+
+func (service *userService) Register(newUser schemas.User) (JWTtoken string, err error) {
 	user := service.repository.FindByEmail(newUser.Email)
-	if len(user) != 0 {
+	if user.Email != "" {
 		return "", errors.New("email already in use")
 	}
 
@@ -41,6 +63,7 @@ func (service *userServiceStruct) Register(newUser schemas.User) (JWTtoken strin
 		}
 		newUser.Password = hashedPassword
 	}
+
 	service.repository.Save(newUser)
-	return service.serviceJWT.GenerateToken(fmt.Sprint(newUser.Id), newUser.Username, false), nil
+	return service.serviceJWT.GenerateJWTToken(fmt.Sprint(newUser.Id), newUser.Username, false), nil
 }

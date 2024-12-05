@@ -8,45 +8,84 @@ import (
 
 type UserRepository interface {
 	Save(user schemas.User)
-	FindByEmail(email string) []schemas.User
-	FindByUsername(username string) []schemas.User
+	Update(user schemas.User)
+	Delete(user schemas.User)
+
+	FindAll() []schemas.User
+	FindByID(id uint64) schemas.User
+	FindByUsername(username string) schemas.User
+	FindByEmail(email string) schemas.User
 }
 
-type userRepositoryStruct struct {
+type userRepository struct {
 	db *schemas.Database
 }
 
-func NewUserRepository(connection *gorm.DB) UserRepository {
-	err := connection.AutoMigrate(&schemas.User{})
+func NewUserRepository(conn *gorm.DB) UserRepository {
+	err := conn.AutoMigrate(&schemas.User{})
 	if err != nil {
-		panic("Failed to migrate the database")
+		panic("failed to migrate database")
 	}
-	return &userRepositoryStruct{
+	return &userRepository{
 		db: &schemas.Database{
-			Connection: connection,
+			Connection: conn,
 		},
 	}
 }
 
-func (repo *userRepositoryStruct) Save(user schemas.User) {
+func (repo *userRepository) Save(user schemas.User) {
 	err := repo.db.Connection.Create(&user)
 	if err.Error != nil {
 		panic(err.Error)
 	}
 }
 
-func (repo *userRepositoryStruct) FindByEmail(email string) (users []schemas.User) {
-	err := repo.db.Connection.Where(&schemas.User{Email: email}).Find(&users)
+func (r *userRepository) Update(user schemas.User) {
+	err := r.db.Connection.Save(&user)
 	if err.Error != nil {
 		panic(err.Error)
+	}
+}
+
+func (r *userRepository) Delete(user schemas.User) {
+	err := r.db.Connection.Delete(&user)
+	if err.Error != nil {
+		panic(err.Error)
+	}
+}
+
+func (r *userRepository) FindAll() []schemas.User {
+	var users []schemas.User
+	err := r.db.Connection.Find(&users)
+	if err.Error != nil {
+		return []schemas.User{}
 	}
 	return users
 }
 
-func (repo *userRepositoryStruct) FindByUsername(username string) (users []schemas.User) {
-	err := repo.db.Connection.Where(&schemas.User{Username: username}).Find(&users)
+func (r *userRepository) FindByID(id uint64) schemas.User {
+	var user schemas.User
+	err := r.db.Connection.First(&user, id)
 	if err.Error != nil {
-		panic(err.Error)
+		return schemas.User{}
 	}
-	return users
+	return user
+}
+
+func (r *userRepository) FindByUsername(username string) schemas.User {
+	var user schemas.User
+	err := r.db.Connection.Where(&schemas.User{Username: username}).First(&user)
+	if err.Error != nil {
+		return schemas.User{}
+	}
+	return user
+}
+
+func (r *userRepository) FindByEmail(email string) schemas.User {
+	var user schemas.User
+	err := r.db.Connection.Where(&schemas.User{Email: email}).First(&user)
+	if err.Error != nil {
+		return schemas.User{}
+	}
+	return user
 }

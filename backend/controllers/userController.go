@@ -1,30 +1,53 @@
 package controllers
 
 import (
-	"area51/schemas"
-	"area51/services"
 	"errors"
 
 	"github.com/gin-gonic/gin"
+
+	"area51/schemas"
+	"area51/services"
 )
 
 type UserController interface {
+	Login(ctx *gin.Context) (string, error)
 	Register(ctx *gin.Context) (string, error)
 }
 
-type userControllerStruct struct {
+type userController struct {
 	userService services.UserService
-	jwtService services.JWTService
+	jWtService  services.JWTService
 }
 
-func NewUserController(userService services.UserService, jwtService services.JWTService) UserController {
-	return &userControllerStruct{
+func NewUserController(userService services.UserService,
+	jWtService services.JWTService,
+) UserController {
+	return &userController{
 		userService: userService,
-		jwtService: jwtService,
+		jWtService:  jWtService,
 	}
 }
 
-func (controller *userControllerStruct) Register(ctx *gin.Context) (string, error) {
+func (controller *userController) Login(ctx *gin.Context) (string, error) {
+	var credentials schemas.LoginCredentials
+	err := ctx.ShouldBind(&credentials)
+	if err != nil {
+		return "", err
+	}
+
+	newUser := schemas.User{
+		Username: credentials.Username,
+		Password: credentials.Password,
+	}
+
+	token, err := controller.userService.Login(newUser)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func (controller *userController) Register(ctx *gin.Context) (string, error) {
 	var credentials schemas.RegisterCredentials
 	err := ctx.ShouldBind(&credentials)
 	if err != nil {
@@ -42,7 +65,7 @@ func (controller *userControllerStruct) Register(ctx *gin.Context) (string, erro
 
 	newUser := schemas.User{
 		Username: credentials.Username,
-		Email: credentials.Email,
+		Email:    credentials.Email,
 		Password: credentials.Password,
 	}
 	token, err := controller.userService.Register(newUser)

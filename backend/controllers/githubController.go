@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"area51/services"
-	"area51/tools"
 	"errors"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+
+	"area51/services"
+	"area51/tools"
 )
 
 type GitHubController interface {
