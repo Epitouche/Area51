@@ -2,6 +2,13 @@ package schemas
 
 import "time"
 
+type ServiceName string
+
+const (
+	Github        ServiceName = "github"
+)
+
+
 type Service struct {
 	Id				uint64		`json:"id,omitempty" gorm:"primary_key;auto_increment"`
 	Name			string		`json:"name" gorm:"type:varchar(100)"`

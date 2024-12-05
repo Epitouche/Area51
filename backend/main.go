@@ -47,11 +47,16 @@ var (
 	databaseConnection *gorm.DB = database.Connection()
 	// Repositories
 	userRepository        repository.UserRepository        = repository.NewUserRepository(databaseConnection)
+	githubRepository      repository.GithubRepository      = repository.NewGithubRepository(databaseConnection)
+	tokenRepository       repository.TokenRepository       = repository.NewTokenRepository(databaseConnection)
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
+	githubService      services.GithubService      = services.NewGithubService(githubRepository)
+	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
+	githubController	  controllers.GithubController      = controllers.NewGithubController(githubService, userService, serviceToken)
 )
 
 var (

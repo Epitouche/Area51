@@ -13,6 +13,7 @@ import (
 type UserService interface {
 	Login(user schemas.User) (JWTtoken string, err error)
 	Register(newUser schemas.User) (JWTtoken string, err error)
+	GetUserInfos(token string) (userInfos schemas.User, err error)
 }
 
 type userService struct {
@@ -66,4 +67,13 @@ func (service *userService) Register(newUser schemas.User) (JWTtoken string, err
 
 	service.repository.Save(newUser)
 	return service.serviceJWT.GenerateJWTToken(fmt.Sprint(newUser.Id), newUser.Username, false), nil
+}
+
+func (service *userService) GetUserInfos(token string) (userInfos schemas.User, err error) {
+	userId, err := service.serviceJWT.GetUserIdFromToken(token)
+	if err != nil {
+		return schemas.User{}, err
+	}
+	userInfos = service.repository.FindByID(userId)
+	return userInfos, nil
 }
