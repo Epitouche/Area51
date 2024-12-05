@@ -39,7 +39,7 @@ func (api *UserApi) Login(ctx *gin.Context) {
 func (api *UserApi) Register(ctx *gin.Context) {
 	token, err := api.userController.Register(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusConflict, &schemas.Response{
+		ctx.JSON(http.StatusConflict, &schemas.BasicResponse{
 			Message: err.Error(),
 		})
 		return
