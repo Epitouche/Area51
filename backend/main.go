@@ -32,6 +32,11 @@ func setupRouter() *gin.Engine {
 			auth.POST("/login", userApi.Login)
 			auth.POST("/register", userApi.Register)
 		}
+
+		github := apiRoutes.Group("/github")
+		{
+			github.GET("/auth", )
+		}
 	}
 
 	return router
@@ -51,6 +56,7 @@ var (
 
 var (
 userApi       *api.UserApi        = api.NewUserApi(userController)
+githubApi     *api.GithubApi      = api.NewGithubApi(githubController)
 )
 
 
