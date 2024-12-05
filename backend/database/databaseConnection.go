@@ -16,7 +16,7 @@ func getInEnv(varWanted string) (envVar string) {
 }
 
 func Connection() *gorm.DB {
-	host := getInEnv("POSTGRES_DB")
+	host := getInEnv("POSTGRES_DB_HOST")
 	user := getInEnv("POSTGRES_USER")
 	password := getInEnv("POSTGRES_PASSWORD")
 	dbname := getInEnv("POSTGRES_DB")
