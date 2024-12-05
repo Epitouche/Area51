@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import ListTable from "~/components/ListTable.vue";
+import ListTable from "~/components/ListTableComponent.vue";
+import Modal from "~/components/ModalComponent.vue";
 
 const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
 
@@ -32,6 +33,34 @@ const rows = [
     date: "10/14/2024",
   },
 ];
+
+const isModalActionOpen = ref(false);
+const isModalReactionOpen = ref(false);
+
+const openModalAction = () => {
+  isModalActionOpen.value = true;
+};
+
+const closeModalAction = () => {
+  isModalActionOpen.value = false;
+};
+
+const confirmModalAction = () => {
+  closeModalAction();
+};
+
+const openModalReaction = () => {
+  isModalReactionOpen.value = true;
+};
+
+const closeModalReaction = () => {
+  isModalReactionOpen.value = false;
+};
+
+const confirmModalReaction = () => {
+  closeModalReaction();
+};
+
 </script>
 
 <template>
@@ -48,20 +77,37 @@ const rows = [
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
       />
     </div>
-    <div class="flex justify-center space-x-10 m-20">
+    <div class="flex justify-center m-16 gap-10">
       <Button
         text="Choose an action"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-900 dark:hover:bg-accent-800"
+        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
+        :onClick="openModalAction"
       >
       </Button>
+      <Modal
+        :isOpen="isModalActionOpen"
+        title="Choose an action"
+        @close="closeModalAction"
+        @confirm="confirmModalAction"
+      >
+      </Modal>
       <Button
         text="Choose a reaction"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-900 dark:hover:bg-accent-800"
+        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
+        :onClick="openModalReaction"
       ></Button>
+      <Modal
+        :isOpen="isModalReactionOpen"
+        title="Choose a reaction"
+        @close="closeModalReaction"
+        @confirm="confirmModalReaction"
+      >
+      </Modal>
+
     </div>
     <div class="flex justify-center">
       <hr
@@ -72,13 +118,14 @@ const rows = [
       <Button
         text="Filter"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-900 dark:hover:bg-accent-800"
+        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
       ></Button>
+      <!-- do dropdown to replace the button "all status"-->
       <Button
         text="All Status"
         bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-900 dark:hover:bg-accent-800"
+        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
         textColor="text-fontBlack dark:text-fontWhite"
       ></Button>
     </div>
