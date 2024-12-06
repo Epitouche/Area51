@@ -36,6 +36,10 @@ func setupRouter() *gin.Engine {
 				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
 		}
+		workflow := apiRoutes.Group("/workflow")
+		{
+			workflow.POST("", workflowApi.CreateWorkflow)
+		}
 	}
 
 	return router
@@ -51,6 +55,7 @@ var (
 	servicesRepository    repository.ServiceRepository     = repository.NewServiceRepository(databaseConnection)
 	actionRepository      repository.ActionRepository      = repository.NewActionRepository(databaseConnection)
 	reactionRepository    repository.ReactionRepository    = repository.NewReactionRepository(databaseConnection)
+	workflowsRepository   repository.WorkflowRepository    = repository.NewWorkflowRepository(databaseConnection)
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
@@ -59,18 +64,21 @@ var (
 	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
 	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService)
 	reactionService  services.ReactionService     = services.NewReactionService(reactionRepository, servicesService)
+	workflowsService services.WorkflowService    = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService)
 
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
 	githubController	  controllers.GithubController      = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
 	// actionController      controllers.ActionController      = controllers.NewActionController(actionService)
 	servicesController    controllers.ServicesController    = controllers.NewServiceController(servicesService, actionService, reactionService)
+	workflowController    controllers.WorkflowController    = controllers.NewWorkflowController(workflowsService)
 )
 
 var (
 userApi       *api.UserApi        = api.NewUserApi(userController)
 githubApi     *api.GithubApi      = api.NewGithubApi(githubController)
 servicesApi   *api.ServicesApi    = api.NewServicesApi(servicesController)
+workflowApi   *api.WorkflowApi    = api.NewWorkflowApi(workflowController)
 )
 
 

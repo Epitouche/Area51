@@ -15,6 +15,8 @@ import (
 type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
+	FindReactionByName(name string) func(workflowId uint64)
 }
 
 type githubService struct {
@@ -87,4 +89,31 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 	}
 	response.Body.Close()
 	return result, nil
+}
+
+func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
+	switch name {
+	case string(schemas.GithubPullRequest):
+		return service.LookAtPullRequest
+	default:
+		return nil
+	}
+}
+
+func (service *githubService) FindReactionByName(name string) func(workflowId uint64) {
+	switch name {
+	case string(schemas.GithubReactionCreateNewRelease):
+		return service.CreateNewRelease
+	default:
+		return nil
+	}
+}
+
+func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
+	fmt.Printf("LookAtPullRequest\n")
+	channel <- "LookAtPullRequest"
+}
+
+func (service *githubService) CreateNewRelease(workflowId uint64) {
+	fmt.Printf("CreateNewRelease\n")
 }

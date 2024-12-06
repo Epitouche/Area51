@@ -8,6 +8,8 @@ import (
 type ServicesService interface {
 	FindAll() (allService []schemas.Service)
 	FindByName(serviceName schemas.ServiceName) schemas.Service
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
+	FindReactionByName(name string) func (workflowId uint64)
 	GetServices() []interface{}
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
 }
@@ -66,3 +68,22 @@ func (service *servicesService) GetAllServices() (allServicesJson []schemas.Serv
 	}
 	return allServicesJson, nil
 }
+
+func (service *servicesService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
+	for _, oneService := range service.allServices {
+		if githubService, ok := oneService.(GithubService); ok {
+			return githubService.FindActionByName(name)
+		}
+	}
+	return nil
+}
+
+func (service *servicesService) FindReactionByName(name string) func (workflowId uint64) {
+	for _, oneService := range service.allServices {
+		if githubService, ok := oneService.(GithubService); ok {
+			return githubService.FindReactionByName(name)
+		}
+	}
+	return nil
+}
+

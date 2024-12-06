@@ -1,5 +1,17 @@
 package schemas
 
+type GithubAction string
+
+const (
+	GithubPullRequest GithubAction = "pull_request"
+)
+
+type GithubReaction string
+
+const (
+	GithubReactionCreateNewRelease GithubReaction = "create_new_release"
+)
+
 type GitHubResponseToken struct {
 	AccessToken string `json:"access_token"`
 	Scope       string `json:"scope"`
