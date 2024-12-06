@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   TextInput,
@@ -9,55 +9,71 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
-// import Icon from 'react-native-vector-icons/MaterialIcons';
+import { RegisterProps } from '../types';
+import { registerApiCall } from '../service/auth';
+import { AppContext } from '../context/AppContext';
+import { RootStackParamList } from '../navigation/AppNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [lastName, setLastName] = useState('');
-  // const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = () => {
-    console.log('Logging in with', email, password, name, lastName);
+type RegisterScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Register'
+>;
+
+type Props = {
+  navigation: RegisterScreenNavigationProp;
+};
+
+export default function RegisterScreen({ navigation }: Props) {
+  const [message, setMessage] = useState('');
+  const [forms, setForms] = useState<RegisterProps>({
+    email: '',
+    password: '',
+    username: '',
+  });
+  const { serverIp } = useContext(AppContext);
+
+  const handleLogin = async () => {
+    setMessage('');
+    if (await registerApiCall({
+      apiEndpoint: serverIp,
+      formsRegister: forms,
+      setMessage,
+    }))
+      navigation.navigate('Dashboard');
   };
 
   return (
     <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.container}>
       <Text style={styles.header}>REGISTER IN</Text>
       <View style={styles.inputBox}>
-        <View style={styles.nameBox}>
-          <TextInput
-            style={styles.nameInput}
-            placeholder="First Name"
-            keyboardType="default"
-            value={name}
-            onChangeText={setName}
-          />
-          <TextInput
-            style={styles.nameInput}
-            placeholder="Last Name"
-            keyboardType="default"
-            value={lastName}
-            onChangeText={setLastName}
-          />
-        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          keyboardType="default"
+          autoCapitalize="none"
+          value={forms.username}
+          onChangeText={text => setForms({ ...forms, username: text })}
+        />
         <TextInput
           style={styles.input}
           placeholder="Email"
           keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
+          autoCapitalize="none"
+          value={forms.email}
+          onChangeText={text => setForms({ ...forms, email: text })}
         />
         <TextInput
           style={styles.input}
           secureTextEntry
           placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
+          value={forms.password}
+          onChangeText={text => setForms({ ...forms, password: text })}
           autoCapitalize="none"
         />
       </View>
+      {message !== '' && <Text style={styles.errorMessage}>{message}</Text>}
       {/* <View style={styles.checkboxContainer}>
         <TouchableOpacity
           onPress={() => setRememberMe(!rememberMe)}
@@ -160,20 +176,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
   },
-  nameBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  nameInput: {
-    width: '48%',
-    borderBottomWidth: 1,
-    borderColor: '#F7FAFB',
-    padding: 5,
-    marginVertical: 10,
-    fontSize: 16,
-    color: 'white',
-  },
 
   // Button Section
   loginButton: {
@@ -234,5 +236,10 @@ const styles = StyleSheet.create({
     marginRight: 15,
     width: 25,
     height: 25,
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: 16,
+    marginTop: 10,
   },
 });

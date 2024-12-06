@@ -19,27 +19,28 @@ export async function loginApiCall({
       throw new Error('No login form provided');
     }
     const formData = new FormData();
-    formData.append('email', formsLogin.email);
+    formData.append('username', formsLogin.username);
     formData.append('password', formsLogin.password);
     const response = await fetch(`http://${apiEndpoint}:8080/api/auth/login`, {
       method: 'POST',
       body: formData,
     });
     const data = await response.json();
-    console.log(response);
     if (response.status !== 200) {
       if (response.status === 401) {
         setMessage('Error: invalid credentials');
         return false;
       }
       setMessage('Error: token not found');
+      console.error('Token not found');
+      return false;
     }
-
-    setMessage(data.access_token);
+    await saveToken('token', data.access_token);
     return true;
   } catch (error) {
-    setMessage('Error: token not found');
-    throw new Error('API call failed');
+    setMessage('Error: Internal Server Error');
+    console.error('API call failed:', error);
+    return false;
   }
 }
 
@@ -58,9 +59,10 @@ export async function registerApiCall({
     formData.append('password', formsRegister.password);
     formData.append('username', formsRegister.username);
     const response = await fetch(
-      `http://${apiEndpoint}:8080/about.json`,
+      `http://${apiEndpoint}:8080/api/auth/register`,
       {
-        method: 'GET',
+        method: 'POST',
+        body: formData,
       },
     );
     const data = await response.json();
@@ -70,13 +72,14 @@ export async function registerApiCall({
         return false;
       }
       setMessage('Error: token not found');
-      throw new Error('API call failed');
+      console.error('Token not found');
+      return false;
     }
-    // await saveToken('token', data.access_token);
-    setMessage(data);
+    await saveToken('token', data.access_token);
     return true;
   } catch (error) {
     setMessage('Error: Internal Server Error');
-    throw new Error('API call failed');
+    console.error('API call failed:', error);
+    return false;
   }
 }

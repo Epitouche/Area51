@@ -1,11 +1,12 @@
 // src/screens/HomeScreen.js
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Button, View, Text, TextInput, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppContext } from '../context/AppContext';
+import { checkToken } from '../service/token';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -17,6 +18,7 @@ export default function HomeScreen({ navigation }: Props) {
   const { serverIp, setServerIp } = useContext(AppContext);
   const [isConnected, setIsConnected] = useState(false);
   const [isValidIp, setIsValidIp] = useState(false);
+  const [token, setToken] = useState('');
 
   const validateIp = (ip: string) => {
     const ipPattern =
@@ -35,6 +37,11 @@ export default function HomeScreen({ navigation }: Props) {
     }
   };
 
+  useEffect(() => {
+    checkToken('token', setToken);
+    console.log('token:', token);
+  },  []);
+
   return (
     <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.wallpaper}>
       <View style={styles.container}>
@@ -50,19 +57,29 @@ export default function HomeScreen({ navigation }: Props) {
           <Button title="Save" onPress={handleSave} />
         </View>
         {isValidIp && isConnected && (
-          <View style={styles.buttonBox}>
-            <View style={styles.button}>
-              <Button
-                title="Connexion"
-                onPress={() => navigation.navigate('Login')}
-              />
+          <View>
+            <View style={styles.buttonBox}>
+              <View style={styles.button}>
+                <Button
+                  title="Connexion"
+                  onPress={() => navigation.navigate('Login')}
+                />
+              </View>
+              <View style={styles.button}>
+                <Button
+                  title="Inscription"
+                  onPress={() => navigation.navigate('Register')}
+                />
+              </View>
             </View>
-            <View style={styles.button}>
-              <Button
-                title="Inscription"
-                onPress={() => navigation.navigate('Register')}
-              />
-            </View>
+            {token !== 'Error: token not found' && (
+              <View style={styles.button}>
+                <Button
+                  title="Dashboard"
+                  onPress={() => navigation.navigate('Dashboard')}
+                />
+              </View>
+            )}
           </View>
         )}
       </View>

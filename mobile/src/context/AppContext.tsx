@@ -15,7 +15,7 @@ interface AppProviderProps {
   children: ReactNode;
 }
 
-export function AppProvider({ children }: AppProviderProps) {
+export default function AppProvider({ children }: AppProviderProps) {
   const [serverIp, setServerIp] = useState<string>('');
 
   return (
@@ -26,4 +26,3 @@ export function AppProvider({ children }: AppProviderProps) {
 }
 
 export { AppContext };
-export default AppProvider;

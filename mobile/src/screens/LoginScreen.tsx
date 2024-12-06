@@ -10,18 +10,26 @@ import {
 import { Button } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppContext } from '../context/AppContext';
-import { exempleApiCall } from '../service/callTest';
-// import Icon from 'react-native-vector-icons/MaterialIcons';
+import { loginApiCall } from '../service/auth';
+import { LoginProps } from '../types';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+
+type Props = {
+  navigation: LoginScreenNavigationProp;
+};
+
+export default function LoginScreen({ navigation }: Props) {
+  const [forms, setForms] = useState<LoginProps>({ username: '', password: '' });
   const { serverIp } = useContext(AppContext);
-  const [isWorking, setIsWorking] = useState(false);
+  const [message, setMessage] = useState('');
   // const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = () => {
-    exempleApiCall(serverIp, setIsWorking);
+  const handleLogin = async () => {
+    if (await loginApiCall({ apiEndpoint: serverIp, formsLogin: forms, setMessage }))
+      navigation.navigate('Dashboard');
   };
 
   return (
@@ -30,17 +38,17 @@ export default function LoginPage() {
       <View style={styles.inputBox}>
         <TextInput
           style={styles.input}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
+          autoCapitalize="none"
+          placeholder="Username"
+          value={forms.username}
+          onChangeText={username => setForms({ ...forms, username })}
         />
         <TextInput
           style={styles.input}
           secureTextEntry
-          value={password}
+          value={forms.password}
           placeholder="Password"
-          onChangeText={setPassword}
+          onChangeText={password => setForms({ ...forms, password })}
           autoCapitalize="none"
         />
       </View>
@@ -84,7 +92,7 @@ export default function LoginPage() {
           </View>
         </Button>
       </View>
-      {isWorking && <Text style={styles.passwordText}>Working...</Text>}
+      {message !== '' && <Text style={styles.passwordText}>{message}</Text>}
       <View style={styles.forgotPasswordBox}>
         <TouchableOpacity>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
