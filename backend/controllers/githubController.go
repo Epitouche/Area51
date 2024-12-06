@@ -108,9 +108,11 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 			Username: userInfo.Login,
 			Email:    userInfo.Email,
 		}
-		controller.userService.CreateUser(newUser)
-		freshUser := controller.userService.GetUserByEmail(userInfo.Email)
-		actualUser = freshUser
+		err := controller.userService.CreateUser(newUser)
+		if err != nil {
+			return "", fmt.Errorf("unable to create user because %w", err)
+		}
+		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
 		newGithubToken = schemas.ServiceToken{
 			Token:   githubTokenResponse.AccessToken,
 			Service: githubService,
@@ -137,7 +139,10 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 					TokenId: token.Id,
 				}
 				actualUser.TokenId = token.Id
-				controller.userService.UpdateUserInfos(actualUser)
+				err := controller.userService.UpdateUserInfos(actualUser)
+				if err != nil {
+					return "", fmt.Errorf("unable to update user infos because %w", err)
+				}
 				break
 			}
 		}
@@ -171,6 +176,9 @@ func (controller *githubController) GetUserInfos(ctx *gin.Context) (userInfos sc
 		return schemas.GithubUserInfo{}, err
 	}
 	token, err := controller.serviceToken.GetTokenById(user.TokenId)
+	if err != nil {
+		return schemas.GithubUserInfo{}, err
+	}
 
 	githubUserInfos, err := controller.service.GetUserInfo(token.Token)
 	if err != nil {
