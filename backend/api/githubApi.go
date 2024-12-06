@@ -29,7 +29,7 @@ func (api *GithubApi) RedirectToGithub(ctx *gin.Context, path string) {
 }
 
 func (api *GithubApi) HandleGithubTokenCallback(ctx *gin.Context, path string) {
-	github_token, err := api.controller.ServiceCallback(ctx, path)
+	github_token, err := api.controller.ServiceGithubCallback(ctx, path)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	} else {

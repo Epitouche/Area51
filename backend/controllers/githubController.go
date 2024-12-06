@@ -12,7 +12,7 @@ import (
 
 type GithubController interface {
 	RedirectionToGithubService(ctx *gin.Context, path string) (string, error)
-	ServiceCallback(ctx *gin.Context, path string) (string, error)
+	ServiceGithubCallback(ctx *gin.Context, path string) (string, error)
 	GetUserInfos(ctx *gin.Context) (userInfos schemas.GithubUserInfo, err error)
 }
 
@@ -59,7 +59,7 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 	return authUrl, nil
 }
 
-func (controller *githubController) ServiceCallback(ctx *gin.Context, path string) (string, error) {
+func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path string) (string, error) {
 	var isAlreadyRegistered bool = false
 	code := ctx.Query("code")
 	if code == "" {

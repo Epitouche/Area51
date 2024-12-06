@@ -15,7 +15,7 @@ type ServicesApi struct {
 	controller controllers.ServicesController
 }
 
-func NewServiceApi(controller controllers.ServicesController) *ServicesApi {
+func NewServicesApi(controller controllers.ServicesController) *ServicesApi {
 	return &ServicesApi{
 		controller: controller,
 	}

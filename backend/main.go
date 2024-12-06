@@ -29,11 +29,11 @@ func setupRouter() *gin.Engine {
 
 		github := apiRoutes.Group("/github")
 		{
-			github.GET("/auth", func(c *gin.Context) {
-				githubApi.RedirectToGithub(c, github.BasePath()+"/callback")
+			github.GET("/auth", func(ctx *gin.Context) {
+				githubApi.RedirectToGithub(ctx, github.BasePath()+"/callback")
 			})
-			github.GET("/callback", func(c *gin.Context) {
-				githubApi.HandleGithubTokenCallback(c, github.BasePath()+"/callback")
+			github.GET("/callback", func(ctx *gin.Context) {
+				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
 		}
 	}
@@ -70,7 +70,7 @@ var (
 var (
 userApi       *api.UserApi        = api.NewUserApi(userController)
 githubApi     *api.GithubApi      = api.NewGithubApi(githubController)
-servicesApi   *api.ServicesApi    = api.NewServiceApi(servicesController)
+servicesApi   *api.ServicesApi    = api.NewServicesApi(servicesController)
 )
 
 
