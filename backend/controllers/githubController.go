@@ -109,7 +109,8 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 			Email:    userInfo.Email,
 			// TokenId:  tokenId,
 		}
-		controller.userService.UpdateUserInfos(newUser)
+		// controller.userService.UpdateUserInfos(newUser)
+		controller.userService.CreateUser(newUser)
 		freshUser := controller.userService.GetUserByEmail(userInfo.Email)
 		actualUser = freshUser
 		newGithubToken = schemas.ServiceToken{
@@ -135,7 +136,6 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 	// if err != nil {
 	// 	return "", fmt.Errorf("unable to get user info because %w", err)
 	// }
-	fmt.Printf("JE SUIS LA\n")
 	if newUser.Username == "" {
 		newUser = schemas.User{
 			Username: userInfo.Login,
@@ -144,16 +144,15 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 		}
 	} else {
 		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
-		fmt.Printf("TOTOTOTOTOTOTOTOTOTOT\n")
-		fmt.Printf("tokens: %v\n", tokens)
 		for _, token := range tokens {
-			fmt.Printf("token.Id: %v\n", token.Id)
 			if token.UserId == actualUser.Id {
 				newUser = schemas.User{
 					Username: userInfo.Login,
 					Email:    userInfo.Email,
-					TokenId:  token.Id,
+					TokenId: token.Id,
 				}
+				actualUser.TokenId = token.Id
+				controller.userService.UpdateUserInfos(actualUser)
 				break
 			}
 		}

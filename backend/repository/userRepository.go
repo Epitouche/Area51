@@ -41,7 +41,7 @@ func (repo *userRepository) Save(user schemas.User) {
 }
 
 func (r *userRepository) Update(user schemas.User) {
-	err := r.db.Connection.Save(&user)
+	err := r.db.Connection.Where(&schemas.User{Id: user.Id}).Updates(&user)
 	if err.Error != nil {
 		panic(err.Error)
 	}

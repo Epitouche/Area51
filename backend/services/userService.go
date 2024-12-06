@@ -18,6 +18,7 @@ type UserService interface {
 	GetUserById(userId uint64) schemas.User
 	GetUserByUsername(username string) schemas.User
 	GetUserByEmail(email string) schemas.User
+	CreateUser(newUser schemas.User) error
 }
 
 type userService struct {
@@ -50,7 +51,7 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 		), nil
 	}
 
-	if user.Email == newUser.Email {
+	if user.Username == newUser.Username {
 		if newUser.TokenId != 0 {
 			return service.serviceJWT.GenerateJWTToken(
 				strconv.FormatUint(user.Id, 10),
@@ -106,4 +107,9 @@ func (service *userService) GetUserByUsername(username string) schemas.User {
 
 func (service *userService) GetUserByEmail(email string) schemas.User {
 	return service.repository.FindByEmail(email)
+}
+
+func (service *userService) CreateUser(newUser schemas.User) error {
+	service.repository.Save(newUser)
+	return nil
 }
