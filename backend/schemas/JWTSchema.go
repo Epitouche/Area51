@@ -1,5 +1,5 @@
 package schemas
 
 type JWT struct {
-	Token string `json:"token"`
+	Token string `json:"access_token"`
 }
