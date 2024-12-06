@@ -7,16 +7,20 @@ const password = ref("");
 const router = useRouter();
 
 async function onSubmit() {
-  const { token } = await $fetch("http://localhost:8080/api/auth/login", {
-    method: "POST",
-    body: {
-      username: username.value,
-      password: password.value,
-    },
-  });
-  if (token) {
-    localStorage.setItem("token", token);
-    router.push("/services");
+  try {
+    const { token } = await $fetch("http://localhost:8080/api/auth/login", {
+      method: "POST",
+      body: {
+        username: username.value,
+        password: password.value,
+      },
+    });
+    if (token) {
+      localStorage.setItem("token", token);
+      router.push("/services");
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 </script>
@@ -67,7 +71,7 @@ async function onSubmit() {
           />
         </div>
       </form>
-      <hr class="border-primaryWhite-400">
+      <hr class="border-primaryWhite-400" />
       <div class="flex justify-around space-x-4">
         <ButtonComponent
           text="Github"
