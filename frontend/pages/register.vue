@@ -25,6 +25,7 @@
           id="remember"
           type="checkbox"
           class="w-4 h-4 text-accent-500 border-primaryWhite-300 rounded focus:ring-accent-500"
+          label=""
         />
         <label for="remember" class="ml-2 text-sm">Remember me</label>
       </div>
