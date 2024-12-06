@@ -9,14 +9,6 @@ import (
 	"area51/toolbox"
 )
 
-// func getInEnv(varWanted string) (envVar string) {
-// 	envVar = os.Getenv(varWanted)
-// 	if envVar == "" {
-// 		panic(varWanted + " is not set")
-// 	}
-// 	return envVar
-// }
-
 func Connection() *gorm.DB {
 	host := toolbox.GetInEnv("POSTGRES_DB_HOST")
 	user := toolbox.GetInEnv("POSTGRES_USER")
