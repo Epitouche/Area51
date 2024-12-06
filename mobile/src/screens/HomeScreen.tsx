@@ -1,5 +1,3 @@
-// src/screens/HomeScreen.js
-
 import React, { useState, useContext, useEffect } from 'react';
 import { Button, View, Text, TextInput, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
