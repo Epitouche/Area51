@@ -4,27 +4,19 @@ import { ref } from "vue";
 
 const username = ref("");
 const password = ref("");
-const callCount = ref(0);
-const didItWork = ref(false);
-const body = computed(() => {
-  return {
-    username: username.value,
-    password: password.value,
-  };
-});
-// const router = useRouter();
+const router = useRouter();
 
 async function onSubmit() {
-  console.log(body.value);
-  const { error } = await $fetch("http://localhost:8080/api/auth/login", {
+  const { token } = await $fetch("http://localhost:8080/api/auth/login", {
     method: "POST",
-    body,
-    onResponse() {
-      callCount.value++;
+    body: {
+      username: username.value,
+      password: password.value,
     },
   });
-  if (!error.value) {
-    didItWork.value = true;
+  if (token) {
+    localStorage.setItem("token", token);
+    router.push("/services");
   }
 }
 </script>
@@ -33,12 +25,9 @@ async function onSubmit() {
   <div
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-primaryDark-500"
   >
-    <h1 class="text-white">{{ callCount }}</h1>
     <div
       class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
     >
-      <h1>{{ callCount }}</h1>
-      <h1>{{ didItWork }}</h1>
       <h2 class="text-2xl font-bold text-center">LOG IN</h2>
       <form class="space-y-6" @submit.prevent="onSubmit">
         <div>
