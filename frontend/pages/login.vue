@@ -1,6 +1,4 @@
 <script>
-import Button from "@/components/Button.vue";
-import Input from "@/components/Input.vue";
 </script>
 
 <template>
@@ -13,7 +11,7 @@ import Input from "@/components/Input.vue";
       <h2 class="text-2xl font-bold text-center">LOG IN</h2>
       <form class="space-y-6">
         <div>
-          <Input
+          <InputComponent
             id="email"
             type="email"
             label="Email"
@@ -21,7 +19,7 @@ import Input from "@/components/Input.vue";
           />
         </div>
         <div>
-          <Input
+          <InputComponent
             id="password"
             type="password"
             label="Password"
@@ -30,7 +28,7 @@ import Input from "@/components/Input.vue";
         </div>
       </form>
       <div class="flex items-center">
-        <input
+        <inputComponent
           id="remember"
           type="checkbox"
           class="w-4 h-4 text-accent-500 border-primaryWhite-300 rounded focus:ring-accent-500"
@@ -38,7 +36,7 @@ import Input from "@/components/Input.vue";
         <label for="remember" class="ml-2 text-sm">Remember me</label>
       </div>
       <div class="flex justify-center">
-        <Button
+        <ButtonComponent
           text="Log In"
           bgColor="bg-primaryWhite-500"
           hoverColor="hover:bg-secondaryWhite-500"
@@ -47,14 +45,14 @@ import Input from "@/components/Input.vue";
       </div>
       <hr class="border-primaryWhite-400" />
       <div class="flex justify-around space-x-4">
-        <Button
+        <ButtonComponent
           text="Github"
           class="w-full"
           bgColor="bg-primaryWhite-500"
           hoverColor="hover:bg-secondaryWhite-500"
           textColor="text-fontBlack"
         />
-        <Button
+        <ButtonComponent
           text="Google"
           class="w-full"
           bgColor="bg-primaryWhite-500"
