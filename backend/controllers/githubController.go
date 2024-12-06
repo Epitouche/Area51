@@ -107,9 +107,7 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 		newUser = schemas.User{
 			Username: userInfo.Login,
 			Email:    userInfo.Email,
-			// TokenId:  tokenId,
 		}
-		// controller.userService.UpdateUserInfos(newUser)
 		controller.userService.CreateUser(newUser)
 		freshUser := controller.userService.GetUserByEmail(userInfo.Email)
 		actualUser = freshUser
@@ -122,20 +120,7 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 	}
 
 	tokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
-	// userAlreadExists := false
 
-	// if err != nil {
-	// 	if err.Error() == "token already exists" {
-	// 		userAlreadExists = true
-	// 	} else {
-	// 		return "", fmt.Errorf("unable to save token because %w", err)
-	// 	}
-	// }
-
-	// userInfo, err := controller.service.GetUserInfo(newGithubToken.Token)
-	// if err != nil {
-	// 	return "", fmt.Errorf("unable to get user info because %w", err)
-	// }
 	if newUser.Username == "" {
 		newUser = schemas.User{
 			Username: userInfo.Login,
