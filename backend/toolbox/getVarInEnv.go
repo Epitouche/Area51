@@ -1,9 +1,9 @@
-package tools
+package toolbox
 
 import "os"
 
-type EnvVar interface {
-	GetInEnv(varWanted string) (string)
+type Toolbox interface {
+	GetInEnv(varWanted string) (envVar string)
 }
 
 func GetInEnv(varWanted string) (envVar string) {

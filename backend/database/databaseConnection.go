@@ -1,19 +1,20 @@
 package database
 
 import (
-	"area51/tools"
 	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"area51/toolbox"
 )
 
 func Connection() *gorm.DB {
-	host := tools.GetInEnv("POSTGRES_DB_HOST")
-	user := tools.GetInEnv("POSTGRES_USER")
-	password := tools.GetInEnv("POSTGRES_PASSWORD")
-	dbname := tools.GetInEnv("POSTGRES_DB")
-	port := tools.GetInEnv("DB_PORT")
+	host := toolbox.GetInEnv("POSTGRES_DB_HOST")
+	user := toolbox.GetInEnv("POSTGRES_USER")
+	password := toolbox.GetInEnv("POSTGRES_PASSWORD")
+	dbname := toolbox.GetInEnv("POSTGRES_DB")
+	port := toolbox.GetInEnv("DB_PORT")
 
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + port + " sslmode=disable TimeZone=Europe/Paris"
 	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

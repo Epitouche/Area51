@@ -2,6 +2,7 @@ package services
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -10,6 +11,7 @@ import (
 type JWTService interface {
 	GenerateJWTToken(userId string, username string, isAdmin bool) string
 	ValidateJWTToken(token string) (*jwt.Token, error)
+	GetUserIdFromToken(token string) (userId uint64, err error)
 }
 
 type jwtService struct {
@@ -66,4 +68,24 @@ func (service *jwtService) ValidateJWTToken(tokenString string) (*jwt.Token, err
 		}
 		return []byte(service.secretKey), nil
 	})
+}
+
+func (service *jwtService) GetUserIdFromToken(tokenString string) (userId uint64, err error) {
+	token, err := service.ValidateJWTToken(tokenString)
+	if err != nil {
+		return 0, err
+	}
+	if token.Valid {
+		claims := token.Claims.(jwt.MapClaims)
+		if jti, ok := claims["jti"].(string); ok {
+			id, err := strconv.ParseUint(jti, 10, 64)
+			if err != nil {
+				return 0, err
+			}
+			return id, nil
+		}
+		return 0, nil
+	} else {
+		return 0, nil
+	}
 }

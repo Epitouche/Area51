@@ -1,27 +1,38 @@
 package api
 
 import (
-	"area51/controllers"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"area51/controllers"
 )
 
+
 type GithubApi struct {
-	githubTokenController controllers.GitHubController
+	controller controllers.GithubController
 }
 
-func NewGithubAPI(githubTokenController controllers.GitHubController) *GithubApi {
+func NewGithubApi(controller controllers.GithubController) *GithubApi {
 	return &GithubApi{
-		githubTokenController: githubTokenController,
+		controller: controller,
 	}
 }
 
 func (api *GithubApi) RedirectToGithub(ctx *gin.Context, path string) {
-	authURL, err := api.githubTokenController.RedirectToGithub(ctx, path)
+	authURL, err := api.controller.RedirectionToGithubService(ctx, path)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error":err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	} else {
 		ctx.JSON(http.StatusOK, gin.H{"github_authentication_url": authURL})
+	}
+}
+
+func (api *GithubApi) HandleGithubTokenCallback(ctx *gin.Context, path string) {
+	github_token, err := api.controller.ServiceGithubCallback(ctx, path)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{"access_token": github_token})
 	}
 }
