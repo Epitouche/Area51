@@ -16,15 +16,18 @@ type Props = {
 };
 export default function DashboardScreen({ navigation }: Props) {
   const [token, setToken] = useState('');
+  const [github, setGithub] = useState('');
 
   const handleLogout = () => {
     deleteToken('token');
+    deleteToken('github');
     navigation.navigate('Home');
   };
 
   useEffect(() => {
     checkToken('token', setToken);
-    if (token === 'Error: token not found') {
+    checkToken('github', setGithub);
+    if (token === 'Error: token not found' && github === 'Error: token not found') {
       console.log('Token not found', token);
       navigation.navigate('Home');
     }
