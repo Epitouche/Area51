@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +29,6 @@ func (api *GithubApi) RedirectToGithub(ctx *gin.Context, path string) {
 }
 
 func (api *GithubApi) HandleGithubTokenCallback(ctx *gin.Context, path string) {
-	fmt.Printf("I enter in the API!!!!!!!!!\n")
 	github_token, err := api.controller.ServiceCallback(ctx, path)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

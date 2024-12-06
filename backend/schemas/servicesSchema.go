@@ -8,6 +8,12 @@ const (
 	Github        ServiceName = "github"
 )
 
+type ServiceJson struct {
+	Name     ServiceName    `json:"name"`
+	Action   []ActionJson   `json:"actions"`
+	Reaction []ReactionJson `json:"reactions"`
+}
+
 
 type Service struct {
 	Id				uint64		`json:"id,omitempty" gorm:"primary_key;auto_increment"`

@@ -60,7 +60,7 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 }
 
 func (controller *githubController) ServiceCallback(ctx *gin.Context, path string) (string, error) {
-	fmt.Printf("I enter in the Controller!!!!!!!!!\n")
+	var isAlreadyRegistered bool = false
 	code := ctx.Query("code")
 	if code == "" {
 		return "", nil
@@ -70,65 +70,106 @@ func (controller *githubController) ServiceCallback(ctx *gin.Context, path strin
 	if state == "" {
 		return "", nil
 	}
-	fmt.Printf("state Passed !!!!!!!!!\n")
 	// if state != latestCSRFToken {
 	// 	return "", nil
 	// }
-	fmt.Printf("CSRF token passed !!!!!!!!!")
 	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(code, path)
-	fmt.Printf("githubTokenResponse Passed !!!!!!!!!")
 	if err != nil {
 		return "", err
 	}
 
 	githubService := controller.servicesService.FindByName(schemas.Github)
-	fmt.Printf("githubService Passed !!!!!!!!!")
 
-	newGithubToken := schemas.ServiceToken{
-		Token:   githubTokenResponse.AccessToken,
-		Service: githubService,
-		UserId:  1,
-	}
-	fmt.Printf("newGithubToken Passed !!!!!!!!!")
-	tokenId, err := controller.serviceToken.SaveToken(newGithubToken)
-	userAlreadExists := false
-
-	fmt.Printf("MON BOEUF\n")
-
-	if err != nil {
-		if err.Error() == "token already exists" {
-			userAlreadExists = true
-		} else {
-			return "", fmt.Errorf("unable to save token because %w", err)
-		}
-	}
-
-	userInfo, err := controller.service.GetUserInfo(newGithubToken.Token)
+	userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("unable to get user info because %w", err)
 	}
-
-
-	newUser := schemas.User{
-		Username: userInfo.Login,
-		Email:    userInfo.Email,
-		TokenId:  tokenId,
-	}
-	fmt.Printf("newUser username: %v\n", newUser.Username)
-	fmt.Printf("newUser email: %v\n", newUser.Email)
-	fmt.Printf("newUser tokenId: %v\n", newUser.TokenId)
-
-
-	if userAlreadExists {
-		fmt.Printf("user already exists")
-		token, err := controller.userService.Login(newUser)
-		if err != nil {
-			return "", fmt.Errorf("unable to login user because %w", err)
+	var actualUser schemas.User
+	if userInfo.Email == "" {
+		actualUser = controller.userService.GetUserByUsername(userInfo.Login)
+		if actualUser.Username != "" {
+			isAlreadyRegistered = true
 		}
+	}
+	actualUser = controller.userService.GetUserByEmail(userInfo.Email)
+	if actualUser.Email != "" {
+		isAlreadyRegistered = true
+	}
+	var newGithubToken schemas.ServiceToken
+	var newUser schemas.User
+	if isAlreadyRegistered {
+		newGithubToken = schemas.ServiceToken{
+			Token:   githubTokenResponse.AccessToken,
+			Service: githubService,
+			UserId:  actualUser.Id,
+		}
+	} else {
+		newUser = schemas.User{
+			Username: userInfo.Login,
+			Email:    userInfo.Email,
+			// TokenId:  tokenId,
+		}
+		controller.userService.UpdateUserInfos(newUser)
+		freshUser := controller.userService.GetUserByEmail(userInfo.Email)
+		actualUser = freshUser
+		newGithubToken = schemas.ServiceToken{
+			Token:   githubTokenResponse.AccessToken,
+			Service: githubService,
+			UserId:  actualUser.Id,
+		}
+		isAlreadyRegistered = true
+	}
+
+	tokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
+	// userAlreadExists := false
+
+	// if err != nil {
+	// 	if err.Error() == "token already exists" {
+	// 		userAlreadExists = true
+	// 	} else {
+	// 		return "", fmt.Errorf("unable to save token because %w", err)
+	// 	}
+	// }
+
+	// userInfo, err := controller.service.GetUserInfo(newGithubToken.Token)
+	// if err != nil {
+	// 	return "", fmt.Errorf("unable to get user info because %w", err)
+	// }
+	fmt.Printf("JE SUIS LA\n")
+	if newUser.Username == "" {
+		newUser = schemas.User{
+			Username: userInfo.Login,
+			Email:    userInfo.Email,
+			TokenId:  tokenId,
+		}
+	} else {
+		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
+		fmt.Printf("TOTOTOTOTOTOTOTOTOTOT\n")
+		fmt.Printf("tokens: %v\n", tokens)
+		for _, token := range tokens {
+			fmt.Printf("token.Id: %v\n", token.Id)
+			if token.UserId == actualUser.Id {
+				newUser = schemas.User{
+					Username: userInfo.Login,
+					Email:    userInfo.Email,
+					TokenId:  token.Id,
+				}
+				break
+			}
+		}
+
+	}
+	// if userInfo.Email == "" {
+	// 	newUser.Email = "no email"
+	// }
+
+	if isAlreadyRegistered {
+		token, _ := controller.userService.Login(newUser)
+		// if err != nil {
+		// 	return "", fmt.Errorf("unable to login user because %w", err)
+		// }
 		return token, nil
 	} else {
-		fmt.Printf("Creating new user")
-
 		token, err := controller.userService.Register(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to register user because %w", err)

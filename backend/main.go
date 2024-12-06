@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -20,11 +17,7 @@ func setupRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(cors.Default())
 
-	router.GET("/about.json", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"Message": "simple about.json route",
-		})
-	})
+	router.GET("/about.json", servicesApi.AboutJson)
 
 	apiRoutes := router.Group("/api")
 	{
@@ -40,7 +33,6 @@ func setupRouter() *gin.Engine {
 				githubApi.RedirectToGithub(c, github.BasePath()+"/callback")
 			})
 			github.GET("/callback", func(c *gin.Context) {
-				fmt.Printf("I enter the callback route!!!!!!!\n")
 				githubApi.HandleGithubTokenCallback(c, github.BasePath()+"/callback")
 			})
 		}
@@ -57,20 +49,28 @@ var (
 	githubRepository      repository.GithubRepository      = repository.NewGithubRepository(databaseConnection)
 	tokenRepository       repository.TokenRepository       = repository.NewTokenRepository(databaseConnection)
 	servicesRepository    repository.ServiceRepository     = repository.NewServiceRepository(databaseConnection)
+	actionRepository      repository.ActionRepository      = repository.NewActionRepository(databaseConnection)
+	reactionRepository    repository.ReactionRepository    = repository.NewReactionRepository(databaseConnection)
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
 	githubService      services.GithubService      = services.NewGithubService(githubRepository)
 	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
 	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
+	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService)
+	reactionService  services.ReactionService     = services.NewReactionService(reactionRepository, servicesService)
+
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
 	githubController	  controllers.GithubController      = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
+	// actionController      controllers.ActionController      = controllers.NewActionController(actionService)
+	servicesController    controllers.ServicesController    = controllers.NewServiceController(servicesService, actionService, reactionService)
 )
 
 var (
 userApi       *api.UserApi        = api.NewUserApi(userController)
 githubApi     *api.GithubApi      = api.NewGithubApi(githubController)
+servicesApi   *api.ServicesApi    = api.NewServiceApi(servicesController)
 )
 
 

@@ -8,6 +8,8 @@ import (
 type ServicesService interface {
 	FindAll() (allService []schemas.Service)
 	FindByName(serviceName schemas.ServiceName) schemas.Service
+	GetServices() []interface{}
+	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
 }
 
 type servicesService struct {
@@ -49,4 +51,18 @@ func (service *servicesService) FindAll() (allService []schemas.Service) {
 
 func (service *servicesService) FindByName(serviceName schemas.ServiceName) schemas.Service {
 	return service.repository.FindByName(serviceName)
+}
+
+func (service *servicesService) GetServices() []interface{} {
+	return service.allServices
+}
+
+func (service *servicesService) GetAllServices() (allServicesJson []schemas.ServiceJson, err error) {
+	allServices := service.repository.FindAll()
+	for _, oneService := range allServices {
+		allServicesJson = append(allServicesJson, schemas.ServiceJson{
+			Name: schemas.ServiceName(oneService.Name),
+		})
+	}
+	return allServicesJson, nil
 }
