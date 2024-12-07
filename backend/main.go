@@ -8,6 +8,7 @@ import (
 	"area51/api"
 	"area51/controllers"
 	"area51/database"
+	"area51/middlewares"
 	"area51/repository"
 	"area51/services"
 )
@@ -36,7 +37,7 @@ func setupRouter() *gin.Engine {
 				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
 		}
-		workflow := apiRoutes.Group("/workflow")
+		workflow := apiRoutes.Group("/workflow", middlewares.Authorization())
 		{
 			workflow.POST("", workflowApi.CreateWorkflow)
 		}
