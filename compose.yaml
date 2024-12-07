@@ -54,7 +54,7 @@ services:
     depends_on:
       mobile_app:
         condition: service_started
-      service:
+      server:
         condition: service_healthy
     volumes:
       - apk:app/public/apk

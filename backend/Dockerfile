@@ -2,23 +2,23 @@ FROM golang:1.23-alpine AS dependencies
 
 WORKDIR /app
 
-COPY backend/go.mod .
+COPY ./go.mod .
 
-COPY backend/go.sum .
+COPY ./go.sum .
 
 RUN go mod download
 
 
 FROM dependencies AS build
 
-COPY backend/ .
+COPY ./ .
 
 RUN go build -o /app
 
 
 FROM dependencies AS test
 
-COPY backend/ .
+COPY ./ .
 
 CMD ["go", "test", "-v"]
 
@@ -26,8 +26,8 @@ FROM alpine:3.15 AS run
 
 WORKDIR /app
 
-COPY --from=build /app/Area51 .
+COPY --from=build /app/area51 .
 
 EXPOSE 8080
 
-CMD ["/app/Area51"]
+CMD ["/app/area51"]
