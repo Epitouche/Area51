@@ -71,7 +71,7 @@ async function onSubmit() {
           />
         </div>
       </form>
-      <hr class="border-primaryWhite-400" />
+      <hr class="border-primaryWhite-400">
       <div class="flex justify-around space-x-4">
         <ButtonComponent
           text="Github"
