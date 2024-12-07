@@ -59,14 +59,12 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
-	fmt.Printf("response body: %v\n", response.Body)
 	var resultToken schemas.GitHubResponseToken
 	err = json.NewDecoder(response.Body).Decode(&resultToken)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
 	response.Body.Close()
-	fmt.Printf("resultToken: %v\n", resultToken)
 	return resultToken, nil
 }
 
@@ -75,7 +73,6 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
-	fmt.Printf("accessToken: %s\n", accessToken)
 	request.Header.Set("Authorization", "Bearer "+accessToken)
 	client := &http.Client{}
 	response, err := client.Do(request)
