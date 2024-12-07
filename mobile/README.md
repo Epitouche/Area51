@@ -85,3 +85,9 @@ npm install @react-navigation/native
 npm install @react-navigation/stack
 npm install react-native-screens react-native-safe-area-context
 ```
+
+### Compile on Android
+Go on android folder and do this
+```
+./gradlew :app:assembleRelease
+```
