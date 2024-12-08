@@ -1,11 +1,15 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
+
+	"github.com/google/go-github/v67/github"
 
 	"area51/repository"
 	"area51/schemas"
@@ -107,8 +111,25 @@ func (service *githubService) FindReactionByName(name string) func(workflowId ui
 }
 
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
-	fmt.Printf("LookAtPullRequest\n")
-	channel <- "LookAtPullRequest"
+	ctx := context.Background()
+	client := github.NewClient(nil)
+	var options schemas.GithubPullRequestOptions
+	err := json.NewDecoder(strings.NewReader(option)).Decode(&options)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	pullRequests, _, err := client.PullRequests.List(ctx, options.Owner, options.Repo, nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, pullRequest := range pullRequests {
+		if pullRequest.CreatedAt.After(options.CheckedAt) {
+			fmt.Println("Trigger the action")
+		}
+	}
 }
 
 func (service *githubService) CreateNewRelease(workflowId uint64) {

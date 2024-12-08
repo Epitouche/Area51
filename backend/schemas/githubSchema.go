@@ -1,5 +1,7 @@
 package schemas
 
+import "time"
+
 type GithubAction string
 
 const (
@@ -27,4 +29,10 @@ type GithubUserInfo struct {
 	HtmlUrl   string `json:"html_url"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
+}
+
+type GithubPullRequestOptions struct {
+	Repo	string	`json:"-"`
+	Owner	string	`json:"-"`
+	CheckedAt time.Time `json:"-" gorm:"default:CURRENT_TIMESTAMP"`
 }
