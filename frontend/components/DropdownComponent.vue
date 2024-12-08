@@ -8,23 +8,23 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const selectOption = (option) => {
+async function selectOption(option: string) {
   updateSelected(option);
   isOpen.value = false;
-};
+}
 
 const props = defineProps<{
   options: string[];
   label?: string;
-  selected?: string;
+  modelValue: string;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:selected", value: string): void;
+  (e: "update:modelValue", value: string): void;
 }>();
 
 const updateSelected = (value: string) => {
-  emit("update:selected", value);
+  emit("update:modelValue", value);
 };
 </script>
 

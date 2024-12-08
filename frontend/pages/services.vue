@@ -73,7 +73,6 @@ async function fetchServices() {
     );
     response.server.services.forEach((service) => {
       services.value.push(service);
-      service.actions = ["Action 1", "Action 2", "Action 3"];
     });
   } catch (error) {
     console.error("Error fetching services:", error);
@@ -118,10 +117,9 @@ onMounted(fetchServices);
             class="flex justify-center"
           >
             <DropdownComponent
+              v-model="actionSelected"
               :label="service.name"
               :options="service.actions"
-              :selected="actionSelected"
-              :on-select="() => {console.log('Selected:', actionSelected)}"
             />
           </div>
         </div>
