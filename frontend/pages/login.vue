@@ -94,7 +94,9 @@ async function redirectToGitHubOAuth() {
       </div>
       <div class="flex justify-around">
         <p class="text-center text-sm">
-          <a href="#" class="text-fontWhite underline">Create an account</a>
+          <NuxtLink to="/register" class="text-fontWhite underline">
+            Create an account
+          </NuxtLink>
         </p>
         <p class="text-center text-sm">
           <a href="#" class="text-fontWhite underline">Forgot password?</a>
