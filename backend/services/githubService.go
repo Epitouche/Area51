@@ -16,16 +16,24 @@ type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
-	FindReactionByName(name string) func(workflowId uint64)
+	FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken)
 }
 
 type githubService struct {
 	repository repository.GithubRepository
+	userService UserService
+	reactionResponseDataService ReactionResponseDataService
 }
 
-func NewGithubService(repository repository.GithubRepository) GithubService {
+func NewGithubService(
+	repository repository.GithubRepository,
+	userService UserService,
+	reactionResponseDataService ReactionResponseDataService,
+	) GithubService {
 	return &githubService{
 		repository: repository,
+		userService: userService,
+		reactionResponseDataService: reactionResponseDataService,
 	}
 }
 
@@ -97,20 +105,58 @@ func (service *githubService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *githubService) FindReactionByName(name string) func(workflowId uint64) {
+func (service *githubService) FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken) {
 	switch name {
-	case string(schemas.GithubReactionCreateNewRelease):
-		return service.CreateNewRelease
+	case string(schemas.GithubReactionListComments):
+		return service.ListAllReviewComments
 	default:
 		return nil
 	}
 }
 
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
+	time.Sleep(30 * time.Second)
 	fmt.Printf("LookAtPullRequest\n")
 	channel <- "LookAtPullRequest"
 }
 
-func (service *githubService) CreateNewRelease(workflowId uint64) {
-	fmt.Printf("CreateNewRelease\n")
+func (service *githubService) ListAllReviewComments(workflowId uint64, accessToken []schemas.ServiceToken) {
+	request, err := http.NewRequest("GET", "https://api.github.com/repos/Epitouche/Area51/pulls/comments", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	request.Header.Set("Accept", "application/vnd.github+json")
+	for _, token := range accessToken {
+		actualUser := service.userService.GetUserById(token.UserId)
+		if token.UserId == actualUser.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
+
+	result := []schemas.GithubListCommentsResponse{}
+	savedResult := schemas.ReactionResponseData{
+		WorkflowId: workflowId,
+	}
+
+	err = json.NewDecoder(response.Body).Decode(&result)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	jsonValue, err := json.Marshal(result)
+	if err != nil {
+		fmt.Println(err)
+	}
+	savedResult.ApiResponse = json.RawMessage(jsonValue)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	service.reactionResponseDataService.Save(savedResult)
 }

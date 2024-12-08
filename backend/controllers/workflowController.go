@@ -23,4 +23,3 @@ func NewWorkflowController(service services.WorkflowService) WorkflowController 
 func (controller *workflowController) CreateWorkflow(ctx *gin.Context) (string, error) {
 	return controller.service.CreateWorkflow(ctx)
 }
-
