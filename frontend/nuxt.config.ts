@@ -8,5 +8,6 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@nuxt/devtools', '@nuxt/eslint'],
+  modules: ['@nuxt/devtools', '@nuxt/eslint', '@nuxt/icon'],
+  compatibilityDate: '2024-12-03',
 });

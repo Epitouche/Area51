@@ -1,6 +1,4 @@
 <script>
-import Button from "@/components/Button.vue";
-import Input from "@/components/Input.vue";
 </script>
 
 <template>
@@ -12,29 +10,18 @@ import Input from "@/components/Input.vue";
     >
       <h2 class="text-2xl font-bold text-center">REGISTER</h2>
       <form class="space-y-6">
-        <div class="flex justify-around">
-          <Input id="firstname" type="text" label="First Name" icon="fas fa-user" />
-          <Input
-            id="lastname"
-            type="text"
-            label="Last Name"
-            icon="fas fa-user"
-          />
+        <div>
+          <InputComponent id="username" type="text" label="Username" />
         </div>
         <div>
-          <Input id="email" type="email" label="Email" icon="fas fa-user" />
+          <InputComponent id="email" type="email" label="Email" />
         </div>
         <div>
-          <Input
-            id="password"
-            type="password"
-            label="Password"
-            icon="fas fa-lock"
-          />
+          <InputComponent id="password" type="password" label="Password" />
         </div>
       </form>
       <div class="flex items-center">
-        <input
+        <InputComponent
           id="remember"
           type="checkbox"
           class="w-4 h-4 text-accent-500 border-primaryWhite-300 rounded focus:ring-accent-500"
@@ -42,7 +29,7 @@ import Input from "@/components/Input.vue";
         <label for="remember" class="ml-2 text-sm">Remember me</label>
       </div>
       <div class="flex justify-center">
-        <Button
+        <ButtonComponent
           text="Create Account"
           bgColor="bg-primaryWhite-500"
           hoverColor="hover:bg-secondaryWhite-500"
@@ -51,14 +38,14 @@ import Input from "@/components/Input.vue";
       </div>
       <hr class="border-primaryWhite-400" />
       <div class="flex justify-around space-x-4">
-        <Button
+        <ButtonComponent
           text="Github"
           class="w-full"
           bgColor="bg-primaryWhite-500"
           hoverColor="hover:bg-secondaryWhite-500"
           textColor="text-fontBlack"
         />
-        <Button
+        <ButtonComponent
           text="Google"
           class="w-full"
           bgColor="bg-primaryWhite-500"
