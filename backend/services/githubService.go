@@ -127,7 +127,7 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		time.Sleep(30 * time.Second)
 		return
 	}
-	if nbPR < len(pullRequests) {
+	if nbPR != len(pullRequests) {
 		fmt.Println("Trigger reaction")
 		nbPR = len(pullRequests)
 	}
