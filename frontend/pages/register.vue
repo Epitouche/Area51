@@ -2,13 +2,12 @@
 import { ref } from "vue";
 
 const username = ref("");
-const password = ref("");
 const email = ref("");
-const router = useRouter();
+const password = ref("");
 
 async function onSubmit() {
   try {
-    const { token } = await $fetch("http://localhost:8080/api/auth/register", {
+    const { access_token } = await $fetch("http://localhost:8080/api/auth/register", {
       method: "POST",
       body: {
         username: username.value,
@@ -16,20 +15,23 @@ async function onSubmit() {
         password: password.value,
       },
     });
-    if (token) {
-      localStorage.setItem("token", token);
-      router.push("/services");
+    if (access_token) {
+      localStorage.setItem("access_token", access_token);
+      navigateTo("/services");
     }
   } catch (error) {
-    console.error(error);
+    console.error("API response:", error.response?.data || error.message);
   }
 }
 
 async function redirectToGitHubOAuth() {
   try {
-    const { github_authentication_url } = await $fetch("http://localhost:8080/api/github/auth", {
-      method: "GET",
-    });
+    const { github_authentication_url } = await $fetch(
+      "http://localhost:8080/api/github/auth",
+      {
+        method: "GET",
+      }
+    );
     if (github_authentication_url) {
       window.location.href = github_authentication_url;
     } else {
@@ -39,7 +41,6 @@ async function redirectToGitHubOAuth() {
     console.error("Error fetching GitHub OAuth URL:", error);
   }
 }
-
 </script>
 
 <template>

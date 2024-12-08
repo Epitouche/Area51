@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ServerResponse, Service } from "@/types";
+import type { ServerResponse, Service } from "~/src/types";
 
 const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
 
@@ -71,7 +71,7 @@ async function fetchServices() {
         method: "GET",
       }
     );
-    response.server.services.forEach((service) => {
+    response.server.services.forEach((service : Service) => {
       services.value.push(service);
     });
   } catch (error) {
@@ -117,9 +117,10 @@ onMounted(fetchServices);
             class="flex justify-center"
           >
             <DropdownComponent
+              v-if="service.actions"
               v-model="actionSelected"
               :label="service.name"
-              :options="service.actions"
+              :options="service.actions.map((action) => action.name)"
             />
           </div>
         </div>
@@ -137,7 +138,7 @@ onMounted(fetchServices);
         @close="closeModalReaction"
         @confirm="confirmModalReaction"
       >
-        <div v-for="service in services" :key="service.id">
+        <div v-for="service in services" :key="service.name">
           <ButtonComponent
             :text="service.name"
             bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
@@ -150,7 +151,7 @@ onMounted(fetchServices);
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex justify-start gap-5 m-20">
       <ButtonComponent
