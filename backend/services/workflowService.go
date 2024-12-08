@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -15,6 +16,7 @@ type WorkflowService interface {
 	CreateWorkflow(ctx *gin.Context) (string, error)
 	InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken)
 	ExistWorkflow(workflowId uint64) bool
+	GetWorkflowByName(name string) schemas.Workflow
 }
 
 type workflowService struct {
@@ -62,13 +64,31 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		return "", err
 	}
 
-	githubServiceToken, err := service.serviceToken.GetTokenByUserId(user.Id)
+	workflowName := result.Name
+	workflowValue := "1"
+	if workflowName == "" {
+		workflowName = "Workflow " + workflowValue
+		for service.GetWorkflowByName(workflowName).Name != "" {
+			workflowValueInt, _ := strconv.Atoi(workflowValue)
+			workflowValueInt++
+			workflowValue = strconv.Itoa(workflowValueInt)
+		}
+		workflowValueInt, _ := strconv.Atoi(workflowValue)
+		workflowValueInt++
+		workflowValueInt++
+		workflowValue = strconv.Itoa(workflowValueInt)
+
+		workflowName = "Workflow " + workflowValue
+	}
+
+	githubServiceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
 	newWorkflow := schemas.Workflow{
 		UserId: result.UserId,
 		User: user,
 		IsActive: true,
 		Action: service.actionService.FindById(result.ActionId),
 		Reaction: service.reactionService.FindById(result.ReactionId),
+		Name: workflowName,
 	}
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
@@ -126,7 +146,6 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 				result := <- channel
 				reaction(workflow.Id, githubServiceToken)
 				fmt.Println(result)
-				// workflow.IsActive = false
 			}
 		}
 	}(workflowStartingPoint, channel)
@@ -135,4 +154,8 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 func (service *workflowService) ExistWorkflow(workflowId uint64) bool {
 	_, err := service.repository.FindByIds(workflowId)
 	return err == nil
+}
+
+func (service *workflowService) GetWorkflowByName(name string) schemas.Workflow {
+	return service.repository.FindByWorkflowName(name)
 }
