@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from "vue";
-// import { useRouter } from "vue-router";
 
 const username = ref("");
 const password = ref("");
@@ -25,6 +24,22 @@ async function onSubmit() {
     console.error(error);
   }
 }
+
+async function redirectToGitHubOAuth() {
+  try {
+    const { github_authentication_url } = await $fetch("http://localhost:8080/api/github/auth", {
+      method: "GET",
+    });
+    if (github_authentication_url) {
+      window.location.href = github_authentication_url;
+    } else {
+      console.error("GitHub authentication URL not found");
+    }
+  } catch (error) {
+    console.error("Error fetching GitHub OAuth URL:", error);
+  }
+}
+
 </script>
 
 <template>
@@ -87,6 +102,7 @@ async function onSubmit() {
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
+          @click="redirectToGitHubOAuth"
         />
         <ButtonComponent
           text="Google"

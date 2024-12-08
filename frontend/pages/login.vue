@@ -1,10 +1,8 @@
 <script setup>
 import { ref } from "vue";
-// import { useRouter } from "vue-router";
 
 const username = ref("");
 const password = ref("");
-const router = useRouter();
 
 async function onSubmit() {
   try {
@@ -17,10 +15,25 @@ async function onSubmit() {
     });
     if (token) {
       localStorage.setItem("token", token);
-      router.push("/services");
+      window.location.href = "/services";
     }
   } catch (error) {
     console.error(error);
+  }
+}
+
+async function redirectToGitHubOAuth() {
+  try {
+    const { github_authentication_url } = await $fetch("http://localhost:8080/api/github/auth", {
+      method: "GET",
+    });
+    if (github_authentication_url) {
+      window.location.href = github_authentication_url;
+    } else {
+      console.error("GitHub authentication URL not found");
+    }
+  } catch (error) {
+    console.error("Error fetching GitHub OAuth URL:", error);
   }
 }
 </script>
@@ -52,16 +65,6 @@ async function onSubmit() {
             icon="fas fa-lock"
           />
         </div>
-        <!-- <div class="flex items-center gap-2">
-          <InputComponent
-            id="remember"
-            v-model="rememberMe"
-            type="checkbox"
-            class="w-4 h-4 text-accent-500 border-primaryWhite-300 rounded focus:ring-accent-500"
-            label=""
-          />
-          <label for="remember" class="ml-2 text-sm">Remember me</label>
-        </div> -->
         <div class="flex justify-center">
           <ButtonComponent
             text="Log In"
@@ -74,11 +77,12 @@ async function onSubmit() {
       <hr class="border-primaryWhite-400">
       <div class="flex justify-around space-x-4">
         <ButtonComponent
-          text="Github"
+          text="GitHub"
           class="w-full"
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
+          @click="redirectToGitHubOAuth"
         />
         <ButtonComponent
           text="Google"
