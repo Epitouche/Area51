@@ -118,18 +118,17 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 				return
 			}
 			reaction := service.servicesService.FindReactionByName(workflow.Reaction.Name)
-			fmt.Printf("Reaction Name: %+v\n", workflow.Reaction.Name)
 			if reaction == nil {
 				fmt.Println("Reaction not found")
 				return
 			}
 			if workflow.IsActive {
+				result := <- channel
 				reaction(workflow.Id, githubServiceToken)
+				fmt.Println(result)
 				// workflow.IsActive = false
 			}
 		}
-		fmt.Println("Clear")
-		channel <- "Workflow finished"
 	}(workflowStartingPoint, channel)
 }
 

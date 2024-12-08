@@ -22,15 +22,18 @@ type GithubService interface {
 type githubService struct {
 	repository repository.GithubRepository
 	userService UserService
+	reactionResponseDataService ReactionResponseDataService
 }
 
 func NewGithubService(
 	repository repository.GithubRepository,
 	userService UserService,
+	reactionResponseDataService ReactionResponseDataService,
 	) GithubService {
 	return &githubService{
 		repository: repository,
 		userService: userService,
+		reactionResponseDataService: reactionResponseDataService,
 	}
 }
 
@@ -112,8 +115,7 @@ func (service *githubService) FindReactionByName(name string) func(workflowId ui
 }
 
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
-	// wait 5 seconds
-	time.Sleep(5 * time.Second)
+	time.Sleep(30 * time.Second)
 	fmt.Printf("LookAtPullRequest\n")
 	channel <- "LookAtPullRequest"
 }
@@ -124,28 +126,37 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 		fmt.Println(err)
 	}
 	request.Header.Set("Accept", "application/vnd.github+json")
-	// var actualUser schemas.User
 	for _, token := range accessToken {
-		fmt.Printf("token userId: %+v\n", token.UserId)
 		actualUser := service.userService.GetUserById(token.UserId)
-		fmt.Printf("actualUser: %++v\n", actualUser)
 		if token.UserId == actualUser.Id {
-			fmt.Printf("I'M IN THE IF STATEMENT")
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
 	client := &http.Client{}
 	response, err := client.Do(request)
-	fmt.Printf("response: %+v\n", response)
 	if err != nil {
 		fmt.Println(err)
 	}
-	result := schemas.GithubListCommentsResponse{}
+	defer response.Body.Close()
+
+	result := []schemas.GithubListCommentsResponse{}
+	savedResult := schemas.ReactionResponseData{
+		WorkflowId: workflowId,
+	}
+
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
 		fmt.Println(err)
 	}
-	response.Body.Close()
-	fmt.Printf("final result: %+v", result)
 
+	jsonValue, err := json.Marshal(result)
+	if err != nil {
+		fmt.Println(err)
+	}
+	savedResult.ApiResponse = json.RawMessage(jsonValue)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	service.reactionResponseDataService.Save(savedResult)
 }
