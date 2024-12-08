@@ -60,12 +60,12 @@ var (
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
-	githubService      services.GithubService      = services.NewGithubService(githubRepository)
+	githubService      services.GithubService      = services.NewGithubService(githubRepository, userService)
 	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
 	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
 	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService)
 	reactionService  services.ReactionService     = services.NewReactionService(reactionRepository, servicesService)
-	workflowsService services.WorkflowService    = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService)
+	workflowsService services.WorkflowService    = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken)
 
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
