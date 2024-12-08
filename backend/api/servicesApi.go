@@ -12,17 +12,20 @@ import (
 )
 
 type ServicesApi struct {
-	controller controllers.ServicesController
+	serviceController controllers.ServicesController
+	workflowController controllers.WorkflowController
 }
 
-func NewServicesApi(controller controllers.ServicesController) *ServicesApi {
+func NewServicesApi(serviceController controllers.ServicesController, workflowController controllers.WorkflowController) *ServicesApi {
 	return &ServicesApi{
-		controller: controller,
+		serviceController: serviceController,
+		workflowController: workflowController,
 	}
 }
 
 func (api *ServicesApi) AboutJson(ctx *gin.Context) {
-	allServices, err := api.controller.AboutJson(ctx)
+	allServices, err := api.serviceController.AboutJson(ctx)
+	allWorkflows, err := api.workflowController.AboutJson(ctx)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, &schemas.BasicResponse{
@@ -36,6 +39,7 @@ func (api *ServicesApi) AboutJson(ctx *gin.Context) {
 			"server": map[string]any{
 				"current_time": fmt.Sprintf("%d", time.Now().Unix()),
 				"services":     allServices,
+				"workflows":	allWorkflows,
 			},
 		})
 	}
