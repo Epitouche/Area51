@@ -28,7 +28,7 @@ async function redirectToGitHubOAuth() {
       method: "GET",
     });
     if (github_authentication_url) {
-      window.location.href = github_authentication_url;
+      window.location.href = "/services";
     } else {
       console.error("GitHub authentication URL not found");
     }
