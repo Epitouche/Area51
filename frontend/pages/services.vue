@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ServerResponse, Service } from "~/src/types";
+
 const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
 
 const rows = [
@@ -31,6 +33,7 @@ const rows = [
   },
 ];
 
+const actionSelected = ref("");
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 
@@ -58,6 +61,25 @@ const confirmModalReaction = () => {
   closeModalReaction();
 };
 
+const services = ref<Service[]>([]);
+
+async function fetchServices() {
+  try {
+    const response = await $fetch<ServerResponse>(
+      "http://localhost:8080/about.json",
+      {
+        method: "GET",
+      }
+    );
+    response.server.services.forEach((service : Service) => {
+      services.value.push(service);
+    });
+  } catch (error) {
+    console.error("Error fetching services:", error);
+  }
+}
+
+onMounted(fetchServices);
 </script>
 
 <template>
@@ -72,60 +94,83 @@ const confirmModalReaction = () => {
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex justify-center m-16 gap-10">
       <ButtonComponent
         text="Choose an action"
-        bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
-        textColor="text-fontBlack dark:text-fontWhite"
-        :onClick="openModalAction"
-      >
-      </ButtonComponent>
+        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+        text-color="text-fontBlack dark:text-fontWhite"
+        :on-click="openModalAction"
+      />
       <ModalComponent
-        :isOpen="isModalActionOpen"
         title="Choose an action"
+        :is-open="isModalActionOpen"
         @close="closeModalAction"
         @confirm="confirmModalAction"
       >
+        <div class="grid grid-cols-3 gap-4">
+          <div
+            v-for="(service, index) in services"
+            :key="index"
+            class="flex justify-center"
+          >
+            <DropdownComponent
+              v-if="service.actions"
+              v-model="actionSelected"
+              :label="service.name"
+              :options="service.actions.map((action) => action.name)"
+            />
+          </div>
+        </div>
       </ModalComponent>
       <ButtonComponent
         text="Choose a reaction"
-        bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
-        textColor="text-fontBlack dark:text-fontWhite"
-        :onClick="openModalReaction"
-      ></ButtonComponent>
+        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+        text-color="text-fontBlack dark:text-fontWhite"
+        :on-click="openModalReaction"
+      />
       <ModalComponent
-        :isOpen="isModalReactionOpen"
+        :is-open="isModalReactionOpen"
         title="Choose a reaction"
         @close="closeModalReaction"
         @confirm="confirmModalReaction"
       >
+        <div v-for="service in services" :key="service.name">
+          <ButtonComponent
+            :text="service.name"
+            bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+            hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+            text-color="text-fontBlack dark:text-fontWhite"
+          />
+        </div>
       </ModalComponent>
-
     </div>
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex justify-start gap-5 m-20">
       <ButtonComponent
         text="Filter"
-        bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
-        textColor="text-fontBlack dark:text-fontWhite"
-      ></ButtonComponent>
-      <!-- do dropdown to replace the buttonComponent "all status"-->
+        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+        text-color="text-fontBlack dark:text-fontWhite"
+      />
       <ButtonComponent
         text="All Status"
-        bgColor="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hoverColor="hover:bg-accent-100 dark:hover:bg-accent-800"
-        textColor="text-fontBlack dark:text-fontWhite"
-      ></ButtonComponent>
+        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+        text-color="text-fontBlack dark:text-fontWhite"
+      />
     </div>
-    <ListTableComponent v-show="columns && rows" :columns="columns" :rows="rows" />
+    <ListTableComponent
+      v-show="columns && rows"
+      :columns="columns"
+      :rows="rows"
+    />
   </div>
 </template>
