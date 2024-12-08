@@ -23,12 +23,18 @@ type GithubService interface {
 }
 
 type githubService struct {
-	repository repository.GithubRepository
+	githubRepository repository.GithubRepository
+	tokenRepository repository.TokenRepository
+	workflowRepository repository.WorkflowRepository
+	reactionRepository repository.ReactionRepository
 }
 
-func NewGithubService(repository repository.GithubRepository) GithubService {
+func NewGithubService(githubRepository repository.GithubRepository, tokenRepository repository.TokenRepository, workflowRepository repository.WorkflowRepository, reactionRepository repository.ReactionRepository) GithubService {
 	return &githubService{
-		repository: repository,
+		githubRepository: githubRepository,
+		tokenRepository: tokenRepository,
+		workflowRepository: workflowRepository,
+		reactionRepository: reactionRepository,
 	}
 }
 
@@ -110,18 +116,29 @@ func (service *githubService) FindReactionByName(name string) func(workflowId ui
 }
 
 var nbPR int
+type transportWithToken struct {
+	token string
+}
+
+func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", "Bearer " + t.token)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	return http.DefaultTransport.RoundTrip(req)
+}
 
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
 	ctx := context.Background()
-	client := github.NewClient(nil)
-	// var options schemas.GithubPullRequestOptions
-	// err := json.NewDecoder(strings.NewReader(option)).Decode(&options)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	pullRequests, _, err := client.PullRequests.List(ctx, "Karumapathetic", "https://github.com/Karumapathetic/testAREA", nil)
+	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	token := service.tokenRepository.FindByUserId(workflow.UserId)
+	client := github.NewClient(&http.Client{
+		Transport: &transportWithToken{token: token[len(token) - 1].Token},
+	})
+	pullRequests, _, err := client.PullRequests.List(ctx, "Karumapathetic", "testAREA", nil)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
@@ -130,6 +147,9 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 	if nbPR != len(pullRequests) {
 		fmt.Println("Trigger reaction")
 		nbPR = len(pullRequests)
+		reaction := service.reactionRepository.FindById(workflow.ReactionId)
+		reaction.Trigger = true
+		service.reactionRepository.Update(reaction)
 	}
 	time.Sleep(30 * time.Second)
 }

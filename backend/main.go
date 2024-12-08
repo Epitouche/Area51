@@ -67,7 +67,7 @@ var (
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
-	githubService      services.GithubService      = services.NewGithubService(githubRepository)
+	githubService      services.GithubService      = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository)
 	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
 	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
 	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService, userService)
