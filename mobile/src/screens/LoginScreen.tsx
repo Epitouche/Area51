@@ -10,7 +10,7 @@ import {
 import { Button } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppContext } from '../context/AppContext';
-import { loginApiCall } from '../service/auth';
+import { loginApiCall, githubLogin } from '../service';
 import { LoginProps } from '../types';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -25,12 +25,18 @@ export default function LoginScreen({ navigation }: Props) {
   const [forms, setForms] = useState<LoginProps>({ username: '', password: '' });
   const { serverIp } = useContext(AppContext);
   const [message, setMessage] = useState('');
+  const [token, setToken] = useState('');
   // const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async () => {
     if (await loginApiCall({ apiEndpoint: serverIp, formsLogin: forms, setMessage }))
       navigation.navigate('Dashboard');
   };
+
+  const handleGithubLogin = async () => {
+    if (await githubLogin(setToken))
+      navigation.navigate('Dashboard');
+  }
 
   return (
     <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.container}>
@@ -69,7 +75,7 @@ export default function LoginScreen({ navigation }: Props) {
       </Button>
       <View style={styles.line} />
       <View style={styles.socialButtonBox}>
-        <Button style={styles.button}>
+        <Button onPress={handleGithubLogin} style={styles.button}>
           <View style={styles.buttonContent}>
             <Image
               source={{

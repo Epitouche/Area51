@@ -5,6 +5,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppContext } from '../context/AppContext';
 import { checkToken } from '../service/token';
+import { GITHUB_CLIENT_ID, GITHUB_SECRET } from '@env';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -37,6 +38,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   useEffect(() => {
     checkToken('token', setToken);
+    checkToken('github', setToken);
     console.log('token:', token);
   },  []);
 
