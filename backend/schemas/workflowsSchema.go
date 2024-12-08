@@ -10,6 +10,14 @@ type WorkflowResult struct {
 	ReactionId     uint64 `json:"reaction_id"`
 }
 
+type WorkflowJson struct {
+	Name         string `json:"name"`
+	ActionId       uint64 `json:"action_id"`
+	ReactionId     uint64 `json:"reaction_id"`
+	IsActive		bool	`json:"is_active"`
+	CreatedAt		time.Time	`json:"created_at"`
+}
+
 type Workflow struct {
 	Id				uint64		`json:"id,omitempty" gorm:"primary_key;auto_increment"`
 	UserId			uint64		`json:"-"`

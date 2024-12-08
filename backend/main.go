@@ -85,7 +85,7 @@ var (
 var (
 userApi       *api.UserApi        = api.NewUserApi(userController)
 githubApi     *api.GithubApi      = api.NewGithubApi(githubController)
-servicesApi   *api.ServicesApi    = api.NewServicesApi(servicesController)
+servicesApi   *api.ServicesApi    = api.NewServicesApi(servicesController, workflowController)
 workflowApi   *api.WorkflowApi    = api.NewWorkflowApi(workflowController)
 actionApi     *api.ActionApi      = api.NewActionApi(actionController)
 )

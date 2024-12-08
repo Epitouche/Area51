@@ -1,17 +1,18 @@
 <script setup>
 import { ref } from "vue";
-// import { useRouter } from "vue-router";
 
 const username = ref("");
 const password = ref("");
+const email = ref("");
 const router = useRouter();
 
 async function onSubmit() {
   try {
-    const { token } = await $fetch("http://localhost:8080/api/auth/login", {
+    const { token } = await $fetch("http://localhost:8080/api/auth/register", {
       method: "POST",
       body: {
         username: username.value,
+        email: email.value,
         password: password.value,
       },
     });
@@ -32,7 +33,7 @@ async function onSubmit() {
     <div
       class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
     >
-      <h2 class="text-2xl font-bold text-center">LOG IN</h2>
+      <h2 class="text-2xl font-bold text-center">REGISTER</h2>
       <form class="space-y-6" @submit.prevent="onSubmit">
         <div>
           <InputComponent
@@ -40,7 +41,14 @@ async function onSubmit() {
             v-model="username"
             type="text"
             label="Username"
-            icon="fas fa-user"
+          />
+        </div>
+        <div>
+          <InputComponent
+            id="email"
+            v-model="email"
+            type="email"
+            label="Email"
           />
         </div>
         <div>
@@ -49,7 +57,6 @@ async function onSubmit() {
             v-model="password"
             type="password"
             label="Password"
-            icon="fas fa-lock"
           />
         </div>
         <!-- <div class="flex items-center gap-2">
@@ -64,7 +71,7 @@ async function onSubmit() {
         </div> -->
         <div class="flex justify-center">
           <ButtonComponent
-            text="Log In"
+            text="Create an account"
             bg-color="bg-primaryWhite-500"
             hover-color="hover:bg-secondaryWhite-500"
             text-color="text-fontBlack"
@@ -90,8 +97,8 @@ async function onSubmit() {
       </div>
       <div class="flex justify-around">
         <p class="text-center text-sm">
-          <NuxtLink to="/register" class="text-fontWhite underline">
-            Create an account
+          <NuxtLink to="/login" class="text-fontWhite underline">
+            Already have an account?
           </NuxtLink>
         </p>
         <p class="text-center text-sm">

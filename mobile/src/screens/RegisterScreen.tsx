@@ -9,55 +9,71 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
+import { RegisterProps } from '../types';
+import { registerApiCall } from '../service/auth';
 import { AppContext } from '../context/AppContext';
-import { loginApiCall, githubLogin } from '../service';
-import { LoginProps } from '../types';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+
+type RegisterScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Register'
+>;
 
 type Props = {
-  navigation: LoginScreenNavigationProp;
+  navigation: RegisterScreenNavigationProp;
 };
 
-export default function LoginScreen({ navigation }: Props) {
-  const [forms, setForms] = useState<LoginProps>({ username: '', password: '' });
-  const { serverIp } = useContext(AppContext);
+export default function RegisterScreen({ navigation }: Props) {
   const [message, setMessage] = useState('');
-  const [token, setToken] = useState('');
-  // const [rememberMe, setRememberMe] = useState(false);
+  const [forms, setForms] = useState<RegisterProps>({
+    email: '',
+    password: '',
+    username: '',
+  });
+  const { serverIp } = useContext(AppContext);
 
   const handleLogin = async () => {
-    if (await loginApiCall({ apiEndpoint: serverIp, formsLogin: forms, setMessage }))
+    setMessage('');
+    if (await registerApiCall({
+      apiEndpoint: serverIp,
+      formsRegister: forms,
+      setMessage,
+    }))
       navigation.navigate('Dashboard');
   };
 
-  const handleGithubLogin = async () => {
-    if (await githubLogin(setToken))
-      navigation.navigate('Dashboard');
-  }
-
   return (
     <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.container}>
-      <Text style={styles.header}>LOG IN</Text>
+      <Text style={styles.header}>REGISTER IN</Text>
       <View style={styles.inputBox}>
         <TextInput
           style={styles.input}
-          autoCapitalize="none"
           placeholder="Username"
+          keyboardType="default"
+          autoCapitalize="none"
           value={forms.username}
-          onChangeText={username => setForms({ ...forms, username })}
+          onChangeText={text => setForms({ ...forms, username: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={forms.email}
+          onChangeText={text => setForms({ ...forms, email: text })}
         />
         <TextInput
           style={styles.input}
           secureTextEntry
-          value={forms.password}
           placeholder="Password"
-          onChangeText={password => setForms({ ...forms, password })}
+          value={forms.password}
+          onChangeText={text => setForms({ ...forms, password: text })}
           autoCapitalize="none"
         />
       </View>
+      {message !== '' && <Text style={styles.errorMessage}>{message}</Text>}
       {/* <View style={styles.checkboxContainer}>
         <TouchableOpacity
           onPress={() => setRememberMe(!rememberMe)}
@@ -75,7 +91,7 @@ export default function LoginScreen({ navigation }: Props) {
       </Button>
       <View style={styles.line} />
       <View style={styles.socialButtonBox}>
-        <Button onPress={handleGithubLogin} style={styles.button}>
+        <Button style={styles.button}>
           <View style={styles.buttonContent}>
             <Image
               source={{
@@ -98,7 +114,6 @@ export default function LoginScreen({ navigation }: Props) {
           </View>
         </Button>
       </View>
-      {message !== '' && <Text style={styles.passwordText}>{message}</Text>}
       <View style={styles.forgotPasswordBox}>
         <TouchableOpacity>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
@@ -113,28 +128,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: '3%',
-    gap: 40,
+    gap: 30,
   },
   header: {
     fontSize: 32,
     color: '#fff',
     fontWeight: 'bold',
     marginTop: '20%',
-  },
-  inputBox: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 30,
-    marginTop: '10%',
-  },
-  input: {
-    width: '90%',
-    borderBottomWidth: 1,
-    borderColor: '#F7FAFB',
-    padding: 5,
-    marginVertical: 10,
-    fontSize: 16,
-    color: 'white',
   },
   // checkboxContainer: {
   //   flexDirection: 'row',
@@ -159,6 +159,25 @@ const styles = StyleSheet.create({
   //   color: '#fff',
   //   fontSize: 16,
   // },
+
+  // Input Section
+  inputBox: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 30,
+    marginTop: '10%',
+  },
+  input: {
+    width: '100%',
+    borderBottomWidth: 1,
+    borderColor: '#F7FAFB',
+    padding: 5,
+    marginVertical: 10,
+    fontSize: 16,
+    color: 'white',
+  },
+
+  // Button Section
   loginButton: {
     width: '35%',
     backgroundColor: '#F7FAFB',
@@ -217,5 +236,10 @@ const styles = StyleSheet.create({
     marginRight: 15,
     width: 25,
     height: 25,
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: 16,
+    marginTop: 10,
   },
 });

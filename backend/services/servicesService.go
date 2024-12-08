@@ -14,6 +14,11 @@ type ServicesService interface {
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
 }
 
+type ServiceInterface interface {
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
+	FindReactionByName(name string) func (workflowId uint64)
+}
+
 type servicesService struct {
 	repository 			repository.ServiceRepository
 	allServices 		[]interface{}
@@ -71,8 +76,8 @@ func (service *servicesService) GetAllServices() (allServicesJson []schemas.Serv
 
 func (service *servicesService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
 	for _, oneService := range service.allServices {
-		if githubService, ok := oneService.(GithubService); ok {
-			return githubService.FindActionByName(name)
+		if oneService.(ServiceInterface).FindActionByName(name) != nil {
+			return oneService.(ServiceInterface).FindActionByName(name)
 		}
 	}
 	return nil
@@ -80,8 +85,8 @@ func (service *servicesService) FindActionByName(name string) func(channel chan 
 
 func (service *servicesService) FindReactionByName(name string) func (workflowId uint64) {
 	for _, oneService := range service.allServices {
-		if githubService, ok := oneService.(GithubService); ok {
-			return githubService.FindReactionByName(name)
+		if oneService.(ServiceInterface).FindReactionByName(name) != nil {
+			return oneService.(ServiceInterface).FindReactionByName(name)
 		}
 	}
 	return nil
