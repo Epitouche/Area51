@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { ServerResponse, Service } from '@/types';
+import type { ServerResponse, Service } from "@/types";
+
 const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
 
 const rows = [
@@ -32,6 +33,7 @@ const rows = [
   },
 ];
 
+const actionSelected = ref("");
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 
@@ -63,20 +65,22 @@ const services = ref<Service[]>([]);
 
 async function fetchServices() {
   try {
-    const response = await $fetch<ServerResponse>("http://localhost:8080/about.json", {
-      method: "GET",
-    });
+    const response = await $fetch<ServerResponse>(
+      "http://localhost:8080/about.json",
+      {
+        method: "GET",
+      }
+    );
     response.server.services.forEach((service) => {
       services.value.push(service);
+      service.actions = ["Action 1", "Action 2", "Action 3"];
     });
-    console.log("Services fetched:", services.value);
   } catch (error) {
     console.error("Error fetching services:", error);
   }
 }
 
 onMounted(fetchServices);
-
 </script>
 
 <template>
@@ -102,18 +106,24 @@ onMounted(fetchServices);
         :on-click="openModalAction"
       />
       <ModalComponent
-      title="Choose an action"
-      :is-open="isModalActionOpen"
-      @close="closeModalAction"
-      @confirm="confirmModalAction"
+        title="Choose an action"
+        :is-open="isModalActionOpen"
+        @close="closeModalAction"
+        @confirm="confirmModalAction"
       >
-        <div v-for="service in services" :key="service.id">
-          <ButtonComponent
-            :text="service.name"
-            bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-            hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-            text-color="text-fontBlack dark:text-fontWhite"
-          />
+        <div class="grid grid-cols-3 gap-4">
+          <div
+            v-for="(service, index) in services"
+            :key="index"
+            class="flex justify-center"
+          >
+            <DropdownComponent
+              :label="service.name"
+              :options="service.actions"
+              :selected="actionSelected"
+              :on-select="() => {console.log('Selected:', actionSelected)}"
+            />
+          </div>
         </div>
       </ModalComponent>
       <ButtonComponent
@@ -142,7 +152,7 @@ onMounted(fetchServices);
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      >
+      />
     </div>
     <div class="flex justify-start gap-5 m-20">
       <ButtonComponent
@@ -151,7 +161,6 @@ onMounted(fetchServices);
         hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
         text-color="text-fontBlack dark:text-fontWhite"
       />
-      <!-- do dropdown to replace the buttonComponent "all status"-->
       <ButtonComponent
         text="All Status"
         bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"

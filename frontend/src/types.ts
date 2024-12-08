@@ -1,6 +1,6 @@
 export interface Service {
   name: string;
-  actions: any;
+  actions: any[];
   reactions: any;
 }
 
