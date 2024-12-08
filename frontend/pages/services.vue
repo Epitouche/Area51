@@ -34,6 +34,7 @@ const rows = [
 ];
 
 const actionSelected = ref("");
+const reactionSelected = ref("");
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 
@@ -71,7 +72,7 @@ async function fetchServices() {
         method: "GET",
       }
     );
-    response.server.services.forEach((service : Service) => {
+    response.server.services.forEach((service: Service) => {
       services.value.push(service);
     });
   } catch (error) {
@@ -96,57 +97,74 @@ onMounted(fetchServices);
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
       >
     </div>
-    <div class="flex justify-center m-16 gap-10">
-      <ButtonComponent
-        text="Choose an action"
-        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-        text-color="text-fontBlack dark:text-fontWhite"
-        :on-click="openModalAction"
-      />
-      <ModalComponent
-        title="Choose an action"
-        :is-open="isModalActionOpen"
-        @close="closeModalAction"
-        @confirm="confirmModalAction"
-      >
-        <div class="grid grid-cols-3 gap-4">
-          <div
-            v-for="(service, index) in services"
-            :key="index"
-            class="flex justify-center"
-          >
-            <DropdownComponent
-              v-if="service.actions"
-              v-model="actionSelected"
-              :label="service.name"
-              :options="service.actions.map((action) => action.name)"
-            />
+    <div class="flex flex-col justify-center m-16 gap-10">
+      <div class="flex justify-center gap-5">
+        <ButtonComponent
+          :text="actionSelected ? actionSelected : 'Choose an action'"
+          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+          text-color="text-fontBlack dark:text-fontWhite"
+          :on-click="openModalAction"
+        />
+        <ModalComponent
+          title="Choose an action"
+          :is-open="isModalActionOpen"
+          @close="closeModalAction"
+          @confirm="confirmModalAction"
+        >
+          <div class="grid grid-cols-3 gap-4">
+            <div
+              v-for="(service, index) in services"
+              :key="index"
+              class="flex justify-center"
+            >
+              <DropdownComponent
+                v-if="service.actions"
+                v-model="actionSelected"
+                :label="service.name"
+                :options="service.actions.map((action) => action.name)"
+              />
+            </div>
           </div>
-        </div>
-      </ModalComponent>
-      <ButtonComponent
-        text="Choose a reaction"
-        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-        text-color="text-fontBlack dark:text-fontWhite"
-        :on-click="openModalReaction"
-      />
-      <ModalComponent
-        :is-open="isModalReactionOpen"
-        title="Choose a reaction"
-        @close="closeModalReaction"
-        @confirm="confirmModalReaction"
-      >
-        <div v-for="service in services" :key="service.name">
-          <ButtonComponent
-            :text="service.name"
-            bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-            hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-            text-color="text-fontBlack dark:text-fontWhite"
-          />
-        </div>
-      </ModalComponent>
+        </ModalComponent>
+        <ButtonComponent
+          :text="reactionSelected ? reactionSelected : 'Choose an action'"
+          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+          text-color="text-fontBlack dark:text-fontWhite"
+          :on-click="openModalReaction"
+        />
+        <ModalComponent
+          title="Choose a reaction"
+          :is-open="isModalReactionOpen"
+          @close="closeModalReaction"
+          @confirm="confirmModalReaction"
+        >
+          <div class="grid grid-cols-3 gap-4">
+            <div
+              v-for="(service, index) in services"
+              :key="index"
+              class="flex justify-center"
+            >
+              <DropdownComponent
+                v-if="service.reactions"
+                v-model="reactionSelected"
+                :label="service.name"
+                :options="service.reactions.map((reaction) => reaction.name)"
+              />
+            </div>
+          </div>
+        </ModalComponent>
+      </div>
+      <div class="flex justify-center">
+        <ButtonComponent
+          :class="actionSelected && reactionSelected ? '' : 'cursor-not-allowed opacity-50'"
+          text="Add Workflow"
+          :bg-color="actionSelected && reactionSelected ? 'bg-tertiary-500' : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'"
+          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+          text-color="text-fontBlack dark:text-fontWhite"
+        />
+      </div>
     </div>
     <div class="flex justify-center">
       <hr
