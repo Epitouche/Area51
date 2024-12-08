@@ -1,11 +1,14 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/google/go-github/v67/github"
 
 	"area51/repository"
 	"area51/schemas"
@@ -15,6 +18,8 @@ import (
 type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
+	FindReactionByName(name string) func(workflowId uint64)
 }
 
 type githubService struct {
@@ -57,14 +62,12 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
-	fmt.Printf("response body: %v\n", response.Body)
 	var resultToken schemas.GitHubResponseToken
 	err = json.NewDecoder(response.Body).Decode(&resultToken)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
 	response.Body.Close()
-	fmt.Printf("resultToken: %v\n", resultToken)
 	return resultToken, nil
 }
 
@@ -73,7 +76,6 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
-	fmt.Printf("accessToken: %s\n", accessToken)
 	request.Header.Set("Authorization", "Bearer "+accessToken)
 	client := &http.Client{}
 	response, err := client.Do(request)
@@ -87,4 +89,52 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 	}
 	response.Body.Close()
 	return result, nil
+}
+
+func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
+	switch name {
+	case string(schemas.GithubPullRequest):
+		return service.LookAtPullRequest
+	default:
+		return nil
+	}
+}
+
+func (service *githubService) FindReactionByName(name string) func(workflowId uint64) {
+	switch name {
+	case string(schemas.GithubReactionCreateNewRelease):
+		return service.CreateNewRelease
+	default:
+		return nil
+	}
+}
+
+var nbPR int
+
+func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
+	ctx := context.Background()
+	client := github.NewClient(nil)
+	// var options schemas.GithubPullRequestOptions
+	// err := json.NewDecoder(strings.NewReader(option)).Decode(&options)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+
+	pullRequests, _, err := client.PullRequests.List(ctx, "Karumapathetic", "https://github.com/Karumapathetic/testAREA", nil)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+	if nbPR != len(pullRequests) {
+		fmt.Println("Trigger reaction")
+		nbPR = len(pullRequests)
+	}
+	time.Sleep(30 * time.Second)
+}
+
+func (service *githubService) CreateNewRelease(workflowId uint64) {
+	time.Sleep(30 * time.Second)
+	fmt.Printf("CreateNewRelease\n")
 }

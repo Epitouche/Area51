@@ -1,13 +1,18 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
+	"time"
+
+	"github.com/gin-gonic/gin"
 
 	"area51/repository"
 	"area51/schemas"
 )
 
 type ActionService interface {
+	CreateAction(ctx *gin.Context) (string, error)
 	FindAll() []schemas.Action
 	SaveAllAction()
 	FindById(actionId uint64) schemas.Action
@@ -20,19 +25,49 @@ type ServiceAction interface {
 
 type actionService struct {
 	repository     repository.ActionRepository
+	userService    UserService
 	serviceService ServicesService
 }
 
 func NewActionService(
 	repository repository.ActionRepository,
 	serviceService ServicesService,
+	userService UserService,
 ) ActionService {
 	newActionService := &actionService{
 		repository:     repository,
 		serviceService: serviceService,
+		userService: userService,
 	}
 	newActionService.SaveAllAction()
 	return newActionService
+}
+
+func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
+	var result schemas.ActionResult
+	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	if err != nil {
+		return "", err
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	tokenString := authHeader[len("Bearer "):]
+
+	_, err = service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return "", err
+	}
+	serviceInfo := service.serviceService.FindByName(schemas.Github)
+
+	newAction := schemas.Action{
+		Name: result.Name,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Description: result.Description,
+		ServiceId: serviceInfo.Id,
+		Options: result.Options,
+	}
+	service.repository.Save(newAction)
+	return "Action Created successfully", nil
 }
 
 func (service *actionService) FindAll() []schemas.Action {
