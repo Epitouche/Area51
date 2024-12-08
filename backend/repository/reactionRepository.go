@@ -44,7 +44,7 @@ func (repo *reactionRepository) Save(action schemas.Reaction) {
 }
 
 func (repo *reactionRepository) Update(action schemas.Reaction) {
-	err := repo.db.Connection.Save(&action)
+	err := repo.db.Connection.Where(&schemas.Reaction{Id: action.Id}).Updates(&action)
 	if err.Error != nil {
 		panic(err.Error)
 	}
