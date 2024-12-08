@@ -64,6 +64,7 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 		UpdatedAt: time.Now(),
 		Description: result.Description,
 		ServiceId: serviceInfo.Id,
+		Options: result.Options,
 	}
 	service.repository.Save(newAction)
 	return "Action Created successfully", nil

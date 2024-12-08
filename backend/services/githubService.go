@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/google/go-github/v67/github"
@@ -110,28 +109,32 @@ func (service *githubService) FindReactionByName(name string) func(workflowId ui
 	}
 }
 
+var nbPR int
+
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
 	ctx := context.Background()
 	client := github.NewClient(nil)
-	var options schemas.GithubPullRequestOptions
-	err := json.NewDecoder(strings.NewReader(option)).Decode(&options)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// var options schemas.GithubPullRequestOptions
+	// err := json.NewDecoder(strings.NewReader(option)).Decode(&options)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
-	pullRequests, _, err := client.PullRequests.List(ctx, options.Owner, options.Repo, nil)
+	pullRequests, _, err := client.PullRequests.List(ctx, "Karumapathetic", "https://github.com/Karumapathetic/testAREA", nil)
 	if err != nil {
 		fmt.Println(err)
+		time.Sleep(30 * time.Second)
 		return
 	}
-	for _, pullRequest := range pullRequests {
-		if pullRequest.CreatedAt.After(options.CheckedAt) {
-			fmt.Println("Trigger the action")
-		}
+	if nbPR < len(pullRequests) {
+		fmt.Println("Trigger reaction")
+		nbPR = len(pullRequests)
 	}
+	time.Sleep(30 * time.Second)
 }
 
 func (service *githubService) CreateNewRelease(workflowId uint64) {
+	time.Sleep(30 * time.Second)
 	fmt.Printf("CreateNewRelease\n")
 }

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 
 	"area51/schemas"
@@ -39,6 +41,7 @@ func NewWorkflowRepository(db *gorm.DB) WorkflowRepository {
 func (repo *workflowRepository) Save(workflow schemas.Workflow) {
 	err := repo.db.Connection.Create(&workflow)
 	if err.Error != nil {
+		fmt.Printf("%+v", err.Error)
 		panic(err.Error)
 	}
 }
