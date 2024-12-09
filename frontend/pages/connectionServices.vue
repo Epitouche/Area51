@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ServerResponse, Service } from "~/src/types";
+import type { Service } from "~/src/types";
 
 const services = ref<Service[]>([]);
 </script>
