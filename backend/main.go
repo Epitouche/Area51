@@ -63,16 +63,17 @@ var (
 	actionRepository      repository.ActionRepository      = repository.NewActionRepository(databaseConnection)
 	reactionRepository    repository.ReactionRepository    = repository.NewReactionRepository(databaseConnection)
 	workflowsRepository   repository.WorkflowRepository    = repository.NewWorkflowRepository(databaseConnection)
-
+	reactionResponseDataRepository repository.ReactionResponseDataRepository = repository.NewReactionResponseDataRepository(databaseConnection)
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
-	githubService      services.GithubService      = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository)
+	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
+	githubService      services.GithubService      = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
 	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
 	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
 	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService  services.ReactionService     = services.NewReactionService(reactionRepository, servicesService)
-	workflowsService services.WorkflowService    = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService)
+	workflowsService services.WorkflowService    = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken)
 
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)

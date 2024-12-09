@@ -7,6 +7,7 @@ type WorkflowResult struct {
 	ActionOption   string `json:"action_option"   binding:"required"`
 	ActionId       uint64 `json:"action_id"`
 	ReactionOption string `json:"reaction_option" binding:"required"`
+	Name 		 string `json:"name"`
 	ReactionId     uint64 `json:"reaction_id"`
 }
 

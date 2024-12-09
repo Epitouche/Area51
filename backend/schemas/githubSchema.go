@@ -11,7 +11,7 @@ const (
 type GithubReaction string
 
 const (
-	GithubReactionCreateNewRelease GithubReaction = "create_new_release"
+	GithubReactionListComments GithubReaction = "list_comments"
 )
 
 type GitHubResponseToken struct {
@@ -31,6 +31,11 @@ type GithubUserInfo struct {
 	Email     string `json:"email"`
 }
 
+type GithubListCommentsResponse struct {
+	Body			string `json:"body"`
+	PullRequestUrl 	string `json:"pull_request_url"`
+	//! Needs more fields in the future
+}
 type GithubPullRequestOptions struct {
 	Repo	string	`json:"-"`
 	Owner	string	`json:"-"`

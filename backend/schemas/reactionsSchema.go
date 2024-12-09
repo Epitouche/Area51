@@ -1,10 +1,21 @@
 package schemas
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type ReactionJson struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+type ReactionResponseData struct {
+	Id 				uint64 			`json:"id,omitempty" gorm:"primary_key;auto_increment"`
+	WorkflowId 		uint64 			`json:"workflow_id"`
+	Workflow 		Workflow 		`json:"workflow,omitempty" gorm:"foreignkey:WorkflowId;references:Id"`
+	ApiResponse  	json.RawMessage `gorm:"type:jsonb" json:"apiResponse"`
+	CreatedAt		time.Time       `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 }
 
 type Reaction struct {
