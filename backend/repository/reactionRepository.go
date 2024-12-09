@@ -15,7 +15,7 @@ type ReactionRepository interface {
 	Delete(action schemas.Reaction)
 	FindAll() []schemas.Reaction
 	FindByName(actionName string) []schemas.Reaction
-	FindByServiceId(serviceId uint64) []schemas.Action
+	FindByServiceId(serviceId uint64) []schemas.Reaction
 	FindByServiceByName(serviceID uint64, actionName string) []schemas.Reaction
 	FindById(actionId uint64) schemas.Reaction
 }
@@ -44,7 +44,7 @@ func (repo *reactionRepository) Save(action schemas.Reaction) {
 }
 
 func (repo *reactionRepository) Update(action schemas.Reaction) {
-	err := repo.db.Connection.Save(&action)
+	err := repo.db.Connection.Where(&schemas.Reaction{Id: action.Id}).Updates(&action)
 	if err.Error != nil {
 		panic(err.Error)
 	}
@@ -75,14 +75,14 @@ func (repo *reactionRepository) FindByName(actionName string) []schemas.Reaction
 	return actions
 }
 
-func (repo *reactionRepository) FindByServiceId(serviceId uint64) []schemas.Action {
-	var actions []schemas.Action
-	err := repo.db.Connection.Where(&schemas.Action{ServiceId: serviceId}).
-		Find(&actions)
+func (repo *reactionRepository) FindByServiceId(serviceId uint64) []schemas.Reaction {
+	var reactions []schemas.Reaction
+	err := repo.db.Connection.Where(&schemas.Reaction{ServiceId: serviceId}).
+		Find(&reactions)
 	if err.Error != nil {
 		panic(fmt.Errorf("failed to find action by service id: %v", err.Error))
 	}
-	return actions
+	return reactions
 }
 
 func (repo *reactionRepository) FindByServiceByName(

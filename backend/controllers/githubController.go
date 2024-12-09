@@ -91,7 +91,9 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 			isAlreadyRegistered = true
 		}
 	}
-	actualUser = controller.userService.GetUserByEmail(userInfo.Email)
+	if userInfo.Email != "" {
+		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
+	}
 	if actualUser.Email != "" {
 		isAlreadyRegistered = true
 	}
@@ -112,9 +114,10 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		if err != nil {
 			return "", fmt.Errorf("unable to create user because %w", err)
 		}
-		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
+		actualUser = controller.userService.GetUserByUsername(userInfo.Login)
 		newGithubToken = schemas.ServiceToken{
 			Token:   githubTokenResponse.AccessToken,
+			RefreshToken: githubTokenResponse.RefreshToken,
 			Service: githubService,
 			UserId:  actualUser.Id,
 		}

@@ -45,6 +45,7 @@ func (service *reactionService) GetAllServicesByServiceId(
 		reactionJson = append(reactionJson, schemas.ReactionJson{
 			Name:        oneReaction.Name,
 			Description: oneReaction.Description,
+			ReactionId:  oneReaction.Id,
 		})
 	}
 	return reactionJson

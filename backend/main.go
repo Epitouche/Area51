@@ -8,6 +8,7 @@ import (
 	"area51/api"
 	"area51/controllers"
 	"area51/database"
+	"area51/middlewares"
 	"area51/repository"
 	"area51/services"
 )
@@ -36,6 +37,16 @@ func setupRouter() *gin.Engine {
 				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
 		}
+		workflow := apiRoutes.Group("/workflow", middlewares.Authorization())
+		{
+			workflow.POST("", workflowApi.CreateWorkflow)
+			workflow.GET("/reaction", workflowApi.GetMostRecentReaction)
+		}
+
+		action := apiRoutes.Group("/action", middlewares.Authorization())
+		{
+			action.POST("", actionApi.CreateAction)
+		}
 	}
 
 	return router
@@ -44,6 +55,7 @@ func setupRouter() *gin.Engine {
 var (
 	// Database connection
 	databaseConnection *gorm.DB = database.Connection()
+
 	// Repositories
 	userRepository        repository.UserRepository        = repository.NewUserRepository(databaseConnection)
 	githubRepository      repository.GithubRepository      = repository.NewGithubRepository(databaseConnection)
@@ -51,26 +63,33 @@ var (
 	servicesRepository    repository.ServiceRepository     = repository.NewServiceRepository(databaseConnection)
 	actionRepository      repository.ActionRepository      = repository.NewActionRepository(databaseConnection)
 	reactionRepository    repository.ReactionRepository    = repository.NewReactionRepository(databaseConnection)
+	workflowsRepository   repository.WorkflowRepository    = repository.NewWorkflowRepository(databaseConnection)
+	reactionResponseDataRepository repository.ReactionResponseDataRepository = repository.NewReactionResponseDataRepository(databaseConnection)
 	// Services
 	jwtService 		services.JWTService						= services.NewJWTService()
 	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
-	githubService      services.GithubService      = services.NewGithubService(githubRepository)
+	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
+	githubService      services.GithubService      = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
 	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
 	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
-	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService)
+	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService  services.ReactionService     = services.NewReactionService(reactionRepository, servicesService)
+	workflowsService services.WorkflowService    = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 
 	// Controllers
 	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
 	githubController	  controllers.GithubController      = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
-	// actionController      controllers.ActionController      = controllers.NewActionController(actionService)
+	actionController      controllers.ActionController      = controllers.NewActionController(actionService)
 	servicesController    controllers.ServicesController    = controllers.NewServiceController(servicesService, actionService, reactionService)
+	workflowController    controllers.WorkflowController    = controllers.NewWorkflowController(workflowsService)
 )
 
 var (
 userApi       *api.UserApi        = api.NewUserApi(userController)
 githubApi     *api.GithubApi      = api.NewGithubApi(githubController)
-servicesApi   *api.ServicesApi    = api.NewServicesApi(servicesController)
+servicesApi   *api.ServicesApi    = api.NewServicesApi(servicesController, workflowController)
+workflowApi   *api.WorkflowApi    = api.NewWorkflowApi(workflowController)
+actionApi     *api.ActionApi      = api.NewActionApi(actionController)
 )
 
 
