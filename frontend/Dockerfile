@@ -11,4 +11,6 @@ FROM build AS run
 
 COPY . .
 
+RUN npm run build
+
 CMD ["npx", "nuxt", "dev"]
