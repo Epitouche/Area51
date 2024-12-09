@@ -19,6 +19,9 @@ type ServiceReaction interface {
 type reactionService struct {
 	repository     repository.ReactionRepository
 	serviceService ServicesService
+	allReactions   []interface{}
+	allReactionsSchema []schemas.Reaction
+
 }
 
 func NewReactionService(
@@ -28,6 +31,14 @@ func NewReactionService(
 	newService := &reactionService{
 		repository:     repository,
 		serviceService: serviceService,
+		allReactionsSchema: []schemas.Reaction{
+			{
+				Name: "list_comments",
+				Description: "List all comments of a repository",
+				ServiceId: serviceService.FindByName(schemas.Github).Id,
+			},
+		},
+		allReactions: []interface{}{serviceService},
 	}
 	newService.SaveAllReaction()
 	return newService

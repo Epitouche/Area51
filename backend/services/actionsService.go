@@ -27,6 +27,8 @@ type actionService struct {
 	repository     repository.ActionRepository
 	userService    UserService
 	serviceService ServicesService
+	allActions    []interface{}
+	allActionsSchema []schemas.Action
 }
 
 func NewActionService(
@@ -38,6 +40,13 @@ func NewActionService(
 		repository:     repository,
 		serviceService: serviceService,
 		userService: userService,
+		allActionsSchema: []schemas.Action{
+			{
+				Name: "pull_request",
+				Description: "Creation or deletion of a pull request",
+				ServiceId: serviceService.FindByName(schemas.Github).Id,
+			},
+		},
 	}
 	newActionService.SaveAllAction()
 	return newActionService
