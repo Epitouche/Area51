@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -18,14 +16,7 @@ import (
 func setupRouter() *gin.Engine {
 
 	router := gin.Default()
-	router.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"*"},        // Allow all origins
-        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Allow all methods
-        AllowHeaders:     []string{"*"},        // Allow all headers
-        ExposeHeaders:    []string{"*"},        // Expose all headers
-        AllowCredentials: true,                 // Allow credentials (if needed)
-        MaxAge:           12 * time.Hour,       // Cache preflight requests for 12 hours
-    }))
+	router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
 
