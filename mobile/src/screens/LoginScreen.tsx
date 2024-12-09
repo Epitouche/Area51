@@ -14,6 +14,7 @@ import { loginApiCall, githubLogin } from '../service';
 import { LoginProps } from '../types';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { GithubLoginButton } from '../components';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -34,7 +35,7 @@ export default function LoginScreen({ navigation }: Props) {
   };
 
   const handleGithubLogin = async () => {
-    if (await githubLogin(setToken))
+    if (await githubLogin(serverIp, setToken))
       navigation.navigate('Dashboard');
   }
 
@@ -75,17 +76,7 @@ export default function LoginScreen({ navigation }: Props) {
       </Button>
       <View style={styles.line} />
       <View style={styles.socialButtonBox}>
-        <Button onPress={handleGithubLogin} style={styles.button}>
-          <View style={styles.buttonContent}>
-            <Image
-              source={{
-                uri: 'https://img.icons8.com/?size=100&id=12599&format=png',
-              }}
-              style={styles.icon}
-            />
-            <Text style={styles.text}>Github</Text>
-          </View>
-        </Button>
+        <GithubLoginButton handleGithubLogin={handleGithubLogin} />
         <Button style={styles.button}>
           <View style={styles.buttonContent}>
             <Image

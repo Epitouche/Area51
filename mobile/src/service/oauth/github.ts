@@ -1,8 +1,9 @@
 import { authorize } from 'react-native-app-auth';
 import { GITHUB_CLIENT_ID, GITHUB_SECRET } from '@env';
 import { saveToken } from '../token';
+import { sendGithubToken } from '../github';
 
-export const githubLogin = async (setToken: (token: string) => void) => {
+export const githubLogin = async (apiEndpoint: string ,setToken: (token: string) => void) => {
   try {
     const authState = await authorize({
       clientId: GITHUB_CLIENT_ID,
@@ -16,6 +17,7 @@ export const githubLogin = async (setToken: (token: string) => void) => {
     });
     setToken(authState.accessToken);
     saveToken('github', authState.accessToken);
+    sendGithubToken(apiEndpoint, authState.accessToken);
     return true;
   } catch (error) {
     console.error(error);

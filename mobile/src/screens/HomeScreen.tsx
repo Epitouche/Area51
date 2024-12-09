@@ -5,7 +5,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import LinearGradient from 'react-native-linear-gradient';
 import { AppContext } from '../context/AppContext';
 import { checkToken } from '../service/token';
-import { GITHUB_CLIENT_ID, GITHUB_SECRET } from '@env';
+import { getAboutJson } from '../service';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -14,7 +14,8 @@ type Props = {
 };
 
 export default function HomeScreen({ navigation }: Props) {
-  const { serverIp, setServerIp } = useContext(AppContext);
+  const { serverIp, setServerIp, setAboutJson } =
+    useContext(AppContext);
   const [isConnected, setIsConnected] = useState(false);
   const [isValidIp, setIsValidIp] = useState(false);
   const [token, setToken] = useState('');
@@ -39,8 +40,11 @@ export default function HomeScreen({ navigation }: Props) {
   useEffect(() => {
     checkToken('token', setToken);
     checkToken('github', setToken);
-    console.log('token:', token);
-  },  []);
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (isConnected) getAboutJson(serverIp, setAboutJson);
+  }, [isConnected, serverIp]);
 
   return (
     <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.wallpaper}>
