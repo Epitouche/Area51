@@ -18,6 +18,7 @@
         <li><a href="#project-organization">Organization</a></li>
         <li><a href="#contributing"></a>Contributing</li>
         <li><a href="#the-team"></a>Team</li>
+        <li><a href="#useful-links">Useful links</a></li>
     </ul>
 </details>
 
@@ -78,7 +79,7 @@ After cloning the repository go [here]() to follow the instruction to launch the
 ## Project Organization
 We use the following tools for project management and documentation (Learn more by clicking on Github Projects or Google Drive):
 - [GitHub Projects](./docs/Organization.md): For sprint planning, issue tracking, and task management. ([link](https://github.com/orgs/Epitouche/projects/2))
-- [Google Drive](./docs/Organization.md): Central repository for sprint notes, design documents, and the proof of concept (POC). ([link](https://drive.google.com/drive/folders/1Z0oZLYy2zBhhryj8Y1aOzdajEbtKuYpq))
+- [Google Drive](./docs/Organization.md): Central repository for sprint notes, design documents, and the proof of concept ([POC](./docs/POC.md)). ([link](https://drive.google.com/drive/folders/1Z0oZLYy2zBhhryj8Y1aOzdajEbtKuYpq))
 
 ## Contributing
 We welcome contributions to improve this project !\
@@ -91,3 +92,12 @@ The team is composed of a group of 5 french students:
 - [Dvaking](https://github.com/Dvaking)
 - [Babouche](https://github.com/Babouuchee)
 - [Karumapathetic](https://github.com/karumapathetic)
+
+## Useful links
+Here is the links to the markdown documentation for this project:
+- [Organization](./docs/Organization.md)
+- [Proof of Concepts (POC)](./docs/POC.md)
+- [Services](./docs/Services.md)
+- [Backend](./docs/Backend.md)
+- [Frontend](./docs/Frontend.md)
+- [Mobile](./docs/Mobile.md)
