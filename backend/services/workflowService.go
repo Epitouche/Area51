@@ -56,6 +56,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	if err != nil {
 		return "", err
 	}
+	fmt.Println(result)
 	authHeader := ctx.GetHeader("Authorization")
 	tokenString := authHeader[len("Bearer "):]
 
@@ -86,9 +87,12 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		UserId: result.UserId,
 		User: user,
 		IsActive: true,
+		ActionId: result.ActionId,
+		ReactionId: result.ReactionId,
 		Action: service.actionService.FindById(result.ActionId),
 		Reaction: service.reactionService.FindById(result.ReactionId),
 		Name: workflowName,
+
 	}
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
@@ -108,6 +112,7 @@ func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workf
 
 func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
+		fmt.Println("Start of WorkflowActionChannel")
         for service.ExistWorkflow(workflowStartingPoint.Id) {
             workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
             if err != nil {
@@ -121,7 +126,6 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
             }
             if workflow.IsActive {
                 action(channel, workflow.Action.Name, workflow.Id)
-				workflow.IsActive = false
             }
         }
         fmt.Println("Clear")
@@ -148,6 +152,7 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 				fmt.Println(result)
 			}
 		}
+
 	}(workflowStartingPoint, channel)
 }
 

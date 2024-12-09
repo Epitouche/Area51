@@ -8,6 +8,7 @@ import (
 type ServicesService interface {
 	FindAll() (allService []schemas.Service)
 	FindByName(serviceName schemas.ServiceName) schemas.Service
+	FindById(serviceId uint64) schemas.Service
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
 	FindReactionByName(name string) func (workflowId uint64, accessToken []schemas.ServiceToken)
 	GetServices() []interface{}
@@ -92,3 +93,6 @@ func (service *servicesService) FindReactionByName(name string) func (workflowId
 	return nil
 }
 
+func (service *servicesService) FindById(serviceId uint64) schemas.Service {
+	return service.repository.FindById(serviceId)
+}

@@ -3,12 +3,20 @@ package schemas
 import "time"
 
 type WorkflowResult struct {
-	UserId         uint64 `json:"-"`
+	UserId         uint64 `json:"user_id"`
 	ActionOption   string `json:"action_option"   binding:"required"`
-	ActionId       uint64 `json:"-"`
+	ActionId       uint64 `json:"action_id"`
 	ReactionOption string `json:"reaction_option" binding:"required"`
-	ReactionId     uint64 `json:"-"`
 	Name 		 string `json:"name"`
+	ReactionId     uint64 `json:"reaction_id"`
+}
+
+type WorkflowJson struct {
+	Name         string `json:"name"`
+	ActionId       uint64 `json:"action_id"`
+	ReactionId     uint64 `json:"reaction_id"`
+	IsActive		bool	`json:"is_active"`
+	CreatedAt		time.Time	`json:"created_at"`
 }
 
 type Workflow struct {

@@ -1,11 +1,15 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
+
+	"github.com/google/go-github/v67/github"
 
 	"area51/repository"
 	"area51/schemas"
@@ -20,20 +24,30 @@ type GithubService interface {
 }
 
 type githubService struct {
-	repository repository.GithubRepository
+	githubRepository repository.GithubRepository
+	tokenRepository repository.TokenRepository
 	userService UserService
+	workflowRepository repository.WorkflowRepository
+	reactionRepository repository.ReactionRepository
 	reactionResponseDataService ReactionResponseDataService
+	mutex sync.Mutex
 }
 
 func NewGithubService(
-	repository repository.GithubRepository,
-	userService UserService,
+	githubRepository repository.GithubRepository,
+	tokenRepository repository.TokenRepository,
+	workflowRepository repository.WorkflowRepository,
+	reactionRepository repository.ReactionRepository,
 	reactionResponseDataService ReactionResponseDataService,
+	userService UserService,
 	) GithubService {
 	return &githubService{
-		repository: repository,
-		userService: userService,
+		githubRepository: githubRepository,
+		tokenRepository: tokenRepository,
+		workflowRepository: workflowRepository,
+		reactionRepository: reactionRepository,
 		reactionResponseDataService: reactionResponseDataService,
+		userService: userService,
 	}
 }
 
@@ -114,13 +128,66 @@ func (service *githubService) FindReactionByName(name string) func(workflowId ui
 	}
 }
 
+var nbPR int
+type transportWithToken struct {
+	token string
+}
+
+func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", "Bearer " + t.token)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	return http.DefaultTransport.RoundTrip(req)
+}
+
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
-	time.Sleep(30 * time.Second)
-	fmt.Printf("LookAtPullRequest\n")
-	channel <- "LookAtPullRequest"
+	service.mutex.Lock()
+	ctx := context.Background()
+	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	token := service.tokenRepository.FindByUserId(workflow.UserId)
+	client := github.NewClient(&http.Client{
+		Transport: &transportWithToken{token: token[len(token) - 1].Token},
+	})
+	pullRequests, _, err := client.PullRequests.List(ctx, "JsuisSayker", "TestAreaGithub", nil)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+	if nbPR != len(pullRequests) {
+		nbPR = len(pullRequests)
+		reaction := service.reactionRepository.FindById(workflow.ReactionId)
+		reaction.Trigger = true
+		reaction.Id = workflow.ReactionId
+		service.reactionRepository.Update(reaction)
+	}
+	channel <- "Workflow done"
+	service.mutex.Unlock()
+	time.Sleep(5 * time.Second)
 }
 
 func (service *githubService) ListAllReviewComments(workflowId uint64, accessToken []schemas.ServiceToken) {
+	service.mutex.Lock()
+	var actualReaction schemas.Reaction
+	for _, token := range accessToken {
+		actualUser := service.userService.GetUserById(token.UserId)
+		if token.UserId == actualUser.Id {
+			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
+			for _, workflow := range actualWorkflow {
+				if workflow.Id == workflowId {
+					actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
+					if !actualReaction.Trigger {
+						return
+					}
+				}
+			}
+		}
+	}
+
 	request, err := http.NewRequest("GET", "https://api.github.com/repos/Epitouche/Area51/pulls/comments", nil)
 	if err != nil {
 		fmt.Println(err)
@@ -159,4 +226,10 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 		fmt.Println(err)
 	}
 	service.reactionResponseDataService.Save(savedResult)
+	workflow, _  := service.workflowRepository.FindByIds(workflowId)
+	actualReaction = service.reactionRepository.FindById(workflow.ReactionId)
+	actualReaction.Trigger = false
+	service.reactionRepository.Update(actualReaction)
+	service.mutex.Unlock()
+	time.Sleep(5 * time.Second)
 }

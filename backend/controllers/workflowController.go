@@ -3,11 +3,13 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 
+	"area51/schemas"
 	"area51/services"
 )
 
 type WorkflowController interface {
 	CreateWorkflow(ctx *gin.Context) (string, error)
+	AboutJson(ctx *gin.Context) (allWorkflows []schemas.WorkflowJson, err error)
 }
 
 type workflowController struct {
@@ -22,4 +24,18 @@ func NewWorkflowController(service services.WorkflowService) WorkflowController 
 
 func (controller *workflowController) CreateWorkflow(ctx *gin.Context) (string, error) {
 	return controller.service.CreateWorkflow(ctx)
+}
+
+func (controller *workflowController) AboutJson(ctx *gin.Context) (allWorkflowsJson []schemas.WorkflowJson, err error) {
+	allWorkflows := controller.service.FindAll()
+	for _, oneWorkflow := range allWorkflows {
+		allWorkflowsJson = append(allWorkflowsJson, schemas.WorkflowJson{
+			Name: oneWorkflow.Name,
+			ActionId: oneWorkflow.ActionId,
+			ReactionId: oneWorkflow.ReactionId,
+			IsActive: oneWorkflow.IsActive,
+			CreatedAt: oneWorkflow.CreatedAt,
+		})
+	}
+	return allWorkflowsJson, nil
 }
