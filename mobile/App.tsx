@@ -1,12 +1,12 @@
 import React from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
-import {AppRegistry} from 'react-native';
+import { AppRegistry, ScrollView } from 'react-native';
 import AppProvider from './src/context/AppContext';
 
 export default function App() {
   return (
     <AppProvider>
-      <AppNavigator />
+        <AppNavigator />
     </AppProvider>
   );
 }

@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Button } from 'react-native-paper';
-import LinearGradient from 'react-native-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { deleteToken, checkToken } from '../service/token';
+import { deleteToken, checkToken, getToken } from '../service/token';
+import {
+  DeconnectionPopUp,
+  DetailsModals,
+  GithubLoginButton,
+  ServicesModals,
+  WorkflowTable,
+} from '../components';
+import { getAboutJson, githubLogin } from '../service';
+import { AppContext } from '../context/AppContext';
+import { getWorkflows, sendWorkflows } from '../service/workflows';
+import { PullRequestComment } from '../types';
 
 type DashboardNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -14,9 +24,21 @@ type DashboardNavigationProp = StackNavigationProp<
 type Props = {
   navigation: DashboardNavigationProp;
 };
+
 export default function DashboardScreen({ navigation }: Props) {
   const [token, setToken] = useState('');
   const [github, setGithub] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [deconnectionModalVisible, setDeconnectionModalVisible] =
+    useState(false);
+  const [serviceName, setServiceName] = useState('');
+  const [isAction, setIsAction] = useState(true);
+  const [action, setAction] = useState<number>(1);
+  const [reaction, setReaction] = useState<number>(1);
+  const [detailsModals, setdetailsModals] = useState(false);
+  const [workflowsInfo, setWorkflowsInfo] = useState<PullRequestComment[]>();
+
+  const { serverIp, aboutjson, setAboutJson } = useContext(AppContext);
 
   const handleLogout = () => {
     deleteToken('token');
@@ -24,61 +46,160 @@ export default function DashboardScreen({ navigation }: Props) {
     navigation.navigate('Home');
   };
 
+  const handleGithubLogin = async () => {
+    if (github === 'Error: token not found')
+      await githubLogin(serverIp, setGithub);
+    else {
+      setServiceName('github');
+      setDeconnectionModalVisible(!deconnectionModalVisible);
+    }
+  };
+
+  useEffect(() => {
+    if (token !== 'Error: token not found')
+      getWorkflows(serverIp, token, setWorkflowsInfo);
+  }, [detailsModals]);
+
   useEffect(() => {
     checkToken('token', setToken);
     checkToken('github', setGithub);
-    if (token === 'Error: token not found' && github === 'Error: token not found') {
-      console.log('Token not found', token);
+    if (
+      token === 'Error: token not found' &&
+      github === 'Error: token not found'
+    ) {
       navigation.navigate('Home');
     }
   }, [token]);
 
+  const handleSendWorkflow = async () => {
+    await getToken('token', setToken);
+    if (token !== 'Error: token not found' && action && reaction) {
+      await sendWorkflows(token, serverIp, {
+        action_id: action,
+        reaction_id: reaction,
+      });
+      await getAboutJson(serverIp, setAboutJson);
+    }
+  };
+
   return (
-    <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.container}>
-      <Text style={styles.header}>Dashboard</Text>
-      <View style={styles.button}>
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.textContainer}>
+          <Text style={styles.header}>Dashboard</Text>
+        </View>
         <Button
           mode="contained"
-          onPress={handleLogout}
-          style={styles.loginButton}>
+          style={styles.loginButton}
+          onPress={handleLogout}>
           <Text style={styles.text}>Logout</Text>
         </Button>
+        <GithubLoginButton
+          handleGithubLogin={handleGithubLogin}
+          color="#B454FD"
+        />
+        <View style={styles.buttonContainer}>
+          <Button
+            mode="contained"
+            style={styles.button}
+            onPress={() => {
+              setIsAction(true);
+              setModalVisible(true);
+            }}>
+            <Text style={styles.text}>Add Action</Text>
+          </Button>
+          <Button
+            mode="contained"
+            style={styles.button}
+            onPress={() => {
+              setIsAction(false);
+              setModalVisible(true);
+            }}>
+            <Text style={styles.text}>Add Reaction</Text>
+          </Button>
+        </View>
+        <Button
+          mode="contained"
+          style={styles.button}
+          onPress={handleSendWorkflow}>
+          <Text style={styles.text}>Send Workflow</Text>
+        </Button>
+        {aboutjson && (
+          <View style={styles.tabContainer}>
+            <WorkflowTable
+              workflows={aboutjson.server.workflows}
+              setDetailsModalVisible={setdetailsModals}
+              detailsModalVisible={detailsModals}
+            />
+          </View>
+        )}
+        {workflowsInfo && (
+          <DetailsModals
+            modalVisible={detailsModals}
+            setModalVisible={setdetailsModals}
+            workflows={workflowsInfo}
+          />
+        )}
+        <ServicesModals
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          services={aboutjson}
+          isAction={isAction}
+          setActionOrReaction={isAction ? setAction : setReaction}
+        />
+        <DeconnectionPopUp
+          setModalVisible={setDeconnectionModalVisible}
+          modalVisible={deconnectionModalVisible}
+          service={serviceName}
+        />
       </View>
-    </LinearGradient>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '90%',
     alignItems: 'center',
-    padding: '3%',
-    gap: 40,
+    justifyContent: 'center',
+    gap: 20,
   },
   header: {
     fontSize: 32,
-    color: '#fff',
+    color: '#222831',
     fontWeight: 'bold',
     marginTop: '20%',
   },
   loginButton: {
-    width: '35%',
-    backgroundColor: '#F7FAFB',
+    width: 'auto',
+    backgroundColor: '#B454FD',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  button: {
-    width: '50%',
-    marginTop: 10,
-    marginBottom: 10,
-    backgroundColor: '#F7FAFB',
+  textContainer: {
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonContainer: {
+    marginTop: 20,
     flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 20,
+    width: '90%',
+  },
+  button: {
+    width: '48%',
+    backgroundColor: '#B454FD',
+    alignItems: 'center',
     justifyContent: 'center',
   },
   text: {
-    color: '#5C5C5C',
+    color: '#222831',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  tabContainer: {
+    width: '90%',
+    justifyContent: 'center',
   },
 });

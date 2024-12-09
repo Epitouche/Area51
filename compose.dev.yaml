@@ -38,9 +38,9 @@ services:
     command: sleep infinity
     environment:
       - NODE_ENV=development
-      - PORT=8082
+      - PORT=8081
     ports:
-      - "0.0.0.0:8082:8082"
+      - "0.0.0.0:8081:8081"
     networks:
       - app-networks-dev
 
