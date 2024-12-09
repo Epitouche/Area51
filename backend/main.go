@@ -16,7 +16,14 @@ import (
 func setupRouter() *gin.Engine {
 
 	router := gin.Default()
-	router.Use(cors.Default())
+	fullCors := cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+		ExposeHeaders:   []string{"Content-Length"},
+		AllowCredentials: true,
+	})
+	router.Use(fullCors)
 
 	router.GET("/about.json", servicesApi.AboutJson)
 
@@ -26,6 +33,7 @@ func setupRouter() *gin.Engine {
 		{
 			auth.POST("/login", userApi.Login)
 			auth.POST("/register", userApi.Register)
+			auth.GET("/access_token", userApi.GetAccessToken)
 		}
 
 		github := apiRoutes.Group("/github")

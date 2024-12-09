@@ -40,7 +40,7 @@ func (repo *tokenRepository) Save(token schemas.ServiceToken) {
 }
 
 func (repo *tokenRepository) Update(token schemas.ServiceToken) {
-	err := repo.db.Connection.Save(&token)
+	err := repo.db.Connection.Where(&schemas.ServiceToken{Id: token.Id}).Updates(&token)
 	if err.Error != nil {
 		panic(err.Error)
 	}

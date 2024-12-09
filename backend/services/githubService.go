@@ -172,7 +172,7 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 
 func (service *githubService) ListAllReviewComments(workflowId uint64, accessToken []schemas.ServiceToken) {
 	service.mutex.Lock()
-	var actualReaction schemas.Reaction
+	// var actualReaction schemas.Reaction
 	for _, token := range accessToken {
 		actualUser := service.userService.GetUserById(token.UserId)
 		if token.UserId == actualUser.Id {
@@ -226,8 +226,9 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 		fmt.Println(err)
 	}
 	service.reactionResponseDataService.Save(savedResult)
+	//! Need to update the trigger to false
 	workflow, _  := service.workflowRepository.FindByIds(workflowId)
-	actualReaction = service.reactionRepository.FindById(workflow.ReactionId)
+	actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
 	actualReaction.Trigger = false
 	service.reactionRepository.Update(actualReaction)
 	service.mutex.Unlock()
