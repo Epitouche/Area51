@@ -26,7 +26,7 @@ COPY ./ /app
 
 WORKDIR /app/android
 
-RUN ./gradlew clean :app:assembleRelease --stacktrace
+RUN ./gradlew :app:assembleRelease
 
 
 FROM alpine:latest AS build-apk
