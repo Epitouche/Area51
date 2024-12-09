@@ -8,6 +8,7 @@ import (
 type ReactionJson struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	ReactionId	uint64 `json:"reaction_id"`
 }
 
 type ReactionResponseData struct {
