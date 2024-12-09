@@ -8,8 +8,16 @@ import (
 type ServicesService interface {
 	FindAll() (allService []schemas.Service)
 	FindByName(serviceName schemas.ServiceName) schemas.Service
+	FindById(serviceId uint64) schemas.Service
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
+	FindReactionByName(name string) func (workflowId uint64, accessToken []schemas.ServiceToken)
 	GetServices() []interface{}
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
+}
+
+type ServiceInterface interface {
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
+	FindReactionByName(name string) func (workflowId uint64, accessToken []schemas.ServiceToken)
 }
 
 type servicesService struct {
@@ -65,4 +73,26 @@ func (service *servicesService) GetAllServices() (allServicesJson []schemas.Serv
 		})
 	}
 	return allServicesJson, nil
+}
+
+func (service *servicesService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
+	for _, oneService := range service.allServices {
+		if oneService.(ServiceInterface).FindActionByName(name) != nil {
+			return oneService.(ServiceInterface).FindActionByName(name)
+		}
+	}
+	return nil
+}
+
+func (service *servicesService) FindReactionByName(name string) func (workflowId uint64, accessToken []schemas.ServiceToken) {
+	for _, oneService := range service.allServices {
+		if oneService.(ServiceInterface).FindReactionByName(name) != nil {
+			return oneService.(ServiceInterface).FindReactionByName(name)
+		}
+	}
+	return nil
+}
+
+func (service *servicesService) FindById(serviceId uint64) schemas.Service {
+	return service.repository.FindById(serviceId)
 }
