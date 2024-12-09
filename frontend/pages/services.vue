@@ -64,14 +64,7 @@ const confirmModalReaction = () => {
 
 const services = ref<Service[]>([]);
 
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
-
-const authToken = getCookie("token");
+const token = useCookie("token");
 
 async function fetchServices() {
   try {
@@ -98,12 +91,12 @@ async function addWorkflow() {
       {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${token.value}`,
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
         },
         body: {
-          action: actionSelected.value.action_id,
-          reaction: reactionSelected.value.reaction_id,
+          action_id: actionSelected.value.action_id,
+          reaction_id: reactionSelected.value.reaction_id,
         },
       }
     );
@@ -114,6 +107,9 @@ async function addWorkflow() {
 }
 
 onMounted(fetchServices);
+onMounted(() => {
+  console.log("token", token.value);
+});
 </script>
 
 <template>
@@ -128,7 +124,7 @@ onMounted(fetchServices);
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      >
+      />
     </div>
     <div class="flex flex-col justify-center m-16 gap-10">
       <div class="flex justify-center gap-5">
@@ -161,7 +157,9 @@ onMounted(fetchServices);
           </div>
         </ModalComponent>
         <ButtonComponent
-          :text="reactionSelected.name ? reactionSelected.name : 'Choose a reaction'"
+          :text="
+            reactionSelected.name ? reactionSelected.name : 'Choose a reaction'
+          "
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
@@ -211,7 +209,7 @@ onMounted(fetchServices);
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      >
+      />
     </div>
     <div class="flex justify-start gap-5 m-20">
       <ButtonComponent
