@@ -16,7 +16,14 @@ import (
 func setupRouter() *gin.Engine {
 
 	router := gin.Default()
-	router.Use(cors.Default())
+	titi := cors.New(cors.Config{
+        AllowOrigins:     []string{"*"},
+        AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+        AllowHeaders:    []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+        ExposeHeaders:   []string{"Content-Length"},
+        AllowCredentials: true,
+    })
+    router.Use(titi)
 
 	router.GET("/about.json", servicesApi.AboutJson)
 

@@ -157,7 +157,7 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 
 	if isAlreadyRegistered {
 		token, _ := controller.userService.Login(newUser)
-		ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
+		ctx.SetCookie("token", token, 3600, "/", "localhost", false, false)
 		ctx.Redirect(http.StatusFound, "http://localhost:8082/services")
 		return token, nil
 	} else {
