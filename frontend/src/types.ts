@@ -1,3 +1,8 @@
+export type Workflow = {
+  body: string;
+  pull_request_url: string;
+}
+
 export interface Action {
   name: string;
   action_id: number;

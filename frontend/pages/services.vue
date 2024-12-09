@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import type { Action, Reaction, ServerResponse, Service } from "~/src/types";
+import type {
+  Action,
+  Reaction,
+  ServerResponse,
+  Service,
+  Workflow,
+} from "~/src/types";
 
 const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
 
@@ -82,6 +88,8 @@ async function fetchServices() {
   }
 }
 
+const lastWorkflow = ref<Workflow[]>([]);
+
 async function addWorkflow() {
   try {
     console.log("actionSelected", actionSelected.value.action_id);
@@ -91,7 +99,7 @@ async function addWorkflow() {
       {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token.value}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
         body: {
@@ -106,9 +114,29 @@ async function addWorkflow() {
   }
 }
 
-onMounted(fetchServices);
+async function getLastWorkflow() {
+  try {
+    const response = await $fetch<Workflow[]>(
+      "http://localhost:8080/api/workflow/reaction",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    lastWorkflow.value = response;
+    console.log(response);
+  } catch (error) {
+    console.error("Error getting last workflow:", error);
+  }
+}
+
 onMounted(() => {
+  fetchServices();
   console.log("token", token.value);
+  getLastWorkflow();
 });
 </script>
 
@@ -230,5 +258,16 @@ onMounted(() => {
       :columns="columns"
       :rows="rows"
     />
+    <div class="flex flex-col justify-center m-20 p-5 rounded-xl">
+      <p
+        v-for="workflow in lastWorkflow"
+        class="text-2xl font-bold text-fontBlack dark:text-fontWhite"
+      >
+        BODY: {{ workflow.body }}
+        <hr
+        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
+        >
+      </p>
+    </div>
   </div>
 </template>
