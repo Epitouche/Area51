@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ServerResponse, Service } from "~/src/types";
+import type { Action, Reaction, ServerResponse, Service } from "~/src/types";
 
 const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
 
@@ -33,8 +33,8 @@ const rows = [
   },
 ];
 
-const actionSelected = ref("");
-const reactionSelected = ref("");
+const actionSelected = ref(<Action>{});
+const reactionSelected = ref(<Reaction>{});
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 
@@ -80,6 +80,31 @@ async function fetchServices() {
   }
 }
 
+async function addWorkflow() {
+  try {
+    console.log("access_token", localStorage.getItem("access_token"));
+    console.log("actionSelected", actionSelected.value.action_id);
+    console.log("reactionSelected", reactionSelected.value.reaction_id);
+    const response = await $fetch<ServerResponse>(
+      "http://localhost:8080/api/workflow",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: {
+          action: actionSelected.value.action_id,
+          reaction: reactionSelected.value.reaction_id,
+        },
+      }
+    );
+    console.log(response);
+  } catch (error) {
+    console.error("Error adding workflow:", error);
+  }
+}
+
 onMounted(fetchServices);
 </script>
 
@@ -100,7 +125,7 @@ onMounted(fetchServices);
     <div class="flex flex-col justify-center m-16 gap-10">
       <div class="flex justify-center gap-5">
         <ButtonComponent
-          :text="actionSelected ? actionSelected : 'Choose an action'"
+          :text="actionSelected.name ? actionSelected.name : 'Choose an action'"
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
@@ -122,13 +147,13 @@ onMounted(fetchServices);
                 v-if="service.actions"
                 v-model="actionSelected"
                 :label="service.name"
-                :options="service.actions.map((action) => action.name)"
+                :options="service.actions.map((action) => action)"
               />
             </div>
           </div>
         </ModalComponent>
         <ButtonComponent
-          :text="reactionSelected ? reactionSelected : 'Choose a reaction'"
+          :text="reactionSelected.name ? reactionSelected.name : 'Choose a reaction'"
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
@@ -150,7 +175,7 @@ onMounted(fetchServices);
                 v-if="service.reactions"
                 v-model="reactionSelected"
                 :label="service.name"
-                :options="service.reactions.map((reaction) => reaction.name)"
+                :options="service.reactions.map((reaction) => reaction)"
               />
             </div>
           </div>
@@ -158,11 +183,20 @@ onMounted(fetchServices);
       </div>
       <div class="flex justify-center">
         <ButtonComponent
-          :class="actionSelected && reactionSelected ? '' : 'cursor-not-allowed opacity-50'"
+          :class="
+            actionSelected && reactionSelected
+              ? ''
+              : 'cursor-not-allowed opacity-50'
+          "
           text="Add Workflow"
-          :bg-color="actionSelected && reactionSelected ? 'bg-tertiary-500' : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'"
+          :bg-color="
+            actionSelected && reactionSelected
+              ? 'bg-tertiary-500'
+              : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'
+          "
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
+          :on-click="addWorkflow"
         />
       </div>
     </div>

@@ -1,10 +1,12 @@
 export interface Action {
   name: string;
+  action_id: number;
   description: string;
 }
 
 export interface Reaction {
   name: string;
+  reaction_id: number;
   description: string;
 }
 
