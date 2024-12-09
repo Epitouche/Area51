@@ -128,7 +128,7 @@ onMounted(fetchServices);
           </div>
         </ModalComponent>
         <ButtonComponent
-          :text="reactionSelected ? reactionSelected : 'Choose an action'"
+          :text="reactionSelected ? reactionSelected : 'Choose a reaction'"
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
