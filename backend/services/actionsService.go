@@ -82,6 +82,7 @@ func (service *actionService) GetAllServicesByServiceId(
 		actionJson = append(actionJson, schemas.ActionJson{
 			Name:        oneAction.Name,
 			Description: oneAction.Description,
+			ActionId:    oneAction.Id,
 		})
 	}
 	return actionJson
