@@ -15,6 +15,7 @@ type ReactionRepository interface {
 	Delete(action schemas.Reaction)
 	FindAll() []schemas.Reaction
 	FindByName(actionName string) []schemas.Reaction
+	FindAllByName(actionName string) []schemas.Reaction
 	FindByServiceId(serviceId uint64) []schemas.Reaction
 	FindByServiceByName(serviceID uint64, actionName string) []schemas.Reaction
 	FindById(actionId uint64) schemas.Reaction
@@ -105,4 +106,13 @@ func (repo *reactionRepository) FindById(actionId uint64) schemas.Reaction {
 		panic(err.Error)
 	}
 	return action
+}
+
+func (repo *reactionRepository) FindAllByName(actionName string) []schemas.Reaction {
+	var actions []schemas.Reaction
+	err := repo.db.Connection.Where(&schemas.Reaction{Name: actionName}).Find(&actions)
+	if err.Error != nil {
+		panic(err.Error)
+	}
+	return actions
 }

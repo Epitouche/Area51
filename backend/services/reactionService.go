@@ -64,13 +64,11 @@ func (service *reactionService) GetAllServicesByServiceId(
 
 func (service *reactionService) SaveAllReaction() {
 	for _, services := range service.serviceService.GetServices() {
-		if serviceReaction, ok := services.(ServiceReaction); ok {
-			reactions := serviceReaction.GetServiceReactionInfo()
-			for _, reaction := range reactions {
-				service.repository.Save(reaction)
+		for _, oneService := range services.(ServiceReaction).GetServiceReactionInfo() {
+			reactionByName := service.repository.FindAllByName(oneService.Name)
+			if len(reactionByName) == 0 {
+				service.repository.Save(oneService)
 			}
-		} else {
-			println("ServiceReaction interface not implemented")
 		}
 	}
 }
