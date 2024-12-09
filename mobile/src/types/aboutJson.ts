@@ -37,3 +37,8 @@ export type AboutJson = {
   client: Client;
   server: Server;
 };
+
+export type PullRequestComment = {
+  body: string;
+  pull_request_url: string;
+};

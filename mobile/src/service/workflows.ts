@@ -28,7 +28,7 @@ export async function sendWorkflows(
   }
 }
 
-export async function getWorkflows(apiEndpoint: string, token: string) {
+export async function getWorkflows(apiEndpoint: string, token: string, sendWorkflows: (workflow: any) => void) {
   try {
     const response = await fetch(
       `http://${apiEndpoint}:8080/api/workflow/reaction`,
@@ -42,7 +42,9 @@ export async function getWorkflows(apiEndpoint: string, token: string) {
     );
     const data = await response.json();
     if (response.status === 200) {
-      console.log('API get data success:', data);
+      console.log('API get workflows success');
+      if (data !== null)
+        sendWorkflows(data);
     }
     return true;
   } catch (error) {

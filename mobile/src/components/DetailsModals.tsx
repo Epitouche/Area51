@@ -1,26 +1,22 @@
-import { useEffect } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Button, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Modal } from 'react-native';
 import { getWorkflows } from '../service/workflows';
+import { PullRequestComment } from '../types';
 
 interface DetailsModalsProps {
   modalVisible: boolean;
   setModalVisible: (modalVisible: boolean) => void;
-  serverIp: string;
-  token: string;
+  workflows: PullRequestComment[];
 }
 
 export function DetailsModals({
   modalVisible,
   setModalVisible,
-  serverIp,
-  token,
+  workflows,
 }: DetailsModalsProps) {
-  useEffect(() => {
-    getWorkflows(serverIp, token);
-  }), [modalVisible];
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Modal
         animationType="fade"
         transparent={true}
@@ -33,20 +29,16 @@ export function DetailsModals({
             <Text style={styles.headerCell}>Name</Text>
             <Text style={styles.headerCell}>Is Active</Text>
           </View>
-          {/* {(
+          {workflows &&
+            workflows.map((workflows, index) => (
               <View key={index} style={styles.row}>
-                <Text style={styles.cell}>{workflow.name}</Text>
-                <Text style={styles.cell}>
-                  {workflow.is_active ? 'Yes' : 'No'}
-                </Text>
-                <Button>
-                  <Text>details</Text>
-                </Button>
+                <Text style={styles.cell}>{workflows.body}</Text>
+                <Text style={styles.cell}>{workflows.pull_request_url}</Text>
               </View>
-            ))} */}
+            ))}
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -56,6 +48,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+    backgroundColor: 'white',
   },
   headerRow: {
     flexDirection: 'row',
