@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  css: ['@/assets/css/main.css'],
+  css: ["@/assets/css/main.css"],
 
   postcss: {
     plugins: {
@@ -7,7 +7,7 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  modules: ["@nuxt/devtools", "@nuxt/eslint", "@nuxt/icon"],
 
-  modules: ['@nuxt/devtools', '@nuxt/eslint', '@nuxt/icon'],
-  compatibilityDate: '2024-12-03',
+  compatibilityDate: "2024-12-03",
 });
