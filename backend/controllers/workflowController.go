@@ -9,6 +9,7 @@ import (
 
 type WorkflowController interface {
 	CreateWorkflow(ctx *gin.Context) (string, error)
+	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
 	AboutJson(ctx *gin.Context) (allWorkflows []schemas.WorkflowJson, err error)
 }
 
@@ -38,4 +39,8 @@ func (controller *workflowController) AboutJson(ctx *gin.Context) (allWorkflowsJ
 		})
 	}
 	return allWorkflowsJson, nil
+}
+
+func (controller *workflowController) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
+	return controller.service.GetMostRecentReaction(ctx)
 }

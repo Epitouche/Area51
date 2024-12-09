@@ -17,6 +17,7 @@ type WorkflowService interface {
 	InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken)
 	ExistWorkflow(workflowId uint64) bool
 	GetWorkflowByName(name string) schemas.Workflow
+	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
 }
 
 type workflowService struct {
@@ -26,6 +27,7 @@ type workflowService struct {
 	reactionService ReactionService
 	servicesService ServicesService
 	serviceToken 	TokenService
+	reactionResponseDataService ReactionResponseDataService
 }
 
 func NewWorkflowService(
@@ -35,6 +37,7 @@ func NewWorkflowService(
 	reactionService ReactionService,
 	servicesService ServicesService,
 	serviceToken TokenService,
+	reactionResponseDataService ReactionResponseDataService,
 	) WorkflowService {
 	return &workflowService{
 		repository: repository,
@@ -43,6 +46,7 @@ func NewWorkflowService(
 		reactionService: reactionService,
 		servicesService: servicesService,
 		serviceToken: serviceToken,
+		reactionResponseDataService: reactionResponseDataService,
 	}
 }
 
@@ -163,4 +167,27 @@ func (service *workflowService) ExistWorkflow(workflowId uint64) bool {
 
 func (service *workflowService) GetWorkflowByName(name string) schemas.Workflow {
 	return service.repository.FindByWorkflowName(name)
+}
+
+func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
+	authHeader := ctx.GetHeader("Authorization")
+	tokenString := authHeader[len("Bearer "):]
+
+	user, err := service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return nil, err
+	}
+
+	workflows := service.repository.FindByUserId(user.Id)
+	var reactionResponse []schemas.GithubListCommentsResponse
+	for _, workflow := range workflows {
+		reactionResponseData := service.reactionResponseDataService.FindByWorkflowId(workflow.Id)
+		for _, data := range reactionResponseData {
+			err := json.Unmarshal(data.ApiResponse, &reactionResponse)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return reactionResponse, nil
 }

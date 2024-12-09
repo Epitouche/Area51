@@ -26,3 +26,12 @@ func (api *WorkflowApi) CreateWorkflow(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, token)
 }
+
+func (api *WorkflowApi) GetMostRecentReaction(ctx *gin.Context) {
+	reaction, err := api.workflowController.GetMostRecentReaction(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, reaction)
+}
