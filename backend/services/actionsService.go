@@ -46,6 +46,7 @@ func NewActionService(
 				ServiceId: serviceService.FindByName(schemas.Github).Id,
 			},
 		},
+		allActions: []interface{}{serviceService},
 	}
 	newActionService.SaveAllAction()
 	return newActionService
