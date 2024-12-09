@@ -63,12 +63,10 @@ func (service *reactionService) GetAllServicesByServiceId(
 }
 
 func (service *reactionService) SaveAllReaction() {
-	for _, services := range service.serviceService.GetServices() {
-		for _, oneService := range services.(ServiceReaction).GetServiceReactionInfo() {
-			reactionByName := service.repository.FindAllByName(oneService.Name)
-			if len(reactionByName) == 0 {
-				service.repository.Save(oneService)
-			}
+	for _, oneService := range service.allReactionsSchema {
+		serviceByName := service.repository.FindAllByName(oneService.Name)
+		if len(serviceByName) == 0 {
+			service.repository.Save(oneService)
 		}
 	}
 }

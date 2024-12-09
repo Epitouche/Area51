@@ -97,12 +97,10 @@ func (service *actionService) GetAllServicesByServiceId(
 }
 
 func (service *actionService) SaveAllAction() {
-	for _, services := range service.serviceService.GetServices() {
-		for _, oneService := range services.(ServiceAction).GetServiceActionInfo() {
-			actionByName := service.repository.FindAllByName(oneService.Name)
-			if len(actionByName) == 0 {
-				service.repository.Save(oneService)
-			}
+	for _, oneService := range service.allActionsSchema {
+		serviceByName := service.repository.FindAllByName(oneService.Name)
+		if len(serviceByName) == 0 {
+			service.repository.Save(oneService)
 		}
 	}
 }
