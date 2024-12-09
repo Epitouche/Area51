@@ -10,3 +10,7 @@ type RegisterCredentials struct {
 	Username string `form:"username"`
 	Password string `form:"password"`
 }
+
+type MobileToken struct {
+	Token string `json:"token"`
+}

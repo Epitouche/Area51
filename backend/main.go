@@ -36,6 +36,7 @@ func setupRouter() *gin.Engine {
 			github.GET("/callback", func(ctx *gin.Context) {
 				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
+			github.POST("/mobile/token", githubApi.StoreMobileToken)
 		}
 		workflow := apiRoutes.Group("/workflow", middlewares.Authorization())
 		{
