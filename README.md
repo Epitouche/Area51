@@ -1,12 +1,34 @@
-# SafeArea
-## AREA Automation Suite
+<div>
+    <h1 align="center">SafeArea</h1>
+</div>
+
+<details>
+    <summary>Table of Contents</summary>
+    <ul>
+        <li><a href="#about-the-project">About the Project</a></li>
+        <li><a href="#main-features">Main Features</a></li>
+        <li><a href="#project-architecture">Project Architecture</a></li>
+        <li><a href="#getting-started">Getting Started</a>
+            <ul>
+                <li><a href="#prerequisites">Prerequisites</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#usage">Usage</a></li>
+            </ul>
+        </li>
+        <li><a href="#project-organization">Organization</a></li>
+        <li><a href="#contributing"></a>Contributing</li>
+        <li><a href="#the-team"></a>Team</li>
+    </ul>
+</details>
+
+## About the project
 Welcome to the AREA Automation Suite, a powerful platform inspired by IFTTT and Zapier called the SafeAREA. This software allows users to automate workflows by connecting Actions and REActions through AREA configurations (Action-REAction-Automations). The suite includes the following components:
 
 - Application Server: Manages core functionalities like user management, services, and AREA handling.
 - Web Client: A browser-based interface to configure and monitor AREA workflows.
 - Mobile Client: A mobile app for configuring and monitoring AREA workflows on the go.
 
-## Features
+## Main features
 1. User Management:
     - Register, authenticate, and manage user accounts.
     - Confirm enrollment through email validation.
@@ -44,22 +66,26 @@ To set up the project, ensure you have the following tools installed:
 - Dev Container: VSCode extension to easily launch backend/frontend.
 
 ### Installation
-1. Clone the repository:
+Clone the repository:
 ```bash
 git clone git@github.com:Epitouche/Area51.git
 ```
 
+### Usage
+
+After cloning the repository go [here]() to follow the instruction to launch the backend or frontend in dev mode.
+
 ## Project Organization
-We use the following tools for project management and documentation:
-- GitHub Projects: For sprint planning, issue tracking, and task management. ([link](https://github.com/orgs/Epitouche/projects/2))
-- Google Drive: Central repository for sprint notes, design documents, and the proof of concept (POC). ([link](https://drive.google.com/drive/folders/1Z0oZLYy2zBhhryj8Y1aOzdajEbtKuYpq))
+We use the following tools for project management and documentation (Learn more by clicking on Github Projects or Google Drive):
+- [GitHub Projects](./docs/Organization.md): For sprint planning, issue tracking, and task management. ([link](https://github.com/orgs/Epitouche/projects/2))
+- [Google Drive](./docs/Organization.md): Central repository for sprint notes, design documents, and the proof of concept (POC). ([link](https://drive.google.com/drive/folders/1Z0oZLYy2zBhhryj8Y1aOzdajEbtKuYpq))
 
 ## Contributing
 We welcome contributions to improve this project !\
 You can contribute by creating an issue on this project and the members of the team will take care of the problem or upgrade.
 
 ## The team
-A group of 5 french students:
+The team is composed of a group of 5 french students:
 - [JsuisSayker](https://github.com/JsuisSayker)
 - [OxiiLB](https://github.com/OxiiLB)
 - [Dvaking](https://github.com/Dvaking)
