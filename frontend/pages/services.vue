@@ -64,6 +64,15 @@ const confirmModalReaction = () => {
 
 const services = ref<Service[]>([]);
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+const authToken = getCookie("token");
+
 async function fetchServices() {
   try {
     const response = await $fetch<ServerResponse>(
@@ -82,7 +91,6 @@ async function fetchServices() {
 
 async function addWorkflow() {
   try {
-    console.log("access_token", localStorage.getItem("access_token"));
     console.log("actionSelected", actionSelected.value.action_id);
     console.log("reactionSelected", reactionSelected.value.reaction_id);
     const response = await $fetch<ServerResponse>(
@@ -91,7 +99,7 @@ async function addWorkflow() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+          "Authorization": `Bearer ${authToken}`,
         },
         body: {
           action: actionSelected.value.action_id,
