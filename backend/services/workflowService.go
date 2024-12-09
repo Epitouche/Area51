@@ -60,7 +60,6 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(result)
 	authHeader := ctx.GetHeader("Authorization")
 	tokenString := authHeader[len("Bearer "):]
 
@@ -88,7 +87,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 
 	githubServiceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
 	newWorkflow := schemas.Workflow{
-		UserId: result.UserId,
+		UserId: user.Id,
 		User: user,
 		IsActive: true,
 		ActionId: result.ActionId,
