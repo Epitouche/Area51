@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -99,13 +98,11 @@ func (service *actionService) GetAllServicesByServiceId(
 
 func (service *actionService) SaveAllAction() {
 	for _, services := range service.serviceService.GetServices() {
-		if serviceAction, ok := services.(ServiceAction); ok {
-			actions := serviceAction.GetServiceActionInfo()
-			for _, action := range actions {
-				service.repository.Save(action)
+		for _, oneService := range services.(ServiceAction).GetServiceActionInfo() {
+			actionByName := service.repository.FindAllByName(oneService.Name)
+			if len(actionByName) == 0 {
+				service.repository.Save(oneService)
 			}
-		} else {
-			fmt.Println("Service is not ServiceAction")
 		}
 	}
 }
