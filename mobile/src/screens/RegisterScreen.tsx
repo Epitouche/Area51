@@ -14,7 +14,8 @@ import { registerApiCall } from '../service/auth';
 import { AppContext } from '../context/AppContext';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
-
+import { GithubLoginButton } from '../components';
+import { githubLogin } from '../service';
 
 type RegisterScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -33,14 +34,22 @@ export default function RegisterScreen({ navigation }: Props) {
     username: '',
   });
   const { serverIp } = useContext(AppContext);
+  const [token, setToken] = useState('');
 
   const handleLogin = async () => {
     setMessage('');
-    if (await registerApiCall({
-      apiEndpoint: serverIp,
-      formsRegister: forms,
-      setMessage,
-    }))
+    if (
+      await registerApiCall({
+        apiEndpoint: serverIp,
+        formsRegister: forms,
+        setMessage,
+      })
+    )
+      navigation.navigate('Dashboard');
+  };
+
+  const handleGithubLogin = async () => {
+    if (await githubLogin(serverIp, setToken))
       navigation.navigate('Dashboard');
   };
 
@@ -91,17 +100,7 @@ export default function RegisterScreen({ navigation }: Props) {
       </Button>
       <View style={styles.line} />
       <View style={styles.socialButtonBox}>
-        <Button style={styles.button}>
-          <View style={styles.buttonContent}>
-            <Image
-              source={{
-                uri: 'https://img.icons8.com/?size=100&id=12599&format=png',
-              }}
-              style={styles.icon}
-            />
-            <Text style={styles.text}>Github</Text>
-          </View>
-        </Button>
+        <GithubLoginButton handleGithubLogin={handleGithubLogin} />
         <Button style={styles.button}>
           <View style={styles.buttonContent}>
             <Image

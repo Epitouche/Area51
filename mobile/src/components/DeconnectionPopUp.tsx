@@ -1,0 +1,102 @@
+import React, { useState } from 'react';
+import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import { deleteToken } from '../service';
+import { Button } from 'react-native-paper';
+
+interface DeconnectionPopUpProps {
+  service: string;
+  modalVisible: boolean;
+  setModalVisible: (modalVisible: boolean) => void;
+}
+
+export function DeconnectionPopUp({
+  service,
+  modalVisible,
+  setModalVisible,
+}: DeconnectionPopUpProps) {
+  const handleDeconnection = () => {
+    deleteToken(service);
+    setModalVisible(false);
+  };
+  return (
+    <View style={styles.container}>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalText}>
+              Tu es déjà connecté à {service}, veux-tu te déconnecter ?
+            </Text>
+            <View style={styles.buttonContainer}>
+              <Button
+                style={styles.button}
+                onPress={handleDeconnection}>
+                <Text style={{ color: 'white', fontSize: 16 }}>
+                  Déconnecter
+                </Text>
+              </Button>
+              <Button
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}>
+                <Text style={{ color: 'black', fontSize: 16 }}>Annuler</Text>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: "70%",
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  button: {
+    width: 'auto',
+    backgroundColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+  },
+  cancelButton: {
+    width: 'auto',
+    backgroundColor: '#E8E9E9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+});

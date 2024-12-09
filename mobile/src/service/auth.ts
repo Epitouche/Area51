@@ -36,6 +36,7 @@ export async function loginApiCall({
       return false;
     }
     await saveToken('token', data.access_token);
+    console.log('API login success');
     return true;
   } catch (error) {
     setMessage('Error: Internal Server Error');
@@ -49,7 +50,6 @@ export async function registerApiCall({
   setMessage,
   formsRegister,
 }: AuthApiCall) {
-  console.log(apiEndpoint);
   try {
     if (!formsRegister) {
       throw new Error('No register form provided');
