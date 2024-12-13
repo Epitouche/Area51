@@ -61,8 +61,8 @@ export default function DashboardScreen({ navigation }: Props) {
   }, [detailsModals]);
 
   useEffect(() => {
-    checkToken('token', setToken);
-    checkToken('github', setGithub);
+    checkToken('token');
+    checkToken('github');
     if (
       token === 'Error: token not found' &&
       github === 'Error: token not found'

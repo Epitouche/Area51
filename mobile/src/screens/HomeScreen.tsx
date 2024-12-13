@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import LinearGradient from 'react-native-linear-gradient';
 import { AppContext } from '../context/AppContext';
 import { checkToken } from '../service/token';
 import { getAboutJson } from '../service';
+import { globalStyles } from '../styles/global_style';
+import { Button } from 'react-native-paper';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -14,93 +15,93 @@ type Props = {
 };
 
 export default function HomeScreen({ navigation }: Props) {
-  const { serverIp, setServerIp, setAboutJson } =
-    useContext(AppContext);
-  const [isConnected, setIsConnected] = useState(false);
+  const { serverIp, setServerIp, setAboutJson, isConnected } = useContext(AppContext);
   const [isValidIp, setIsValidIp] = useState(false);
-  const [token, setToken] = useState('');
+  const [ipTmp, setIpTmp] = useState('');
 
-  const validateIp = (ip: string) => {
-    const ipPattern =
-      /^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$/;
-    return ipPattern.test(ip);
-  };
+  // const validateIp = (ip: string) => {
+  //   const ipPattern =
+  //     /^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$/;
+  //   return ipPattern.test(ip);
+  // };
 
   const handleSave = () => {
-    if (validateIp(serverIp)) {
+    // if (validateIp(serverIp)) {
       setIsValidIp(true);
-      setIsConnected(true);
-    } else {
-      alert('Please enter a valid IP address');
-      setIsValidIp(false);
-      setIsConnected(false);
-    }
+      setServerIp(ipTmp);
+    // } else {
+    //   alert('Please enter a valid IP address');
+    //   setIsValidIp(false);
+    // }
   };
-
-  useEffect(() => {
-    checkToken('token', setToken);
-    checkToken('github', setToken);
-  }, [isConnected]);
 
   useEffect(() => {
     if (isConnected) getAboutJson(serverIp, setAboutJson);
   }, [isConnected, serverIp]);
 
   return (
-    <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.wallpaper}>
+    <View style={globalStyles.wallpaper}>
       <View style={styles.container}>
-        <Text>Home Screen</Text>
-        <View style={styles.inputBox}>
+        <Text style={globalStyles.titleWhite}>Area51</Text>
+        <View style={styles.textAlign}>
+          <View style={styles.textAlign}>
+            <Text style={globalStyles.subtitleWhite}>Automate</Text>
+          </View>
+          <View>
+            <Text style={globalStyles.subtitleWhite}>without limits</Text>
+          </View>
+        </View>
+        <View style={styles.ipBox}>
           <TextInput
-            style={styles.input}
+            style={[globalStyles.input, { width: '48%' }]}
             placeholder="Server IP"
             keyboardType="numeric"
-            value={serverIp}
-            onChangeText={setServerIp}
+            value={ipTmp}
+            onChangeText={setIpTmp}
           />
-          <Button title="Save" onPress={handleSave} />
+          <Button
+            onPress={handleSave}
+            style={[globalStyles.buttonColor, styles.button]}>
+            <Text style={globalStyles.textBlack}>Save</Text>
+          </Button>
         </View>
-        {isValidIp && isConnected && (
+        {isValidIp && (
           <View>
             <View style={styles.buttonBox}>
-              <View style={styles.button}>
-                <Button
-                  title="Connexion"
-                  onPress={() => navigation.navigate('Login')}
-                />
-              </View>
-              <View style={styles.button}>
-                <Button
-                  title="Inscription"
-                  onPress={() => navigation.navigate('Register')}
-                />
-              </View>
+              <Button
+                style={[globalStyles.buttonColor, styles.button]}
+                onPress={() => navigation.navigate('Login')}>
+                <Text style={globalStyles.textBlack}>Connexion</Text>
+              </Button>
+              <Button
+                style={[globalStyles.buttonColor, styles.button]}
+                onPress={() => navigation.navigate('Register')}>
+                <Text style={globalStyles.textBlack}>Inscription</Text>
+              </Button>
             </View>
-            {token !== 'Error: token not found' && (
+            {isConnected && (
               <View style={styles.button}>
                 <Button
-                  title="Dashboard"
-                  onPress={() => navigation.navigate('Dashboard')}
-                />
+                  style={[globalStyles.buttonColor, styles.button]}
+                  onPress={() => navigation.navigate('Dashboard')}>
+                  <Text style={globalStyles.textBlack}>Inscription</Text>
+                </Button>
               </View>
             )}
           </View>
         )}
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wallpaper: {
-    flex: 1,
-    alignItems: 'center',
-    padding: '3%',
-  },
   container: {
     width: '100%',
-    justifyContent: 'space-between',
+    padding: '5%',
+    paddingTop: '20%',
     alignItems: 'center',
+    gap: 20,
   },
   buttonBox: {
     width: '100%',
@@ -108,17 +109,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   button: {
-    width: '45%',
+    width: '40%',
   },
   inputBox: {
     width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row',
+    gap: 10,
   },
-  input: {
-    backgroundColor: 'white',
-    width: '80%',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+  ipBox: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20,
+  },
+  textAlign: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
