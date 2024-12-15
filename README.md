@@ -16,8 +16,8 @@
             </ul>
         </li>
         <li><a href="#project-organization">Organization</a></li>
-        <li><a href="#contributing"></a>Contributing</li>
-        <li><a href="#the-team"></a>Team</li>
+        <li><a href="#contributing">Contributing</a></li>
+        <li><a href="#the-team">Team</a></li>
         <li><a href="#useful-links">Useful links</a></li>
     </ul>
 </details>
@@ -52,11 +52,11 @@ This project is divided into three main components:
     - Built using Go, a simple but efficient language.
 2. Web Client:
     - User-friendly browser interface for managing workflows.
-    - Built using Nuxt.Js, a framework Vue.Js using Typescript.
+    - Built using Nuxt.Js, a framework Vue.Js using Typescript and Tailwind CSS for easier styled components.
 3. Mobile Client:
     - Mobile application for managing workflows on Android and iOS.
     - Provides push notifications and offline functionality.
-    - Built in React Native for simplicity of the mobile development.
+    - Built in React Native for the simplicity of the mobile development.
 
 ## Getting Started
 ### Prerequisites
