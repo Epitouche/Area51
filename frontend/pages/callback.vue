@@ -9,25 +9,24 @@ onMounted(async () => {
   const code = route.query.code;
   const state = route.query.state;
 
-  console.log("code", code);
-
   if (code && state) {
     try {
-      const { token } = await $fetch(
-        "http://localhost:8080/api/github/auth/callback",
-        {
-          method: "GET",
-          params: { code, state },
-        }
-      );
+      const response = await $fetch("/api/github", {
+        method: "GET",
+        params: { code, state },
+      });
 
-      if (token) {
-        const tokenCookie = useCookie("token");
-        tokenCookie.value = token;
+      console.log("API Response:", response);
+
+      const access_token = response?.access_token;
+
+      if (access_token) {
+        const tokenCookie = useCookie("access_token");
+        tokenCookie.value = access_token;
 
         router.push("/dashboard");
       } else {
-        console.error("Token not received");
+        console.error("Token not received in API response");
       }
     } catch (error) {
       console.error("Error during GitHub callback:", error);
@@ -36,6 +35,7 @@ onMounted(async () => {
     console.error("Required parameters (code or state) are missing in URL");
   }
 });
+
 </script>
 
 <template>

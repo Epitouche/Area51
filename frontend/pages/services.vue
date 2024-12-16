@@ -70,7 +70,7 @@ const confirmModalReaction = () => {
 
 const services = ref<Service[]>([]);
 
-const token = useCookie("token");
+const token = useCookie("access_token");
 
 async function fetchServices() {
   try {

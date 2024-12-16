@@ -16,14 +16,15 @@ import (
 func setupRouter() *gin.Engine {
 
 	router := gin.Default()
-	fullCors := cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-		AllowHeaders:    []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
-		ExposeHeaders:   []string{"Content-Length"},
-		AllowCredentials: true,
-	})
-	router.Use(fullCors)
+	// fullCors := cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"*"},
+	// 	AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+	// 	AllowHeaders:    []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+	// 	ExposeHeaders:   []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// })
+	// router.Use(fullCors)
+	router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
 
@@ -66,41 +67,40 @@ var (
 	databaseConnection *gorm.DB = database.Connection()
 
 	// Repositories
-	userRepository        repository.UserRepository        = repository.NewUserRepository(databaseConnection)
-	githubRepository      repository.GithubRepository      = repository.NewGithubRepository(databaseConnection)
-	tokenRepository       repository.TokenRepository       = repository.NewTokenRepository(databaseConnection)
-	servicesRepository    repository.ServiceRepository     = repository.NewServiceRepository(databaseConnection)
-	actionRepository      repository.ActionRepository      = repository.NewActionRepository(databaseConnection)
-	reactionRepository    repository.ReactionRepository    = repository.NewReactionRepository(databaseConnection)
-	workflowsRepository   repository.WorkflowRepository    = repository.NewWorkflowRepository(databaseConnection)
+	userRepository                 repository.UserRepository                 = repository.NewUserRepository(databaseConnection)
+	githubRepository               repository.GithubRepository               = repository.NewGithubRepository(databaseConnection)
+	tokenRepository                repository.TokenRepository                = repository.NewTokenRepository(databaseConnection)
+	servicesRepository             repository.ServiceRepository              = repository.NewServiceRepository(databaseConnection)
+	actionRepository               repository.ActionRepository               = repository.NewActionRepository(databaseConnection)
+	reactionRepository             repository.ReactionRepository             = repository.NewReactionRepository(databaseConnection)
+	workflowsRepository            repository.WorkflowRepository             = repository.NewWorkflowRepository(databaseConnection)
 	reactionResponseDataRepository repository.ReactionResponseDataRepository = repository.NewReactionResponseDataRepository(databaseConnection)
 	// Services
-	jwtService 		services.JWTService						= services.NewJWTService()
-	userService        services.UserService        = services.NewUserService(userRepository, jwtService)
+	jwtService                  services.JWTService                  = services.NewJWTService()
+	userService                 services.UserService                 = services.NewUserService(userRepository, jwtService)
 	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
-	githubService      services.GithubService      = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
-	serviceToken       services.TokenService       = services.NewTokenService(tokenRepository)
-	servicesService		services.ServicesService    = services.NewServicesService(servicesRepository, githubService)
-	actionService 	 services.ActionService       = services.NewActionService(actionRepository, servicesService, userService)
-	reactionService  services.ReactionService     = services.NewReactionService(reactionRepository, servicesService)
-	workflowsService services.WorkflowService    = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
+	githubService               services.GithubService               = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
+	serviceToken                services.TokenService                = services.NewTokenService(tokenRepository)
+	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService)
+	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
+	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
+	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 
 	// Controllers
-	userController        controllers.UserController        = controllers.NewUserController(userService, jwtService)
-	githubController	  controllers.GithubController      = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
-	actionController      controllers.ActionController      = controllers.NewActionController(actionService)
-	servicesController    controllers.ServicesController    = controllers.NewServiceController(servicesService, actionService, reactionService)
-	workflowController    controllers.WorkflowController    = controllers.NewWorkflowController(workflowsService)
+	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService)
+	githubController   controllers.GithubController   = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
+	actionController   controllers.ActionController   = controllers.NewActionController(actionService)
+	servicesController controllers.ServicesController = controllers.NewServiceController(servicesService, actionService, reactionService)
+	workflowController controllers.WorkflowController = controllers.NewWorkflowController(workflowsService)
 )
 
 var (
-userApi       *api.UserApi        = api.NewUserApi(userController)
-githubApi     *api.GithubApi      = api.NewGithubApi(githubController)
-servicesApi   *api.ServicesApi    = api.NewServicesApi(servicesController, workflowController)
-workflowApi   *api.WorkflowApi    = api.NewWorkflowApi(workflowController)
-actionApi     *api.ActionApi      = api.NewActionApi(actionController)
+	userApi     *api.UserApi     = api.NewUserApi(userController)
+	githubApi   *api.GithubApi   = api.NewGithubApi(githubController)
+	servicesApi *api.ServicesApi = api.NewServicesApi(servicesController, workflowController)
+	workflowApi *api.WorkflowApi = api.NewWorkflowApi(workflowController)
+	actionApi   *api.ActionApi   = api.NewActionApi(actionController)
 )
-
 
 // func initDependencies(dependencies *api.UserDependencies) {
 // 	// Database connection
@@ -121,7 +121,6 @@ func main() {
 	// schemas.Dependencies
 	// pass the reference of the dependencies struct to the initDependencies function
 	// initDependencies(&api.UserDependencies{})
-
 
 	router := setupRouter()
 
