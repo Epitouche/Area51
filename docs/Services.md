@@ -4,7 +4,7 @@ Welcome to the services documentation where you will find everything related to 
 
 ### Google Drive
 
-Link to the folder of the google drive related : [Services](https://drive.google.com/drive/folders/1DB13jL5AZHboqqtxwosQ_k78navmMrfO)
+Link to the folder of the google drive related : [*Services*](https://drive.google.com/drive/folders/1DB13jL5AZHboqqtxwosQ_k78navmMrfO)
 
 ## About
 
@@ -18,7 +18,7 @@ Our aim was to do a nice looking AREA website that would be very well suited for
 
 ## Our services
 
-In our search for all the services that we were going to implement, we stumbled upon a very useful github repository that listed all kinds of API. Very useful in our case. Here is the link to this github repository : [public-apis](https://github.com/public-apis/public-apis)
+In our search for all the services that we were going to implement, we stumbled upon a very useful github repository that listed all kinds of API. Very useful in our case. Here is the link to this github repository : [*public-apis*](https://github.com/public-apis/public-apis)
 
 For the project we had to choose exactly **7 services** to meet our needs, here is the name of the services :
 - Github
@@ -29,7 +29,7 @@ For the project we had to choose exactly **7 services** to meet our needs, here 
 - Microsoft
 - Spotify
 
-Here is the link to our list of services with example of Action REAction : [link](https://docs.google.com/document/d/1aUjQjh-PXsvZBNcvug_akDXQm7c0KKCYHwNhgjf-AfE/edit?tab=t.wssc4j3o35lb)
+Here is the link to our list of services with example of Action REAction : [*link*](https://docs.google.com/document/d/1aUjQjh-PXsvZBNcvug_akDXQm7c0KKCYHwNhgjf-AfE/edit?tab=t.wssc4j3o35lb)
 
 ## Action-REAction
 

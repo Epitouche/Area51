@@ -74,12 +74,12 @@ git clone git@github.com:Epitouche/Area51.git
 
 ### Usage
 
-After cloning the repository go [here]() to follow the instruction to launch the backend or frontend in dev mode.
+After cloning the repository go [*here*]() to follow the instruction to launch the backend or frontend in dev mode.
 
 ## Project Organization
 We use the following tools for project management and documentation (Learn more by clicking on Github Projects or Google Drive):
-- [GitHub Projects](./docs/Organization.md): For sprint planning, issue tracking, and task management. ([link](https://github.com/orgs/Epitouche/projects/2))
-- [Google Drive](./docs/Organization.md): Central repository for sprint notes, design documents, and the proof of concept ([POC](./docs/POC.md)). ([link](https://drive.google.com/drive/folders/1Z0oZLYy2zBhhryj8Y1aOzdajEbtKuYpq))
+- [*GitHub Projects*](./docs/Organization.md): For sprint planning, issue tracking, and task management. ([*link*](https://github.com/orgs/Epitouche/projects/2))
+- [*Google Drive*](./docs/Organization.md): Central repository for sprint notes, design documents, and the proof of concept ([*POC*](./docs/POC.md)). ([*link*](https://drive.google.com/drive/folders/1Z0oZLYy2zBhhryj8Y1aOzdajEbtKuYpq))
 
 ## Contributing
 We welcome contributions to improve this project !\
@@ -87,17 +87,17 @@ You can contribute by creating an issue on this project and the members of the t
 
 ## The team
 The team is composed of a group of 5 french students:
-- [JsuisSayker](https://github.com/JsuisSayker)
-- [OxiiLB](https://github.com/OxiiLB)
-- [Dvaking](https://github.com/Dvaking)
-- [Babouche](https://github.com/Babouuchee)
-- [Karumapathetic](https://github.com/karumapathetic)
+- [*JsuisSayker*](https://github.com/JsuisSayker)
+- [*OxiiLB*](https://github.com/OxiiLB)
+- [*Dvaking*](https://github.com/Dvaking)
+- [*Babouche*](https://github.com/Babouuchee)
+- [*Karumapathetic*](https://github.com/karumapathetic)
 
 ## Useful links
 Here is the links to the markdown documentation for this project:
-- [Organization](./docs/Organization.md)
-- [Proof of Concepts (POC)](./docs/POC.md)
-- [Services](./docs/Services.md)
-- [Backend](./docs/Backend.md)
-- [Frontend](./docs/Frontend.md)
-- [Mobile](./docs/Mobile.md)
+- [*Organization*](./docs/Organization.md)
+- [*Proof of Concepts (POC)*](./docs/POC.md)
+- [*Services*](./docs/Services.md)
+- [*Backend*](./docs/Backend.md)
+- [*Frontend*](./docs/Frontend.md)
+- [*Mobile*](./docs/Mobile.md)

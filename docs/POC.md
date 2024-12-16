@@ -7,8 +7,8 @@ During the initial phase of the project, we conducted multiple Proof of Concept 
 ### Google drive
 
 Links to the google drive related to this documentation : 
-- [POC](https://drive.google.com/drive/folders/1xGKR8Eacx1CSvbYXR9jYdJIzmAc6M4wr)
-- [Comparative study](https://drive.google.com/drive/folders/1-I0mpIKqtx0I88JygWed12zAsLaLGHwc)
+- [*POC*](https://drive.google.com/drive/folders/1xGKR8Eacx1CSvbYXR9jYdJIzmAc6M4wr)
+- [*Comparative study*](https://drive.google.com/drive/folders/1-I0mpIKqtx0I88JygWed12zAsLaLGHwc)
 
 ## Frontend
 
@@ -22,7 +22,7 @@ After evaluating both frameworks, Nuxt.js stands out as the optimal choice for o
 - Project scope alignment
 - Consistency and ecosystem
 
-See the comparative study [here](https://docs.google.com/document/d/1PLtFkfK3roHymzFe8zRKGv8vRpWPqcKsMHBeDatM_ZI/edit?tab=t.0).
+See the comparative study [*here*](https://docs.google.com/document/d/1PLtFkfK3roHymzFe8zRKGv8vRpWPqcKsMHBeDatM_ZI/edit?tab=t.0).
 
 ## Mobile
 
@@ -36,7 +36,7 @@ After evaluating both frameworks, React Native stands out as the optimal choice 
 - Performance and reliability
 - Easy to use
 
-See the comparative study [here](https://docs.google.com/document/d/1Ix20LQwPjIRT0HvM8ijExx4zL1ES1zBaSeFejPy6Rx8/edit?tab=t.0#heading=h.ksrahm5scavn).
+See the comparative study [*here*](https://docs.google.com/document/d/1Ix20LQwPjIRT0HvM8ijExx4zL1ES1zBaSeFejPy6Rx8/edit?tab=t.0#heading=h.ksrahm5scavn).
 
 ## Backend
 
@@ -50,4 +50,4 @@ After evaluating both frameworks, Gin stands out as the optimal choice for our b
 - Simplicity and ease of use
 - Compatibility with our existing infrastructure
 
-See the comparative study [here](https://docs.google.com/document/d/1uQX1gIL-EXO336DGwKnB81dUQUVCfMa2oppbZUmdLng/edit?tab=t.0#heading=h.xj36xwytubn0).
+See the comparative study [*here*](https://docs.google.com/document/d/1uQX1gIL-EXO336DGwKnB81dUQUVCfMa2oppbZUmdLng/edit?tab=t.0#heading=h.xj36xwytubn0).
