@@ -1,6 +1,55 @@
+<<<<<<< Updated upstream
 <script>
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
+=======
+<script setup>
+import { ref } from "vue";
+
+const username = ref("");
+const password = ref("");
+
+async function onSubmit() {
+  try {
+    const { access_token } = await $fetch("http://localhost:8080/api/auth/login", {
+      method: "POST",
+      body: {
+        username: username.value,
+        password: password.value,
+      },
+    });
+
+    if (access_token) {
+      const tokenCookie = useCookie("token");
+      tokenCookie.value = access_token;
+
+      navigateTo("/services");
+    } else {
+      console.error("Access token not received");
+    }
+  } catch (error) {
+    console.error("API response:", error.response?.data || error.message);
+  }
+}
+
+async function redirectToGitHubOAuth() {
+  try {
+    const { github_authentication_url } = await $fetch(
+      "http://localhost:8080/api/github/auth",
+      {
+        method: "GET",
+      }
+    );
+    if (github_authentication_url) {
+      window.location.href = github_authentication_url;
+    } else {
+      console.error("GitHub authentication URL not found");
+    }
+  } catch (error) {
+    console.error("Error fetching GitHub OAuth URL:", error);
+  }
+}
+>>>>>>> Stashed changes
 </script>
 
 <template>
