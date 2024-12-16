@@ -33,4 +33,17 @@ export const globalStyles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
   },
+  ipBox: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20,
+  },
+  container: {
+    width: '100%',
+    padding: '5%',
+    paddingTop: '20%',
+    alignItems: 'center',
+    gap: 20,
+  },
 });

@@ -36,7 +36,6 @@ export default function AppProvider({ children }: AppProviderProps) {
         setIsConnected(true);
     };
     checkConnection();
-    console.log("je suis là");
   }, [serverIp]);
 
   return (

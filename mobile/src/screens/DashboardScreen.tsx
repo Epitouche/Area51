@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Button } from 'react-native-paper';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
 import { deleteToken, checkToken, getToken } from '../service/token';
 import {
   DeconnectionPopUp,
@@ -16,16 +15,7 @@ import { AppContext } from '../context/AppContext';
 import { getWorkflows, sendWorkflows } from '../service/workflows';
 import { PullRequestComment } from '../types';
 
-type DashboardNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Dashboard'
->;
-
-type Props = {
-  navigation: DashboardNavigationProp;
-};
-
-export default function DashboardScreen({ navigation }: Props) {
+export default function DashboardScreen() {
   const [token, setToken] = useState('');
   const [github, setGithub] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,12 +28,13 @@ export default function DashboardScreen({ navigation }: Props) {
   const [detailsModals, setdetailsModals] = useState(false);
   const [workflowsInfo, setWorkflowsInfo] = useState<PullRequestComment[]>();
 
-  const { serverIp, aboutjson, setAboutJson } = useContext(AppContext);
+  const { serverIp, aboutjson, setAboutJson, setIsConnected } =
+    useContext(AppContext);
 
   const handleLogout = () => {
+    setIsConnected(false);
     deleteToken('token');
     deleteToken('github');
-    navigation.navigate('Home');
   };
 
   const handleGithubLogin = async () => {
@@ -67,7 +58,6 @@ export default function DashboardScreen({ navigation }: Props) {
       token === 'Error: token not found' &&
       github === 'Error: token not found'
     ) {
-      navigation.navigate('Home');
     }
   }, [token]);
 

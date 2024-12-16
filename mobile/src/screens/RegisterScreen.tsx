@@ -8,32 +8,21 @@ import {
   Image,
 } from 'react-native';
 import { Button } from 'react-native-paper';
-import LinearGradient from 'react-native-linear-gradient';
 import { RegisterProps } from '../types';
 import { registerApiCall } from '../service/auth';
 import { AppContext } from '../context/AppContext';
-import { RootStackParamList } from '../navigation/AppNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { GithubLoginButton } from '../components';
+import { GithubLoginButton, IpInput } from '../components';
 import { githubLogin } from '../service';
+import { globalStyles } from '../styles/global_style';
 
-type RegisterScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Register'
->;
-
-type Props = {
-  navigation: RegisterScreenNavigationProp;
-};
-
-export default function RegisterScreen({ navigation }: Props) {
+export default function RegisterScreen() {
   const [message, setMessage] = useState('');
   const [forms, setForms] = useState<RegisterProps>({
     email: '',
     password: '',
     username: '',
   });
-  const { serverIp } = useContext(AppContext);
+  const { serverIp, setIsConnected } = useContext(AppContext);
   const [token, setToken] = useState('');
 
   const handleLogin = async () => {
@@ -45,80 +34,80 @@ export default function RegisterScreen({ navigation }: Props) {
         setMessage,
       })
     )
-      navigation.navigate('Dashboard');
+      setIsConnected(true);
   };
 
   const handleGithubLogin = async () => {
-    if (await githubLogin(serverIp, setToken))
-      navigation.navigate('Dashboard');
+    if (await githubLogin(serverIp, setToken)) setIsConnected(true);
   };
 
   return (
-    <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.container}>
-      <Text style={styles.header}>REGISTER IN</Text>
-      <View style={styles.inputBox}>
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          keyboardType="default"
-          autoCapitalize="none"
-          value={forms.username}
-          onChangeText={text => setForms({ ...forms, username: text })}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={forms.email}
-          onChangeText={text => setForms({ ...forms, email: text })}
-        />
-        <TextInput
-          style={styles.input}
-          secureTextEntry
-          placeholder="Password"
-          value={forms.password}
-          onChangeText={text => setForms({ ...forms, password: text })}
-          autoCapitalize="none"
-        />
+    <View style={globalStyles.wallpaper}>
+      <View style={globalStyles.container}>
+        <Text style={styles.header}>REGISTER IN</Text>
+        {serverIp === '' ? (
+          <IpInput />
+        ) : (
+          <>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                keyboardType="default"
+                autoCapitalize="none"
+                value={forms.username}
+                onChangeText={text => setForms({ ...forms, username: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={forms.email}
+                onChangeText={text => setForms({ ...forms, email: text })}
+              />
+              <TextInput
+                style={styles.input}
+                secureTextEntry
+                placeholder="Password"
+                value={forms.password}
+                onChangeText={text => setForms({ ...forms, password: text })}
+                autoCapitalize="none"
+              />
+            </View>
+            {message !== '' && (
+              <Text style={styles.errorMessage}>{message}</Text>
+            )}
+            <Button
+              mode="contained"
+              style={styles.loginButton}
+              onPress={handleLogin}>
+              <Text style={styles.text}>Login</Text>
+            </Button>
+            <View style={styles.line} />
+            <View style={styles.socialButtonBox}>
+              <GithubLoginButton handleGithubLogin={handleGithubLogin} />
+              <Button style={styles.button}>
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={{
+                      uri: 'https://img.icons8.com/color/48/google-logo.png',
+                    }}
+                    style={styles.icon}
+                  />
+                  <Text style={styles.text}>Google</Text>
+                </View>
+              </Button>
+            </View>
+            <View style={styles.forgotPasswordBox}>
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
-      {message !== '' && <Text style={styles.errorMessage}>{message}</Text>}
-      {/* <View style={styles.checkboxContainer}>
-        <TouchableOpacity
-          onPress={() => setRememberMe(!rememberMe)}
-          style={styles.checkbox}>
-          {rememberMe ? (
-            <Text style={styles.checkboxText}>✔</Text>
-          ) : (
-            <Text style={styles.checkboxText}>☐</Text>
-          )}
-        </TouchableOpacity>
-        <Text style={styles.rememberMeText}>Remember me</Text>
-      </View> */}
-      <Button mode="contained" style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.text}>Login</Text>
-      </Button>
-      <View style={styles.line} />
-      <View style={styles.socialButtonBox}>
-        <GithubLoginButton handleGithubLogin={handleGithubLogin} />
-        <Button style={styles.button}>
-          <View style={styles.buttonContent}>
-            <Image
-              source={{
-                uri: 'https://img.icons8.com/color/48/google-logo.png',
-              }}
-              style={styles.icon}
-            />
-            <Text style={styles.text}>Google</Text>
-          </View>
-        </Button>
-      </View>
-      <View style={styles.forgotPasswordBox}>
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>Forgot Password?</Text>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
+    </View>
   );
 }
 
