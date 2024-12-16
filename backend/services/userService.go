@@ -52,7 +52,7 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 	}
 
 	if user.Username == newUser.Username {
-		if newUser.TokenId != 0 {
+		if newUser.TokenId != nil && *newUser.TokenId != 0 {
 			return service.serviceJWT.GenerateJWTToken(
 				strconv.FormatUint(user.Id, 10),
 				user.Username,

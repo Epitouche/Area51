@@ -14,6 +14,7 @@ type TokenService interface {
 	FindAll() ([]schemas.ServiceToken, error)
 	GetTokenById(tokenId uint64) (schemas.ServiceToken, error)
 	GetTokenByUserId(userId uint64) ([]schemas.ServiceToken, error)
+	GetTokenByUserIdAndServiceId(userId uint64, serviceId uint64) (schemas.ServiceToken, error)
 }
 
 type tokenService struct {
@@ -68,4 +69,11 @@ func (service *tokenService) GetTokenById(tokenId uint64) (schemas.ServiceToken,
 
 func (service *tokenService) GetTokenByUserId(userId uint64) ([]schemas.ServiceToken, error) {
 	return service.repository.FindByUserId(userId), nil
+}
+
+func (service *tokenService) GetTokenByUserIdAndServiceId(
+	userId uint64,
+	serviceId uint64,
+) (schemas.ServiceToken, error) {
+	return service.repository.FindByUserIdAndServiceId(userId, serviceId), nil
 }
