@@ -1,0 +1,39 @@
+name: format frontend
+
+on:
+  push:
+    branches:
+      - dev
+      - frontend
+  pull_request:
+    branches:
+      - dev
+      - frontend
+
+defaults:
+  run:
+    working-directory: ./frontend
+
+permissions:
+    contents: write
+
+jobs:
+    run-frontend-formatter:
+        name: Run Frontend Formatter
+        runs-on: self-hosted
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+              with:
+                    fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20'
+
+            - name: Install Dependencies
+              run: npm ci
+
+            - name: Run Formatter
+              run: npx prettier --write .

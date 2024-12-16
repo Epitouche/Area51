@@ -1,8 +1,3 @@
-<<<<<<< Updated upstream
-<script>
-import Button from "@/components/Button.vue";
-import Input from "@/components/Input.vue";
-=======
 <script setup>
 import { ref } from "vue";
 
@@ -49,7 +44,7 @@ async function redirectToGitHubOAuth() {
     console.error("Error fetching GitHub OAuth URL:", error);
   }
 }
->>>>>>> Stashed changes
+
 </script>
 
 <template>
@@ -60,60 +55,67 @@ async function redirectToGitHubOAuth() {
       class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
     >
       <h2 class="text-2xl font-bold text-center">LOG IN</h2>
-      <form class="space-y-6">
+      <form class="space-y-6" @submit.prevent="onSubmit">
         <div>
-          <Input
-            id="email"
-            type="email"
-            label="Email"
+          <InputComponent
+            id="username"
+            v-model="username"
+            type="text"
+            label="Username"
             icon="fas fa-user"
           />
         </div>
         <div>
-          <Input
+          <InputComponent
             id="password"
+            v-model="password"
             type="password"
             label="Password"
             icon="fas fa-lock"
           />
         </div>
+        <!-- <div class="flex items-center gap-2">
+          <InputComponent
+            id="remember"
+            v-model="rememberMe"
+            type="checkbox"
+            class="w-4 h-4 text-accent-500 border-primaryWhite-300 rounded focus:ring-accent-500"
+            label=""
+          />
+          <label for="remember" class="ml-2 text-sm">Remember me</label>
+        </div> -->
+        <div class="flex justify-center">
+          <ButtonComponent
+            text="Log In"
+            bg-color="bg-primaryWhite-500"
+            hover-color="hover:bg-secondaryWhite-500"
+            text-color="text-fontBlack"
+          />
+        </div>
       </form>
-      <div class="flex items-center">
-        <input
-          id="remember"
-          type="checkbox"
-          class="w-4 h-4 text-accent-500 border-primaryWhite-300 rounded focus:ring-accent-500"
-        />
-        <label for="remember" class="ml-2 text-sm">Remember me</label>
-      </div>
-      <div class="flex justify-center">
-        <Button
-          text="Log In"
-          bgColor="bg-primaryWhite-500"
-          hoverColor="hover:bg-secondaryWhite-500"
-          textColor="text-fontBlack"
-        />
-      </div>
-      <hr class="border-primaryWhite-400" />
+      <hr class="border-primaryWhite-400">
       <div class="flex justify-around space-x-4">
-        <Button
+        <ButtonComponent
           text="Github"
           class="w-full"
-          bgColor="bg-primaryWhite-500"
-          hoverColor="hover:bg-secondaryWhite-500"
-          textColor="text-fontBlack"
+          bg-color="bg-primaryWhite-500"
+          hover-color="hover:bg-secondaryWhite-500"
+          text-color="text-fontBlack"
+          :on-click="redirectToGitHubOAuth"
         />
-        <Button
+        <ButtonComponent
           text="Google"
           class="w-full"
-          bgColor="bg-primaryWhite-500"
-          hoverColor="hover:bg-secondaryWhite-500"
-          textColor="text-fontBlack"
+          bg-color="bg-primaryWhite-500"
+          hover-color="hover:bg-secondaryWhite-500"
+          text-color="text-fontBlack"
         />
       </div>
       <div class="flex justify-around">
         <p class="text-center text-sm">
-          <a href="#" class="text-fontWhite underline">Create an account</a>
+          <NuxtLink to="/register" class="text-fontWhite underline">
+            Create an account
+          </NuxtLink>
         </p>
         <p class="text-center text-sm">
           <a href="#" class="text-fontWhite underline">Forgot password?</a>

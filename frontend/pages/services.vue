@@ -135,7 +135,7 @@ async function getLastWorkflow() {
 
 onMounted(() => {
   fetchServices();
-  console.log("token", token);
+  console.log("token", token.value);
   getLastWorkflow();
 });
 </script>
