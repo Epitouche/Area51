@@ -26,7 +26,7 @@ func NewServicesApi(serviceController controllers.ServicesController, workflowCo
 func (api *ServicesApi) AboutJson(ctx *gin.Context) {
 	allServices, serviceErr := api.serviceController.AboutJson(ctx)
 	allWorkflows, workflowErr := api.workflowController.AboutJson(ctx)
-	
+
 	if serviceErr != nil {
 		ctx.JSON(http.StatusInternalServerError, &schemas.BasicResponse{
 			Message: serviceErr.Error(),
