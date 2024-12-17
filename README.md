@@ -52,7 +52,7 @@ This project is divided into three main components:
     - Built using Go, a simple but efficient language.
 2. Web Client:
     - User-friendly browser interface for managing workflows.
-    - Built using Nuxt.Js, a framework Vue.Js using Typescript and Tailwind CSS for easier styled components.
+    - Built using Nuxt.Js, a framework Vue.Js using Javascript and Tailwind CSS for easier styled components.
 3. Mobile Client:
     - Mobile application for managing workflows on Android and iOS.
     - Provides push notifications and offline functionality.
