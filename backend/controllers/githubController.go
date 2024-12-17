@@ -50,7 +50,8 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 		return "", err
 	}
 
-	redirectUri := appAdressHost + appPort + path
+	ctx.SetCookie("latestCSRFToken", state, 3600, "/", "localhost", false, true)
+	redirectUri := appAdressHost + appPort + "/callback"
 	authUrl := "https://github.com/login/oauth/authorize" +
 		"?client_id=" + clientId +
 		"&response_type=code" +
