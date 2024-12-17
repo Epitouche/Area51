@@ -30,6 +30,7 @@ func setupRouter() *gin.Engine {
 
 	apiRoutes := router.Group("/api")
 	{
+
 		auth := apiRoutes.Group("/auth")
 		{
 			auth.POST("/login", userApi.Login)
