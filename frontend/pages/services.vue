@@ -4,43 +4,21 @@ import type {
   Reaction,
   ServerResponse,
   Service,
+  WorkflowResponse,
   Workflow,
 } from "~/src/types";
 
-const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
-
-const rows = [
-  {
-    id: 1,
-    name: "Service",
-    action: "On push",
-    reaction: "Send message",
-    status: "Active",
-    memberId: 1,
-    date: "12/02/2024",
-  },
-  {
-    id: 2,
-    name: "Service 2",
-    action: "On pull request",
-    reaction: "Play Music",
-    status: "Inactive",
-    memberId: 2,
-    date: "10/25/2024",
-  },
-  {
-    id: 3,
-    name: "Service 3",
-    action: "On push",
-    reaction: "Fill mail",
-    status: "Active",
-    memberId: 3,
-    date: "10/14/2024",
-  },
+const columns = [
+  "Name",
+  "Action ID",
+  "Reaction ID",
+  "Activity",
+  "Creation Date",
 ];
 
 const actionSelected = ref(<Action>{});
 const reactionSelected = ref(<Reaction>{});
+const workflowsInList = ref<Workflow[]>([]);
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 
@@ -83,12 +61,21 @@ async function fetchServices() {
     response.server.services.forEach((service: Service) => {
       services.value.push(service);
     });
+    console.log("services", services.value);
+    workflowsInList.value = response.server.workflows;
+    workflowsInList.value.forEach((workflow) => {
+      const dateString = workflow.created_at;
+      const date = new Date(dateString);
+
+      const formattedDate = date.toLocaleDateString("en-GB");
+      workflow.created_at = formattedDate;
+    });
   } catch (error) {
     console.error("Error fetching services:", error);
   }
 }
 
-const lastWorkflow = ref<Workflow[]>([]);
+const lastWorkflow = ref<WorkflowResponse[]>([]);
 
 async function addWorkflow() {
   try {
@@ -97,7 +84,7 @@ async function addWorkflow() {
       {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token.value}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
         body: {
@@ -106,6 +93,8 @@ async function addWorkflow() {
         },
       }
     );
+    // Update the list of workflows
+    fetchServices();
   } catch (error) {
     console.error("Error adding workflow:", error);
   }
@@ -113,12 +102,12 @@ async function addWorkflow() {
 
 async function getLastWorkflow() {
   try {
-    const response = await $fetch<Workflow[]>(
+    const response = await $fetch<WorkflowResponse[]>(
       "http://localhost:8080/api/workflow/reaction",
       {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token.value}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -249,9 +238,9 @@ onMounted(() => {
       />
     </div>
     <ListTableComponent
-      v-show="columns && rows"
+      v-show="columns && workflowsInList"
       :columns="columns"
-      :rows="rows"
+      :rows="workflowsInList"
     />
     <div class="flex flex-col justify-center m-20 p-5 rounded-xl">
       <p
