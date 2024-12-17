@@ -1,40 +1,28 @@
 export default defineEventHandler(async (event) => {
-  const { code, state } = getQuery(event);
-
-  if (!code || !state) {
+  const params = await readBody(event);
+  if (!params.code || !params.state) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Missing required parameters: code or state",
+      message: "Missing parameters: code, or service",
     });
   }
 
   try {
-    const response = await $fetch("http://localhost:8080/api/github/callback", {
-      params: {
-        code: code,
-        state: state,
+    const response = await $fetch(
+      `http://server:8080/api/github/callback`,
+      {
+        method: "POST",
+        body: {
+          code: params.code,
+          state: params.state,
+        },
+        headers: {
+          Authorization: params.authorization ? `${params.authorization}` : "",
+        },
       },
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "GET",
-    });
-
-    if (!response) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: "Access token not found in response",
-      });
-    }
-
-    console.log("Response from callback:", response);
+    );
     return response;
   } catch (error) {
-    console.error("Error during GitHub callback:", error);
-
-    throw createError({
-      statusCode: 502,
-      statusMessage: "Failed to fetch from GitHub callback endpoint",
-    });
+    console.error(error);
   }
 });

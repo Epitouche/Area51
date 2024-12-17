@@ -99,8 +99,6 @@ const lastWorkflow = ref<Workflow[]>([]);
 
 async function addWorkflow() {
   try {
-    console.log("actionSelected", actionSelected.value.action_id);
-    console.log("reactionSelected", reactionSelected.value.reaction_id);
     const response = await $fetch<ServerResponse>(
       "http://localhost:8080/api/workflow",
       {
@@ -115,7 +113,6 @@ async function addWorkflow() {
         },
       }
     );
-    console.log(response);
   } catch (error) {
     console.error("Error adding workflow:", error);
   }
@@ -134,7 +131,6 @@ async function getLastWorkflow() {
       }
     );
     lastWorkflow.value = response;
-    console.log(response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
   }
@@ -142,7 +138,6 @@ async function getLastWorkflow() {
 
 onMounted(() => {
   fetchServices();
-  console.log("token", token.value);
   getLastWorkflow();
 });
 </script>
