@@ -14,6 +14,7 @@ type TokenRepository interface {
 	FindByToken(token string) []schemas.ServiceToken
 	FindById(tokenId uint64) schemas.ServiceToken
 	FindByUserId(userId uint64) []schemas.ServiceToken
+	FindByUserIdAndServiceId(userId uint64, serviceId uint64) schemas.ServiceToken
 }
 
 type tokenRepository struct {
@@ -85,6 +86,15 @@ func (repo *tokenRepository) FindByUserId(userId uint64) []schemas.ServiceToken 
 	err := repo.db.Connection.Where(&schemas.ServiceToken{UserId: userId}).Find(&serviceToken)
 	if err.Error != nil {
 		return []schemas.ServiceToken{}
+	}
+	return serviceToken
+}
+
+func (repo *tokenRepository) FindByUserIdAndServiceId(userId uint64, serviceId uint64) schemas.ServiceToken {
+	var serviceToken schemas.ServiceToken
+	err := repo.db.Connection.Where(&schemas.ServiceToken{UserId: userId, ServiceId: serviceId}).First(&serviceToken)
+	if err.Error != nil {
+		return schemas.ServiceToken{}
 	}
 	return serviceToken
 }

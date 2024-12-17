@@ -14,3 +14,8 @@ type RegisterCredentials struct {
 type MobileToken struct {
 	Token string `json:"token"`
 }
+
+type GithubCodeCredentials struct {
+	Code 		string `json:"code"`
+	State 		string `json:"state"`
+}

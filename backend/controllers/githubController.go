@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -62,19 +61,24 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 
 func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path string) (string, error) {
 	var isAlreadyRegistered bool = false
-	code := ctx.Query("code")
-	if code == "" {
+	var codeCredentials schemas.GithubCodeCredentials
+	err := json.NewDecoder(ctx.Request.Body).Decode(&codeCredentials)
+	if err != nil {
+		return "", err
+	}
+	// code := ctx.Query("code")
+	if codeCredentials.Code == "" {
 		return "", nil
 	}
-	state := ctx.Query("state")
+	// state := ctx.Query("state")
 	// latestCSRFToken, err := ctx.Cookie("latestCSRFToken")
-	if state == "" {
+	if codeCredentials.State == "" {
 		return "", nil
 	}
 	// if state != latestCSRFToken {
 	// 	return "", nil
 	// }
-	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(code, path)
+	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(codeCredentials.Code, path)
 	if err != nil {
 		return "", err
 	}
@@ -82,6 +86,7 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	githubService := controller.servicesService.FindByName(schemas.Github)
 
 	userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
+
 	if err != nil {
 		return "", fmt.Errorf("unable to get user info because %w", err)
 	}
@@ -98,13 +103,24 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	if actualUser.Email != "" {
 		isAlreadyRegistered = true
 	}
+
 	var newGithubToken schemas.ServiceToken
 	var newUser schemas.User
+	var tokenId *uint64
 	if isAlreadyRegistered {
 		newGithubToken = schemas.ServiceToken{
+			Id: 	*actualUser.TokenId,
 			Token:   githubTokenResponse.AccessToken,
 			Service: githubService,
 			UserId:  actualUser.Id,
+			User: actualUser,
+		}
+		if actualUser.TokenId != nil {
+			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, githubService.Id)
+			if actualServiceToken.Token != "" {
+				controller.serviceToken.Update(newGithubToken)
+				tokenId = &actualServiceToken.Id
+			}
 		}
 	} else {
 		newUser = schemas.User{
@@ -119,13 +135,17 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		newGithubToken = schemas.ServiceToken{
 			Token:        githubTokenResponse.AccessToken,
 			RefreshToken: githubTokenResponse.RefreshToken,
-			Service:      githubService,
-			UserId:       actualUser.Id,
+			Service: githubService,
+			UserId:  actualUser.Id,
+			User: actualUser,
 		}
 		isAlreadyRegistered = true
 	}
 
-	tokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
+	if tokenId == nil {
+		savedTokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
+		tokenId = &savedTokenId
+	}
 
 	if newUser.Username == "" {
 		newUser = schemas.User{
@@ -140,9 +160,9 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 				newUser = schemas.User{
 					Username: userInfo.Login,
 					Email:    userInfo.Email,
-					TokenId:  token.Id,
+					TokenId: &token.Id,
 				}
-				actualUser.TokenId = token.Id
+				actualUser.TokenId = &token.Id
 				err := controller.userService.UpdateUserInfos(actualUser)
 				if err != nil {
 					return "", fmt.Errorf("unable to update user infos because %w", err)
@@ -156,6 +176,8 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	if isAlreadyRegistered {
 		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?"+"code="+code+"&state="+state)
 		token, _ := controller.userService.Login(newUser)
+		// ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
+		// ctx.Redirect(http.StatusFound, "http://localhost:8081/services")
 		return token, nil
 	} else {
 		token, err := controller.userService.Register(newUser)
@@ -174,7 +196,7 @@ func (controller *githubController) GetUserInfos(ctx *gin.Context) (userInfos sc
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
-	token, err := controller.serviceToken.GetTokenById(user.TokenId)
+	token, err := controller.serviceToken.GetTokenById(*user.TokenId)
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
@@ -214,11 +236,20 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 	}
 	var newGithubToken schemas.ServiceToken
 	var newUser schemas.User
+	var tokenId *uint64
 	if isAlreadyRegistered {
 		newGithubToken = schemas.ServiceToken{
+			Id: 	*actualUser.TokenId,
 			Token:   result.Token,
 			Service: githubService,
 			UserId:  actualUser.Id,
+		}
+		if actualUser.TokenId != nil {
+			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, githubService.Id)
+			if actualServiceToken.Token != "" {
+				controller.serviceToken.Update(newGithubToken)
+				tokenId = &actualServiceToken.Id
+			}
 		}
 	} else {
 		newUser = schemas.User{
@@ -238,7 +269,10 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 		isAlreadyRegistered = true
 	}
 
-	tokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
+	if tokenId == nil {
+		savedTokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
+		tokenId = &savedTokenId
+	}
 
 	if newUser.Username == "" {
 		newUser = schemas.User{
@@ -253,9 +287,9 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 				newUser = schemas.User{
 					Username: userInfo.Login,
 					Email:    userInfo.Email,
-					TokenId:  token.Id,
+					TokenId: &token.Id,
 				}
-				actualUser.TokenId = token.Id
+				actualUser.TokenId = &token.Id
 				err := controller.userService.UpdateUserInfos(actualUser)
 				if err != nil {
 					return "", fmt.Errorf("unable to update user infos because %w", err)
