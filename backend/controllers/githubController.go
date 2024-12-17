@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -177,7 +178,7 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?"+"code="+code+"&state="+state)
 		token, _ := controller.userService.Login(newUser)
 		// ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
-		// ctx.Redirect(http.StatusFound, "http://localhost:8081/services")
+		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code=" + codeCredentials.Code + "&state=" + codeCredentials.State)
 		return token, nil
 	} else {
 		token, err := controller.userService.Register(newUser)
