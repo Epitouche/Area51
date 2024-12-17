@@ -19,6 +19,7 @@ type UserService interface {
 	GetUserByUsername(username string) schemas.User
 	GetUserByEmail(email string) schemas.User
 	CreateUser(newUser schemas.User) error
+	GetAllServices(userId uint64) ([]schemas.ServiceToken, error)
 }
 
 type userService struct {
@@ -111,4 +112,8 @@ func (service *userService) GetUserByEmail(email string) schemas.User {
 func (service *userService) CreateUser(newUser schemas.User) error {
 	service.repository.Save(newUser)
 	return nil
+}
+
+func (service *userService) GetAllServices(userId uint64) ([]schemas.ServiceToken, error) {
+	return service.repository.FindAllServicesByUserId(userId), nil
 }

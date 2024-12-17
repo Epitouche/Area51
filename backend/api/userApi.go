@@ -61,3 +61,10 @@ func (api *UserApi) GetAccessToken(ctx *gin.Context) {
 		Token: token,
 	})
 }
+
+func (api *UserApi) GetServices(ctx *gin.Context) {
+	allServices, err := api.userController.GetAllServices(ctx)
+	if err != nil {
+	}
+	ctx.JSON(http.StatusOK, allServices)
+}

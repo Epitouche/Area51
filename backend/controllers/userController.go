@@ -14,19 +14,24 @@ type UserController interface {
 	Login(ctx *gin.Context) (string, error)
 	Register(ctx *gin.Context) (string, error)
 	GetAccessToken(ctx *gin.Context) (string, error)
+	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
 }
 
 type userController struct {
-	userService services.UserService
-	jWtService  services.JWTService
+	userService     services.UserService
+	jWtService      services.JWTService
+	servicesService services.ServicesService
 }
 
-func NewUserController(userService services.UserService,
+func NewUserController(
+	userService services.UserService,
 	jWtService services.JWTService,
+	servicesService services.ServicesService,
 ) UserController {
 	return &userController{
-		userService: userService,
-		jWtService:  jWtService,
+		userService:     userService,
+		jWtService:      jWtService,
+		servicesService: servicesService,
 	}
 }
 
@@ -84,4 +89,23 @@ func (controller *userController) GetAccessToken(ctx *gin.Context) (string, erro
 	fmt.Printf("token: %v\n", token)
 	// credentials.Token = token
 	return token, nil
+}
+
+func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Service, error) {
+	authHeader := ctx.GetHeader("Authorization")
+	tokenString := authHeader[len("Bearer "):]
+	var allServices []schemas.Service
+	userId, err := controller.jWtService.GetUserIdFromToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	services, err := controller.userService.GetAllServices(userId)
+	if err != nil {
+		return nil, err
+	}
+	for _, service := range services {
+		allServices = append(allServices, controller.servicesService.FindById(service.ServiceId))
+
+	}
+	return allServices, nil
 }
