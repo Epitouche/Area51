@@ -82,7 +82,14 @@ async function fetchServices() {
     );
     response.server.services.forEach((service: Service) => {
       services.value.push(service);
+      // add fake actions and reactions
+      service.actions = [
+        { action_id: 1, name: "Action 1" },
+        { action_id: 2, name: "Action 2" },
+        { action_id: 3, name: "Action 3" },
+      ];
     });
+    // add fake service
   } catch (error) {
     console.error("Error fetching services:", error);
   }

@@ -11,8 +11,8 @@ export default defineEventHandler(async (event) => {
   try {
     const response = await $fetch("http://localhost:8080/api/github/callback", {
       params: {
-        code,
-        state,
+        code: code,
+        state: state,
       },
       headers: {
         "Content-Type": "application/json",
