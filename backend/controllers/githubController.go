@@ -121,7 +121,10 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		if actualUser.TokenId != nil {
 			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, githubService.Id)
 			if actualServiceToken.Token != "" {
-				controller.serviceToken.Update(newGithubToken)
+				err := controller.serviceToken.Update(newGithubToken)
+				if err != nil {
+					return "", fmt.Errorf("unable to update token because %w", err)
+				}
 				tokenId = &actualServiceToken.Id
 			}
 		}
@@ -249,7 +252,10 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 		if actualUser.TokenId != nil {
 			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, githubService.Id)
 			if actualServiceToken.Token != "" {
-				controller.serviceToken.Update(newGithubToken)
+				err := controller.serviceToken.Update(newGithubToken)
+				if err != nil {
+					return "", fmt.Errorf("unable to update token because %w", err)
+				}
 				tokenId = &actualServiceToken.Id
 			}
 		}
