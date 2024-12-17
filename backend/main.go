@@ -16,15 +16,15 @@ import (
 func setupRouter() *gin.Engine {
 
 	router := gin.Default()
-	// fullCors := cors.New(cors.Config{
-	// 	AllowOrigins:     []string{"*"},
-	// 	AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-	// 	AllowHeaders:    []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
-	// 	ExposeHeaders:   []string{"Content-Length"},
-	// 	AllowCredentials: true,
-	// })
-	// router.Use(fullCors)
-	router.Use(cors.Default())
+	fullCors := cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+		ExposeHeaders:   []string{"Content-Length"},
+		AllowCredentials: true,
+	})
+	router.Use(fullCors)
+	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
 
