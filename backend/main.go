@@ -41,7 +41,7 @@ func setupRouter() *gin.Engine {
 			github.GET("/auth", func(ctx *gin.Context) {
 				githubApi.RedirectToGithub(ctx, github.BasePath()+"/callback")
 			})
-			github.GET("/callback", func(ctx *gin.Context) {
+			github.POST("/callback", func(ctx *gin.Context) {
 				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
 			github.POST("/mobile/token", githubApi.StoreMobileToken)

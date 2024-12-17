@@ -63,19 +63,24 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 
 func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path string) (string, error) {
 	var isAlreadyRegistered bool = false
-	code := ctx.Query("code")
-	if code == "" {
+	var codeCredentials schemas.GithubCodeCredentials
+	err := json.NewDecoder(ctx.Request.Body).Decode(&codeCredentials)
+	if err != nil {
+		return "", err
+	}
+	// code := ctx.Query("code")
+	if codeCredentials.Code == "" {
 		return "", nil
 	}
-	state := ctx.Query("state")
+	// state := ctx.Query("state")
 	// latestCSRFToken, err := ctx.Cookie("latestCSRFToken")
-	if state == "" {
+	if codeCredentials.State == "" {
 		return "", nil
 	}
 	// if state != latestCSRFToken {
 	// 	return "", nil
 	// }
-	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(code, path)
+	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(codeCredentials.Code, path)
 	if err != nil {
 		return "", err
 	}
