@@ -2,13 +2,39 @@
 
 During the whole project we had to organize everything that we were doing and organize ourselves to be more efficient and capable of putting our best to work.
 
-To keep everyone on the same page and have an almost perfect project organization we decided to go on a SCRUM-like organization. What does it mean ? It means that we have sprints of 2 weeks for the whole duration of the project.
+To keep everyone on the same page and have an almost perfect project organization we decided to go on a **SCRUM-like** organization. What does it mean ? It means that we have sprints of 2 weeks for the whole duration of the project.
 
-We have daily meeting to put everyone on the same page, to know what everyone has done and know what everyone will work on. The dailies are very important because it keeps everyone on the team on the same page so that all the team have the same exact informations about the projects.
+We have daily meeting to put everyone on the same page, to know what everyone has done and know what everyone will work on. The dailies are very important because it keeps everyone on the team on the same page so the team have the exact same informations about the projects.
+
+## Project Timeline
+
+The project spans a total of **9 weeks** (from the 18/11/2024 to the 19/11/2024), during which we have planned several sprints and key milestones. Each sprint lasts for 2 weeks, allowing us to focus on specific tasks and deliverables except for the first 3 weeks where we made only one sprint cause of the MVP that we had to present.
+
+Our timeline includes regular sprint reviews and retrospectives to assess progress and make necessary adjustments. By maintaining a clear and structured timeline, we aim to keep the project on track and ensure timely delivery of all objectives.
+
+Here is the timeline:
+```mermaid
+gantt
+    title Our Project Timeline
+    dateFormat DD-MM-YYYY
+    section Project
+        Sprint 1    :a1, 18-11-2024, 21d
+        Planning    :milestone, 25-11-2024, 0d
+        MVP         :milestone, after a1, 0d
+        Sprint 2    :14d
+        Sprint 3    :14d
+        Sprint 4    :14d
+        Final Product: milestone, 0d
+```
+
+The timeline has 3 "**checkpoint**":
+- **Planning**: To present our organization and to show the technical requirements of our project with the framework and languages chosen.
+- **MVP**: The Minimum Viable Product is to show that we have a website working with the minimum of features working.
+- **Final Product**: The final delivery for the project, the website and everything that goes with it.
 
 ## Google Drive
 
-We utilized Google Drive as our central repository for all project-related documents. This includhereed sprint notes, design documents, proof of concept (POC) reports, and other important resources. \
+We utilized Google Drive as our central repository for all project-related documents. This include sprint notes, design documents, proof of concept (POC) reports, and other important resources. \
 By storing everything in Google Drive, we ensured that all team members had easy access to the latest information and could collaborate effectively in real-time. The structured folder system helped us keep everything organized and easy to find.
 
 The link to our google drive is right [*here*](https://drive.google.com/drive/folders/1Z0oZLYy2zBhhryj8Y1aOzdajEbtKuYpq).
