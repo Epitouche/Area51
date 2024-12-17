@@ -10,15 +10,19 @@ interface AppContextProps {
   setAboutJson: (aboutjson: AboutJson) => void;
   isConnected: boolean;
   setIsConnected: (isConnected: boolean) => void;
+  isBlackTheme: boolean;
+  setIsBlackTheme: (isBlackTheme: boolean) => void;
 }
 
 const AppContext = createContext<AppContextProps>({
   serverIp: '',
-  setServerIp: () => { },
+  setServerIp: () => {},
   aboutjson: undefined,
-  setAboutJson: () => { },
+  setAboutJson: () => {},
   isConnected: false,
-  setIsConnected: () => { },
+  setIsConnected: () => {},
+  isBlackTheme: true,
+  setIsBlackTheme: () => {},
 });
 
 interface AppProviderProps {
@@ -29,17 +33,27 @@ export default function AppProvider({ children }: AppProviderProps) {
   const [serverIp, setServerIp] = useState<string>('');
   const [aboutjson, setAboutJson] = useState<AboutJson>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isBlackTheme, setIsBlackTheme] = useState<boolean>(true);
 
   useEffect(() => {
     const checkConnection = async () => {
-      if (await checkToken('token'))
-        setIsConnected(true);
+      if (await checkToken('token')) setIsConnected(true);
     };
     checkConnection();
   }, [serverIp]);
 
   return (
-    <AppContext.Provider value={{ serverIp, setServerIp, aboutjson, setAboutJson, isConnected, setIsConnected }}>
+    <AppContext.Provider
+      value={{
+        serverIp,
+        setServerIp,
+        aboutjson,
+        setAboutJson,
+        isConnected,
+        setIsConnected,
+        isBlackTheme,
+        setIsBlackTheme,
+      }}>
       {children}
     </AppContext.Provider>
   );

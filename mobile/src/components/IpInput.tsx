@@ -6,7 +6,7 @@ import { AppContext } from '../context/AppContext';
 
 export function IpInput() {
   const [ipTmp, setIpTmp] = useState('');
-  const { setServerIp, serverIp } = useContext(AppContext);
+  const { setServerIp, serverIp, isBlackTheme } = useContext(AppContext);
 
   // const validateIp = (ip: string) => {
   //   const ipPattern =
@@ -26,10 +26,14 @@ export function IpInput() {
     //   setIsValidIp(false);
     // }
   };
+
   return (
     <View style={styles.ipBox}>
       <TextInput
-        style={[globalStyles.input, { width: '48%' }]}
+        style={[
+          isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
+          { width: '48%' },
+        ]}
         placeholder="Server IP"
         keyboardType="numeric"
         value={ipTmp}
@@ -38,7 +42,9 @@ export function IpInput() {
       <Button
         onPress={handleSave}
         style={[globalStyles.buttonColor, styles.button]}>
-        <Text style={globalStyles.textBlack}>Save</Text>
+        <Text style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+          Save
+        </Text>
       </Button>
     </View>
   );

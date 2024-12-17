@@ -19,7 +19,7 @@ export default function LoginScreen() {
     username: '',
     password: '',
   });
-  const { serverIp, setIsConnected } = useContext(AppContext);
+  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
   const [message, setMessage] = useState('');
   const [token, setToken] = useState('');
 
@@ -31,6 +31,7 @@ export default function LoginScreen() {
     });
     if (loginSuccessful) {
       setIsConnected(true);
+      console.log('register');
     }
   };
 
@@ -42,23 +43,33 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={globalStyles.wallpaper}>
+    <View
+      style={
+        isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
+      }>
       <View style={globalStyles.container}>
-        <Text style={styles.header}>LOG IN</Text>
+        <Text
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          LOG IN
+        </Text>
         {serverIp === '' ? (
           <IpInput />
         ) : (
           <>
             <View style={styles.inputBox}>
               <TextInput
-                style={styles.input}
+                style={
+                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
+                }
                 autoCapitalize="none"
                 placeholder="Username"
                 value={forms.username}
                 onChangeText={username => setForms({ ...forms, username })}
               />
               <TextInput
-                style={styles.input}
+                style={
+                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
+                }
                 secureTextEntry
                 value={forms.password}
                 placeholder="Password"
@@ -72,13 +83,20 @@ export default function LoginScreen() {
               onPress={handleLogin}>
               <Text
                 style={[
-                  globalStyles.textBlack,
+                  isBlackTheme ? globalStyles.textBlack : globalStyles.text,
                   { fontSize: 14, fontWeight: 'bold' },
                 ]}>
                 Login
               </Text>
             </Button>
-            <View style={styles.line} />
+            <View
+              style={[
+                globalStyles.line,
+                isBlackTheme
+                  ? globalStyles.lineColorBlack
+                  : globalStyles.lineColor,
+              ]}
+            />
             <View style={styles.socialButtonBox}>
               <GithubLoginButton handleGithubLogin={handleGithubLogin} />
               <Button style={globalStyles.buttonColor}>
@@ -89,8 +107,7 @@ export default function LoginScreen() {
                     }}
                     style={styles.icon}
                   />
-                  <Text
-                    style={[globalStyles.textBlack, { fontWeight: 'bold' }]}>
+                  <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
                     Google
                   </Text>
                 </View>
@@ -157,13 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  line: {
-    width: '90%',
-    height: 2,
-    backgroundColor: '#F7FAFB',
-    borderRadius: 2,
-    marginBottom: 16,
-  },
+
   socialButtonBox: {
     flexDirection: 'row',
     width: '80%',

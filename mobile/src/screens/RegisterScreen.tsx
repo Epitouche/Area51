@@ -22,7 +22,7 @@ export default function RegisterScreen() {
     password: '',
     username: '',
   });
-  const { serverIp, setIsConnected } = useContext(AppContext);
+  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
   const [token, setToken] = useState('');
 
   const handleLogin = async () => {
@@ -35,6 +35,7 @@ export default function RegisterScreen() {
       })
     )
       setIsConnected(true);
+    console.log('register');
   };
 
   const handleGithubLogin = async () => {
@@ -42,16 +43,25 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={globalStyles.wallpaper}>
+    <View
+      style={
+        isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
+      }>
       <View style={globalStyles.container}>
-        <Text style={styles.header}>REGISTER IN</Text>
+        <Text
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          REGISTER IN
+        </Text>
         {serverIp === '' ? (
           <IpInput />
         ) : (
           <>
             <View style={styles.inputBox}>
               <TextInput
-                style={styles.input}
+                style={[
+                  isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
+                  { width: '90%' },
+                ]}
                 placeholder="Username"
                 keyboardType="default"
                 autoCapitalize="none"
@@ -59,7 +69,10 @@ export default function RegisterScreen() {
                 onChangeText={text => setForms({ ...forms, username: text })}
               />
               <TextInput
-                style={styles.input}
+                style={[
+                  isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
+                  { width: '90%' },
+                ]}
                 placeholder="Email"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -67,7 +80,10 @@ export default function RegisterScreen() {
                 onChangeText={text => setForms({ ...forms, email: text })}
               />
               <TextInput
-                style={styles.input}
+                style={[
+                  isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
+                  { width: '90%' },
+                ]}
                 secureTextEntry
                 placeholder="Password"
                 value={forms.password}

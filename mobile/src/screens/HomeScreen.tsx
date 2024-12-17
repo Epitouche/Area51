@@ -6,23 +6,43 @@ import { globalStyles } from '../styles/global_style';
 import { IpInput } from '../components';
 
 export default function HomeScreen() {
-  const { serverIp, setAboutJson, isConnected } = useContext(AppContext);
-  const [ipTmp, setIpTmp] = useState('');
+  const { serverIp, setAboutJson, isConnected, isBlackTheme } =
+    useContext(AppContext);
 
   useEffect(() => {
     if (isConnected) getAboutJson(serverIp, setAboutJson);
   }, [isConnected, serverIp]);
 
   return (
-    <View style={globalStyles.wallpaper}>
+    <View
+      style={
+        isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
+      }>
       <View style={globalStyles.container}>
-        <Text style={globalStyles.titleWhite}>Area51</Text>
+        <Text
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          Area51
+        </Text>
         <View style={styles.textAlign}>
           <View style={styles.textAlign}>
-            <Text style={globalStyles.subtitleWhite}>Automate</Text>
+            <Text
+              style={
+                isBlackTheme
+                  ? globalStyles.subtitleBlack
+                  : globalStyles.subtitle
+              }>
+              Automate
+            </Text>
           </View>
           <View>
-            <Text style={globalStyles.subtitleWhite}>without limits</Text>
+            <Text
+              style={
+                isBlackTheme
+                  ? globalStyles.subtitleBlack
+                  : globalStyles.subtitle
+              }>
+              without limits
+            </Text>
           </View>
         </View>
         <IpInput />
