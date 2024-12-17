@@ -61,4 +61,3 @@ func (api *UserApi) GetAccessToken(ctx *gin.Context) {
 		Token: token,
 	})
 }
-

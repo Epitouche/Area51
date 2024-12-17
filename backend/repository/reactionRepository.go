@@ -8,7 +8,6 @@ import (
 	"area51/schemas"
 )
 
-
 type ReactionRepository interface {
 	Save(action schemas.Reaction)
 	Update(action schemas.Reaction)

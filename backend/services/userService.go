@@ -28,7 +28,6 @@ type userService struct {
 	serviceJWT         JWTService
 }
 
-
 func NewUserService(repository repository.UserRepository, serviceJWT JWTService) UserService {
 	return &userService{
 		authorizedUsername: "root",

@@ -12,13 +12,13 @@ import (
 )
 
 type ServicesApi struct {
-	serviceController controllers.ServicesController
+	serviceController  controllers.ServicesController
 	workflowController controllers.WorkflowController
 }
 
 func NewServicesApi(serviceController controllers.ServicesController, workflowController controllers.WorkflowController) *ServicesApi {
 	return &ServicesApi{
-		serviceController: serviceController,
+		serviceController:  serviceController,
 		workflowController: workflowController,
 	}
 }
@@ -43,7 +43,7 @@ func (api *ServicesApi) AboutJson(ctx *gin.Context) {
 			"server": map[string]any{
 				"current_time": fmt.Sprintf("%d", time.Now().Unix()),
 				"services":     allServices,
-				"workflows":	allWorkflows,
+				"workflows":    allWorkflows,
 			},
 		})
 	}

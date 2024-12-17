@@ -16,7 +16,7 @@ type JWTService interface {
 
 type jwtService struct {
 	secretKey string
-	issuer	string
+	issuer    string
 }
 
 type jwtCustomClaims struct {
@@ -24,7 +24,6 @@ type jwtCustomClaims struct {
 	Admin bool   `json:"admin"`
 	jwt.StandardClaims
 }
-
 
 func NewJWTService() JWTService {
 	return &jwtService{
@@ -48,8 +47,8 @@ func (service *jwtService) GenerateJWTToken(userId string, username string, isAd
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 			Issuer:    service.issuer,
-			IssuedAt: time.Now().Unix(),
-			Id: userId,
+			IssuedAt:  time.Now().Unix(),
+			Id:        userId,
 		},
 	}
 

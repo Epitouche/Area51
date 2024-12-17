@@ -20,7 +20,6 @@ type serviceRepository struct {
 	db *schemas.Database
 }
 
-
 func NewServiceRepository(db *gorm.DB) ServiceRepository {
 	err := db.AutoMigrate(&schemas.Service{})
 	if err != nil {

@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"area51/services"
-
 	"github.com/gin-gonic/gin"
+
+	"area51/services"
 )
 
-type ActionController interface{
+type ActionController interface {
 	CreateAction(ctx *gin.Context) (string, error)
 }
 

@@ -12,8 +12,8 @@ type ServicesController interface {
 }
 
 type servicesController struct {
-	service 		services.ServicesService
-	serviceAction 	services.ActionService
+	service         services.ServicesService
+	serviceAction   services.ActionService
 	serviceReaction services.ReactionService
 }
 
