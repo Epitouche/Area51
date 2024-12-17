@@ -8,94 +8,123 @@ import {
   Image,
 } from 'react-native';
 import { Button } from 'react-native-paper';
-import LinearGradient from 'react-native-linear-gradient';
 import { AppContext } from '../context/AppContext';
 import { loginApiCall, githubLogin } from '../service';
 import { LoginProps } from '../types';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
-import { GithubLoginButton } from '../components';
+import { GithubLoginButton, IpInput } from '../components';
+import { globalStyles } from '../styles/global_style';
 
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
-
-type Props = {
-  navigation: LoginScreenNavigationProp;
-};
-
-export default function LoginScreen({ navigation }: Props) {
-  const [forms, setForms] = useState<LoginProps>({ username: '', password: '' });
-  const { serverIp } = useContext(AppContext);
+export default function LoginScreen() {
+  const [forms, setForms] = useState<LoginProps>({
+    username: '',
+    password: '',
+  });
+  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
   const [message, setMessage] = useState('');
   const [token, setToken] = useState('');
-  // const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async () => {
-    if (await loginApiCall({ apiEndpoint: serverIp, formsLogin: forms, setMessage }))
-      navigation.navigate('Dashboard');
+    const loginSuccessful = await loginApiCall({
+      apiEndpoint: serverIp,
+      formsLogin: forms,
+      setMessage,
+    });
+    if (loginSuccessful) {
+      setIsConnected(true);
+      console.log('register');
+    }
   };
 
   const handleGithubLogin = async () => {
-    if (await githubLogin(serverIp, setToken))
-      navigation.navigate('Dashboard');
-  }
+    const githubLoginSuccessful = await githubLogin(serverIp, setToken);
+    if (githubLoginSuccessful) {
+      setIsConnected(true);
+    }
+  };
 
   return (
-    <LinearGradient colors={['#7874FD', '#B225EE']} style={styles.container}>
-      <Text style={styles.header}>LOG IN</Text>
-      <View style={styles.inputBox}>
-        <TextInput
-          style={styles.input}
-          autoCapitalize="none"
-          placeholder="Username"
-          value={forms.username}
-          onChangeText={username => setForms({ ...forms, username })}
-        />
-        <TextInput
-          style={styles.input}
-          secureTextEntry
-          value={forms.password}
-          placeholder="Password"
-          onChangeText={password => setForms({ ...forms, password })}
-          autoCapitalize="none"
-        />
-      </View>
-      {/* <View style={styles.checkboxContainer}>
-        <TouchableOpacity
-          onPress={() => setRememberMe(!rememberMe)}
-          style={styles.checkbox}>
-          {rememberMe ? (
-            <Text style={styles.checkboxText}>✔</Text>
-          ) : (
-            <Text style={styles.checkboxText}>☐</Text>
-          )}
-        </TouchableOpacity>
-        <Text style={styles.rememberMeText}>Remember me</Text>
-      </View> */}
-      <Button mode="contained" style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.text}>Login</Text>
-      </Button>
-      <View style={styles.line} />
-      <View style={styles.socialButtonBox}>
-        <GithubLoginButton handleGithubLogin={handleGithubLogin} />
-        <Button style={styles.button}>
-          <View style={styles.buttonContent}>
-            <Image
-              source={{
-                uri: 'https://img.icons8.com/color/48/google-logo.png',
-              }}
-              style={styles.icon}
+    <View
+      style={
+        isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
+      }>
+      <View style={globalStyles.container}>
+        <Text
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          LOG IN
+        </Text>
+        {serverIp === '' ? (
+          <IpInput />
+        ) : (
+          <>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={
+                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
+                }
+                autoCapitalize="none"
+                placeholder="Username"
+                value={forms.username}
+                onChangeText={username => setForms({ ...forms, username })}
+              />
+              <TextInput
+                style={
+                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
+                }
+                secureTextEntry
+                value={forms.password}
+                placeholder="Password"
+                onChangeText={password => setForms({ ...forms, password })}
+                autoCapitalize="none"
+              />
+            </View>
+            <Button
+              mode="contained"
+              style={globalStyles.buttonColor}
+              onPress={handleLogin}>
+              <Text
+                style={[
+                  isBlackTheme ? globalStyles.textBlack : globalStyles.text,
+                  { fontSize: 14, fontWeight: 'bold' },
+                ]}>
+                Login
+              </Text>
+            </Button>
+            <View
+              style={[
+                globalStyles.line,
+                isBlackTheme
+                  ? globalStyles.lineColorBlack
+                  : globalStyles.lineColor,
+              ]}
             />
-            <Text style={styles.text}>Google</Text>
-          </View>
-        </Button>
+            <View style={styles.socialButtonBox}>
+              <GithubLoginButton handleGithubLogin={handleGithubLogin} />
+              <Button style={globalStyles.buttonColor}>
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={{
+                      uri: 'https://img.icons8.com/color/48/google-logo.png',
+                    }}
+                    style={styles.icon}
+                  />
+                  <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
+                    Google
+                  </Text>
+                </View>
+              </Button>
+            </View>
+            {message !== '' && (
+              <Text style={styles.passwordText}>{message}</Text>
+            )}
+            <View style={styles.forgotPasswordBox}>
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
-      {message !== '' && <Text style={styles.passwordText}>{message}</Text>}
-      <View style={styles.forgotPasswordBox}>
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>Forgot Password?</Text>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -127,38 +156,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
   },
-  // checkboxContainer: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginBottom: 20,
-  // },
-  // checkbox: {
-  //   width: 24,
-  //   height: 24,
-  //   borderWidth: 2,
-  //   borderColor: '#fff',
-  //   borderRadius: 20,
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   marginRight: 10,
-  // },
-  // checkboxText: {
-  //   fontSize: 18,
-  //   color: '#fff',
-  // },
-  // rememberMeText: {
-  //   color: '#fff',
-  //   fontSize: 16,
-  // },
   loginButton: {
     width: '35%',
     backgroundColor: '#F7FAFB',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  passwordText: {
-    color: 'white',
-  },
+  passwordText: { color: 'white' },
   forgotPassword: {
     color: '#fff',
     textDecorationLine: 'underline',
@@ -169,13 +173,6 @@ const styles = StyleSheet.create({
     margin: 10,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  line: {
-    width: '90%',
-    height: 2,
-    backgroundColor: '#F7FAFB',
-    borderRadius: 2,
-    marginBottom: 16,
   },
 
   socialButtonBox: {
@@ -198,7 +195,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   text: {
     color: '#5C5C5C',
     fontSize: 16,
