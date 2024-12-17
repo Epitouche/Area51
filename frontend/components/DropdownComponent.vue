@@ -36,18 +36,17 @@ const selectOption = (option: Action | Reaction) => {
     />
     <div
       v-show="isOpen"
-      class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 rounded-md shadow-lg bg-primaryWhite-500 dark:bg-primaryDark-500 z-10"
+      class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
     >
-      <div class="flex flex-col items-center gap-2">
-        <ButtonComponent
+      <div class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700">
+        <button
           v-for="(option, index) in props.options"
           :key="index"
-          :text="option.name"
-          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
+          class="text-left px-4 py-2 text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
           @click="() => selectOption(option)"
-        />
+        >
+          {{ option.name }}
+        </button>
       </div>
     </div>
   </div>

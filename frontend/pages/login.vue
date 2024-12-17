@@ -6,19 +6,21 @@ const password = ref("");
 
 async function onSubmit() {
   try {
-    const { access_token } = await $fetch(
-      "http://localhost:8080/api/auth/login",
-      {
-        method: "POST",
-        body: {
-          username: username.value,
-          password: password.value,
-        },
-      }
-    );
+    const { access_token } = await $fetch("http://localhost:8080/api/auth/login", {
+      method: "POST",
+      body: {
+        username: username.value,
+        password: password.value,
+      },
+    });
+
     if (access_token) {
-      localStorage.setItem("access_token", access_token);
+      const tokenCookie = useCookie("token");
+      tokenCookie.value = access_token;
+
       navigateTo("/services");
+    } else {
+      console.error("Access token not received");
     }
   } catch (error) {
     console.error("API response:", error.response?.data || error.message);
@@ -42,6 +44,7 @@ async function redirectToGitHubOAuth() {
     console.error("Error fetching GitHub OAuth URL:", error);
   }
 }
+
 </script>
 
 <template>

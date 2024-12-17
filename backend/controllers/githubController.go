@@ -20,9 +20,9 @@ type GithubController interface {
 }
 
 type githubController struct {
-	service 		services.GithubService
-	userService 	services.UserService
-	serviceToken 	services.TokenService
+	service         services.GithubService
+	userService     services.UserService
+	serviceToken    services.TokenService
 	servicesService services.ServicesService
 }
 
@@ -33,13 +33,12 @@ func NewGithubController(
 	servicesService services.ServicesService,
 ) GithubController {
 	return &githubController{
-		service: service,
-		userService: userService,
-		serviceToken: serviceToken,
+		service:         service,
+		userService:     userService,
+		serviceToken:    serviceToken,
 		servicesService: servicesService,
 	}
 }
-
 
 func (controller *githubController) RedirectionToGithubService(ctx *gin.Context, path string) (string, error) {
 	clientId := toolbox.GetInEnv("GITHUB_CLIENT_ID")
@@ -139,7 +138,7 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		}
 		actualUser = controller.userService.GetUserByUsername(userInfo.Login)
 		newGithubToken = schemas.ServiceToken{
-			Token:   githubTokenResponse.AccessToken,
+			Token:        githubTokenResponse.AccessToken,
 			RefreshToken: githubTokenResponse.RefreshToken,
 			Service: githubService,
 			UserId:  actualUser.Id,

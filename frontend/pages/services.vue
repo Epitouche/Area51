@@ -70,7 +70,7 @@ const confirmModalReaction = () => {
 
 const services = ref<Service[]>([]);
 
-const token = useCookie("token");
+const token = useCookie("access_token");
 
 async function fetchServices() {
   try {
@@ -82,7 +82,14 @@ async function fetchServices() {
     );
     response.server.services.forEach((service: Service) => {
       services.value.push(service);
+      // add fake actions and reactions
+      service.actions = [
+        { action_id: 1, name: "Action 1" },
+        { action_id: 2, name: "Action 2" },
+        { action_id: 3, name: "Action 3" },
+      ];
     });
+    // add fake service
   } catch (error) {
     console.error("Error fetching services:", error);
   }
@@ -92,14 +99,12 @@ const lastWorkflow = ref<Workflow[]>([]);
 
 async function addWorkflow() {
   try {
-    console.log("actionSelected", actionSelected.value.action_id);
-    console.log("reactionSelected", reactionSelected.value.reaction_id);
     const response = await $fetch<ServerResponse>(
       "http://localhost:8080/api/workflow",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token.value}`,
+          "Authorization": `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
         body: {
@@ -108,7 +113,6 @@ async function addWorkflow() {
         },
       }
     );
-    console.log(response);
   } catch (error) {
     console.error("Error adding workflow:", error);
   }
@@ -121,13 +125,12 @@ async function getLastWorkflow() {
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token.value}`,
+          "Authorization": `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
     );
     lastWorkflow.value = response;
-    console.log(response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
   }
@@ -135,7 +138,6 @@ async function getLastWorkflow() {
 
 onMounted(() => {
   fetchServices();
-  console.log("token", token.value);
   getLastWorkflow();
 });
 </script>
@@ -264,9 +266,6 @@ onMounted(() => {
         class="text-2xl font-bold text-fontBlack dark:text-fontWhite"
       >
         BODY: {{ workflow.body }}
-        <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-        >
       </p>
     </div>
   </div>

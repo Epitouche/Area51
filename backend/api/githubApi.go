@@ -8,7 +8,6 @@ import (
 	"area51/controllers"
 )
 
-
 type GithubApi struct {
 	controller controllers.GithubController
 }
