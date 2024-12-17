@@ -43,7 +43,7 @@ func NewGithubController(
 
 func (controller *githubController) RedirectionToGithubService(ctx *gin.Context, path string) (string, error) {
 	clientId := toolbox.GetInEnv("GITHUB_CLIENT_ID")
-	appPort := toolbox.GetInEnv("APP_PORT")
+	appPort := toolbox.GetInEnv("FRONTEND_PORT")
 	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	state, err := toolbox.GenerateCSRFToken()
