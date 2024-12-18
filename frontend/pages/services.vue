@@ -87,7 +87,7 @@ async function fetchServices() {
 }
 async function addWorkflow() {
   try {
-    await $fetch<ServerResponse>("/api/workflows", {
+    await $fetch<ServerResponse>("/api/workflows/addWorkflows", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token.value}`,
@@ -107,7 +107,7 @@ async function addWorkflow() {
 async function getLastWorkflow() {
   try {
     const response = await $fetch<WorkflowResponse[]>(
-      "http://localhost:8080/api/workflow/reaction",
+      "/api/workflows/getLastWorkflow",
       {
         method: "GET",
         headers: {

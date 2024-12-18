@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
   if (!params.code || !params.state) {
     throw createError({
       statusCode: 400,
-      message: "Missing parameters: code, or service",
+      message: "Missing parameters: code, or state",
     });
   }
 
