@@ -18,7 +18,7 @@ async function fetchGitHubToken() {
   if (code && state) {
     try {
       const response = await Promise.race([
-        $fetch<ApiResponse>("/api/github", {
+        $fetch<ApiResponse>("/api/callback", {
           method: "POST",
           body: {
             code: code as string,

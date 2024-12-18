@@ -72,7 +72,7 @@ async function fetchServices() {
       services.push(service);
     });
 
-    workflowsInList.length = 0; 
+    workflowsInList.length = 0;
     workflowsInList.push(...response.server.workflows);
 
     workflowsInList.forEach((workflow) => {
@@ -87,20 +87,17 @@ async function fetchServices() {
 }
 async function addWorkflow() {
   try {
-    const response = await $fetch<ServerResponse>(
-      "http://localhost:8080/api/workflow",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-        body: {
-          action_id: actionSelected.value.action_id,
-          reaction_id: reactionSelected.value.reaction_id,
-        },
-      }
-    );
+    await $fetch<ServerResponse>("/api/workflows", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: {
+        action_id: actionSelected.value.action_id,
+        reaction_id: reactionSelected.value.reaction_id,
+      },
+    });
     fetchServices();
   } catch (error) {
     console.error("Error adding workflow:", error);
