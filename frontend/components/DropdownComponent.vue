@@ -42,7 +42,7 @@ const selectOption = (option: Action | Reaction) => {
         <button
           v-for="(option, index) in props.options"
           :key="index"
-          class="text-left px-4 py-2 text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
+          class="text-center px-4 py-2 text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
           @click="() => selectOption(option)"
         >
           {{ option.name }}

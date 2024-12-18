@@ -4,45 +4,36 @@ import type {
   Reaction,
   ServerResponse,
   Service,
+  WorkflowResponse,
   Workflow,
 } from "~/src/types";
 
-const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
-
-const rows = [
-  {
-    id: 1,
-    name: "Service",
-    action: "On push",
-    reaction: "Send message",
-    status: "Active",
-    memberId: 1,
-    date: "12/02/2024",
-  },
-  {
-    id: 2,
-    name: "Service 2",
-    action: "On pull request",
-    reaction: "Play Music",
-    status: "Inactive",
-    memberId: 2,
-    date: "10/25/2024",
-  },
-  {
-    id: 3,
-    name: "Service 3",
-    action: "On push",
-    reaction: "Fill mail",
-    status: "Active",
-    memberId: 3,
-    date: "10/14/2024",
-  },
+const columns = [
+  "Name",
+  "Action ID",
+  "Reaction ID",
+  "Activity",
+  "Creation Date",
 ];
 
+const services = reactive<Service[]>([]);
+const workflowsInList = reactive<Workflow[]>([]);
+const lastWorkflow = reactive<WorkflowResponse[]>([]);
 const actionSelected = ref(<Action>{});
 const reactionSelected = ref(<Reaction>{});
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
+const token = useCookie("access_token");
+const copyIcon = ref("material-symbols:content-copy-outline-rounded");
+
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    copyIcon.value = "material-symbols:check-rounded";
+  } catch (err) {
+    console.error("Erreur lors de la copie :", err);
+  }
+};
 
 const openModalAction = () => {
   isModalActionOpen.value = true;
@@ -68,10 +59,6 @@ const confirmModalReaction = () => {
   closeModalReaction();
 };
 
-const services = ref<Service[]>([]);
-
-const token = useCookie("access_token");
-
 async function fetchServices() {
   try {
     const response = await $fetch<ServerResponse>(
@@ -80,32 +67,38 @@ async function fetchServices() {
         method: "GET",
       }
     );
+
     response.server.services.forEach((service: Service) => {
-      services.value.push(service);
+      services.push(service);
+    });
+
+    workflowsInList.length = 0;
+    workflowsInList.push(...response.server.workflows);
+
+    workflowsInList.forEach((workflow) => {
+      const dateString = workflow.created_at;
+      const date = new Date(dateString);
+      const formattedDate = date.toLocaleDateString("en-GB");
+      workflow.created_at = formattedDate;
     });
   } catch (error) {
     console.error("Error fetching services:", error);
   }
 }
-
-const lastWorkflow = ref<Workflow[]>([]);
-
 async function addWorkflow() {
   try {
-    const response = await $fetch<ServerResponse>(
-      "http://localhost:8080/api/workflow",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-        body: {
-          action_id: actionSelected.value.action_id,
-          reaction_id: reactionSelected.value.reaction_id,
-        },
-      }
-    );
+    await $fetch<ServerResponse>("/api/workflows", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: {
+        action_id: actionSelected.value.action_id,
+        reaction_id: reactionSelected.value.reaction_id,
+      },
+    });
+    fetchServices();
   } catch (error) {
     console.error("Error adding workflow:", error);
   }
@@ -113,17 +106,17 @@ async function addWorkflow() {
 
 async function getLastWorkflow() {
   try {
-    const response = await $fetch<Workflow[]>(
+    const response = await $fetch<WorkflowResponse[]>(
       "http://localhost:8080/api/workflow/reaction",
       {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token.value}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
     );
-    lastWorkflow.value = response;
+    lastWorkflow.push(...response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
   }
@@ -249,17 +242,34 @@ onMounted(() => {
       />
     </div>
     <ListTableComponent
-      v-show="columns && rows"
+      v-show="columns && workflowsInList"
       :columns="columns"
-      :rows="rows"
+      :rows="workflowsInList"
     />
-    <div class="flex flex-col justify-center m-20 p-5 rounded-xl">
-      <p
-        v-for="workflow in lastWorkflow"
-        class="text-2xl font-bold text-fontBlack dark:text-fontWhite"
+    <div class="flex justify-center">
+      <hr
+        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
+      />
+    </div>
+    <div class="flex justify-center m-20">
+      <div
+        class="relative flex justify-center bg-primaryWhite-100 dark:bg-secondaryDark-500 rounded-2xl w-10/12"
       >
-        BODY: {{ workflow.body }}
-      </p>
+        <!-- Bouton pour copier le JSON, turn accent after copy -->
+        <button
+          @click="copyToClipboard(JSON.stringify(lastWorkflow, null, 2))"
+          class="absolute top-4 right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
+          aria-label="Copier le JSON"
+        >
+          <Icon :name="copyIcon" />
+        </button>
+        <pre
+          class="whitespace-pre-wrap break-words text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
+        >
+    {{ JSON.stringify(lastWorkflow, null, 2) }}
+  </pre
+        >
+      </div>
     </div>
   </div>
 </template>
