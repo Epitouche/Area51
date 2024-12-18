@@ -16,13 +16,13 @@ const columns = [
   "Creation Date",
 ];
 
+const services = reactive<Service[]>([]);
+const workflowsInList = reactive<Workflow[]>([]);
+const lastWorkflow = reactive<WorkflowResponse[]>([]);
 const actionSelected = ref(<Action>{});
 const reactionSelected = ref(<Reaction>{});
-const workflowsInList = ref<Workflow[]>([]);
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
-const lastWorkflow = ref<WorkflowResponse[]>([]);
-const services = ref<Service[]>([]);
 const token = useCookie("access_token");
 const copyIcon = ref("material-symbols:content-copy-outline-rounded");
 
@@ -67,14 +67,17 @@ async function fetchServices() {
         method: "GET",
       }
     );
+
     response.server.services.forEach((service: Service) => {
-      services.value.push(service);
+      services.push(service);
     });
-    workflowsInList.value = response.server.workflows;
-    workflowsInList.value.forEach((workflow) => {
+
+    workflowsInList.length = 0; 
+    workflowsInList.push(...response.server.workflows);
+
+    workflowsInList.forEach((workflow) => {
       const dateString = workflow.created_at;
       const date = new Date(dateString);
-
       const formattedDate = date.toLocaleDateString("en-GB");
       workflow.created_at = formattedDate;
     });
@@ -82,7 +85,6 @@ async function fetchServices() {
     console.error("Error fetching services:", error);
   }
 }
-
 async function addWorkflow() {
   try {
     const response = await $fetch<ServerResponse>(
@@ -117,7 +119,7 @@ async function getLastWorkflow() {
         },
       }
     );
-    lastWorkflow.value = response;
+    lastWorkflow.push(...response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
   }
