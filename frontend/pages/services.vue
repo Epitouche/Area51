@@ -61,7 +61,6 @@ async function fetchServices() {
     response.server.services.forEach((service: Service) => {
       services.value.push(service);
     });
-    console.log("services", services.value);
     workflowsInList.value = response.server.workflows;
     workflowsInList.value.forEach((workflow) => {
       const dateString = workflow.created_at;
