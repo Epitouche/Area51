@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   columns: string[];
-  rows: Record<string, any>[];
+  rows: Record<string, string | number | boolean>[];
 }>();
 </script>
 
@@ -15,7 +15,7 @@ const props = defineProps<{
           <th
             class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
-            <input type="checkbox" >
+            <input type="checkbox">
           </th>
           <th
             v-for="column in columns"
@@ -33,7 +33,7 @@ const props = defineProps<{
           class="odd:bg-secondaryWhite-500 text-center even:bg-bg-primaryWhite-50 dark:odd:bg-primaryDark-500 dark:even:bg-secondaryDark-500"
         >
           <td class="px-6 py-4">
-            <input type="checkbox" >
+            <input type="checkbox">
           </td>
           <td
             v-for="(value, key) in row"
