@@ -7,16 +7,20 @@ const password = ref("");
 
 async function onSubmit() {
   try {
-    const { access_token } = await $fetch("http://localhost:8080/api/auth/register", {
-      method: "POST",
-      body: {
-        username: username.value,
-        email: email.value,
-        password: password.value,
-      },
-    });
+    const { access_token } = await $fetch(
+      "http://localhost:8080/api/auth/register",
+      {
+        method: "POST",
+        body: {
+          username: username.value,
+          email: email.value,
+          password: password.value,
+        },
+      }
+    );
     if (access_token) {
-      localStorage.setItem("access_token", access_token);
+      const tokenCookie = useCookie("access_token");
+      tokenCookie.value = access_token;
       navigateTo("/services");
     }
   } catch (error) {

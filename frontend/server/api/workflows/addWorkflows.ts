@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
     if (!access_token || !params.action_id || !params.reaction_id) {
       throw createError({
         statusCode: 400,
-        message: "Missing parameters: code, or service",
+        message: "Missing parameters: token, action_id, or reaction_id",
       });
     }
     const response = await $fetch("http://server:8080/api/workflow", {

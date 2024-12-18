@@ -15,7 +15,7 @@ async function onSubmit() {
     });
 
     if (access_token) {
-      const tokenCookie = useCookie("token");
+      const tokenCookie = useCookie("access_token");
       tokenCookie.value = access_token;
 
       navigateTo("/services");
