@@ -39,11 +39,14 @@
         Make your favorite apps connect with each other <br />
         and let us automatize tasks for you!
       </p>
-      <NuxtLink to="/login">
-        <button
-          class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-8 rounded-full shadow-md transition duration-300">
-          Start now!
-        </button>
+      <NuxtLink to="/register">
+        <ButtonComponent
+          text="Start now!"
+          bgColor="bg-tertiary-500"
+          hoverColor="hover:bg-purple-600"
+          textColor="text-fontWhite"
+          class="mt-4"
+        ></ButtonComponent>
       </NuxtLink>
     </div>
   </div>
