@@ -1,6 +1,6 @@
 <template>
     <div>
-      <nav class="bg-[#F7FAFB] p-4 border-b border-gray-200">
+      <nav class="p-4 border-b border-gray-200">
         <div class="container mx-auto flex justify-between items-center">
           <div class="text-lg font-bold">
             <NuxtLink to="/">MyLogo</NuxtLink>
