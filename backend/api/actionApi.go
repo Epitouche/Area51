@@ -19,10 +19,9 @@ func NewActionApi(controller controllers.ActionController) *ActionApi {
 }
 
 func (api *ActionApi) CreateAction(ctx *gin.Context) {
-	message, err := api.actionController.CreateAction(ctx)
-	if err != nil {
+	if message, err := api.actionController.CreateAction(ctx); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
-		return
+	} else {
+		ctx.JSON(http.StatusOK, message)
 	}
-	ctx.JSON(http.StatusOK, message)
 }

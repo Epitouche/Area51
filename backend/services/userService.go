@@ -41,7 +41,7 @@ func NewUserService(repository repository.UserRepository, serviceJWT JWTService)
 func (service *userService) Login(newUser schemas.User) (JWTtoken string, err error) {
 	user := service.repository.FindByUsername(newUser.Username)
 	if user.Username == "" {
-		return "", errors.New("User not found")
+		return "", errors.New("user not found")
 	}
 	if database.CompareHashAndPassword(user.Password, newUser.Password) {
 		return service.serviceJWT.GenerateJWTToken(
@@ -61,7 +61,7 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 		}
 	}
 
-	return "", errors.New("Invalid password")
+	return "", errors.New("invalid password")
 
 }
 

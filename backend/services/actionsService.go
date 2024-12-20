@@ -8,6 +8,7 @@ import (
 
 	"area51/repository"
 	"area51/schemas"
+	"area51/toolbox"
 )
 
 type ActionService interface {
@@ -58,8 +59,10 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	authHeader := ctx.GetHeader("Authorization")
-	tokenString := authHeader[len("Bearer "):]
+	tokenString, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		return "", err
+	}
 
 	_, err = service.userService.GetUserInfos(tokenString)
 	if err != nil {

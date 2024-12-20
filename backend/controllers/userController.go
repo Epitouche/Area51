@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 
 	"area51/schemas"
 	"area51/services"
+	"area51/toolbox"
 )
 
 type UserController interface {
@@ -37,17 +37,14 @@ func NewUserController(
 
 func (controller *userController) Login(ctx *gin.Context) (string, error) {
 	var credentials schemas.LoginCredentials
-	err := ctx.ShouldBind(&credentials)
-	if err != nil {
+	if err := ctx.ShouldBind(&credentials); err != nil {
 		return "", err
 	}
 
-	newUser := schemas.User{
+	token, err := controller.userService.Login(schemas.User{
 		Username: credentials.Username,
 		Password: credentials.Password,
-	}
-
-	token, err := controller.userService.Login(newUser)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -70,12 +67,11 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 		return "", errors.New("email must be at least 4 characters long")
 	}
 
-	newUser := schemas.User{
+	token, err := controller.userService.Register(schemas.User{
 		Username: credentials.Username,
 		Email:    credentials.Email,
 		Password: credentials.Password,
-	}
-	token, err := controller.userService.Register(newUser)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -83,19 +79,20 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 }
 
 func (controller *userController) GetAccessToken(ctx *gin.Context) (string, error) {
-	// var credentials schemas.MobileToken
-	cookies, _ := ctx.Request.Cookie("token")
+	cookies, err := ctx.Request.Cookie("token")
+	if err != nil {
+		return "", err
+	}
 	token := cookies.Name
-	fmt.Printf("token: %v\n", token)
-	// credentials.Token = token
 	return token, nil
 }
 
 func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Service, error) {
-	authHeader := ctx.GetHeader("Authorization")
-	tokenString := authHeader[len("Bearer "):]
-	var allServices []schemas.Service
-	userId, err := controller.jWtService.GetUserIdFromToken(tokenString)
+	bearer, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		panic(err.Error())
+	}
+	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +100,9 @@ func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Se
 	if err != nil {
 		return nil, err
 	}
+	var allServices []schemas.Service
 	for _, service := range services {
 		allServices = append(allServices, controller.servicesService.FindById(service.ServiceId))
-
 	}
 	return allServices, nil
 }

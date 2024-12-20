@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -16,13 +17,16 @@ func Connection() *gorm.DB {
 	dbname := toolbox.GetInEnv("POSTGRES_DB")
 	port := toolbox.GetInEnv("DB_PORT")
 
-	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + port + " sslmode=disable TimeZone=Europe/Paris"
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Paris", host, user, password, dbname, port)
 	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
 		panic("failed to connect database")
 	}
+
 	if os.Getenv("GIN_MODE") != "release" {
 		conn = conn.Debug()
 	}
+
 	return conn
 }
