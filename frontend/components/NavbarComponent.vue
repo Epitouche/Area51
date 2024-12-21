@@ -16,7 +16,6 @@
               >
                 Sign up
               </ButtonComponent>
-                <!-- <button class="bg-[#B454FD] px-4 py-2 text-white rounded-full">Sign up</button> -->
             </NuxtLink>
           </div>
         </div>
