@@ -134,7 +134,7 @@ onMounted(() => {
   >
     <div class="m-20">
       <h1 class="text-6xl font-bold text-fontBlack dark:text-fontWhite">
-        Services
+        Workflows
       </h1>
     </div>
     <div class="flex justify-center">
