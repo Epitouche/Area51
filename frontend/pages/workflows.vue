@@ -253,7 +253,7 @@ onMounted(() => {
     </div>
     <div class="flex justify-center m-20">
       <div
-        class="relative flex justify-center bg-primaryWhite-100 dark:bg-secondaryDark-500 rounded-2xl w-10/12"
+        class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-10/12"
       >
         <!-- Bouton pour copier le JSON, turn accent after copy -->
         <button
