@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 
@@ -13,7 +12,6 @@ import (
 type UserController interface {
 	Login(ctx *gin.Context) (string, error)
 	Register(ctx *gin.Context) (string, error)
-	GetAccessToken(ctx *gin.Context) (string, error)
 	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
 }
 
@@ -79,15 +77,6 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return token, nil
-}
-
-func (controller *userController) GetAccessToken(ctx *gin.Context) (string, error) {
-	// var credentials schemas.MobileToken
-	cookies, _ := ctx.Request.Cookie("token")
-	token := cookies.Name
-	fmt.Printf("token: %v\n", token)
-	// credentials.Token = token
 	return token, nil
 }
 
