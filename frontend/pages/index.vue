@@ -70,9 +70,9 @@ const navigateToRegister = () => {
       </div>
     </div>
 
-    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 items-center mb-20">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 items-center mb-24">
       <div class="text-center mb-16">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Make your day easy</h2>
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Make your day easy</h2>
         <p class="text-gray-600">Discover new ways to create useful workflows</p>
       </div>
       <div class="grid md:grid-cols-3 gap-8">
@@ -102,9 +102,9 @@ const navigateToRegister = () => {
     </div>
 
     <div class="bg-purple-50 my-8">
-      <div class="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-12">
+      <div class="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-20">
         <div class="text-center mb-16">
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">About Us</h2>
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">About Us</h2>
           <p class="text-xl text-gray-600 max-w-2xl mx-auto">
             We're on a mission to make workflow automation accessible to everyone
           </p>
@@ -118,11 +118,11 @@ const navigateToRegister = () => {
             <p class="text-gray-600">{{ feature.description }}</p>
           </div>
         </div>
-        <p class="text-center text-xl text-gray-600 max-w-3xl mx-auto mt-8">
+        <p class="text-center text-xl text-gray-600 max-w-3xl mx-auto mt-16">
           You can see the documentation <a class="text-purple-700" href="https://github.com/Epitouche/Area51/blob/main/README.md">here</a> to learn more about us !
         </p>
       </div>
     </div>
-
+    <Footer />
   </div>
 </template>
