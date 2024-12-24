@@ -26,6 +26,24 @@ const workflows = ref([
   }
 ]);
 
+const features = ref([
+  {
+    icon: 'solar:users-group-rounded-linear',
+    title: 'Our Team',
+    description: 'We are a group of 5 passionate students from Epitech Bordeaux united by our ambition to bring innovative ideas to life'
+  },
+  {
+    icon: 'material-symbols:lightbulb-2-outline-rounded',
+    title: 'The Project',
+    description: 'The goal was to create an AREA website where users like you can create useful workflows'
+  },
+  {
+    icon: 'material-symbols:target',
+    title: 'Our Aim',
+    description: 'Our commitment to excellence and problem-solving drives everything we do. Together, we aim to create something impactful and unforgettable'
+  }
+]);
+
 const navigateToRegister = () => {
   useRouter().push('/register');
 };
@@ -33,7 +51,7 @@ const navigateToRegister = () => {
 <template>
   <NavbarComponent />
   <div class="flex flex-col">
-    <div class="flex flex-col mt-48 mx-52 m-12" style="height: 50vh;">
+    <div class="flex flex-col mt-48 mx-52 m-12" style="height: 55vh;">
       <div class="flex flex-col mx-12">
         <h1 class="text-6xl font-bold mx-2">Automatize</h1>
         <h1 class="text-8xl font-bold text-purple-500 mt-2">Everything.</h1>
@@ -52,7 +70,7 @@ const navigateToRegister = () => {
       </div>
     </div>
 
-    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 items-center mb-16">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 items-center mb-20">
       <div class="text-center mb-16">
         <h2 class="text-3xl font-bold text-gray-900 mb-4">Make your day easy</h2>
         <p class="text-gray-600">Discover new ways to create useful workflows</p>
@@ -82,5 +100,29 @@ const navigateToRegister = () => {
         </div>
       </div>
     </div>
+
+    <div class="bg-purple-50 my-8">
+      <div class="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-12">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">About Us</h2>
+          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            We're on a mission to make workflow automation accessible to everyone
+          </p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div v-for="feature in features" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
+            <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <Icon :name="feature.icon" class="h-6 w-6 text-purple-700" />
+            </div>
+            <h3 class="text-xl font-semibold mb-2">{{ feature.title }}</h3>
+            <p class="text-gray-600">{{ feature.description }}</p>
+          </div>
+        </div>
+        <p class="text-center text-xl text-gray-600 max-w-3xl mx-auto mt-8">
+          You can see the documentation <a class="text-purple-700" href="https://github.com/Epitouche/Area51/blob/main/README.md">here</a> to learn more about us !
+        </p>
+      </div>
+    </div>
+
   </div>
 </template>
