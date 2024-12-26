@@ -31,7 +31,6 @@ export default function LoginScreen() {
     });
     if (loginSuccessful) {
       setIsConnected(true);
-      console.log('register');
     }
   };
 

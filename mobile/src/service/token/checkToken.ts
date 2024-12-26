@@ -1,13 +1,13 @@
-import { useState } from 'react';
 import { getToken } from './getToken';
 
-export const checkToken = async (
-  tokenName: string,
-) => {
-  const [token, setToken] = useState('');
-  await getToken(tokenName, setToken);
+export async function checkToken(tokenName: string): Promise<boolean> {
+  let token = '';
+  const setToken = (newToken: string) => {
+    token = newToken;
+  };
 
-  if (token === 'Error: getting the token')
-    return false;
-  return true
-};
+  if ((await getToken(tokenName, setToken)) === false) return false;
+
+  if (token === 'Error: getting the token') return false;
+  return true;
+}
