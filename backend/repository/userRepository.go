@@ -15,6 +15,7 @@ type UserRepository interface {
 	FindById(id uint64) schemas.User
 	FindByUsername(username string) schemas.User
 	FindByEmail(email string) schemas.User
+	FindAllServicesByUserId(id uint64) []schemas.ServiceToken
 }
 
 type userRepository struct {
@@ -88,4 +89,13 @@ func (r *userRepository) FindByEmail(email string) schemas.User {
 		return schemas.User{}
 	}
 	return user
+}
+
+func (r *userRepository) FindAllServicesByUserId(id uint64) []schemas.ServiceToken {
+	var services []schemas.ServiceToken
+	err := r.db.Connection.Where(&schemas.ServiceToken{UserId: id}).Find(&services)
+	if err.Error != nil {
+		return []schemas.ServiceToken{}
+	}
+	return services
 }

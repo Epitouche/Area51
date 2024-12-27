@@ -111,11 +111,11 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	var tokenId *uint64
 	if isAlreadyRegistered {
 		newGithubToken = schemas.ServiceToken{
-			Id: 	*actualUser.TokenId,
+			Id:      *actualUser.TokenId,
 			Token:   githubTokenResponse.AccessToken,
 			Service: githubService,
 			UserId:  actualUser.Id,
-			User: actualUser,
+			User:    actualUser,
 		}
 		if actualUser.TokenId != nil {
 			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, githubService.Id)
@@ -140,9 +140,9 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		newGithubToken = schemas.ServiceToken{
 			Token:        githubTokenResponse.AccessToken,
 			RefreshToken: githubTokenResponse.RefreshToken,
-			Service: githubService,
-			UserId:  actualUser.Id,
-			User: actualUser,
+			Service:      githubService,
+			UserId:       actualUser.Id,
+			User:         actualUser,
 		}
 		isAlreadyRegistered = true
 	}
@@ -165,7 +165,7 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 				newUser = schemas.User{
 					Username: userInfo.Login,
 					Email:    userInfo.Email,
-					TokenId: &token.Id,
+					TokenId:  &token.Id,
 				}
 				actualUser.TokenId = &token.Id
 				err := controller.userService.UpdateUserInfos(actualUser)
@@ -181,7 +181,7 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	if isAlreadyRegistered {
 		token, _ := controller.userService.Login(newUser)
 		// ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
-		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code=" + codeCredentials.Code + "&state=" + codeCredentials.State)
+		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
 		return token, nil
 	} else {
 		token, err := controller.userService.Register(newUser)
@@ -243,7 +243,7 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 	var tokenId *uint64
 	if isAlreadyRegistered {
 		newGithubToken = schemas.ServiceToken{
-			Id: 	*actualUser.TokenId,
+			Id:      *actualUser.TokenId,
 			Token:   result.Token,
 			Service: githubService,
 			UserId:  actualUser.Id,
@@ -294,7 +294,7 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 				newUser = schemas.User{
 					Username: userInfo.Login,
 					Email:    userInfo.Email,
-					TokenId: &token.Id,
+					TokenId:  &token.Id,
 				}
 				actualUser.TokenId = &token.Id
 				err := controller.userService.UpdateUserInfos(actualUser)

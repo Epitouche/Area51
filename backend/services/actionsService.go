@@ -23,10 +23,10 @@ type ServiceAction interface {
 }
 
 type actionService struct {
-	repository     repository.ActionRepository
-	userService    UserService
-	serviceService ServicesService
-	allActions    []interface{}
+	repository       repository.ActionRepository
+	userService      UserService
+	serviceService   ServicesService
+	allActions       []interface{}
 	allActionsSchema []schemas.Action
 }
 
@@ -38,12 +38,12 @@ func NewActionService(
 	newActionService := &actionService{
 		repository:     repository,
 		serviceService: serviceService,
-		userService: userService,
+		userService:    userService,
 		allActionsSchema: []schemas.Action{
 			{
-				Name: "pull_request",
+				Name:        "pull_request",
 				Description: "Creation or deletion of a pull request",
-				ServiceId: serviceService.FindByName(schemas.Github).Id,
+				ServiceId:   serviceService.FindByName(schemas.Github).Id,
 			},
 		},
 		allActions: []interface{}{serviceService},
@@ -68,12 +68,12 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 	serviceInfo := service.serviceService.FindByName(schemas.Github)
 
 	newAction := schemas.Action{
-		Name: result.Name,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Name:        result.Name,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 		Description: result.Description,
-		ServiceId: serviceInfo.Id,
-		Options: result.Options,
+		ServiceId:   serviceInfo.Id,
+		Options:     result.Options,
 	}
 	service.repository.Save(newAction)
 	return "Action Created successfully", nil

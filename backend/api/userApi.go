@@ -49,16 +49,9 @@ func (api *UserApi) Register(ctx *gin.Context) {
 	})
 }
 
-func (api *UserApi) GetAccessToken(ctx *gin.Context) {
-	token, err := api.userController.GetAccessToken(ctx)
+func (api *UserApi) GetServices(ctx *gin.Context) {
+	allServices, err := api.userController.GetAllServices(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, &schemas.BasicResponse{
-			Message: err.Error(),
-		})
-		return
 	}
-	ctx.JSON(http.StatusOK, &schemas.JWT{
-		Token: token,
-	})
+	ctx.JSON(http.StatusOK, allServices)
 }
-
