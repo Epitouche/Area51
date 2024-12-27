@@ -1,27 +1,58 @@
 <script setup lang="ts">
 import type { ServerResponse, Service } from "~/src/types";
 
-const services = reactive<Service[]>([]);
+type ServiceCard = {
+  name: string;
+  description: string;
+  image: string;
+  isConnected: boolean;
+};
+
+const allServices = reactive<ServiceCard[]>([]);
+
+const token = useCookie("access_token");
 
 // Fetch services from the API
 onMounted(async () => {
+
+  // fetch the services
   const response = await $fetch<ServerResponse>(
     "http://localhost:8080/about.json"
   );
+
+  // create a new array with the services
   response.server.services.forEach((service: Service) => {
-    services.push(service);
+    allServices.push({
+      name: service.name,
+      description:
+        "Description of the service. This text has to be long enough to be able to see the overflow of the text.",
+      image: "IMG",
+      isConnected: false,
+    });
   });
 
-  // add fake services for testing
-  services.push({ name: "Service 1", actions: [], reactions: [] });
-  services.push({ name: "Service 2", actions: [], reactions: [] });
-  services.push({ name: "Service 3", actions: [], reactions: [] });
-  services.push({ name: "Service 4", actions: [], reactions: [] });
-  services.push({ name: "Service 5", actions: [], reactions: [] });
-  services.push({ name: "Service 6", actions: [], reactions: [] });
-  services.push({ name: "Service 7", actions: [], reactions: [] });
+  // fetch the connected services
+  const connectedServices = await $fetch<ServiceCard[]>(
+    "http://localhost:8080/api/user/services",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    }
+  );
 
-  services.forEach((service) => {
+  // if the service is connected, set the isConnected property to true
+  allServices.forEach((service) => {
+    connectedServices.forEach((connectedService) => {
+      if (service.name === connectedService.name) {
+        service.isConnected = true;
+      }
+    });
+  });
+
+  // capitalize the first letter of the service name
+  allServices.forEach((service) => {
     service.name = service.name.charAt(0).toUpperCase() + service.name.slice(1);
   });
 });
@@ -42,7 +73,7 @@ onMounted(async () => {
     </div>
     <div class="grid grid-cols-3 gap-4 m-20">
       <div
-        v-for="(service, index) in services"
+        v-for="(service, index) in allServices"
         :key="index"
         class="flex justify-center"
       >
@@ -53,11 +84,15 @@ onMounted(async () => {
             <div
               class="w-12 h-12 bg-primaryWhite-400 dark:bg-secondaryDark-400 rounded-full flex items-center justify-center"
             >
-              <p>IMG</p>
+              <p>{{ service.image }}</p>
             </div>
             <div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" value="" class="sr-only peer" checked>
+                <input
+                  type="checkbox"
+                  :checked="service.isConnected"
+                  class="sr-only peer"
+                >
                 <div
                   class="w-11 h-6 bg-primaryWhite-500 dark:bg-secondaryDark-400 rounded-full peer peer-checked:bg-tertiary-500 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
                 />
@@ -71,7 +106,7 @@ onMounted(async () => {
               {{ service.name }}
             </h3>
             <p class="text-fontBlack dark:text-fontWhite">
-              Description of the service. This text has to be long enough to be able to see the overflow of the text.
+              {{ service.description }}
             </p>
           </div>
         </div>
