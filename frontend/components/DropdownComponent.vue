@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import ButtonComponent from "./ButtonComponent.vue";
 
 const props = defineProps<{
@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>();
 
 const isOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
@@ -23,15 +24,29 @@ const selectOption = (option: string) => {
   emit("update:modelValue", option);
   isOpen.value = false;
 };
-</script>
 
+const handleClickOutside = (event: MouseEvent) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    isOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener("mousedown", handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("mousedown", handleClickOutside);
+});
+</script>
 <template>
-  <div class="relative inline-block text-left">
+  <div ref="dropdownRef" class="relative inline-block text-left">
     <ButtonComponent
       :text="props.label || 'Select an option'"
       bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
       hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
       text-color="text-fontBlack dark:text-fontWhite"
+      icon="material-symbols:keyboard-arrow-down-rounded"
       @click="toggleDropdown"
     />
 

@@ -16,9 +16,11 @@ const columns = [
   "Creation Date",
 ];
 
+const filters = ["All Status", "Active", "Inactive", "Selected"];
+
 const services = reactive<Service[]>([]);
 const workflowsInList = reactive<Workflow[]>([]);
-const lastWorkflow = reactive<WorkflowResponse[]>([]);
+const lastWorkflowResult = reactive<WorkflowResponse[]>([]);
 
 const actionString = ref("");
 const reactionString = ref("");
@@ -28,6 +30,20 @@ const selectedFilter = ref("All Status");
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 const token = useCookie("access_token");
+
+const filteredWorkflows = computed(() => {
+  switch (selectedFilter.value) {
+    case "Active":
+      return workflowsInList.filter(workflow => workflow.is_active === true);
+    case "Inactive":
+      return workflowsInList.filter(workflow => workflow.is_active === false);
+    case "Selected":
+      return workflowsInList;
+    default:
+      return workflowsInList;
+  }
+});
+
 const copyIcon = ref("material-symbols:content-copy-outline-rounded");
 
 const copyToClipboard = async (text: string) => {
@@ -63,7 +79,7 @@ const confirmModalReaction = () => {
   closeModalReaction();
 };
 
-async function fetchServices() {
+async function fetchWorflows() {
   try {
     const response = await $fetch<ServerResponse>(
       "http://localhost:8080/about.json",
@@ -89,6 +105,7 @@ async function fetchServices() {
     console.error("Error fetching services:", error);
   }
 }
+
 async function addWorkflow() {
   try {
     const actionSelected = services
@@ -114,14 +131,14 @@ async function addWorkflow() {
           reaction_id: reactionSelected.reaction_id,
         },
       });
-      fetchServices();
+      fetchWorflows();
     }
   } catch (error) {
     console.error("Error adding workflow:", error);
   }
 }
 
-async function getLastWorkflow() {
+async function getLastWorkflowResult() {
   try {
     const response = await $fetch<WorkflowResponse[]>(
       "/api/workflows/getLastWorkflow",
@@ -133,15 +150,15 @@ async function getLastWorkflow() {
         },
       }
     );
-    lastWorkflow.push(...response);
+    lastWorkflowResult.push(...response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
   }
 }
 
 onMounted(() => {
-  fetchServices();
-  getLastWorkflow();
+  fetchWorflows();
+  getLastWorkflowResult();
 });
 </script>
 
@@ -248,19 +265,19 @@ onMounted(() => {
       <DropdownComponent
         v-model="selectedFilter"
         :label="selectedFilter"
-        :options="['All Status', 'Active', 'Inactive', 'Selected']"
+        :options="filters"
         />
       <ButtonComponent
-        text="All Status"
+        text="Sort by"
         bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
         hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
         text-color="text-fontBlack dark:text-fontWhite"
       />
     </div>
     <ListTableComponent
-      v-show="columns && workflowsInList"
+      v-show="columns && filteredWorkflows"
       :columns="columns"
-      :rows="workflowsInList"
+      :rows="filteredWorkflows"
     />
     <div class="flex justify-center">
       <hr
@@ -274,14 +291,14 @@ onMounted(() => {
         <button
         class="absolute top-4 right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
         aria-label="Copier le JSON"
-        @click="copyToClipboard(JSON.stringify(lastWorkflow, null, 2))"
+        @click="copyToClipboard(JSON.stringify(lastWorkflowResult, null, 2))"
         >
           <Icon :name="copyIcon" />
         </button>
         <pre
           class="whitespace-pre-wrap break-words text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
         >
-    {{ JSON.stringify(lastWorkflow, null, 2) }}
+    {{ JSON.stringify(lastWorkflowResult, null, 2) }}
   </pre
         >
       </div>
