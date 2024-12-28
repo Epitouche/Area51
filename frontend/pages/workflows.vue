@@ -19,8 +19,12 @@ const columns = [
 const services = reactive<Service[]>([]);
 const workflowsInList = reactive<Workflow[]>([]);
 const lastWorkflow = reactive<WorkflowResponse[]>([]);
-const actionSelected = ref(<Action>{});
-const reactionSelected = ref(<Reaction>{});
+
+const actionString = ref("");
+const reactionString = ref("");
+
+const selectedFilter = ref("All Status");
+
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 const token = useCookie("access_token");
@@ -87,18 +91,31 @@ async function fetchServices() {
 }
 async function addWorkflow() {
   try {
-    await $fetch<ServerResponse>("/api/workflows/addWorkflows", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        "Content-Type": "application/json",
-      },
-      body: {
-        action_id: actionSelected.value.action_id,
-        reaction_id: reactionSelected.value.reaction_id,
-      },
-    });
-    fetchServices();
+    const actionSelected = services
+      .map((service) => service.actions)
+      .flat()
+      .find((action) => action.name === actionString.value);
+    
+    const reactionSelected = services
+      .map((service) => service.reactions)
+      .flat()
+      .find((reaction) => reaction.name === reactionString.value);
+
+    if (actionSelected && reactionSelected)
+    {
+      await $fetch<ServerResponse>("/api/workflows/addWorkflows", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+        body: {
+          action_id: actionSelected.action_id,
+          reaction_id: reactionSelected.reaction_id,
+        },
+      });
+      fetchServices();
+    }
   } catch (error) {
     console.error("Error adding workflow:", error);
   }
@@ -140,12 +157,12 @@ onMounted(() => {
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex flex-col justify-center m-16 gap-10">
       <div class="flex justify-center gap-5">
         <ButtonComponent
-          :text="actionSelected.name ? actionSelected.name : 'Choose an action'"
+          :text="actionString ? actionString : 'Choose an action'"
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
@@ -165,16 +182,16 @@ onMounted(() => {
             >
               <DropdownComponent
                 v-if="service.actions"
-                v-model="actionSelected"
+                v-model="actionString"
                 :label="service.name"
-                :options="service.actions.map((action) => action)"
+                :options="service.actions.map((action) => action.name)"
               />
             </div>
           </div>
         </ModalComponent>
         <ButtonComponent
           :text="
-            reactionSelected.name ? reactionSelected.name : 'Choose a reaction'
+            reactionString ? reactionString : 'Choose a reaction'
           "
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
@@ -195,9 +212,9 @@ onMounted(() => {
             >
               <DropdownComponent
                 v-if="service.reactions"
-                v-model="reactionSelected"
+                v-model="reactionString"
                 :label="service.name"
-                :options="service.reactions.map((reaction) => reaction)"
+                :options="service.reactions.map((reaction) => reaction.name)"
               />
             </div>
           </div>
@@ -206,13 +223,13 @@ onMounted(() => {
       <div class="flex justify-center">
         <ButtonComponent
           :class="
-            actionSelected && reactionSelected
+            actionString && reactionString
               ? ''
               : 'cursor-not-allowed opacity-50'
           "
           text="Add Workflow"
           :bg-color="
-            actionSelected && reactionSelected
+            actionString && reactionString
               ? 'bg-tertiary-500'
               : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'
           "
@@ -225,15 +242,14 @@ onMounted(() => {
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex justify-start gap-5 m-20">
-      <ButtonComponent
-        text="Filter"
-        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-        text-color="text-fontBlack dark:text-fontWhite"
-      />
+      <DropdownComponent
+        v-model="selectedFilter"
+        :label="selectedFilter"
+        :options="['All Status', 'Active', 'Inactive', 'Selected']"
+        />
       <ButtonComponent
         text="All Status"
         bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
@@ -249,17 +265,16 @@ onMounted(() => {
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex justify-center m-20">
       <div
         class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-10/12"
       >
-        <!-- Bouton pour copier le JSON, turn accent after copy -->
         <button
-          @click="copyToClipboard(JSON.stringify(lastWorkflow, null, 2))"
-          class="absolute top-4 right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
-          aria-label="Copier le JSON"
+        class="absolute top-4 right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
+        aria-label="Copier le JSON"
+        @click="copyToClipboard(JSON.stringify(lastWorkflow, null, 2))"
         >
           <Icon :name="copyIcon" />
         </button>
