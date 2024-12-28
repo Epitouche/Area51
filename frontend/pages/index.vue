@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import FooterComponent from '~/components/FooterComponent.vue';
 
 const workflows = ref([
   {
@@ -44,32 +45,99 @@ const features = ref([
   }
 ]);
 
+const HeroWorkflows = [
+  {
+    title: "Issue Tracking",
+    steps: [
+      {
+        icon: 'line-md:github',
+        label: "New Issue",
+        color: "bg-gray-900",
+      },
+      {
+        icon: 'line-md:github',
+        label: "Trigger",
+        color: "bg-brand-purple",
+      },
+      {
+        icon: 'line-md:github',
+        label: "Notify Team",
+        color: "bg-indigo-500",
+      },
+    ],
+  },
+  {
+    title: "Meeting Scheduler",
+    steps: [
+      {
+        icon: 'line-md:github',
+        label: "Email Request",
+        color: "bg-red-500",
+      },
+      {
+        icon: 'line-md:github',
+        label: "Process",
+        color: "bg-brand-purple",
+      },
+      {
+        icon: 'line-md:github',
+        label: "Schedule",
+        color: "bg-blue-500",
+      },
+    ],
+  },
+  {
+    title: "Document Flow",
+    steps: [
+      {
+        icon: 'line-md:github',
+        label: "New Doc",
+        color: "bg-emerald-500",
+      },
+      {
+        icon: 'line-md:github',
+        label: "Review",
+        color: "bg-brand-purple",
+      },
+      {
+        icon: 'line-md:github',
+        label: "Approve",
+        color: "bg-amber-500",
+      },
+    ],
+  },
+];
+
 const navigateToRegister = () => {
   useRouter().push('/register');
 };
 </script>
 <template>
+<!-- Navbar -->
   <NavbarComponent />
-  <div class="flex flex-col">
-    <div class="flex flex-col mt-48 mx-52 m-12" style="height: 55vh;">
-      <div class="flex flex-col mx-12">
-        <h1 class="text-6xl font-bold mx-2">Automatize</h1>
-        <h1 class="text-8xl font-bold text-purple-500 mt-2">Everything.</h1>
-        <p class="my-4 text-xl text-gray-700">
+
+  <div class="flex flex-col h-2/3 bg-gray-50">
+<!-- Hero Section -->
+    <div class="mt-32 mx-4 sm:mx-8 md:mx-16 lg:mx-24 xl:mx-48">
+      <div class="flex flex-col">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mx-2">Automatize</h1>
+        <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold text-purple-500 mt-2">Everything.</h1>
+        <p class="my-4 text-lg sm:text-xl md:text-2xl text-gray-700">
           Make your favorite apps connect with each other <br />
-          and let us automatize tasks for you !
+          and let us automatize tasks for you!
         </p>
         <ButtonComponent
           text="Start now!"
           bgColor="bg-tertiary-500"
           hoverColor="hover:bg-purple-600"
           textColor="text-fontWhite"
-          class="mt-4 inline-block max-w-max rounded-lg"
+          class="mt-4 inline-block max-w-max"
           @click="navigateToRegister"
         ></ButtonComponent>
       </div>
     </div>
 
+<!-- Workflow example -->
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 items-center mb-24">
       <div class="text-center mb-16">
         <h2 class="text-4xl font-bold text-gray-900 mb-4">Make your day easy</h2>
@@ -101,6 +169,7 @@ const navigateToRegister = () => {
       </div>
     </div>
 
+<!-- About us -->
     <div class="bg-purple-50 my-8">
       <div class="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-20">
         <div class="text-center mb-16">
@@ -123,6 +192,8 @@ const navigateToRegister = () => {
         </p>
       </div>
     </div>
-    <Footer />
+
+<!-- Footer -->
+    <FooterComponent />
   </div>
 </template>
