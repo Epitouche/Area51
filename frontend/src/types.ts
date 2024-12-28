@@ -6,7 +6,7 @@ export type WorkflowResponse = {
 export type Workflow = {
   name: string;
   action_id: number;
-  reaction_id: string;
+  reaction_id: number;
   is_active: boolean;
   created_at: string;
 };
