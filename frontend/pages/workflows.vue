@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import type {
-  Action,
-  Reaction,
   ServerResponse,
   Service,
   WorkflowResponse,
@@ -27,6 +25,8 @@ const reactionString = ref("");
 
 const selectedFilter = ref("All Status");
 
+const checkboxList = ref<boolean[]>([]);
+
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 const token = useCookie("access_token");
@@ -38,7 +38,7 @@ const filteredWorkflows = computed(() => {
     case "Inactive":
       return workflowsInList.filter(workflow => workflow.is_active === false);
     case "Selected":
-      return workflowsInList;
+      return workflowsInList.filter((_, index) => checkboxList.value[index]);
     default:
       return workflowsInList;
   }
@@ -100,6 +100,7 @@ async function fetchWorflows() {
       const date = new Date(dateString);
       const formattedDate = date.toLocaleDateString("en-GB");
       workflow.created_at = formattedDate;
+      checkboxList.value.push(false);
     });
   } catch (error) {
     console.error("Error fetching services:", error);
@@ -276,6 +277,7 @@ onMounted(() => {
     </div>
     <ListTableComponent
       v-show="columns && filteredWorkflows"
+      v-model="checkboxList"
       :columns="columns"
       :rows="filteredWorkflows"
     />

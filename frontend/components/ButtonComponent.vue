@@ -25,7 +25,7 @@ const computedHoverColor = computed(
 <template>
   <button
     :class="[
-      'rounded-full px-4 py-2 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 flex flex-row gap-2 items-center',
+      'rounded-full px-4 py-2 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 flex flex-row gap-2 justify-center items-center',
       computedBgColor,
       computedTextColor,
       computedHoverColor,
