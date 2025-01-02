@@ -51,6 +51,7 @@ func (service *reactionService) GetAllServicesByServiceId(
 	serviceId uint64,
 ) (reactionJson []schemas.ReactionJson) {
 	allRectionForService := service.repository.FindByServiceId(serviceId)
+
 	for _, oneReaction := range allRectionForService {
 		reactionJson = append(reactionJson, schemas.ReactionJson{
 			Name:        oneReaction.Name,

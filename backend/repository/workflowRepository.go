@@ -27,9 +27,11 @@ type workflowRepository struct {
 
 func NewWorkflowRepository(db *gorm.DB) WorkflowRepository {
 	err := db.AutoMigrate(&schemas.Workflow{})
+
 	if err != nil {
 		panic("failed to migrate database")
 	}
+
 	return &workflowRepository{
 		db: &schemas.Database{
 			Connection: db,
@@ -39,6 +41,7 @@ func NewWorkflowRepository(db *gorm.DB) WorkflowRepository {
 
 func (repo *workflowRepository) Save(workflow schemas.Workflow) {
 	err := repo.db.Connection.Create(&workflow)
+
 	if err.Error != nil {
 		fmt.Printf("%+v", err.Error)
 		panic(err.Error)
@@ -46,22 +49,28 @@ func (repo *workflowRepository) Save(workflow schemas.Workflow) {
 }
 
 func (repo *workflowRepository) Update(workflow schemas.Workflow) {
-	err := repo.db.Connection.Where(&schemas.Workflow{Id: workflow.Id}).Updates(&workflow)
+	err := repo.db.Connection.Where(&schemas.Workflow{
+		Id: workflow.Id,
+	}).Updates(&workflow)
+
 	if err.Error != nil {
 		panic(err.Error)
 	}
 }
 
 func (repo *workflowRepository) Delete(workflowId uint64) {
-	err := repo.db.Connection.Delete(&schemas.Workflow{Id: workflowId})
+	err := repo.db.Connection.Delete(&schemas.Workflow{
+		Id: workflowId,
+	})
+
 	if err.Error != nil {
 		panic(err.Error)
 	}
 }
 
-func (repo *workflowRepository) FindAll() []schemas.Workflow {
-	var workflows []schemas.Workflow
+func (repo *workflowRepository) FindAll() (workflows []schemas.Workflow) {
 	err := repo.db.Connection.Find(&workflows)
+
 	if err.Error != nil {
 		return []schemas.Workflow{}
 	}
@@ -69,57 +78,64 @@ func (repo *workflowRepository) FindAll() []schemas.Workflow {
 }
 
 func (repo *workflowRepository) FindByIds(workflowId uint64) (schemas.Workflow, error) {
-	var workflow schemas.Workflow
-	var action schemas.Action
-	var reaction schemas.Reaction
+	workflow := schemas.Workflow{}
+
 	err := repo.db.Connection.Where(&schemas.Workflow{Id: workflowId}).First(&workflow)
 	if err.Error != nil {
 		return schemas.Workflow{}, err.Error
 	}
-	err = repo.db.Connection.Where(&schemas.Action{Id: workflow.ActionId}).First(&action)
+
+	err = repo.db.Connection.Where(&schemas.Action{Id: workflow.ActionId}).First(&workflow.Action)
 	if err.Error != nil {
 		return schemas.Workflow{}, err.Error
 	}
-	workflow.Action = action
-	err = repo.db.Connection.Where(&schemas.Reaction{Id: workflow.ReactionId}).First(&reaction)
+
+	err = repo.db.Connection.Where(&schemas.Reaction{Id: workflow.ReactionId}).First(&workflow.Reaction)
 	if err.Error != nil {
 		return schemas.Workflow{}, err.Error
 	}
-	workflow.Reaction = reaction
 
 	return workflow, nil
 }
 
-func (repo *workflowRepository) FindByUserId(userId uint64) []schemas.Workflow {
-	var workflows []schemas.Workflow
-	err := repo.db.Connection.Where(&schemas.Workflow{UserId: userId}).Find(&workflows)
+func (repo *workflowRepository) FindByUserId(userId uint64) (workflows []schemas.Workflow) {
+	err := repo.db.Connection.Where(&schemas.Workflow{
+		UserId: userId,
+	}).Find(&workflows)
+
 	if err.Error != nil {
 		return []schemas.Workflow{}
 	}
 	return workflows
 }
 
-func (repo *workflowRepository) FindByWorkflowName(workflowName string) schemas.Workflow {
-	var workflow schemas.Workflow
-	err := repo.db.Connection.Where(&schemas.Workflow{Name: workflowName}).First(&workflow)
+func (repo *workflowRepository) FindByWorkflowName(workflowName string) (workflow schemas.Workflow) {
+	err := repo.db.Connection.Where(&schemas.Workflow{
+		Name: workflowName,
+	}).First(&workflow)
+
 	if err.Error != nil {
 		return schemas.Workflow{}
 	}
 	return workflow
 }
 
-func (repo *workflowRepository) FindByActionId(actionId uint64) schemas.Workflow {
-	var workflow schemas.Workflow
-	err := repo.db.Connection.Where(&schemas.Workflow{ActionId: actionId}).First(&workflow)
+func (repo *workflowRepository) FindByActionId(actionId uint64) (workflow schemas.Workflow) {
+	err := repo.db.Connection.Where(&schemas.Workflow{
+		ActionId: actionId,
+	}).First(&workflow)
+
 	if err.Error != nil {
 		return schemas.Workflow{}
 	}
 	return workflow
 }
 
-func (repo *workflowRepository) FindByReactionId(reactionId uint64) schemas.Workflow {
-	var workflow schemas.Workflow
-	err := repo.db.Connection.Where(&schemas.Workflow{ReactionId: reactionId}).First(&workflow)
+func (repo *workflowRepository) FindByReactionId(reactionId uint64) (workflow schemas.Workflow) {
+	err := repo.db.Connection.Where(&schemas.Workflow{
+		ReactionId: reactionId,
+	}).First(&workflow)
+
 	if err.Error != nil {
 		return schemas.Workflow{}
 	}
@@ -129,6 +145,7 @@ func (repo *workflowRepository) FindByReactionId(reactionId uint64) schemas.Work
 func (repo *workflowRepository) SaveWorkflow(workflow schemas.Workflow) (workflowId uint64, err error) {
 	repo.Save(workflow)
 	result := repo.db.Connection.Last(&workflow)
+
 	if result.Error != nil {
 		return 0, result.Error
 	}

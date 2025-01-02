@@ -54,11 +54,13 @@ func NewActionService(
 }
 
 func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
-	var result schemas.ActionResult
+	result := schemas.ActionResult{}
+
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
 	if err != nil {
 		return "", err
 	}
+
 	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return "", err
@@ -68,8 +70,8 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	serviceInfo := service.serviceService.FindByName(schemas.Github)
 
+	serviceInfo := service.serviceService.FindByName(schemas.Github)
 	newAction := schemas.Action{
 		Name:        result.Name,
 		CreatedAt:   time.Now(),
@@ -78,6 +80,7 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 		ServiceId:   serviceInfo.Id,
 		Options:     result.Options,
 	}
+
 	service.repository.Save(newAction)
 	return "Action Created successfully", nil
 }
@@ -90,6 +93,7 @@ func (service *actionService) GetAllServicesByServiceId(
 	serviceId uint64,
 ) (actionJson []schemas.ActionJson) {
 	allActionForService := service.repository.FindByServiceId(serviceId)
+
 	for _, oneAction := range allActionForService {
 		actionJson = append(actionJson, schemas.ActionJson{
 			Name:        oneAction.Name,

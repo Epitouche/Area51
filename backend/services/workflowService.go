@@ -56,11 +56,12 @@ func (service *workflowService) FindAll() []schemas.Workflow {
 }
 
 func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error) {
-	var result schemas.WorkflowResult
+	result := schemas.WorkflowResult{}
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
 	if err != nil {
 		return "", err
 	}
+
 	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return "", err
@@ -81,10 +82,8 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 			workflowValue = strconv.Itoa(workflowValueInt)
 		}
 		workflowValueInt, _ := strconv.Atoi(workflowValue)
-		workflowValueInt++
-		workflowValueInt++
+		workflowValueInt += 2
 		workflowValue = strconv.Itoa(workflowValueInt)
-
 		workflowName = "Workflow " + workflowValue
 	}
 
@@ -99,10 +98,12 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		Reaction:   service.reactionService.FindById(result.ReactionId),
 		Name:       workflowName,
 	}
+
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
 		return "", err
 	}
+
 	newWorkflow.Id = workflowId
 	service.InitWorkflow(newWorkflow, githubServiceToken)
 	return "Workflow Created succesfully", nil
@@ -124,18 +125,20 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 				fmt.Println("Error")
 				return
 			}
+
 			action := service.servicesService.FindActionByName(workflow.Action.Name)
 			if action == nil {
 				fmt.Println("Action not found")
 				return
 			}
+
 			if workflow.IsActive {
 				action(channel, workflow.Action.Name, workflow.Id)
 			}
 		}
 		fmt.Println("Clear")
 		channel <- "Workflow finished"
-	}(workflowStartingPoint, channel)
+	} (workflowStartingPoint, channel)
 }
 
 func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken) {
@@ -146,19 +149,20 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 				fmt.Println("Error")
 				return
 			}
+
 			reaction := service.servicesService.FindReactionByName(workflow.Reaction.Name)
 			if reaction == nil {
 				fmt.Println("Reaction not found")
 				return
 			}
+
 			if workflow.IsActive {
 				result := <-channel
 				reaction(workflow.Id, githubServiceToken)
 				fmt.Println(result)
 			}
 		}
-
-	}(workflowStartingPoint, channel)
+	} (workflowStartingPoint, channel)
 }
 
 func (service *workflowService) ExistWorkflow(workflowId uint64) bool {
@@ -182,7 +186,7 @@ func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schem
 	}
 
 	workflows := service.repository.FindByUserId(user.Id)
-	var reactionResponse []schemas.GithubListCommentsResponse
+	reactionResponse := []schemas.GithubListCommentsResponse{}
 	for _, workflow := range workflows {
 		reactionResponseData := service.reactionResponseDataService.FindByWorkflowId(workflow.Id)
 		for _, data := range reactionResponseData {

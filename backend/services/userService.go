@@ -43,6 +43,7 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 	if user.Username == "" {
 		return "", errors.New("user not found")
 	}
+
 	if database.CompareHashAndPassword(user.Password, newUser.Password) {
 		return service.serviceJWT.GenerateJWTToken(
 			strconv.FormatUint(user.Id, 10),
@@ -62,7 +63,6 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 	}
 
 	return "", errors.New("invalid password")
-
 }
 
 func (service *userService) Register(newUser schemas.User) (JWTtoken string, err error) {
@@ -88,6 +88,7 @@ func (service *userService) GetUserInfos(token string) (userInfos schemas.User, 
 	if err != nil {
 		return schemas.User{}, err
 	}
+
 	userInfos = service.repository.FindById(userId)
 	return userInfos, nil
 }
