@@ -14,6 +14,7 @@ type UserController interface {
 	Login(ctx *gin.Context) (string, error)
 	Register(ctx *gin.Context) (string, error)
 	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
+	GetAccessToken(ctx *gin.Context) (string, error)
 }
 
 type userController struct {
