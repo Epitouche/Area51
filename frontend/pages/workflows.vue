@@ -129,31 +129,6 @@ async function fetchWorflows() {
       checkboxList.value.push(false);
     });
 
-    // add fake workflows
-    workflowsInList.push(
-      {
-        name: "Fake Workflow 1",
-        action_id: 1,
-        reaction_id: 2,
-        is_active: true,
-        created_at: "01/10/2021",
-      },
-      {
-        name: "Fake Workflow 2",
-        action_id: 2,
-        reaction_id: 3,
-        is_active: false,
-        created_at: "02/10/2021",
-      },
-      {
-        name: "Fake Workflow 3",
-        action_id: 3,
-        reaction_id: 4,
-        is_active: true,
-        created_at: "03/10/2021",
-      }
-    );
-
     sortWorkflows();
   } catch (error) {
     console.error("Error fetching services:", error);
