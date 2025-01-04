@@ -18,16 +18,15 @@ type WorkflowRepository interface {
 	FindByWorkflowName(workflowName string) schemas.Workflow
 	FindByActionId(actionId uint64) schemas.Workflow
 	FindByReactionId(reactionId uint64) schemas.Workflow
-	SaveWorkflow(workflow schemas.Workflow)(workflowId uint64, err error)
+	SaveWorkflow(workflow schemas.Workflow) (workflowId uint64, err error)
 }
 
 type workflowRepository struct {
 	db *schemas.Database
 }
 
-
 func NewWorkflowRepository(db *gorm.DB) WorkflowRepository {
-	err:= db.AutoMigrate(&schemas.Workflow{})
+	err := db.AutoMigrate(&schemas.Workflow{})
 	if err != nil {
 		panic("failed to migrate database")
 	}

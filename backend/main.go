@@ -18,9 +18,9 @@ func setupRouter() *gin.Engine {
 	router := gin.Default()
 	fullCors := cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-		AllowHeaders:    []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
-		ExposeHeaders:   []string{"Content-Length"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	})
 	router.Use(fullCors)
@@ -31,11 +31,15 @@ func setupRouter() *gin.Engine {
 	apiRoutes := router.Group("/api")
 	{
 
+		user := apiRoutes.Group("/user", middlewares.Authorization())
+		{
+			user.GET("services", userApi.GetServices)
+		}
+
 		auth := apiRoutes.Group("/auth")
 		{
 			auth.POST("/login", userApi.Login)
 			auth.POST("/register", userApi.Register)
-			auth.GET("/access_token", userApi.GetAccessToken)
 		}
 
 		github := apiRoutes.Group("/github")
@@ -88,7 +92,7 @@ var (
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 
 	// Controllers
-	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService)
+	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService, servicesService)
 	githubController   controllers.GithubController   = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
 	actionController   controllers.ActionController   = controllers.NewActionController(actionService)
 	servicesController controllers.ServicesController = controllers.NewServiceController(servicesService, actionService, reactionService)

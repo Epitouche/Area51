@@ -1,10 +1,11 @@
 package api
 
 import (
-	"area51/controllers"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"area51/controllers"
 )
 
 type ActionApi struct {

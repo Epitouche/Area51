@@ -10,31 +10,31 @@ type ServicesService interface {
 	FindByName(serviceName schemas.ServiceName) schemas.Service
 	FindById(serviceId uint64) schemas.Service
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
-	FindReactionByName(name string) func (workflowId uint64, accessToken []schemas.ServiceToken)
+	FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken)
 	GetServices() []interface{}
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
 }
 
 type ServiceInterface interface {
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
-	FindReactionByName(name string) func (workflowId uint64, accessToken []schemas.ServiceToken)
+	FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken)
 }
 
 type servicesService struct {
-	repository 			repository.ServiceRepository
-	allServices 		[]interface{}
-	allServicesSchema 	[]schemas.Service
+	repository        repository.ServiceRepository
+	allServices       []interface{}
+	allServicesSchema []schemas.Service
 }
 
 func NewServicesService(
 	repository repository.ServiceRepository,
 	githubService GithubService,
-	) ServicesService {
+) ServicesService {
 	newService := servicesService{
 		repository: repository,
 		allServicesSchema: []schemas.Service{
 			{
-				Name: schemas.Github,
+				Name:        schemas.Github,
 				Description: "This is a code storage service",
 			},
 		},
@@ -84,7 +84,7 @@ func (service *servicesService) FindActionByName(name string) func(channel chan 
 	return nil
 }
 
-func (service *servicesService) FindReactionByName(name string) func (workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *servicesService) FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken) {
 	for _, oneService := range service.allServices {
 		if oneService.(ServiceInterface).FindReactionByName(name) != nil {
 			return oneService.(ServiceInterface).FindReactionByName(name)

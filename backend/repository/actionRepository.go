@@ -7,6 +7,7 @@ import (
 
 	"area51/schemas"
 )
+
 type ActionRepository interface {
 	Save(action schemas.Action)
 	Update(action schemas.Action)

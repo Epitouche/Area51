@@ -31,11 +31,11 @@ func (controller *workflowController) AboutJson(ctx *gin.Context) (allWorkflowsJ
 	allWorkflows := controller.service.FindAll()
 	for _, oneWorkflow := range allWorkflows {
 		allWorkflowsJson = append(allWorkflowsJson, schemas.WorkflowJson{
-			Name: oneWorkflow.Name,
-			ActionId: oneWorkflow.ActionId,
+			Name:       oneWorkflow.Name,
+			ActionId:   oneWorkflow.ActionId,
 			ReactionId: oneWorkflow.ReactionId,
-			IsActive: oneWorkflow.IsActive,
-			CreatedAt: oneWorkflow.CreatedAt,
+			IsActive:   oneWorkflow.IsActive,
+			CreatedAt:  oneWorkflow.CreatedAt,
 		})
 	}
 	return allWorkflowsJson, nil

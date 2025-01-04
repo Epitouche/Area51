@@ -21,12 +21,12 @@ func Authorization() gin.HandlerFunc {
 		tokenString := authHeader[len("Bearer "):]
 		token, _ := services.NewJWTService().ValidateJWTToken(tokenString)
 
-		if token.Valid{
+		if token.Valid {
 			ctx.Next()
 		} else {
 			ctx.JSON(http.StatusUnauthorized, schemas.BasicResponse{
 				Message: "Unauthorized",
-				})
+			})
 		}
 	}
 }

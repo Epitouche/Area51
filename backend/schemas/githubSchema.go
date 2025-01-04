@@ -15,10 +15,10 @@ const (
 )
 
 type GitHubResponseToken struct {
-	AccessToken 	string `json:"access_token"`
-	RefreshToken 	string `json:"refresh_token"`
-	Scope       	string `json:"scope"`
-	TokenType   	string `json:"token_type"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	Scope        string `json:"scope"`
+	TokenType    string `json:"token_type"`
 }
 
 type GithubUserInfo struct {
@@ -32,12 +32,12 @@ type GithubUserInfo struct {
 }
 
 type GithubListCommentsResponse struct {
-	Body			string `json:"body"`
-	PullRequestUrl 	string `json:"pull_request_url"`
+	Body           string `json:"body"`
+	PullRequestUrl string `json:"pull_request_url"`
 	//! Needs more fields in the future
 }
 type GithubPullRequestOptions struct {
-	Repo	string	`json:"-"`
-	Owner	string	`json:"-"`
+	Repo      string    `json:"-"`
+	Owner     string    `json:"-"`
 	CheckedAt time.Time `json:"-" gorm:"default:CURRENT_TIMESTAMP"`
 }

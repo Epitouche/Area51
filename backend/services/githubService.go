@@ -24,13 +24,13 @@ type GithubService interface {
 }
 
 type githubService struct {
-	githubRepository repository.GithubRepository
-	tokenRepository repository.TokenRepository
-	userService UserService
-	workflowRepository repository.WorkflowRepository
-	reactionRepository repository.ReactionRepository
+	githubRepository            repository.GithubRepository
+	tokenRepository             repository.TokenRepository
+	userService                 UserService
+	workflowRepository          repository.WorkflowRepository
+	reactionRepository          repository.ReactionRepository
 	reactionResponseDataService ReactionResponseDataService
-	mutex sync.Mutex
+	mutex                       sync.Mutex
 }
 
 func NewGithubService(
@@ -40,14 +40,14 @@ func NewGithubService(
 	reactionRepository repository.ReactionRepository,
 	reactionResponseDataService ReactionResponseDataService,
 	userService UserService,
-	) GithubService {
+) GithubService {
 	return &githubService{
-		githubRepository: githubRepository,
-		tokenRepository: tokenRepository,
-		workflowRepository: workflowRepository,
-		reactionRepository: reactionRepository,
+		githubRepository:            githubRepository,
+		tokenRepository:             tokenRepository,
+		workflowRepository:          workflowRepository,
+		reactionRepository:          reactionRepository,
 		reactionResponseDataService: reactionResponseDataService,
-		userService: userService,
+		userService:                 userService,
 	}
 }
 
@@ -129,12 +129,13 @@ func (service *githubService) FindReactionByName(name string) func(workflowId ui
 }
 
 var nbPR int
+
 type transportWithToken struct {
 	token string
 }
 
 func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", "Bearer " + t.token)
+	req.Header.Set("Authorization", "Bearer "+t.token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	return http.DefaultTransport.RoundTrip(req)
@@ -150,7 +151,7 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 	}
 	token := service.tokenRepository.FindByUserId(workflow.UserId)
 	client := github.NewClient(&http.Client{
-		Transport: &transportWithToken{token: token[len(token) - 1].Token},
+		Transport: &transportWithToken{token: token[len(token)-1].Token},
 	})
 	pullRequests, _, err := client.PullRequests.List(ctx, "JsuisSayker", "TestAreaGithub", nil)
 	if err != nil {
@@ -227,7 +228,7 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 	}
 	service.reactionResponseDataService.Save(savedResult)
 	//! Need to update the trigger to false
-	workflow, _  := service.workflowRepository.FindByIds(workflowId)
+	workflow, _ := service.workflowRepository.FindByIds(workflowId)
 	actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
 	actualReaction.Trigger = false
 	service.reactionRepository.Update(actualReaction)
