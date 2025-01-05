@@ -6,12 +6,12 @@ const currentYear = computed(() => {
 });
 </script>
 <template>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-primaryWhite-500 dark:bg-primaryDark-500">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
                 <div class="flex items-center mb-4">
                     <!-- Logo -->
-                    <span class="ml-2 text-xl font-bold text-gray-900">AREA</span>
+                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-primaryWhite-700">AREA</span>
                 </div>
                 <p class="text-gray-500 text-sm">
                     A project about automating workflows efficiently.
@@ -34,7 +34,7 @@ const currentYear = computed(() => {
                 <p class="text-gray-500 text-sm">
                     © {{ currentYear }} AREA. All rights reserved.
                 </p>
-                <div class="flex space-x-6 mt-4 md:mt-0">
+                <div class="flex space-x-6 mt-4 md:mt-0 text-fontBlack dark:text-primaryWhite-700">
                     <a href="https://github.com/Epitouche/Area51"><Icon name="line-md:github" /></a>
                 </div>
             </div>
