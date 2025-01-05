@@ -1,12 +1,27 @@
+<script setup>
+const registered = false
+</script>
 <template>
     <div class="bg-primaryWhite-500 dark:bg-primaryDark-500">
-      <nav class="p-4 border-b border-gray-200 dark:border-secondaryDark-500">
+      <nav v-if="registered" class="p-4 border-b border-gray-200 dark:border-secondaryDark-500">
+        <div class="container mx-auto flex justify-between items-center text-fontBlack dark:text-fontWhite">
+          <div class="text-lg font-bold">
+            <NuxtLink to="/">MyLogo</NuxtLink>
+          </div>
+          <div class="space-x-9">
+            <NuxtLink to="/">Dashboard</NuxtLink>
+            <NuxtLink to="/services">Services</NuxtLink>
+            <!-- <NuxtLink to="/workflow">Workflow</NuxtLink> -->
+          </div>
+          <!-- Here -->
+        </div>
+      </nav>
+      <nav v-else class="p-4 border-b border-gray-200 dark:border-secondaryDark-500">
         <div class="container mx-auto flex justify-between items-center">
           <div class="text-lg font-bold">
             <NuxtLink to="/">MyLogo</NuxtLink>
           </div>
           <div class="space-x-9">
-            <!-- <NuxtLink to="/">Home</NuxtLink> -->
             <NuxtLink to="/login" class="text-fontBlack dark:text-fontWhite">Login</NuxtLink>
             <NuxtLink to="/register" class="text-fontBlack dark:text-fontWhite">
               <ButtonComponent

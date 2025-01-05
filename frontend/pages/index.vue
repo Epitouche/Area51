@@ -68,13 +68,14 @@ const navigateToRegister = () => {
 };
 </script>
 <template>
+  <div>
 <!-- Navbar -->
   <NavbarComponent />
 
   <div class="flex flex-col bg-primaryWhite-500 dark:bg-primaryDark-500">
     <!-- Hero Section -->
     <div class="items-center justify-center mx-8">
-      <div class="mt-32 mb-40 mx-16 sm:mx-24 md:mx-32 lg:mx-48 xl:mx-60">
+      <div class="mt-32 mb-40 mx-8 sm:mx-16 md:mx-24 lg:mx-48 xl:mx-60">
         <div class="flex flex-col md:flex-row items-center justify-between">
           <!-- Left Content -->
           <div class="text-center md:text-left ml-4 sm:ml-8 md:ml-16 lg:ml-24 xl:ml-32">
@@ -104,21 +105,21 @@ const navigateToRegister = () => {
                       <div :class="`${workflow.hero_card.first_logo.color} text-white p-3 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200`">
                         <Icon :name="workflow.hero_card.first_logo.icon" class="h-8 w-8 mx-1 mt-1" />
                       </div>
-                      <span class="mt-2 text-xs font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.first_logo.label }}</span>
+                      <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.first_logo.label }}</span>
                     </div>
                     <Icon name="mdi-arrow-right" class="h-7 w-7 text-gray-400 mb-5" />
                     <div class="flex flex-col items-center">
                       <div :class="`${workflow.hero_card.trigger.color} text-white p-3 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200`">
                         <Icon :name="workflow.hero_card.trigger.icon" class="h-8 w-8 mx-1 mt-1" />
                       </div>
-                      <span class="mt-2 text-xs font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.trigger.label }}</span>
+                      <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.trigger.label }}</span>
                     </div>
                     <Icon name="mdi-arrow-right" class="h-7 w-7 text-gray-400 mb-5" />
                     <div class="flex flex-col items-center">
                       <div :class="`${workflow.hero_card.second_logo.color} text-white p-3 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200`">
                         <Icon :name="workflow.hero_card.second_logo.icon" class="h-8 w-8 mx-1 mt-1" />
                       </div>
-                      <span class="mt-2 text-xs font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.second_logo.label }}</span>
+                      <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.second_logo.label }}</span>
                     </div>
                   </div>
                 </div>
@@ -168,7 +169,7 @@ const navigateToRegister = () => {
           </p>
         </div>
         <div class="grid md:grid-cols-3 gap-8">
-          <div v-for="feature in features" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
+          <div v-for="feature in features" :key="feature.title" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
             <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
               <Icon :name="feature.icon" class="h-6 w-6 text-purple-700" />
             </div>
@@ -184,5 +185,6 @@ const navigateToRegister = () => {
 
     <!-- Footer -->
     <FooterComponent />
+  </div>
   </div>
 </template>
