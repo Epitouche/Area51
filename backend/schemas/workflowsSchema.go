@@ -29,6 +29,6 @@ type Workflow struct {
 	Reaction   Reaction  `json:"reaction,omitempty" gorm:"foreignkey:ReactionId;references:Id"`
 	CreatedAt  time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt  time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	IsActive   bool      `json:"is_active" gorm:"type:boolean"`
+	IsActive   bool      `json:"is_active" default:"false" gorm:"column:is_active"`
 	Name       string    `json:"name" gorm:"type:varchar(100)"`
 }

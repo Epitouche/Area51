@@ -11,6 +11,7 @@ import (
 type WorkflowRepository interface {
 	Save(workflow schemas.Workflow)
 	Update(workflow schemas.Workflow)
+	UpdateActiveStatus(workflow schemas.Workflow)
 	Delete(workflowId uint64)
 	FindAll() []schemas.Workflow
 	FindByIds(workflowId uint64) (schemas.Workflow, error)
@@ -19,6 +20,7 @@ type WorkflowRepository interface {
 	FindByActionId(actionId uint64) schemas.Workflow
 	FindByReactionId(reactionId uint64) schemas.Workflow
 	SaveWorkflow(workflow schemas.Workflow) (workflowId uint64, err error)
+	FindExistingWorkflow(workflow schemas.Workflow) schemas.Workflow
 }
 
 type workflowRepository struct {
@@ -47,6 +49,15 @@ func (repo *workflowRepository) Save(workflow schemas.Workflow) {
 
 func (repo *workflowRepository) Update(workflow schemas.Workflow) {
 	err := repo.db.Connection.Where(&schemas.Workflow{Id: workflow.Id}).Updates(&workflow)
+	if err.Error != nil {
+		panic(err.Error)
+	}
+}
+
+func (repo *workflowRepository) UpdateActiveStatus(workflow schemas.Workflow) {
+	err := repo.db.Connection.Model(&schemas.Workflow{}).Where(&schemas.Workflow{Id: workflow.Id}).Updates(map[string]interface{}{
+		"is_active": workflow.IsActive,
+	})
 	if err.Error != nil {
 		panic(err.Error)
 	}
@@ -88,6 +99,14 @@ func (repo *workflowRepository) FindByIds(workflowId uint64) (schemas.Workflow, 
 	workflow.Reaction = reaction
 
 	return workflow, nil
+}
+
+func (repo *workflowRepository) FindExistingWorkflow(workflow schemas.Workflow) schemas.Workflow {
+	err := repo.db.Connection.Where(&schemas.Workflow{UserId: workflow.UserId, ActionId: workflow.ActionId, ReactionId: workflow.ReactionId}).First(&workflow)
+	if err.Error != nil {
+		return schemas.Workflow{}
+	}
+	return workflow
 }
 
 func (repo *workflowRepository) FindByUserId(userId uint64) []schemas.Workflow {

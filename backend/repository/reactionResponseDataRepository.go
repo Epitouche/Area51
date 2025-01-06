@@ -38,7 +38,7 @@ func (repo *reactionResponseDataRepository) Save(reactionResponseData schemas.Re
 }
 
 func (repo *reactionResponseDataRepository) Update(reactionResponseData schemas.ReactionResponseData) {
-	err := repo.db.Connection.Save(&reactionResponseData)
+	err := repo.db.Connection.Where(schemas.ReactionResponseData{Id: reactionResponseData.Id}).Updates(&reactionResponseData)
 	if err.Error != nil {
 		panic(err.Error)
 	}

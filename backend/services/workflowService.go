@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 
@@ -72,18 +73,22 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	workflowValue := "1"
 	if workflowName == "" {
 		workflowName = "Workflow " + workflowValue
+		fmt.Printf("Workflow name found: %+v", service.GetWorkflowByName(workflowName).Name)
 		for service.GetWorkflowByName(workflowName).Name != "" {
+			fmt.Printf("Workflow name found: %+v", service.GetWorkflowByName(workflowName).Name)
 			workflowValueInt, _ := strconv.Atoi(workflowValue)
 			workflowValueInt++
 			workflowValue = strconv.Itoa(workflowValueInt)
+			workflowName = "Workflow " + workflowValue
 		}
 		workflowValueInt, _ := strconv.Atoi(workflowValue)
-		workflowValueInt++
-		workflowValueInt++
+		// workflowValueInt++
+		// workflowValueInt++
 		workflowValue = strconv.Itoa(workflowValueInt)
 
 		workflowName = "Workflow " + workflowValue
 	}
+	// panic("Not implemented")
 
 	githubServiceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
 	newWorkflow := schemas.Workflow{
@@ -95,6 +100,17 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		Action:     service.actionService.FindById(result.ActionId),
 		Reaction:   service.reactionService.FindById(result.ReactionId),
 		Name:       workflowName,
+	}
+	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
+	fmt.Printf("Workflow %+v", actualWorkflow)
+	if actualWorkflow != (schemas.Workflow{}) {
+		fmt.Print("\nMON TOTO\n")
+		if actualWorkflow.IsActive {
+			return "Workflow already exists and is active", nil
+		} else {
+			fmt.Print("OOOOOOUUUUUUUIIIIIIII\n")
+			return "Workflow already exists and is not active", nil
+		}
 	}
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
@@ -108,14 +124,17 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 
 func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken) {
 	workflowChannel := make(chan string)
-	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel)
-	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken)
+	var workflowStateMutex sync.Mutex
+	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel, workflowStateMutex)
+	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken, workflowStateMutex)
 }
 
-func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string) {
+func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string, workflowStateMutex sync.Mutex) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		fmt.Println("Start of WorkflowActionChannel")
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
+			workflowStateMutex.Lock()
+			defer workflowStateMutex.Unlock()
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
 			if err != nil {
 				fmt.Println("Error")
@@ -128,16 +147,21 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			}
 			if workflow.IsActive {
 				action(channel, workflow.Action.Name, workflow.Id)
+			} else {
+				break
 			}
+			// workflowStateMutex.Unlock()
 		}
 		fmt.Println("Clear")
 		channel <- "Workflow finished"
 	}(workflowStartingPoint, channel)
 }
 
-func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken) {
+func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken, workflowStateMutex sync.Mutex) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
+			workflowStateMutex.Lock()
+			defer workflowStateMutex.Unlock()
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
 			if err != nil {
 				fmt.Println("Error")
@@ -150,8 +174,10 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 			}
 			if workflow.IsActive {
 				result := <-channel
-				reaction(workflow.Id, githubServiceToken)
-				fmt.Println(result)
+				reaction(channel, workflow.Id, githubServiceToken)
+				fmt.Printf("result value: %+v\n", result)
+			} else {
+				break
 			}
 		}
 
@@ -169,6 +195,9 @@ func (service *workflowService) GetWorkflowByName(name string) schemas.Workflow 
 
 func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
 	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) <= len("Bearer ") {
+		return []schemas.GithubListCommentsResponse{}, fmt.Errorf("no authorization header found")
+	}
 	tokenString := authHeader[len("Bearer "):]
 
 	user, err := service.userService.GetUserInfos(tokenString)

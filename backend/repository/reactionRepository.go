@@ -10,7 +10,8 @@ import (
 
 type ReactionRepository interface {
 	Save(action schemas.Reaction)
-	Update(action schemas.Reaction)
+	Update(reaction schemas.Reaction)
+	UpdateTrigger(reaction schemas.Reaction)
 	Delete(action schemas.Reaction)
 	FindAll() []schemas.Reaction
 	FindByName(actionName string) []schemas.Reaction
@@ -43,8 +44,17 @@ func (repo *reactionRepository) Save(action schemas.Reaction) {
 	}
 }
 
-func (repo *reactionRepository) Update(action schemas.Reaction) {
-	err := repo.db.Connection.Where(&schemas.Reaction{Id: action.Id}).Updates(&action)
+func (repo *reactionRepository) Update(reaction schemas.Reaction) {
+	err := repo.db.Connection.Where(&schemas.Reaction{Id: reaction.Id}).Updates(&reaction)
+	if err.Error != nil {
+		panic(err.Error)
+	}
+}
+
+func (repo *reactionRepository) UpdateTrigger(reaction schemas.Reaction) {
+	err := repo.db.Connection.Model(&schemas.Reaction{}).Where(&schemas.Reaction{Id: reaction.Id}).Updates(map[string]interface{}{
+		"trigger": reaction.Trigger,
+	})
 	if err.Error != nil {
 		panic(err.Error)
 	}

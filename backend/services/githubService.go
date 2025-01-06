@@ -20,7 +20,7 @@ type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
-	FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
 }
 
 type githubService struct {
@@ -119,7 +119,7 @@ func (service *githubService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *githubService) FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
 	switch name {
 	case string(schemas.GithubReactionListComments):
 		return service.ListAllReviewComments
@@ -143,12 +143,17 @@ func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error
 
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
 	service.mutex.Lock()
+	defer service.mutex.Unlock()
 	ctx := context.Background()
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	// existingWorkflow := service.workflowRepository.FindExistingWorkflow(workflow)
+	// if existingWorkflow != (schemas.Workflow{}) {
+
+	// }
 	token := service.tokenRepository.FindByUserId(workflow.UserId)
 	client := github.NewClient(&http.Client{
 		Transport: &transportWithToken{token: token[len(token)-1].Token},
@@ -166,32 +171,36 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		reaction.Id = workflow.ReactionId
 		service.reactionRepository.Update(reaction)
 	}
-	channel <- "Workflow done"
-	service.mutex.Unlock()
-	time.Sleep(5 * time.Second)
+	// service.mutex.Unlock()
+	channel <- "Action workflow done"
+	// time.Sleep(5 * time.Second)
 }
 
-func (service *githubService) ListAllReviewComments(workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
 	service.mutex.Lock()
-	// var actualReaction schemas.Reaction
-	for _, token := range accessToken {
-		actualUser := service.userService.GetUserById(token.UserId)
-		if token.UserId == actualUser.Id {
-			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
-			for _, workflow := range actualWorkflow {
-				if workflow.Id == workflowId {
-					actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
-					if !actualReaction.Trigger {
-						return
-					}
-				}
-			}
-		}
-	}
+	defer service.mutex.Unlock()
+
+	// Iterate over all tokens
+	// for _, token := range accessToken {
+	// 	actualUser := service.userService.GetUserById(token.UserId)
+	// 	if token.UserId == actualUser.Id {
+	// 		actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
+	// 		for _, workflow := range actualWorkflow {
+	// 			if workflow.Id == workflowId {
+	// 				actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
+	// 				if !actualReaction.Trigger {
+	// 					fmt.Println("Trigger is already false, skipping reaction.")
+	// 					return
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	request, err := http.NewRequest("GET", "https://api.github.com/repos/Epitouche/Area51/pulls/comments", nil)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error creating request:", err)
+		return
 	}
 	request.Header.Set("Accept", "application/vnd.github+json")
 	for _, token := range accessToken {
@@ -203,35 +212,65 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error making request:", err)
+		return
 	}
 	defer response.Body.Close()
 
-	result := []schemas.GithubListCommentsResponse{}
-	savedResult := schemas.ReactionResponseData{
-		WorkflowId: workflowId,
-	}
-
+	var result []schemas.GithubListCommentsResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error decoding response:", err)
+		return
 	}
 
+	savedResult := schemas.ReactionResponseData{
+		WorkflowId:  workflowId,
+		ApiResponse: json.RawMessage{},
+	}
 	jsonValue, err := json.Marshal(result)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error marshalling response:", err)
+		return
 	}
-	savedResult.ApiResponse = json.RawMessage(jsonValue)
-
-	if err != nil {
-		fmt.Println(err)
-	}
+	savedResult.ApiResponse = jsonValue
 	service.reactionResponseDataService.Save(savedResult)
-	//! Need to update the trigger to false
+	// if err != nil {
+	// 	fmt.Println("Error saving response data:", err)
+	// 	return
+	// }
+
+	// Update the trigger to false
 	workflow, _ := service.workflowRepository.FindByIds(workflowId)
+	// workflow.IsActive = false
+	newWorkflow := schemas.Workflow{
+		Id:       workflow.Id,
+		UserId:   workflow.UserId,
+		Reaction: workflow.Reaction,
+		IsActive: false,
+	}
+	service.workflowRepository.Update(newWorkflow)
+	fmt.Printf("Workflow: %+v\n", newWorkflow)
 	actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
-	actualReaction.Trigger = false
-	service.reactionRepository.Update(actualReaction)
-	service.mutex.Unlock()
-	time.Sleep(5 * time.Second)
+	// actualReaction.Id = workflow.ReactionId
+	newReaction := schemas.Reaction{
+		Id:      actualReaction.Id,
+		Trigger: false,
+	}
+	// actualReaction.Trigger = false
+
+	// Update the isActive field to false
+	// workflow.IsActive = false
+	// fmt.Printf("Updated workflow: %+v\n", newWorkflow)
+
+	service.reactionRepository.UpdateTrigger(newReaction)
+	fmt.Printf("Reaction successfully updated to false: %+v\n", actualReaction)
+	givenReaction := service.reactionRepository.FindById(workflow.ReactionId)
+	fmt.Printf("Updated reaction: %+v\n", givenReaction)
+	// if err != nil {
+	// 	fmt.Printf("Failed to update reaction: %v\n", err)
+	// 	return
+	// }
+	// channel <- "Reaction workflow done"
+	// time.Sleep(2 * time.Second)
 }
