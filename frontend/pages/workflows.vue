@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import DropdownComponent from "~/components/DropdownComponent.vue";
 import type {
-  Action,
-  Reaction,
   ServerResponse,
   Service,
   WorkflowResponse,
@@ -16,14 +15,44 @@ const columns = [
   "Creation Date",
 ];
 
+const filters = ["All Status", "Active", "Inactive", "Selected"];
+const sorts = [
+  "Name",
+  "Creation Date",
+  "Action ID",
+  "Reaction ID",
+];
+
 const services = reactive<Service[]>([]);
 const workflowsInList = reactive<Workflow[]>([]);
-const lastWorkflow = reactive<WorkflowResponse[]>([]);
-const actionSelected = ref(<Action>{});
-const reactionSelected = ref(<Reaction>{});
+const lastWorkflowResult = reactive<WorkflowResponse[]>([]);
+
+const actionString = ref("");
+const reactionString = ref("");
+
+const selectedFilter = ref("All Status");
+const selectedSort = ref("Name");
+
+const checkboxList = ref<boolean[]>([]);
+
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 const token = useCookie("access_token");
+
+const filteredWorkflows = computed(() => {
+  sortWorkflows();
+  switch (selectedFilter.value) {
+    case "Active":
+      return workflowsInList.filter((workflow) => workflow.is_active === true);
+    case "Inactive":
+      return workflowsInList.filter((workflow) => workflow.is_active === false);
+    case "Selected":
+      return workflowsInList.filter((_, index) => checkboxList.value[index]);
+    default:
+      return workflowsInList;
+  }
+});
+
 const copyIcon = ref("material-symbols:content-copy-outline-rounded");
 
 const copyToClipboard = async (text: string) => {
@@ -59,7 +88,24 @@ const confirmModalReaction = () => {
   closeModalReaction();
 };
 
-async function fetchServices() {
+const sortWorkflows = () => {
+  workflowsInList.sort((a, b) => {
+    switch (selectedSort.value) {
+      case "Name":
+        return a.name.localeCompare(b.name);
+      case "Creation Date":
+        return a.created_at.localeCompare(b.created_at);
+      case "Action ID":
+        return a.action_id - b.action_id;
+      case "Reaction ID":
+        return a.reaction_id - b.reaction_id;
+      default:
+        return 0;
+    }
+  });
+};
+
+async function fetchWorflows() {
   try {
     const response = await $fetch<ServerResponse>(
       "http://localhost:8080/about.json",
@@ -80,31 +126,47 @@ async function fetchServices() {
       const date = new Date(dateString);
       const formattedDate = date.toLocaleDateString("en-GB");
       workflow.created_at = formattedDate;
+      checkboxList.value.push(false);
     });
+
+    sortWorkflows();
   } catch (error) {
     console.error("Error fetching services:", error);
   }
 }
+
 async function addWorkflow() {
   try {
-    await $fetch<ServerResponse>("/api/workflows/addWorkflows", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        "Content-Type": "application/json",
-      },
-      body: {
-        action_id: actionSelected.value.action_id,
-        reaction_id: reactionSelected.value.reaction_id,
-      },
-    });
-    fetchServices();
+    const actionSelected = services
+      .map((service) => service.actions)
+      .flat()
+      .find((action) => action.name === actionString.value);
+
+    const reactionSelected = services
+      .map((service) => service.reactions)
+      .flat()
+      .find((reaction) => reaction.name === reactionString.value);
+
+    if (actionSelected && reactionSelected) {
+      await $fetch<ServerResponse>("/api/workflows/addWorkflows", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+        body: {
+          action_id: actionSelected.action_id,
+          reaction_id: reactionSelected.reaction_id,
+        },
+      });
+      fetchWorflows();
+    }
   } catch (error) {
     console.error("Error adding workflow:", error);
   }
 }
 
-async function getLastWorkflow() {
+async function getLastWorkflowResult() {
   try {
     const response = await $fetch<WorkflowResponse[]>(
       "/api/workflows/getLastWorkflow",
@@ -116,15 +178,15 @@ async function getLastWorkflow() {
         },
       }
     );
-    lastWorkflow.push(...response);
+    lastWorkflowResult.push(...response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
   }
 }
 
 onMounted(() => {
-  fetchServices();
-  getLastWorkflow();
+  fetchWorflows();
+  getLastWorkflowResult();
 });
 </script>
 
@@ -140,12 +202,12 @@ onMounted(() => {
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex flex-col justify-center m-16 gap-10">
       <div class="flex justify-center gap-5">
         <ButtonComponent
-          :text="actionSelected.name ? actionSelected.name : 'Choose an action'"
+          :text="actionString ? actionString : 'Choose an action'"
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
@@ -165,17 +227,15 @@ onMounted(() => {
             >
               <DropdownComponent
                 v-if="service.actions"
-                v-model="actionSelected"
+                v-model="actionString"
                 :label="service.name"
-                :options="service.actions.map((action) => action)"
+                :options="service.actions.map((action) => action.name)"
               />
             </div>
           </div>
         </ModalComponent>
         <ButtonComponent
-          :text="
-            reactionSelected.name ? reactionSelected.name : 'Choose a reaction'
-          "
+          :text="reactionString ? reactionString : 'Choose a reaction'"
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
           text-color="text-fontBlack dark:text-fontWhite"
@@ -195,9 +255,9 @@ onMounted(() => {
             >
               <DropdownComponent
                 v-if="service.reactions"
-                v-model="reactionSelected"
+                v-model="reactionString"
                 :label="service.name"
-                :options="service.reactions.map((reaction) => reaction)"
+                :options="service.reactions.map((reaction) => reaction.name)"
               />
             </div>
           </div>
@@ -206,13 +266,13 @@ onMounted(() => {
       <div class="flex justify-center">
         <ButtonComponent
           :class="
-            actionSelected && reactionSelected
+            actionString && reactionString
               ? ''
               : 'cursor-not-allowed opacity-50'
           "
           text="Add Workflow"
           :bg-color="
-            actionSelected && reactionSelected
+            actionString && reactionString
               ? 'bg-tertiary-500'
               : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'
           "
@@ -225,48 +285,46 @@ onMounted(() => {
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex justify-start gap-5 m-20">
-      <ButtonComponent
-        text="Filter"
-        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-        text-color="text-fontBlack dark:text-fontWhite"
+      <DropdownComponent
+        v-model="selectedFilter"
+        :label="selectedFilter"
+        :options="filters"
       />
-      <ButtonComponent
-        text="All Status"
-        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-        text-color="text-fontBlack dark:text-fontWhite"
+      <DropdownComponent
+        v-model="selectedSort"
+        :label="selectedSort"
+        :options="sorts"
       />
     </div>
     <ListTableComponent
-      v-show="columns && workflowsInList"
+      v-show="columns && filteredWorkflows"
+      v-model="checkboxList"
       :columns="columns"
-      :rows="workflowsInList"
+      :rows="filteredWorkflows"
     />
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
+      >
     </div>
     <div class="flex justify-center m-20">
       <div
         class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-10/12"
       >
-        <!-- Bouton pour copier le JSON, turn accent after copy -->
         <button
-          @click="copyToClipboard(JSON.stringify(lastWorkflow, null, 2))"
           class="absolute top-4 right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
           aria-label="Copier le JSON"
+          @click="copyToClipboard(JSON.stringify(lastWorkflowResult, null, 2))"
         >
           <Icon :name="copyIcon" />
         </button>
         <pre
           class="whitespace-pre-wrap break-words text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
         >
-    {{ JSON.stringify(lastWorkflow, null, 2) }}
+    {{ JSON.stringify(lastWorkflowResult, null, 2) }}
   </pre
         >
       </div>

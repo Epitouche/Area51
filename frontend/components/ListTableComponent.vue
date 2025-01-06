@@ -1,8 +1,35 @@
 <script setup lang="ts">
-defineProps<{
+import { ref } from 'vue';
+
+const props = defineProps<{
   columns: string[];
   rows: Record<string, string | number | boolean>[];
+  modelValue: boolean[];
 }>();
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean[]): void;
+}>();
+
+const checkboxList = ref(props.modelValue);
+
+const headCheckbox = ref(false);
+
+const checkAll = () => {
+  headCheckbox.value = !headCheckbox.value;
+  checkboxList.value = checkboxList.value.map(() => headCheckbox.value);
+  emitCheckboxes();
+};
+
+const emitCheckboxes = () => {
+  emit('update:modelValue', checkboxList.value);
+};
+
+
+const toggleCheckbox = (index: number) => {
+  checkboxList.value[index] = !checkboxList.value[index];
+  emitCheckboxes();
+};
 </script>
 
 <template>
@@ -15,7 +42,7 @@ defineProps<{
           <th
             class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
-            <input type="checkbox">
+            <input type="checkbox" :checked="headCheckbox" @click="checkAll">
           </th>
           <th
             v-for="column in columns"
@@ -28,12 +55,12 @@ defineProps<{
       </thead>
       <tbody>
         <tr
-          v-for="row in rows"
-          :key="row.id"
+          v-for="(row, i) in rows"
+          :key="i"
           class="odd:bg-secondaryWhite-500 text-center even:bg-bg-primaryWhite-50 dark:odd:bg-primaryDark-500 dark:even:bg-secondaryDark-500"
         >
           <td class="px-6 py-4">
-            <input type="checkbox">
+            <input type="checkbox" :checked="checkboxList[i]" @change="toggleCheckbox(i)">
           </td>
           <td
             v-for="(value, key) in row"
