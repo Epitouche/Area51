@@ -25,8 +25,8 @@ const registered = false
             <NuxtLink to="/login" class="text-fontBlack dark:text-fontWhite">Login</NuxtLink>
             <NuxtLink to="/register" class="text-fontBlack dark:text-fontWhite">
               <ButtonComponent
-                bgColor="bg-tertiary-500"
-                hoverColor="hover:bg-purple-600"
+                bg-color="bg-tertiary-500"
+                hover-color="hover:bg-purple-600"
               >
                 Sign up
               </ButtonComponent>

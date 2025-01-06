@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import FooterComponent from '~/components/FooterComponent.vue';
 
 const workflows = ref([
 {
@@ -62,10 +60,6 @@ const features = ref([
     description: 'Our commitment to excellence and problem-solving drives everything we do. Together, we aim to create something impactful and unforgettable'
   }
 ]);
-
-const navigateToRegister = () => {
-  useRouter().push('/register');
-};
 </script>
 <template>
   <div>
@@ -81,18 +75,19 @@ const navigateToRegister = () => {
           <div class="text-center md:text-left ml-4 sm:ml-8 md:ml-16 lg:ml-24 xl:ml-32">
             <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mx-2 text-fontBlack dark:text-fontWhite">Automatize</h1>
             <h1 class="text-5xl sm:text-6xl md:text-8xl font-bold text-tertiary-500 mt-2">Everything.</h1>
-            <p class="my-4 text-lg sm:text-xl md:text-2xl text-gray-700 text-fontBlack dark:text-fontWhite">
-              Make your favorite apps connect with each other <br />
+            <p class="my-4 text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-fontWhite">
+              Make your favorite apps connect with each other <br>
               and let us automatize tasks for you!
             </p>
-            <ButtonComponent
-              text="Start now!"
-              bgColor="bg-tertiary-500"
-              hoverColor="hover:bg-purple-600"
-              textColor="text-fontWhite"
-              class="mt-4 inline-block max-w-max"
-              @click="navigateToRegister"
-            ></ButtonComponent>
+            <NuxtLink to="/register" class="text-fontBlack dark:text-fontWhite">
+              <ButtonComponent
+                text="Start now!"
+                bg-color="bg-tertiary-500"
+                hover-color="hover:bg-purple-600"
+                text-color="text-fontWhite"
+                class="mt-4 inline-block max-w-max"
+              />
+            </NuxtLink>
           </div>
           <!-- Right Box -->
           <div class="flex justify-center items-center w-full md:w-auto mr-8 sm:mr-16 md:mr-24 lg:mr-32 xl:mr-48">
