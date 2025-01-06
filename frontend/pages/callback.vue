@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { useCookie } from "#app";
-
-const router = useRouter();
 
 const access_token = useCookie("access_token");
 
@@ -36,7 +34,7 @@ async function fetchGitHubToken() {
       if (access_token) {
         access_token.value = response.access_token;
 
-        router.push("/services");
+        navigateTo("/workflows");
       } else {
         console.error("Token not received in API response");
       }

@@ -21,7 +21,7 @@ async function onSubmit() {
     if (access_token) {
       const tokenCookie = useCookie("access_token");
       tokenCookie.value = access_token;
-      navigateTo("/services");
+      navigateTo("/workflows");
     }
   } catch (error) {
     console.error("API response:", error.response?.data || error.message);
