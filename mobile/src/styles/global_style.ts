@@ -32,6 +32,8 @@ export const globalStyles = StyleSheet.create({
   },
   text: {
     color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 30,
@@ -63,6 +65,8 @@ export const globalStyles = StyleSheet.create({
   },
   textBlack: {
     color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   titleBlack: {
     fontSize: 30,

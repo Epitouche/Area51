@@ -2,6 +2,7 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { AboutJson } from '../types';
 import { checkToken } from '../service';
+import { getAboutJson } from '../service/getAboutJson';
 
 interface AppContextProps {
   serverIp: string;
@@ -40,6 +41,13 @@ export default function AppProvider({ children }: AppProviderProps) {
       if (await checkToken('token')) setIsConnected(true);
     };
     checkConnection();
+    const aboutJson = async () => {
+      console.log(serverIp);
+      if (serverIp != '') {
+        getAboutJson(serverIp, setAboutJson);
+      }
+    }
+    aboutJson();
   }, [serverIp]);
 
   return (

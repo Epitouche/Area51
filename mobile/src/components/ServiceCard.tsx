@@ -8,9 +8,10 @@ interface ServiceCardProps {
   title: string;
   image: string;
   status: string;
+  handleOauthLogin: () => void;
 }
 
-export function ServiceCard({ image, status, title }: ServiceCardProps) {
+export function ServiceCard({ image, status, title, handleOauthLogin }: ServiceCardProps) {
   const { isBlackTheme } = useContext(AppContext);
   return (
     <View
@@ -32,7 +33,7 @@ export function ServiceCard({ image, status, title }: ServiceCardProps) {
         {title[0].toLocaleUpperCase() + title.slice(1)}
       </Text>
       <Button
-        onPress={() => console.log('Button pressed')}
+        onPress={handleOauthLogin}
         style={[
           styles.statusBar,
           status === 'Connected' ? styles.connectedBar : styles.disconnectedBar,

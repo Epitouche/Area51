@@ -1,34 +1,28 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Button } from 'react-native-paper';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { deleteToken, checkToken, getToken } from '../service/token';
-import {
-  DeconnectionPopUp,
-  DetailsModals,
-  GithubLoginButton,
-  ServicesModals,
-  WorkflowTable,
-} from '../components';
-import { getAboutJson, githubLogin } from '../service';
+import { ServicesModals } from '../components';
+import { getAboutJson } from '../service';
 import { AppContext } from '../context/AppContext';
-import { getWorkflows, sendWorkflows } from '../service/workflows';
-import { PullRequestComment } from '../types';
+import { sendWorkflows } from '../service/workflows';
+import { globalStyles } from '../styles/global_style';
+import { ActionReaction } from '../types';
 
 export default function DashboardScreen() {
   const [token, setToken] = useState('');
-  const [github, setGithub] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [deconnectionModalVisible, setDeconnectionModalVisible] =
-    useState(false);
-  const [serviceName, setServiceName] = useState('');
-  const [isAction, setIsAction] = useState(true);
-  const [action, setAction] = useState<number>(1);
-  const [reaction, setReaction] = useState<number>(1);
-  const [detailsModals, setdetailsModals] = useState(false);
-  const [workflowsInfo, setWorkflowsInfo] = useState<PullRequestComment[]>();
+  const [isActionOrReaction, setIsActionOrReaction] = useState<boolean>(true);
+  const [action, setAction] = useState<ActionReaction>({
+    id: 0,
+    name: '',
+  });
+  const [reaction, setReaction] = useState<ActionReaction>({
+    id: 0,
+    name: '',
+  });
 
-  const { serverIp, aboutjson, setAboutJson, setIsConnected } =
+  const { serverIp, aboutjson, setAboutJson, setIsConnected, isBlackTheme } =
     useContext(AppContext);
 
   const handleLogout = () => {
@@ -37,27 +31,19 @@ export default function DashboardScreen() {
     deleteToken('github');
   };
 
-  const handleGithubLogin = async () => {
-    if (github === 'Error: token not found')
-      await githubLogin(serverIp, setGithub);
-    else {
-      setServiceName('github');
-      setDeconnectionModalVisible(!deconnectionModalVisible);
-    }
-  };
-
-  useEffect(() => {
-    if (token !== 'Error: token not found')
-      getWorkflows(serverIp, token, setWorkflowsInfo);
-  }, [detailsModals]);
+  // const handleGithubLogin = async () => {
+  //   if (github === 'Error: token not found') await githubLogin(serverIp);
+  //   else {
+  //     setServiceName('github');
+  //     setDeconnectionModalVisible(!deconnectionModalVisible);
+  //   }
+  // };
 
   useEffect(() => {
     checkToken('token');
     checkToken('github');
-    if (
-      token === 'Error: token not found' &&
-      github === 'Error: token not found'
-    ) {
+    if (token === 'Error: token not found') {
+      setIsConnected(false);
     }
   }, [token]);
 
@@ -65,86 +51,165 @@ export default function DashboardScreen() {
     await getToken('token', setToken);
     if (token !== 'Error: token not found' && action && reaction) {
       await sendWorkflows(token, serverIp, {
-        action_id: action,
-        reaction_id: reaction,
+        action_id: action.id,
+        reaction_id: reaction.id,
       });
       await getAboutJson(serverIp, setAboutJson);
     }
   };
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <View style={styles.textContainer}>
-          <Text style={styles.header}>Dashboard</Text>
-        </View>
-        <Button
-          mode="contained"
-          style={styles.loginButton}
-          onPress={handleLogout}>
-          <Text style={styles.text}>Logout</Text>
-        </Button>
-        <GithubLoginButton
-          handleGithubLogin={handleGithubLogin}
-          color="#B454FD"
-        />
-        <View style={styles.buttonContainer}>
+    <View
+      style={
+        isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
+      }>
+      <ScrollView>
+        <View style={globalStyles.container}>
+          <Text
+            style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+            Dashboard
+          </Text>
           <Button
             mode="contained"
-            style={styles.button}
-            onPress={() => {
-              setIsAction(true);
-              setModalVisible(true);
-            }}>
-            <Text style={styles.text}>Add Action</Text>
+            style={styles.loginButton}
+            onPress={handleLogout}>
+            <Text
+              style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+              Logout
+            </Text>
           </Button>
-          <Button
-            mode="contained"
-            style={styles.button}
-            onPress={() => {
-              setIsAction(false);
-              setModalVisible(true);
-            }}>
-            <Text style={styles.text}>Add Reaction</Text>
-          </Button>
+          <View style={styles.buttonContainer}>
+            <Button
+              mode="contained"
+              style={[styles.button, globalStyles.buttonColor]}
+              onPress={() => {
+                setIsActionOrReaction(true);
+                setModalVisible(true);
+              }}>
+              <Text
+                style={
+                  isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                }>
+                Add Action
+              </Text>
+            </Button>
+            <Button
+              mode="contained"
+              style={[styles.button, globalStyles.buttonColor]}
+              onPress={() => {
+                setIsActionOrReaction(false);
+                setModalVisible(true);
+              }}>
+              {reaction.id === 0 ? (
+                <Text
+                  style={
+                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                  }>
+                  Add Reaction
+                </Text>
+              ) : (
+                <Text
+                  style={
+                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                  }>
+                  {reaction.name}
+                </Text>
+              )}
+            </Button>
+          </View>
+          <ServicesModals
+            modalVisible={modalVisible}
+            setModalVisible={setModalVisible}
+            services={aboutjson}
+            isAction={isActionOrReaction}
+            setActionOrReaction={isActionOrReaction ? setAction : setReaction}
+          />
         </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+{
+  /* <View
+  style={isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper}>
+  <ScrollView>
+    <View style={globalStyles.container}>
+      <View style={styles.textContainer}>
+        <Text
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          Dashboard
+        </Text>
+      </View>
+      <Button
+        mode="contained"
+        style={styles.loginButton}
+        onPress={handleLogout}>
+        <Text style={styles.text}>Logout</Text>
+      </Button>
+      <OauthLoginButton
+        handleOauthLogin={handleGithubLogin}
+        color="#B454FD"
+        name="Github"
+        img="https://img.icons8.com/?size=100&id=12599&format=png"
+      />
+      <View style={styles.buttonContainer}>
         <Button
           mode="contained"
           style={styles.button}
-          onPress={handleSendWorkflow}>
-          <Text style={styles.text}>Send Workflow</Text>
+          onPress={() => {
+            setIsAction(true);
+            setModalVisible(true);
+          }}>
+          <Text style={styles.text}>Add Action</Text>
         </Button>
-        {aboutjson && (
-          <View style={styles.tabContainer}>
-            <WorkflowTable
-              workflows={aboutjson.server.workflows}
-              setDetailsModalVisible={setdetailsModals}
-              detailsModalVisible={detailsModals}
-            />
-          </View>
-        )}
-        {workflowsInfo && (
-          <DetailsModals
-            modalVisible={detailsModals}
-            setModalVisible={setdetailsModals}
-            workflows={workflowsInfo}
-          />
-        )}
-        <ServicesModals
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          services={aboutjson}
-          isAction={isAction}
-          setActionOrReaction={isAction ? setAction : setReaction}
-        />
-        <DeconnectionPopUp
-          setModalVisible={setDeconnectionModalVisible}
-          modalVisible={deconnectionModalVisible}
-          service={serviceName}
-        />
+        <Button
+          mode="contained"
+          style={styles.button}
+          onPress={() => {
+            setIsAction(false);
+            setModalVisible(true);
+          }}>
+          <Text style={styles.text}>Add Reaction</Text>
+        </Button>
       </View>
-    </ScrollView>
-  );
+      <Button
+        mode="contained"
+        style={styles.button}
+        onPress={handleSendWorkflow}>
+        <Text style={styles.text}>Send Workflow</Text>
+      </Button>
+      {aboutjson && (
+        <View style={styles.tabContainer}>
+          <WorkflowTable
+            workflows={aboutjson.server.workflows}
+            setDetailsModalVisible={setdetailsModals}
+            detailsModalVisible={detailsModals}
+          />
+        </View>
+      )}
+      {workflowsInfo && (
+        <DetailsModals
+          modalVisible={detailsModals}
+          setModalVisible={setdetailsModals}
+          workflows={workflowsInfo}
+        />
+      )}
+      <ServicesModals
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        services={aboutjson}
+        isAction={isAction}
+        setActionOrReaction={isAction ? setAction : setReaction}
+      />
+      <DeconnectionPopUp
+        setModalVisible={setDeconnectionModalVisible}
+        modalVisible={deconnectionModalVisible}
+        service={serviceName}
+      />
+    </View>
+  </ScrollView>
+</View>; */
 }
 
 const styles = StyleSheet.create({
@@ -178,8 +243,6 @@ const styles = StyleSheet.create({
     width: '90%',
   },
   button: {
-    width: '48%',
-    backgroundColor: '#B454FD',
     alignItems: 'center',
     justifyContent: 'center',
   },

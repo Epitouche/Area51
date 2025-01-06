@@ -7,3 +7,8 @@ export interface ServicesModalsProps {
   setActionOrReaction: (actionOrReaction: number) => void;
   isAction?: boolean;
 }
+
+export type ActionReaction = {
+  id: number;
+  name: string;
+};

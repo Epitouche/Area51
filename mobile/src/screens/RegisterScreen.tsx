@@ -11,7 +11,7 @@ import { Button } from 'react-native-paper';
 import { RegisterProps } from '../types';
 import { registerApiCall } from '../service/auth';
 import { AppContext } from '../context/AppContext';
-import { GithubLoginButton, IpInput } from '../components';
+import { OauthLoginButton, IpInput } from '../components';
 import { githubLogin } from '../service';
 import { globalStyles } from '../styles/global_style';
 
@@ -38,7 +38,7 @@ export default function RegisterScreen() {
   };
 
   const handleGithubLogin = async () => {
-    if (await githubLogin(serverIp, setToken)) setIsConnected(true);
+    if (await githubLogin(serverIp)) setIsConnected(true);
   };
 
   return (
@@ -95,24 +95,28 @@ export default function RegisterScreen() {
             )}
             <Button
               mode="contained"
-              style={styles.loginButton}
+              style={styles.registerButton}
               onPress={handleLogin}>
-              <Text style={styles.text}>Login</Text>
+              <Text
+                style={[
+                  isBlackTheme ? globalStyles.textBlack : globalStyles.text,
+                  { fontSize: 14, fontWeight: 'bold' },
+                ]}>
+                Register
+              </Text>
             </Button>
             <View style={styles.line} />
             <View style={styles.socialButtonBox}>
-              <GithubLoginButton handleGithubLogin={handleGithubLogin} />
-              <Button style={styles.button}>
-                <View style={styles.buttonContent}>
-                  <Image
-                    source={{
-                      uri: 'https://img.icons8.com/color/48/google-logo.png',
-                    }}
-                    style={styles.icon}
-                  />
-                  <Text style={styles.text}>Google</Text>
-                </View>
-              </Button>
+              <OauthLoginButton
+                handleOauthLogin={handleGithubLogin}
+                name="Github"
+                img="https://img.icons8.com/?size=100&id=12599&format=png"
+              />
+              <OauthLoginButton
+                handleOauthLogin={handleGithubLogin}
+                name="Google"
+                img="https://img.icons8.com/?size=100&id=12599&format=png"
+              />
             </View>
             <View style={styles.forgotPasswordBox}>
               <TouchableOpacity>
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
   },
 
   // Button Section
-  loginButton: {
+  registerButton: {
     width: '35%',
     backgroundColor: '#F7FAFB',
     justifyContent: 'center',
