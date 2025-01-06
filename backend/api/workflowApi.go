@@ -21,6 +21,9 @@ func NewWorkflowApi(controller controllers.WorkflowController) *WorkflowApi {
 
 func (api *WorkflowApi) CreateWorkflow(ctx *gin.Context) {
 	token, err := api.workflowController.CreateWorkflow(ctx)
+	if err != nil && err.Error() == "no authorization header found" {
+		return
+	}
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return

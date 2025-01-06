@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 
@@ -62,6 +61,9 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		return "", err
 	}
 	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) <= len("Bearer ") {
+		return "", fmt.Errorf("no authorization header found")
+	}
 	tokenString := authHeader[len("Bearer "):]
 
 	user, err := service.userService.GetUserInfos(tokenString)
@@ -73,22 +75,17 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	workflowValue := "1"
 	if workflowName == "" {
 		workflowName = "Workflow " + workflowValue
-		fmt.Printf("Workflow name found: %+v", service.GetWorkflowByName(workflowName).Name)
 		for service.GetWorkflowByName(workflowName).Name != "" {
-			fmt.Printf("Workflow name found: %+v", service.GetWorkflowByName(workflowName).Name)
 			workflowValueInt, _ := strconv.Atoi(workflowValue)
 			workflowValueInt++
 			workflowValue = strconv.Itoa(workflowValueInt)
 			workflowName = "Workflow " + workflowValue
 		}
 		workflowValueInt, _ := strconv.Atoi(workflowValue)
-		// workflowValueInt++
-		// workflowValueInt++
 		workflowValue = strconv.Itoa(workflowValueInt)
 
 		workflowName = "Workflow " + workflowValue
 	}
-	// panic("Not implemented")
 
 	githubServiceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
 	newWorkflow := schemas.Workflow{
@@ -104,11 +101,9 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
 	fmt.Printf("Workflow %+v", actualWorkflow)
 	if actualWorkflow != (schemas.Workflow{}) {
-		fmt.Print("\nMON TOTO\n")
 		if actualWorkflow.IsActive {
 			return "Workflow already exists and is active", nil
 		} else {
-			fmt.Print("OOOOOOUUUUUUUIIIIIIII\n")
 			return "Workflow already exists and is not active", nil
 		}
 	}
@@ -124,17 +119,17 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 
 func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken) {
 	workflowChannel := make(chan string)
-	var workflowStateMutex sync.Mutex
-	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel, workflowStateMutex)
-	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken, workflowStateMutex)
+	// var workflowStateMutex sync.Mutex
+	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel)
+	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken)
 }
 
-func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string, workflowStateMutex sync.Mutex) {
+func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		fmt.Println("Start of WorkflowActionChannel")
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
-			workflowStateMutex.Lock()
-			defer workflowStateMutex.Unlock()
+			// workflowStateMutex.Lock()
+			// defer workflowStateMutex.Unlock()
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
 			if err != nil {
 				fmt.Println("Error")
@@ -150,18 +145,17 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			} else {
 				break
 			}
-			// workflowStateMutex.Unlock()
 		}
 		fmt.Println("Clear")
 		channel <- "Workflow finished"
 	}(workflowStartingPoint, channel)
 }
 
-func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken, workflowStateMutex sync.Mutex) {
+func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
-			workflowStateMutex.Lock()
-			defer workflowStateMutex.Unlock()
+			// workflowStateMutex.Lock()
+			// defer workflowStateMutex.Unlock()
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
 			if err != nil {
 				fmt.Println("Error")
