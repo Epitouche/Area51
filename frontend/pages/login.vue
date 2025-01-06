@@ -18,7 +18,7 @@ async function onSubmit() {
       const tokenCookie = useCookie("access_token");
       tokenCookie.value = access_token;
 
-      navigateTo("/services");
+      navigateTo("/workflows");
     } else {
       console.error("Access token not received");
     }
