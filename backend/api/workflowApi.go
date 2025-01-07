@@ -27,8 +27,6 @@ func (api *WorkflowApi) CreateWorkflow(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
-	} else {
-		ctx.JSON(http.StatusOK, token)
 	}
 	ctx.JSON(http.StatusOK, schemas.BasicResponse{Message: token})
 }

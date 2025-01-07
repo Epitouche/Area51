@@ -118,13 +118,8 @@ func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Se
 }
 
 func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error) {
-	authHeader := ctx.GetHeader("Authorization")
-	if len(authHeader) < len("Bearer ") {
-		return nil, fmt.Errorf("invalid token")
-	}
-	tokenString := authHeader[len("Bearer "):]
-	var allWorkflows []schemas.WorkflowJson
-	userId, err := controller.jWtService.GetUserIdFromToken(tokenString)
+	bearer, err := toolbox.GetBearerToken(ctx)
+	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +130,7 @@ func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.W
 	if err != nil {
 		return nil, err
 	}
+	var allWorkflows []schemas.WorkflowJson
 	for _, workflow := range workflows {
 		action := controller.actionService.FindById(workflow.ActionId)
 		reaction := controller.reactionService.FindById(workflow.ReactionId)

@@ -47,30 +47,13 @@ func (api *UserApi) Register(ctx *gin.Context) {
 	}
 }
 
-func (api *UserApi) GetAccessToken(ctx *gin.Context) {
-	if token, err := api.userController.GetAccessToken(ctx); err != nil {
-		ctx.JSON(http.StatusUnauthorized, &schemas.BasicResponse{
-			Message: err.Error(),
-		})
-	} else {
-		ctx.JSON(http.StatusOK, &schemas.JWT{
-			Token: token,
-		})
-	}
-}
-
 func (api *UserApi) GetServices(ctx *gin.Context) {
-	allServices, err := api.userController.GetAllServices(ctx)
-	if allServices == nil {
+	if allServices, err := api.userController.GetAllServices(ctx); err != nil {
 		ctx.JSON(http.StatusOK, []schemas.Service{})
-		return
-	}
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
-		return
+	} else {
+		ctx.JSON(http.StatusOK, allServices)
 	}
 }
-
 
 func (api *UserApi) GetWorkflows(ctx *gin.Context) {
 	allWorkflows, err := api.userController.GetAllWorkflows(ctx)
