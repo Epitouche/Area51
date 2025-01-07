@@ -60,11 +60,27 @@ func (api *UserApi) GetAccessToken(ctx *gin.Context) {
 }
 
 func (api *UserApi) GetServices(ctx *gin.Context) {
-	if allServices, err := api.userController.GetAllServices(ctx); err != nil {
-		ctx.JSON(http.StatusUnauthorized, &schemas.BasicResponse{
-			Message: err.Error(),
-		})
-	} else {
-		ctx.JSON(http.StatusOK, allServices)
+	allServices, err := api.userController.GetAllServices(ctx)
+	if allServices == nil {
+		ctx.JSON(http.StatusOK, []schemas.Service{})
+		return
 	}
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+}
+
+
+func (api *UserApi) GetWorkflows(ctx *gin.Context) {
+	allWorkflows, err := api.userController.GetAllWorkflows(ctx)
+	if allWorkflows == nil {
+		ctx.JSON(http.StatusOK, []schemas.WorkflowJson{})
+		return
+	}
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, allWorkflows)
 }

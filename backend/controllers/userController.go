@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,24 +15,30 @@ type UserController interface {
 	Login(ctx *gin.Context) (string, error)
 	Register(ctx *gin.Context) (string, error)
 	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
-	GetAccessToken(ctx *gin.Context) (string, error)
+	GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error)
 }
 
 type userController struct {
 	userService     services.UserService
 	jWtService      services.JWTService
 	servicesService services.ServicesService
+	reactionService services.ReactionService
+	actionService   services.ActionService
 }
 
 func NewUserController(
 	userService services.UserService,
 	jWtService services.JWTService,
 	servicesService services.ServicesService,
+	reactionService services.ReactionService,
+	actionService services.ActionService,
 ) UserController {
 	return &userController{
 		userService:     userService,
 		jWtService:      jWtService,
 		servicesService: servicesService,
+		reactionService: reactionService,
+		actionService:   actionService,
 	}
 }
 
@@ -97,6 +104,9 @@ func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Se
 		return nil, err
 	}
 	services, err := controller.userService.GetAllServices(userId)
+	if len(services) == 0 {
+		return nil, fmt.Errorf("no services found")
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -105,4 +115,40 @@ func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Se
 		allServices = append(allServices, controller.servicesService.FindById(service.ServiceId))
 	}
 	return allServices, nil
+}
+
+func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error) {
+	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) < len("Bearer ") {
+		return nil, fmt.Errorf("invalid token")
+	}
+	tokenString := authHeader[len("Bearer "):]
+	var allWorkflows []schemas.WorkflowJson
+	userId, err := controller.jWtService.GetUserIdFromToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	workflows, err := controller.userService.GetAllWorkflows(userId)
+	if len(workflows) == 0 {
+		return nil, fmt.Errorf("no services found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	for _, workflow := range workflows {
+		action := controller.actionService.FindById(workflow.ActionId)
+		reaction := controller.reactionService.FindById(workflow.ReactionId)
+		allWorkflows = append(allWorkflows, schemas.WorkflowJson{
+			Name:         workflow.Name,
+			WorkflowId:   workflow.Id,
+			ActionId:     workflow.ActionId,
+			ReactionId:   workflow.ReactionId,
+			ActionName:   action.Name,
+			ReactionName: reaction.Name,
+			IsActive:     workflow.IsActive,
+			CreatedAt:    workflow.CreatedAt,
+		})
+
+	}
+	return allWorkflows, nil
 }

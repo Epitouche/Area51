@@ -16,6 +16,7 @@ type UserRepository interface {
 	FindByUsername(username string) schemas.User
 	FindByEmail(email string) schemas.User
 	FindAllServicesByUserId(id uint64) []schemas.ServiceToken
+	FindAllWorkflowsByUserId(id uint64) []schemas.Workflow
 }
 
 type userRepository struct {
@@ -102,13 +103,20 @@ func (r *userRepository) FindByEmail(email string) (user schemas.User) {
 	return user
 }
 
-func (r *userRepository) FindAllServicesByUserId(id uint64) (services []schemas.ServiceToken) {
-	err := r.db.Connection.Where(&schemas.ServiceToken{
-		UserId: id,
-	}).Find(&services)
-
-	if err.Error != nil {
+func (r *userRepository) FindAllServicesByUserId(id uint64) []schemas.ServiceToken {
+	var services []schemas.ServiceToken
+	err := r.db.Connection.Where(&schemas.ServiceToken{UserId: id}).Find(&services)
+	if err.Error != nil || len(services) == 0 {
 		return []schemas.ServiceToken{}
 	}
 	return services
+}
+
+func (r *userRepository) FindAllWorkflowsByUserId(id uint64) []schemas.Workflow {
+	var workflows []schemas.Workflow
+	err := r.db.Connection.Where(&schemas.Workflow{UserId: id}).Find(&workflows)
+	if err.Error != nil || len(workflows) == 0 {
+		return []schemas.Workflow{}
+	}
+	return workflows
 }

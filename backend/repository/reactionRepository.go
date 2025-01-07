@@ -9,9 +9,10 @@ import (
 )
 
 type ReactionRepository interface {
-	Save(reaction schemas.Reaction)
+	Save(action schemas.Reaction)
 	Update(reaction schemas.Reaction)
-	Delete(reaction schemas.Reaction)
+	UpdateTrigger(reaction schemas.Reaction)
+	Delete(action schemas.Reaction)
 	FindAll() []schemas.Reaction
 	FindByName(reactionName string) []schemas.Reaction
 	FindAllByName(reactionName string) []schemas.Reaction
@@ -45,10 +46,16 @@ func (repo *reactionRepository) Save(reaction schemas.Reaction) {
 }
 
 func (repo *reactionRepository) Update(reaction schemas.Reaction) {
-	err := repo.db.Connection.Where(&schemas.Reaction{
-		Id: reaction.Id,
-	}).Updates(&reaction)
+	err := repo.db.Connection.Where(&schemas.Reaction{Id: reaction.Id}).Updates(&reaction)
+	if err.Error != nil {
+		panic(err.Error)
+	}
+}
 
+func (repo *reactionRepository) UpdateTrigger(reaction schemas.Reaction) {
+	err := repo.db.Connection.Model(&schemas.Reaction{}).Where(&schemas.Reaction{Id: reaction.Id}).Updates(map[string]interface{}{
+		"trigger": reaction.Trigger,
+	})
 	if err.Error != nil {
 		panic(err.Error)
 	}

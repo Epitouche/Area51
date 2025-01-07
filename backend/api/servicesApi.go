@@ -25,28 +25,20 @@ func NewServicesApi(serviceController controllers.ServicesController, workflowCo
 
 func (api *ServicesApi) AboutJson(ctx *gin.Context) {
 	allServices, serviceErr := api.serviceController.AboutJson(ctx)
-	allWorkflows, workflowErr := api.workflowController.AboutJson(ctx)
 
 	if serviceErr != nil {
 		ctx.JSON(http.StatusInternalServerError, &schemas.BasicResponse{
 			Message: serviceErr.Error(),
 		})
-		return
-	}
-	if workflowErr != nil {
-		ctx.JSON(http.StatusInternalServerError, &schemas.BasicResponse{
-			Message: workflowErr.Error(),
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"client": map[string]string{
+				"host": ctx.ClientIP(),
+			},
+			"server": map[string]any{
+				"current_time": fmt.Sprintf("%d", time.Now().Unix()),
+				"services":     allServices,
+			},
 		})
-		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"client": map[string]string{
-			"host": ctx.ClientIP(),
-		},
-		"server": map[string]any{
-			"current_time": fmt.Sprintf("%d", time.Now().Unix()),
-			"services":     allServices,
-			"workflows":    allWorkflows,
-		},
-	})
 }

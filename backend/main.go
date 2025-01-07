@@ -33,6 +33,7 @@ func setupRouter() *gin.Engine {
 		user := apiRoutes.Group("/user", middlewares.Authorization())
 		{
 			user.GET("services", userApi.GetServices)
+			user.GET("workflows", userApi.GetWorkflows)
 		}
 
 		auth := apiRoutes.Group("/auth")
@@ -54,6 +55,7 @@ func setupRouter() *gin.Engine {
 		workflow := apiRoutes.Group("/workflow", middlewares.Authorization())
 		{
 			workflow.POST("", workflowApi.CreateWorkflow)
+			workflow.PUT("/activation", workflowApi.ActivateWorkflow)
 			workflow.GET("/reaction", workflowApi.GetMostRecentReaction)
 		}
 
@@ -91,11 +93,11 @@ var (
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 
 	// Controllers
-	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService, servicesService)
+	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService)
 	githubController   controllers.GithubController   = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
 	actionController   controllers.ActionController   = controllers.NewActionController(actionService)
 	servicesController controllers.ServicesController = controllers.NewServiceController(servicesService, actionService, reactionService)
-	workflowController controllers.WorkflowController = controllers.NewWorkflowController(workflowsService)
+	workflowController controllers.WorkflowController = controllers.NewWorkflowController(workflowsService, reactionService, actionService)
 )
 
 var (

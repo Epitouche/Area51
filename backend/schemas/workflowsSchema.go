@@ -11,12 +11,20 @@ type WorkflowResult struct {
 	ReactionId     uint64 `json:"reaction_id"`
 }
 
+type WorkflowActivate struct {
+	WorkflowId   uint64 `json:"workflow_id" binding:"required"`
+	WorflowState bool   `json:"workflow_state" binding:"required"`
+}
+
 type WorkflowJson struct {
-	Name       string    `json:"name"`
-	ActionId   uint64    `json:"action_id"`
-	ReactionId uint64    `json:"reaction_id"`
-	IsActive   bool      `json:"is_active"`
-	CreatedAt  time.Time `json:"created_at"`
+	Name         string    `json:"name"`
+	WorkflowId   uint64    `json:"workflow_id"`
+	ActionName   string    `json:"action_name"`
+	ActionId     uint64    `json:"action_id"`
+	ReactionId   uint64    `json:"reaction_id"`
+	ReactionName string    `json:"reaction_name"`
+	IsActive     bool      `json:"is_active"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type Workflow struct {
@@ -29,6 +37,6 @@ type Workflow struct {
 	Reaction   Reaction  `json:"reaction,omitempty" gorm:"foreignkey:ReactionId;references:Id"`
 	CreatedAt  time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt  time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	IsActive   bool      `json:"is_active" gorm:"type:boolean"`
+	IsActive   bool      `json:"is_active" default:"false" gorm:"column:is_active"`
 	Name       string    `json:"name" gorm:"type:varchar(100)"`
 }
