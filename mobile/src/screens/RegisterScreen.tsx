@@ -35,7 +35,6 @@ export default function RegisterScreen() {
       })
     )
       setIsConnected(true);
-    console.log('register');
   };
 
   const handleGithubLogin = async () => {
