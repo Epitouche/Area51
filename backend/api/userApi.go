@@ -61,3 +61,17 @@ func (api *UserApi) GetServices(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, allServices)
 }
+
+
+func (api *UserApi) GetWorkflows(ctx *gin.Context) {
+	allWorkflows, err := api.userController.GetAllWorkflows(ctx)
+	if allWorkflows == nil {
+		ctx.JSON(http.StatusOK, []schemas.WorkflowJson{})
+		return
+	}
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, allWorkflows)
+}

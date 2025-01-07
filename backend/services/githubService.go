@@ -150,10 +150,6 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		fmt.Println(err)
 		return
 	}
-	// existingWorkflow := service.workflowRepository.FindExistingWorkflow(workflow)
-	// if existingWorkflow != (schemas.Workflow{}) {
-
-	// }
 	token := service.tokenRepository.FindByUserId(workflow.UserId)
 	client := github.NewClient(&http.Client{
 		Transport: &transportWithToken{token: token[len(token)-1].Token},
@@ -233,26 +229,5 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	}
 	savedResult.ApiResponse = jsonValue
 	service.reactionResponseDataService.Save(savedResult)
-
-	// workflow, _ := service.workflowRepository.FindByIds(workflowId)
-	// newWorkflow := schemas.Workflow{
-	// 	Id:       workflow.Id,
-	// 	UserId:   workflow.UserId,
-	// 	Reaction: workflow.Reaction,
-	// 	IsActive: false,
-	// }
-	// service.workflowRepository.UpdateActiveStatus(newWorkflow)
-	// actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
-	// newReaction := schemas.Reaction{
-	// 	Id:      actualReaction.Id,
-	// 	Trigger: false,
-	// }
-
-	// service.reactionRepository.UpdateTrigger(newReaction)
-	// if err != nil {
-	// 	fmt.Printf("Failed to update reaction: %v\n", err)
-	// 	return
-	// }
-	// channel <- "Reaction workflow done"
 	time.Sleep(1 * time.Minute)
 }

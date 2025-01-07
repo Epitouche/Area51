@@ -157,7 +157,6 @@ func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 
 func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken) {
 	workflowChannel := make(chan string)
-	// var workflowStateMutex sync.Mutex
 	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel)
 	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken)
 }
@@ -166,8 +165,6 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		fmt.Println("Start of WorkflowActionChannel")
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
-			// workflowStateMutex.Lock()
-			// defer workflowStateMutex.Unlock()
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
 			if err != nil {
 				fmt.Println("Error")
@@ -192,8 +189,6 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
-			// workflowStateMutex.Lock()
-			// defer workflowStateMutex.Unlock()
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
 			if err != nil {
 				fmt.Println("Error")
