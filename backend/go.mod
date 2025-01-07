@@ -4,10 +4,12 @@ go 1.23
 
 toolchain go1.23.3
 
-require gorm.io/gorm v1.25.12
+require (
+	github.com/google/go-github/v67 v67.0.0
+	gorm.io/gorm v1.25.12
+)
 
 require (
-	github.com/google/go-github/v67 v67.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
