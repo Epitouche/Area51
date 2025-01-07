@@ -63,8 +63,8 @@ const features = ref([
 </script>
 <template>
   <div>
-<!-- Navbar -->
-  <NavbarComponent />
+<!-- Layout -->
+   <NuxtLayout/>
 
   <div class="flex flex-col bg-primaryWhite-500 dark:bg-primaryDark-500">
     <!-- Hero Section -->
