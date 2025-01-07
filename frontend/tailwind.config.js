@@ -5,7 +5,7 @@ export default {
     "./pages/**/*.vue",
     "./app.vue",
   ],
-  darkmode: "media",
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {

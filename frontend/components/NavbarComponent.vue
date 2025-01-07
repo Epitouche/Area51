@@ -9,6 +9,7 @@ const registered = false
           <NuxtLink to="/">MyLogo</NuxtLink>
         </div>
         <div class="space-x-9">
+          <ThemeSwitch/>
           <NuxtLink to="/">Dashboard</NuxtLink>
           <NuxtLink to="/services">Services</NuxtLink>
         </div>
@@ -20,6 +21,7 @@ const registered = false
           <NuxtLink to="/">MyLogo</NuxtLink>
         </div>
         <div class="space-x-9 flex items-center">
+          <ThemeSwitch/>
           <NuxtLink to="/login">Login</NuxtLink>
           <NuxtLink to="/register">
             <ButtonComponent

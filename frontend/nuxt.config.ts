@@ -7,7 +7,13 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  modules: ["@nuxt/devtools", "@nuxt/eslint", "@nuxt/icon"],
+  modules: ["@nuxt/devtools", "@nuxt/eslint", "@nuxt/icon", "@nuxtjs/color-mode"],
+
+  colorMode: {
+    classSuffix: '',
+    preference: 'system',
+    fallback: 'light'
+  },
 
   compatibilityDate: "2024-12-03",
 });
