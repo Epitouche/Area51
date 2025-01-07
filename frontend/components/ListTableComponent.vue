@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import DropdownComponent from "./DropdownComponent.vue";
 
 const props = defineProps<{
   columns: string[];
@@ -31,11 +30,11 @@ const toggleCheckbox = (index: number) => {
   emitCheckboxes();
 };
 
-// Gestion de l'état du dropdown
 const activeDropdownIndex = ref<number | null>(null);
 
 const toggleDropdown = (index: number) => {
-  activeDropdownIndex.value = activeDropdownIndex.value === index ? null : index;
+  activeDropdownIndex.value =
+    activeDropdownIndex.value === index ? null : index;
 };
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -53,7 +52,6 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
-// Ajouter et retirer l'événement global
 onMounted(() => {
   window.addEventListener("click", handleClickOutside);
 });
@@ -124,7 +122,11 @@ onBeforeUnmount(() => {
             />
             <div
               v-show="activeDropdownIndex === i"
-              class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
+              :class="{
+                '-translate-y-40': i >= Math.floor(rows.length / 2),
+                '': i < Math.floor(rows.length / 2),
+              }"
+              class="absolute left-1/2 transform -translate-x-1/2 mt-2 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
             >
               <div
                 class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700"
