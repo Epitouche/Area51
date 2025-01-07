@@ -141,7 +141,6 @@ function ActionOrReaction() {
             onPress={() => {
               if (isAction) {
                 if (selectedActionOrReactionId)
-                  console.log(selectedActionOrReactionId);
                 setAction && setAction(selectedActionOrReactionId as Action);
               } else {
                 if (selectedActionOrReactionId)
