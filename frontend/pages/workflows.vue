@@ -1,11 +1,23 @@
 <script setup lang="ts">
 import DropdownComponent from "~/components/DropdownComponent.vue";
+import { useNotificationStore } from '@/stores/notification';
+
 import type {
   ServerResponse,
   Service,
   WorkflowResponse,
   Workflow,
 } from "~/src/types";
+
+const notificationStore = useNotificationStore();
+
+function triggerNotification(type: "success" | "error" | "warning", title: string, message: string) {
+  notificationStore.addNotification({
+    type,
+    title,
+    message,
+  });
+}
 
 const columns = [
   "Name",
@@ -16,12 +28,7 @@ const columns = [
 ];
 
 const filters = ["All Status", "Active", "Inactive", "Selected"];
-const sorts = [
-  "Name",
-  "Creation Date",
-  "Action ID",
-  "Reaction ID",
-];
+const sorts = ["Name", "Creation Date", "Action ID", "Reaction ID"];
 
 const services = reactive<Service[]>([]);
 const workflowsInList = reactive<Workflow[]>([]);
@@ -160,6 +167,7 @@ async function addWorkflow() {
         },
       });
       fetchWorflows();
+      triggerNotification("success", "Workflow added", "The workflow has been added successfully");
     }
   } catch (error) {
     console.error("Error adding workflow:", error);

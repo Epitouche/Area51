@@ -1,12 +1,29 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
+import { useNotificationStore } from "@/stores/notification";
 
-const username = ref("");
-const password = ref("");
+const username = ref<string>("");
+const password = ref<string>("");
+
+const notificationStore = useNotificationStore();
+
+type NotificationType = "success" | "error" | "warning";
+
+function triggerNotification(type: NotificationType, title: string, message: string) {
+  notificationStore.addNotification({
+    type,
+    title,
+    message,
+  });
+}
+
+interface LoginResponse {
+  access_token: string;
+}
 
 async function onSubmit() {
   try {
-    const { access_token } = await $fetch("http://localhost:8080/api/auth/login", {
+    const { access_token }: LoginResponse = await $fetch("http://localhost:8080/api/auth/login", {
       method: "POST",
       body: {
         username: username.value,
@@ -20,16 +37,21 @@ async function onSubmit() {
 
       navigateTo("/workflows");
     } else {
-      console.error("Access token not received");
+      triggerNotification("error", "Login failed", "Please check your credentials");
     }
   } catch (error) {
-    console.error("API response:", error.response?.data || error.message);
+    console.error("Error logging in:", error);
+    triggerNotification("error", "Login failed", "Please check your credentials");
   }
+}
+
+interface GitHubAuthResponse {
+  github_authentication_url: string;
 }
 
 async function redirectToGitHubOAuth() {
   try {
-    const { github_authentication_url } = await $fetch(
+    const { github_authentication_url }: GitHubAuthResponse = await $fetch(
       "http://localhost:8080/api/github/auth",
       {
         method: "GET",
@@ -44,15 +66,15 @@ async function redirectToGitHubOAuth() {
     console.error("Error fetching GitHub OAuth URL:", error);
   }
 }
-
 </script>
+
 
 <template>
   <div
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-primaryDark-500"
   >
     <div
-      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
+      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-600 to-tertiary-700 dark:from-tertiary-700 dark:to-tertiary-600 text-fontWhite rounded-lg shadow-lg"
     >
       <h2 class="text-2xl font-bold text-center">LOG IN</h2>
       <form class="space-y-6" @submit.prevent="onSubmit">
