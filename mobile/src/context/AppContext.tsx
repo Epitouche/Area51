@@ -1,7 +1,7 @@
 // src/context/AppContext.tsx
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { AboutJson, AboutJsonParse } from '../types';
-import { checkToken } from '../service';
+import { checkToken, getToken, saveToken } from '../service';
 import { getAboutJson } from '../service/getAboutJson';
 
 interface AppContextProps {
@@ -51,13 +51,20 @@ export default function AppProvider({ children }: AppProviderProps) {
     };
     checkConnection();
     const aboutJson = async () => {
-      console.log(serverIp);
       if (serverIp != '') {
         getAboutJson(serverIp, setAboutJson);
       }
     };
     aboutJson();
+    saveToken('serverIp', serverIp);
   }, [serverIp]);
+
+  useEffect(() => {
+    const checkAndGrapServerIp = async () => {
+      if (await checkToken('serverIp')) getToken('serverIp', setServerIp);
+    };
+    checkAndGrapServerIp();
+  }, []);
 
   return (
     <AppContext.Provider

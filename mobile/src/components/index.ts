@@ -1,4 +1,3 @@
-export * from './ServicesModals';
 export * from './OauthLoginButton';
 export * from './DeconnectionPopUp';
 export * from './WorkflowTab';

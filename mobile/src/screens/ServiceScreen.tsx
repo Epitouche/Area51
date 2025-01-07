@@ -37,7 +37,7 @@ export default function ServiceScreen() {
             gap: 10,
           }}>
           {servicesConnected &&
-            servicesConnected.services.length > 0 &&
+            servicesConnected.services &&
             servicesConnected.services.map((service, index) => (
               <ServiceCard
                 key={index}

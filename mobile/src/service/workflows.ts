@@ -41,7 +41,6 @@ export async function getWorkflows(apiEndpoint: string, token: string, sendWorkf
     );
     const data = await response.json();
     if (response.status === 200) {
-      console.log('API get workflows success');
       if (data !== null)
         sendWorkflows(data);
     }

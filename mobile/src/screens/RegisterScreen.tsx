@@ -95,7 +95,7 @@ export default function RegisterScreen() {
             )}
             <Button
               mode="contained"
-              style={globalStyles.buttonColor}
+              style={globalStyles.terciaryDark}
               onPress={handleLogin}>
               <Text
                 style={[

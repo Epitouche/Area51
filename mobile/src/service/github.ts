@@ -4,7 +4,6 @@ import { OauthLogin } from './oauth/oauthCall';
 
 export async function githubLogin(apiEndpoint: string) {
   const setToken = (accessToken: string) => {
-    console.log('Github token:', accessToken);
     sendGithubToken(apiEndpoint, accessToken);
   };
   const config = {

@@ -41,7 +41,7 @@ export function IpInput() {
       />
       <Button
         onPress={handleSave}
-        style={[globalStyles.buttonColor, styles.button]}>
+        style={[globalStyles.terciaryDark, styles.button]}>
         <Text style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
           Save
         </Text>

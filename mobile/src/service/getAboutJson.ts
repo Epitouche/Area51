@@ -11,9 +11,8 @@ export async function getAboutJson(
     });
     const data = await response.json();
     if (response.status === 200) {
-      console.log('API aboutJson success');
+      setAboutJson(data);
     }
-    setAboutJson(data);
     return data;
   } catch (error) {
     console.error('Error fetching AboutJson data:', error, apiEndpoint);

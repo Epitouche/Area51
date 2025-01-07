@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
-import { AppStackList, ServicesParse } from '../types';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { Action, AppStackList, Reaction, ServicesParse } from '../types';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
 
 type LoginScreenRouteProp = RouteProp<AppStackList, 'ActionOrReaction'>;
@@ -27,10 +27,21 @@ function NoService() {
 }
 
 function ActionOrReaction() {
+  const navigation = useNavigation();
+  const defaultService = {
+    name: '',
+    isConnected: false,
+    actions: [],
+    reactions: [],
+  };
+
   const route = useRoute<LoginScreenRouteProp>();
-  const [selectedService, setSelectedService] = useState<ServicesParse>();
-  const [selectedActionOrReactionId, setSelectedActionOrReactionId] = useState<number>();
-  const { isAction } = route.params;
+  const [selectedService, setSelectedService] =
+    useState<ServicesParse>(defaultService);
+  const [selectedActionOrReactionId, setSelectedActionOrReactionId] = useState<
+    Action | Reaction
+  >();
+  const { isAction, setAction, setReaction } = route.params;
   const { servicesConnected, isBlackTheme } = useContext(AppContext);
 
   return (
@@ -49,18 +60,12 @@ function ActionOrReaction() {
             Select a service
           </Text>
           {servicesConnected.services.map((service, index) => {
-            if (selectedService)
-              console.log(selectedService.name, service.name)
             if (service.isConnected) {
               return (
                 <Button
                   key={index}
                   mode="contained"
-                  style={
-                    selectedService && selectedService.name === service.name
-                      ? styles.buttonSelect
-                      : styles.button
-                  }
+                  style={globalStyles.terciaryDark}
                   onPress={() => {
                     setSelectedService(service);
                   }}>
@@ -85,48 +90,71 @@ function ActionOrReaction() {
                 {selectedService.name}
               </Text>
               {isAction
-                ? selectedService.actions.map((action, index) => (
-                    <Button
-                      key={index}
-                      mode="contained"
-                      style={
-                        selectedActionOrReactionId === action.action_id
-                          ? styles.buttonSelect
-                          : styles.button
-                      }
-                      onPress={() => {
-                        console.log('Create action/reaction');
-                      }}>
-                      <Text
-                        style={
-                          isBlackTheme
-                            ? globalStyles.textBlack
-                            : globalStyles.text
-                        }>
-                        {action.name}
-                      </Text>
-                    </Button>
-                  ))
-                : selectedService.reactions.map((reaction, index) => (
-                    <Button
-                      key={index}
-                      mode="contained"
-                      style={styles.button}
-                      onPress={() => {
-                        console.log('Create action/reaction');
-                      }}>
-                      <Text
-                        style={
-                          isBlackTheme
-                            ? globalStyles.textBlack
-                            : globalStyles.text
-                        }>
-                        {reaction.name}
-                      </Text>
-                    </Button>
-                  ))}
+                ? selectedService.actions.map((action, index) => {
+                    if (setAction) {
+                      return (
+                        <Button
+                          key={index}
+                          mode="contained"
+                          style={globalStyles.terciaryDark}
+                          onPress={() => {
+                            setSelectedActionOrReactionId(action);
+                          }}>
+                          <Text
+                            style={
+                              isBlackTheme
+                                ? globalStyles.textBlack
+                                : globalStyles.text
+                            }>
+                            {action.name}
+                          </Text>
+                        </Button>
+                      );
+                    }
+                  })
+                : selectedService.reactions.map((reaction, index) => {
+                    if (setReaction) {
+                      return (
+                        <Button
+                          key={index}
+                          mode="contained"
+                          style={globalStyles.terciaryDark}
+                          onPress={() => {
+                            setSelectedActionOrReactionId(reaction);
+                          }}>
+                          <Text
+                            style={
+                              isBlackTheme
+                                ? globalStyles.textBlack
+                                : globalStyles.text
+                            }>
+                            {reaction.name}
+                          </Text>
+                        </Button>
+                      );
+                    }
+                  })}
             </View>
           )}
+          <Button
+            style={[styles.saveButton, globalStyles.terciaryDark]}
+            onPress={() => {
+              if (isAction) {
+                if (selectedActionOrReactionId)
+                  console.log(selectedActionOrReactionId);
+                setAction && setAction(selectedActionOrReactionId as Action);
+              } else {
+                if (selectedActionOrReactionId)
+                  setReaction &&
+                    setReaction(selectedActionOrReactionId as Reaction);
+              }
+              navigation.goBack();
+            }}>
+            <Text
+              style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+              Save
+            </Text>
+          </Button>
         </View>
       </ScrollView>
     </View>
@@ -134,15 +162,14 @@ function ActionOrReaction() {
 }
 
 export default function ActionOrReactionScreen() {
-  const { servicesConnected, isBlackTheme } = useContext(AppContext);
+  const { servicesConnected } = useContext(AppContext);
   const [connected, setConneted] = useState(0);
   useEffect(() => {
-    if (servicesConnected.services.length > 0)
+    if (servicesConnected.services)
       servicesConnected.services.map(service => {
         if (service.isConnected) setConneted(connected + 1);
       });
   }, []);
-  console.log(servicesConnected.services.length);
 
   return connected > 0 ? <ActionOrReaction /> : <NoService />;
 }
@@ -173,6 +200,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textContainer: {
+    gap: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -183,17 +211,10 @@ const styles = StyleSheet.create({
     gap: 20,
     width: '90%',
   },
-  button: {
+  saveButton: {
+    width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  text: {
-    color: '#222831',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  tabContainer: {
-    width: '100%',
-    justifyContent: 'center',
+    borderRadius: 20,
   },
 });

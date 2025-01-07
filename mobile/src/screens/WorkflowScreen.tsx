@@ -2,25 +2,25 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Button } from 'react-native-paper';
 import { deleteToken, checkToken, getToken } from '../service/token';
-import { ServicesModals, WorkflowTable } from '../components';
+import { WorkflowTable } from '../components';
 import { AppContext } from '../context/AppContext';
 import { parseServices, sendWorkflows, getAboutJson } from '../service';
 import { globalStyles } from '../styles/global_style';
-import { ActionReaction, AppStackList } from '../types';
+import { Action, AppStackList, Reaction } from '../types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-export default function DashboardScreen() {
+export default function WorkflowScreen() {
   const [token, setToken] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isActionOrReaction, setIsActionOrReaction] = useState<boolean>(true);
   const [detailsModals, setdetailsModals] = useState(false);
-  const [action, setAction] = useState<ActionReaction>({
-    id: 0,
+  const [action, setAction] = useState<Action>({
+    action_id: 0,
     name: '',
+    description: '',
   });
-  const [reaction, setReaction] = useState<ActionReaction>({
-    id: 0,
+  const [reaction, setReaction] = useState<Reaction>({
+    reaction_id: 0,
     name: '',
+    description: '',
   });
 
   const navigation = useNavigation<NavigationProp<AppStackList>>();
@@ -32,7 +32,7 @@ export default function DashboardScreen() {
     setIsConnected,
     isBlackTheme,
     setServicesConnected,
-    servicesConnected
+    servicesConnected,
   } = useContext(AppContext);
 
   const handleLogout = () => {
@@ -53,16 +53,16 @@ export default function DashboardScreen() {
       });
   }, []);
 
-  console.log('servicesConnected', servicesConnected);
-
   const handleSendWorkflow = async () => {
     await getToken('token', setToken);
     if (token !== 'Error: token not found' && action && reaction) {
       await sendWorkflows(token, serverIp, {
-        action_id: action.id,
-        reaction_id: reaction.id,
+        action_id: action.action_id,
+        reaction_id: reaction.reaction_id,
       });
       await getAboutJson(serverIp, setAboutJson);
+      setAction({ action_id: 0, name: '', description: '' });
+      setReaction({ reaction_id: 0, name: '', description: '' });
     }
   };
 
@@ -89,13 +89,12 @@ export default function DashboardScreen() {
           <View style={styles.buttonContainer}>
             <Button
               mode="contained"
-              style={[styles.button, globalStyles.buttonColor]}
+              style={[styles.button, globalStyles.secondaryDark]}
               onPress={() => {
                 navigation.navigate('ActionOrReaction', {
-                  isAction: true
+                  isAction: true,
+                  setAction,
                 });
-                // setIsActionOrReaction(true);
-                // setModalVisible(true);
               }}>
               {action.name === '' ? (
                 <Text
@@ -115,10 +114,12 @@ export default function DashboardScreen() {
             </Button>
             <Button
               mode="contained"
-              style={[styles.button, globalStyles.buttonColor]}
+              style={[styles.button, globalStyles.secondaryDark]}
               onPress={() => {
-                setIsActionOrReaction(false);
-                setModalVisible(true);
+                navigation.navigate('ActionOrReaction', {
+                  isAction: false,
+                  setReaction,
+                });
               }}>
               {reaction.name === '' ? (
                 <Text
@@ -137,33 +138,16 @@ export default function DashboardScreen() {
               )}
             </Button>
           </View>
-          {aboutJson && (
-            <Button
-              //disabled={action.name === '' || reaction.name === ''}
-              mode="contained"
-              style={[styles.button, globalStyles.buttonColor]}
-              onPress={() =>
-                parseServices({
-                  aboutJson,
-                  serverIp,
-                  setServicesConnected,
-                })
-              }>
-              <Text
-                style={
-                  isBlackTheme ? globalStyles.textBlack : globalStyles.text
-                }>
-                Send Workflow
-              </Text>
-            </Button>
-          )}
-          <ServicesModals
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
-            services={aboutJson}
-            isAction={isActionOrReaction}
-            setActionOrReaction={isActionOrReaction ? setAction : setReaction}
-          />
+          <Button
+            disabled={action.name === '' || reaction.name === ''}
+            mode="contained"
+            style={[styles.button, globalStyles.secondaryDark]}
+            onPress={handleSendWorkflow}>
+            <Text
+              style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+              Send Workflow
+            </Text>
+          </Button>
         </View>
         {aboutJson && (
           <View style={styles.tabContainer}>
@@ -180,12 +164,6 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: '90%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-  },
   header: {
     fontSize: 32,
     color: '#222831',
@@ -203,13 +181,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonContainer: {
-    marginTop: 20,
+    marginTop: '10%',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 20,
-    width: '90%',
+    gap: '2%',
   },
   button: {
+    width: '48%',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -219,6 +197,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   tabContainer: {
+    marginTop: '10%',
     width: '100%',
     justifyContent: 'center',
   },

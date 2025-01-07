@@ -24,7 +24,7 @@ interface ParseServicesProps {
 export async function parseServices({
   aboutJson,
   serverIp,
-  setServicesConnected
+  setServicesConnected,
 }: ParseServicesProps) {
   let myToken: string = '';
   const setToken = (token: string) => {
@@ -48,6 +48,9 @@ export async function parseConnectedServices({
   setServicesConnected,
 }: ParseConnectedServicesProps) {
   let connectedServices: ConnectedService[] = [];
+  let aboutJsonParse: AboutJsonParse = {
+    services: [],
+  };
   const setConnectedService = (connectedService: ConnectedService[]) => {
     connectedServices = connectedService;
   };
@@ -62,7 +65,7 @@ export async function parseConnectedServices({
   };
   await connectedServicesCall();
 
-  const aboutJsonParse: AboutJsonParse = {
+  aboutJsonParse = {
     services: aboutjson.server.services.map(service => {
       const connected = connectedServices.some(
         connectedService => connectedService.name === service.name,
@@ -75,10 +78,8 @@ export async function parseConnectedServices({
       };
     }),
   };
-  setServicesConnected(aboutJsonParse);
+  if (aboutJsonParse.services.length > 0) setServicesConnected(aboutJsonParse);
 }
-
-
 
 export async function getConnectedService({
   apiEndpoint,
@@ -91,7 +92,7 @@ export async function getConnectedService({
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         method: 'GET',
       },
