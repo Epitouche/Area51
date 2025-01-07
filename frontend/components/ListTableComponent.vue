@@ -126,18 +126,25 @@ onBeforeUnmount(() => {
                 '-translate-y-40': i >= Math.floor(rows.length / 2),
                 '': i < Math.floor(rows.length / 2),
               }"
-              class="absolute left-1/2 transform -translate-x-1/2 mt-2 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
+              class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
             >
               <div
                 class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700"
               >
                 <button
-                  v-for="(option, index) in ['Edit', 'Delete', 'View Details']"
+                  v-for="(option, index) in ['Edit', 'Switch Activity', 'Delete']"
                   :key="index"
                   class="text-center px-4 py-2 text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
+                  :class="
+                    option.includes('Delete')
+                      ? ' hover:bg-error dark:hover:bg-error'
+                      : ''
+                  "
                   @click="() => console.log(`Action ${option} for row ${i}`)"
                 >
-                  {{ option }}
+                  <p :class="option.includes('Delete') ? 'text-error hover:text-white' : ''">
+                    {{ option }}
+                  </p>
                 </button>
               </div>
             </div>
