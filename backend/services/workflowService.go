@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -179,6 +180,8 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			}
 			if workflow.IsActive {
 				action(channel, workflow.Action.Name, workflow.Id)
+			} else {
+				time.Sleep(30 * time.Second)
 			}
 		}
 		fmt.Println("Clear")
@@ -205,6 +208,8 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 				result := <-channel
 				reaction(channel, workflow.Id, githubServiceToken)
 				fmt.Printf("result value: %+v\n", result)
+			} else {
+				time.Sleep(30 * time.Second)
 			}
 		}
 

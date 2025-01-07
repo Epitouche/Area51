@@ -254,5 +254,5 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	// 	return
 	// }
 	// channel <- "Reaction workflow done"
-	time.Sleep(3 * time.Second)
+	time.Sleep(1 * time.Minute)
 }
