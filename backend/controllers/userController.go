@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 
@@ -82,6 +83,9 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 
 func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Service, error) {
 	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) < len("Bearer ") {
+		return nil, fmt.Errorf("invalid token")
+	}
 	tokenString := authHeader[len("Bearer "):]
 	var allServices []schemas.Service
 	userId, err := controller.jWtService.GetUserIdFromToken(tokenString)
@@ -89,6 +93,9 @@ func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Se
 		return nil, err
 	}
 	services, err := controller.userService.GetAllServices(userId)
+	if len(services) == 0 {
+		return nil, fmt.Errorf("no services found")
+	}
 	if err != nil {
 		return nil, err
 	}

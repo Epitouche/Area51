@@ -17,6 +17,7 @@ type WorkflowRepository interface {
 	FindByIds(workflowId uint64) (schemas.Workflow, error)
 	FindByUserId(userId uint64) []schemas.Workflow
 	FindByWorkflowName(workflowName string) schemas.Workflow
+	FindById(workflowId uint64) schemas.Workflow
 	FindByActionId(actionId uint64) schemas.Workflow
 	FindByReactionId(reactionId uint64) schemas.Workflow
 	SaveWorkflow(workflow schemas.Workflow) (workflowId uint64, err error)
@@ -121,6 +122,15 @@ func (repo *workflowRepository) FindByUserId(userId uint64) []schemas.Workflow {
 func (repo *workflowRepository) FindByWorkflowName(workflowName string) schemas.Workflow {
 	var workflow schemas.Workflow
 	err := repo.db.Connection.Where(&schemas.Workflow{Name: workflowName}).First(&workflow)
+	if err.Error != nil {
+		return schemas.Workflow{}
+	}
+	return workflow
+}
+
+func (repo *workflowRepository) FindById(workflowId uint64) schemas.Workflow {
+	var workflow schemas.Workflow
+	err := repo.db.Connection.Where(&schemas.Workflow{Id: workflowId}).First(&workflow)
 	if err.Error != nil {
 		return schemas.Workflow{}
 	}

@@ -51,7 +51,13 @@ func (api *UserApi) Register(ctx *gin.Context) {
 
 func (api *UserApi) GetServices(ctx *gin.Context) {
 	allServices, err := api.userController.GetAllServices(ctx)
+	if allServices == nil {
+		ctx.JSON(http.StatusOK, []schemas.Service{})
+		return
+	}
 	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
 	}
 	ctx.JSON(http.StatusOK, allServices)
 }
