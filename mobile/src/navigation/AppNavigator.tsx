@@ -1,17 +1,33 @@
 import React, { useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { AppContext } from '../context/AppContext';
-import { AuthParamList, TabParamList } from '../types';
+import { AuthParamList, AppStackList} from '../types';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import HomeScreen from '../screens/HomeScreen';
-import ServiceScreen  from '../screens/ServiceScreen';
+import ServiceScreen from '../screens/ServiceScreen';
+import ActionOrReactionScreen from '../screens/ActionOrReactionScreen';
 
-const Tab = createBottomTabNavigator<TabParamList>();
+const Tab = createBottomTabNavigator<AppStackList>();
+const AppStack = createNativeStackNavigator<AppStackList>();
 const AuthStack = createBottomTabNavigator<AuthParamList>();
+
+function AppStackScreen() {
+  return (
+    <AppStack.Navigator>
+      <AppStack.Screen
+        options={{ headerShown: false }}
+        name="App"
+        component={OptionsStackScreen}
+      />
+      <AppStack.Screen name="ActionOrReaction" component={ActionOrReactionScreen} />
+    </AppStack.Navigator>
+  );
+}
 
 function AuthStackScreen() {
   return (
@@ -23,7 +39,7 @@ function AuthStackScreen() {
   );
 }
 
-function AppStackScreen() {
+function OptionsStackScreen() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
       <Tab.Screen name="Home" component={HomeScreen} />

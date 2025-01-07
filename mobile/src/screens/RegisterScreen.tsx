@@ -95,7 +95,7 @@ export default function RegisterScreen() {
             )}
             <Button
               mode="contained"
-              style={styles.registerButton}
+              style={globalStyles.buttonColor}
               onPress={handleLogin}>
               <Text
                 style={[
@@ -112,11 +112,11 @@ export default function RegisterScreen() {
                 name="Github"
                 img="https://img.icons8.com/?size=100&id=12599&format=png"
               />
-              <OauthLoginButton
+              {/* <OauthLoginButton
                 handleOauthLogin={handleGithubLogin}
                 name="Google"
                 img="https://img.icons8.com/?size=100&id=12599&format=png"
-              />
+              /> */}
             </View>
             <View style={styles.forgotPasswordBox}>
               <TouchableOpacity>

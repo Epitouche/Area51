@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
 import { DetailsModals } from './DetailsModals';
+import { globalStyles } from '../styles/global_style';
 
 type Workflow = {
   name: string;
@@ -49,14 +50,14 @@ export function WorkflowTable({
 
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
-    borderWidth: 1,
+    marginTop: 10,
+    width: '100%',
     borderColor: '#ccc',
     borderRadius: 5,
   },
   headerRow: {
     flexDirection: 'row',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
     borderBottomWidth: 1,

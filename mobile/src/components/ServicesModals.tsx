@@ -11,11 +11,11 @@ export function ServicesModals({
   isAction,
   setActionOrReaction,
 }: ServicesModalsProps) {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<string>('');
   const [selectedActionOrReaction, setSelectedActionOrReaction] = useState<
     string | null
   >(null);
-  const [id, setId] = useState<number | null>(null);
+  const [id, setId] = useState<number>(0);
 
   const serviceOptions =
     services?.server?.services?.map((service: Service) => service.name) || [];
@@ -39,15 +39,18 @@ export function ServicesModals({
   const handleSave = () => {
     if (selectedActionOrReaction !== null) {
       if (setActionOrReaction && id) {
-        setActionOrReaction(1);
+        setActionOrReaction({
+          id: id,
+          name: selectedActionOrReaction,
+        });
       } else {
         console.error('setActionOrReaction is not defined');
       }
     }
     setModalVisible(false);
-    setSelectedService(null);
+    setSelectedService('');
     setSelectedActionOrReaction(null);
-    setId(null);
+    setId(0);
   };
 
   return (
@@ -121,18 +124,18 @@ export function ServicesModals({
               </>
             )}
             <View style={styles.buttonContainer}>
-              <Button style={styles.saveButton} onPress={handleSave}>
-                <Text style={{ color: 'white', fontSize: 16 }}>Save</Text>
-              </Button>
               <Button
                 style={styles.cancelButton}
                 onPress={() => {
                   setModalVisible(false);
-                  setSelectedService(null);
+                  setSelectedService('');
                   setSelectedActionOrReaction(null);
-                  setId(null);
+                  setId(0);
                 }}>
-                <Text style={{ color: 'black', fontSize: 16 }}>Cancel</Text>
+                <Text style={{ color: 'white', fontSize: 16 }}>Cancel</Text>
+              </Button>
+              <Button style={styles.saveButton} onPress={handleSave}>
+                <Text style={{ color: 'black', fontSize: 16 }}>Save</Text>
               </Button>
             </View>
           </View>
@@ -225,14 +228,14 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     width: '48%',
-    backgroundColor: 'red',
+    backgroundColor: '#E8E9E9',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
   },
   cancelButton: {
     width: '48%',
-    backgroundColor: '#E8E9E9',
+    backgroundColor: 'red',
     alignItems: 'center',
     justifyContent: 'center',
   },

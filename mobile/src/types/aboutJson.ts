@@ -42,3 +42,15 @@ export type PullRequestComment = {
   body: string;
   pull_request_url: string;
 };
+
+
+export type ServicesParse = {
+  name: string;
+  isConnected: boolean;
+  actions: Action[];
+  reactions: Reaction[];
+}
+
+export type AboutJsonParse = {
+  services: ServicesParse[];
+};

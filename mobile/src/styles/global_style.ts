@@ -64,7 +64,7 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: '#1A1A1A',
   },
   textBlack: {
-    color: '#1A1A1A',
+    color: '#F7FAFB',
     fontSize: 16,
     fontWeight: 'bold',
   },

@@ -3,56 +3,20 @@ import { globalStyles } from '../styles/global_style';
 import { AppContext } from '../context/AppContext';
 import { useContext, useEffect } from 'react';
 import { ServiceCard } from '../components';
-import { getAboutJson } from '../service';
-
-const ServiceButton = [
-  {
-    title: 'Github',
-    image:
-      'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000',
-    status: 'Connected',
-  },
-  {
-    title: 'Google',
-    image:
-      'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000',
-    status: 'Disconnected',
-  },
-  {
-    title: 'Youtube',
-    image:
-      'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000',
-    status: 'Connected',
-  },
-  {
-    title: 'Ta darone',
-    image:
-      'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000',
-    status: 'Connected',
-  },
-  {
-    title: 'Ton pere',
-    image:
-      'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000',
-    status: 'Disconnected',
-  },
-  {
-    title: 'Github',
-    image:
-      'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000',
-    status: 'Connected',
-  },
-];
+import { parseServices } from '../service';
 
 export default function ServiceScreen() {
-  const { isBlackTheme, aboutjson, setAboutJson, serverIp } = useContext(AppContext);
+  const {
+    isBlackTheme,
+    servicesConnected,
+    aboutJson,
+    serverIp,
+    setServicesConnected,
+  } = useContext(AppContext);
 
   useEffect(() => {
-    if (serverIp !== '') {
-      getAboutJson(serverIp, setAboutJson);
-    }
+    if (aboutJson) parseServices({ aboutJson, serverIp, setServicesConnected });
   }, [serverIp]);
-
 
   return (
     <View
@@ -72,14 +36,19 @@ export default function ServiceScreen() {
             justifyContent: 'center',
             gap: 10,
           }}>
-          {aboutjson && aboutjson.server.services.map((service, index) => (
-            <ServiceCard
-              key={index}
-              title={service.name}
-              image={'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000'}
-              status={'Disconnected'}
-            />
-          ))}
+          {servicesConnected &&
+            servicesConnected.services.length > 0 &&
+            servicesConnected.services.map((service, index) => (
+              <ServiceCard
+                key={index}
+                title={service.name}
+                image={
+                  'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000'
+                }
+                status={service.isConnected}
+                handleOauthLogin={() => console.log('pressed')}
+              />
+            ))}
         </View>
       </View>
     </View>

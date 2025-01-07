@@ -1,29 +1,35 @@
 // src/context/AppContext.tsx
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
-import { AboutJson } from '../types';
+import { AboutJson, AboutJsonParse } from '../types';
 import { checkToken } from '../service';
 import { getAboutJson } from '../service/getAboutJson';
 
 interface AppContextProps {
   serverIp: string;
   setServerIp: (ip: string) => void;
-  aboutjson: AboutJson | undefined;
+  aboutJson: AboutJson | undefined;
   setAboutJson: (aboutjson: AboutJson) => void;
   isConnected: boolean;
   setIsConnected: (isConnected: boolean) => void;
   isBlackTheme: boolean;
   setIsBlackTheme: (isBlackTheme: boolean) => void;
+  servicesConnected: AboutJsonParse;
+  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
 }
 
 const AppContext = createContext<AppContextProps>({
   serverIp: '',
   setServerIp: () => {},
-  aboutjson: undefined,
+  aboutJson: undefined,
   setAboutJson: () => {},
   isConnected: false,
   setIsConnected: () => {},
   isBlackTheme: true,
   setIsBlackTheme: () => {},
+  servicesConnected: {
+    services: [],
+  },
+  setServicesConnected: () => {},
 });
 
 interface AppProviderProps {
@@ -32,9 +38,12 @@ interface AppProviderProps {
 
 export default function AppProvider({ children }: AppProviderProps) {
   const [serverIp, setServerIp] = useState<string>('');
-  const [aboutjson, setAboutJson] = useState<AboutJson>();
+  const [aboutJson, setAboutJson] = useState<AboutJson>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isBlackTheme, setIsBlackTheme] = useState<boolean>(true);
+  const [servicesConnected, setServicesConnected] = useState<AboutJsonParse>(
+    {} as AboutJsonParse,
+  );
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -46,7 +55,7 @@ export default function AppProvider({ children }: AppProviderProps) {
       if (serverIp != '') {
         getAboutJson(serverIp, setAboutJson);
       }
-    }
+    };
     aboutJson();
   }, [serverIp]);
 
@@ -55,12 +64,14 @@ export default function AppProvider({ children }: AppProviderProps) {
       value={{
         serverIp,
         setServerIp,
-        aboutjson,
+        aboutJson,
         setAboutJson,
         isConnected,
         setIsConnected,
         isBlackTheme,
         setIsBlackTheme,
+        servicesConnected,
+        setServicesConnected,
       }}>
       {children}
     </AppContext.Provider>

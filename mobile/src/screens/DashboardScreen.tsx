@@ -2,17 +2,18 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Button } from 'react-native-paper';
 import { deleteToken, checkToken, getToken } from '../service/token';
-import { ServicesModals } from '../components';
-import { getAboutJson } from '../service';
+import { ServicesModals, WorkflowTable } from '../components';
 import { AppContext } from '../context/AppContext';
-import { sendWorkflows } from '../service/workflows';
+import { parseServices, sendWorkflows, getAboutJson } from '../service';
 import { globalStyles } from '../styles/global_style';
-import { ActionReaction } from '../types';
+import { ActionReaction, AppStackList } from '../types';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export default function DashboardScreen() {
   const [token, setToken] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [isActionOrReaction, setIsActionOrReaction] = useState<boolean>(true);
+  const [detailsModals, setdetailsModals] = useState(false);
   const [action, setAction] = useState<ActionReaction>({
     id: 0,
     name: '',
@@ -22,30 +23,37 @@ export default function DashboardScreen() {
     name: '',
   });
 
-  const { serverIp, aboutjson, setAboutJson, setIsConnected, isBlackTheme } =
-    useContext(AppContext);
+  const navigation = useNavigation<NavigationProp<AppStackList>>();
+
+  const {
+    serverIp,
+    aboutJson,
+    setAboutJson,
+    setIsConnected,
+    isBlackTheme,
+    setServicesConnected,
+    servicesConnected
+  } = useContext(AppContext);
 
   const handleLogout = () => {
     setIsConnected(false);
     deleteToken('token');
-    deleteToken('github');
   };
 
-  // const handleGithubLogin = async () => {
-  //   if (github === 'Error: token not found') await githubLogin(serverIp);
-  //   else {
-  //     setServiceName('github');
-  //     setDeconnectionModalVisible(!deconnectionModalVisible);
-  //   }
-  // };
-
   useEffect(() => {
-    checkToken('token');
-    checkToken('github');
-    if (token === 'Error: token not found') {
-      setIsConnected(false);
-    }
-  }, [token]);
+    const checkIsToken = async () => {
+      if ((await checkToken('token')) !== true) setIsConnected(false);
+    };
+    checkIsToken();
+    if (aboutJson)
+      parseServices({
+        aboutJson,
+        serverIp,
+        setServicesConnected,
+      });
+  }, []);
+
+  console.log('servicesConnected', servicesConnected);
 
   const handleSendWorkflow = async () => {
     await getToken('token', setToken);
@@ -83,15 +91,27 @@ export default function DashboardScreen() {
               mode="contained"
               style={[styles.button, globalStyles.buttonColor]}
               onPress={() => {
-                setIsActionOrReaction(true);
-                setModalVisible(true);
+                navigation.navigate('ActionOrReaction', {
+                  isAction: true
+                });
+                // setIsActionOrReaction(true);
+                // setModalVisible(true);
               }}>
-              <Text
-                style={
-                  isBlackTheme ? globalStyles.textBlack : globalStyles.text
-                }>
-                Add Action
-              </Text>
+              {action.name === '' ? (
+                <Text
+                  style={
+                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                  }>
+                  Add Action
+                </Text>
+              ) : (
+                <Text
+                  style={
+                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                  }>
+                  {action.name}
+                </Text>
+              )}
             </Button>
             <Button
               mode="contained"
@@ -100,7 +120,7 @@ export default function DashboardScreen() {
                 setIsActionOrReaction(false);
                 setModalVisible(true);
               }}>
-              {reaction.id === 0 ? (
+              {reaction.name === '' ? (
                 <Text
                   style={
                     isBlackTheme ? globalStyles.textBlack : globalStyles.text
@@ -117,99 +137,46 @@ export default function DashboardScreen() {
               )}
             </Button>
           </View>
+          {aboutJson && (
+            <Button
+              //disabled={action.name === '' || reaction.name === ''}
+              mode="contained"
+              style={[styles.button, globalStyles.buttonColor]}
+              onPress={() =>
+                parseServices({
+                  aboutJson,
+                  serverIp,
+                  setServicesConnected,
+                })
+              }>
+              <Text
+                style={
+                  isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                }>
+                Send Workflow
+              </Text>
+            </Button>
+          )}
           <ServicesModals
             modalVisible={modalVisible}
             setModalVisible={setModalVisible}
-            services={aboutjson}
+            services={aboutJson}
             isAction={isActionOrReaction}
             setActionOrReaction={isActionOrReaction ? setAction : setReaction}
           />
         </View>
+        {aboutJson && (
+          <View style={styles.tabContainer}>
+            <WorkflowTable
+              workflows={aboutJson.server.workflows}
+              setDetailsModalVisible={setdetailsModals}
+              detailsModalVisible={detailsModals}
+            />
+          </View>
+        )}
       </ScrollView>
     </View>
   );
-}
-
-{
-  /* <View
-  style={isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper}>
-  <ScrollView>
-    <View style={globalStyles.container}>
-      <View style={styles.textContainer}>
-        <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
-          Dashboard
-        </Text>
-      </View>
-      <Button
-        mode="contained"
-        style={styles.loginButton}
-        onPress={handleLogout}>
-        <Text style={styles.text}>Logout</Text>
-      </Button>
-      <OauthLoginButton
-        handleOauthLogin={handleGithubLogin}
-        color="#B454FD"
-        name="Github"
-        img="https://img.icons8.com/?size=100&id=12599&format=png"
-      />
-      <View style={styles.buttonContainer}>
-        <Button
-          mode="contained"
-          style={styles.button}
-          onPress={() => {
-            setIsAction(true);
-            setModalVisible(true);
-          }}>
-          <Text style={styles.text}>Add Action</Text>
-        </Button>
-        <Button
-          mode="contained"
-          style={styles.button}
-          onPress={() => {
-            setIsAction(false);
-            setModalVisible(true);
-          }}>
-          <Text style={styles.text}>Add Reaction</Text>
-        </Button>
-      </View>
-      <Button
-        mode="contained"
-        style={styles.button}
-        onPress={handleSendWorkflow}>
-        <Text style={styles.text}>Send Workflow</Text>
-      </Button>
-      {aboutjson && (
-        <View style={styles.tabContainer}>
-          <WorkflowTable
-            workflows={aboutjson.server.workflows}
-            setDetailsModalVisible={setdetailsModals}
-            detailsModalVisible={detailsModals}
-          />
-        </View>
-      )}
-      {workflowsInfo && (
-        <DetailsModals
-          modalVisible={detailsModals}
-          setModalVisible={setdetailsModals}
-          workflows={workflowsInfo}
-        />
-      )}
-      <ServicesModals
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        services={aboutjson}
-        isAction={isAction}
-        setActionOrReaction={isAction ? setAction : setReaction}
-      />
-      <DeconnectionPopUp
-        setModalVisible={setDeconnectionModalVisible}
-        modalVisible={deconnectionModalVisible}
-        service={serviceName}
-      />
-    </View>
-  </ScrollView>
-</View>; */
 }
 
 const styles = StyleSheet.create({
@@ -252,7 +219,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   tabContainer: {
-    width: '90%',
+    width: '100%',
     justifyContent: 'center',
   },
 });

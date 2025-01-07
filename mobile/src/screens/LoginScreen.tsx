@@ -86,7 +86,7 @@ function Login({ isBlackTheme, serverIp, setIsConnected }: LoginFunctionProps) {
         </View>
         <Button
           mode="contained"
-          style={styles.loginButton}
+          style={globalStyles.buttonColor}
           onPress={handleLogin}>
           <Text
             style={[
@@ -108,11 +108,11 @@ function Login({ isBlackTheme, serverIp, setIsConnected }: LoginFunctionProps) {
             name="Github"
             img="https://img.icons8.com/?size=100&id=12599&format=png"
           />
-          <OauthLoginButton
+          {/* <OauthLoginButton
             handleOauthLogin={handleGithubLogin}
             name="Google"
             img="https://img.icons8.com/?size=100&id=12599&format=png"
-          />
+          /> */}
         </View>
         {message !== '' && <Text style={styles.passwordText}>{message}</Text>}
         <View style={styles.forgotPasswordBox}>

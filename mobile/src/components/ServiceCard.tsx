@@ -7,7 +7,7 @@ import { Button } from 'react-native-paper';
 interface ServiceCardProps {
   title: string;
   image: string;
-  status: string;
+  status: boolean;
   handleOauthLogin: () => void;
 }
 
@@ -17,7 +17,7 @@ export function ServiceCard({ image, status, title, handleOauthLogin }: ServiceC
     <View
       style={[
         styles.card,
-        status === 'Connected' ? styles.connected : styles.disconnected,
+        status ? styles.connected : styles.disconnected,
       ]}>
       <Image
         source={{
@@ -36,9 +36,9 @@ export function ServiceCard({ image, status, title, handleOauthLogin }: ServiceC
         onPress={handleOauthLogin}
         style={[
           styles.statusBar,
-          status === 'Connected' ? styles.connectedBar : styles.disconnectedBar,
+          status ? styles.connectedBar : styles.disconnectedBar,
         ]}>
-        <Text style={styles.statusText}>{status}</Text>
+        <Text style={styles.statusText}>{status ? 'Connected' : 'Disconnected'}</Text>
       </Button>
     </View>
   );
