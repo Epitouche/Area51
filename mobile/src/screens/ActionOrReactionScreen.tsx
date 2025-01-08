@@ -49,7 +49,7 @@ function ActionOrReaction() {
       style={
         isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
       }>
-      <ScrollView>
+      <View style={styles.flexContainer}>
         <View style={globalStyles.container}>
           <Text
             style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
@@ -136,12 +136,14 @@ function ActionOrReaction() {
                   })}
             </View>
           )}
+        </View>
+        <View style={styles.containerSaveButton}>
           <Button
             style={[styles.saveButton, globalStyles.terciaryDark]}
             onPress={() => {
               if (isAction) {
                 if (selectedActionOrReactionId)
-                setAction && setAction(selectedActionOrReactionId as Action);
+                  setAction && setAction(selectedActionOrReactionId as Action);
               } else {
                 if (selectedActionOrReactionId)
                   setReaction &&
@@ -155,7 +157,7 @@ function ActionOrReaction() {
             </Text>
           </Button>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -174,6 +176,11 @@ export default function ActionOrReactionScreen() {
 }
 
 const styles = StyleSheet.create({
+  flexContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    width: '90%',
+  },
   container: {
     width: '90%',
     alignItems: 'center',
@@ -210,8 +217,15 @@ const styles = StyleSheet.create({
     gap: 20,
     width: '90%',
   },
+  containerSaveButton: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    marginBottom: 40,
+  },
   saveButton: {
-    width: '90%',
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,

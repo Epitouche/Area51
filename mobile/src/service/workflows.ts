@@ -27,7 +27,7 @@ export async function sendWorkflows(
   }
 }
 
-export async function getWorkflows(apiEndpoint: string, token: string, sendWorkflows: (workflow: any) => void) {
+export async function getReaction(apiEndpoint: string, token: string, sendReaction: (reaction: any) => void) {
   try {
     const response = await fetch(
       `http://${apiEndpoint}:8080/api/workflow/reaction`,
@@ -42,7 +42,37 @@ export async function getWorkflows(apiEndpoint: string, token: string, sendWorkf
     const data = await response.json();
     if (response.status === 200) {
       if (data !== null)
-        sendWorkflows(data);
+        sendReaction(data);
+    }
+    return true;
+  } catch (error) {
+    console.error('Error fetching Reaction data:', error);
+    return false;
+  }
+}
+
+export async function getWorkflows(
+  apiEndpoint: string,
+  token: string,
+  setWorkflows: (workflows: any) => void,
+) {
+  try {
+    const response = await fetch(
+      `http://${apiEndpoint}:8080/api/user/workflows`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        method: 'GET',
+      },
+    );
+    const data = await response.json();
+    if (response.status === 200) {
+      if (data !== null)
+        setWorkflows(data);
+    } else {
+      console.error('Error invalide token');
     }
     return true;
   } catch (error) {
@@ -50,3 +80,4 @@ export async function getWorkflows(apiEndpoint: string, token: string, sendWorkf
     return false;
   }
 }
+

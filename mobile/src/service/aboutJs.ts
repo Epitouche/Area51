@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
-import { AboutJson, AboutJsonParse, ConnectedService, ParseConnectedServicesProps, ParseServicesProps, Workflows } from '../types';
+import {
+  AboutJson,
+  AboutJsonParse,
+  ConnectedService,
+  GetConnectedServiceProps,
+  ParseConnectedServicesProps,
+  ParseServicesProps,
+} from '../types';
 import { getToken } from './token';
-
-
 
 export async function getAboutJson(
   apiEndpoint: string,
@@ -88,7 +92,7 @@ export async function getConnectedService({
   apiEndpoint,
   token,
   setConnectedService,
-}: Workflows) {
+}: GetConnectedServiceProps) {
   try {
     const response = await fetch(
       `http://${apiEndpoint}:8080/api/user/services `,
