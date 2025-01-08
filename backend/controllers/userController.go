@@ -51,7 +51,7 @@ func (controller *userController) Login(ctx *gin.Context) (string, error) {
 	token, err := controller.userService.Login(schemas.User{
 		Username: credentials.Username,
 		Password: credentials.Password,
-	})
+	}, schemas.Service{})
 	if err != nil {
 		return "", err
 	}

@@ -102,8 +102,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		Name:       workflowName,
 	}
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
-	fmt.Printf("Workflow %+v", actualWorkflow)
-	if actualWorkflow != (schemas.Workflow{}) {
+	if actualWorkflow.Id != 0 {
 		if actualWorkflow.IsActive {
 			return "Workflow already exists and is active", nil
 		} else {
@@ -186,7 +185,7 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 		}
 		fmt.Println("Clear")
 		channel <- "Workflow finished"
-	} (workflowStartingPoint, channel)
+	}(workflowStartingPoint, channel)
 }
 
 func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken) {
@@ -212,7 +211,7 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 				time.Sleep(30 * time.Second)
 			}
 		}
-	} (workflowStartingPoint, channel)
+	}(workflowStartingPoint, channel)
 }
 
 func (service *workflowService) ExistWorkflow(workflowId uint64) bool {

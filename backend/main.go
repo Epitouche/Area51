@@ -27,6 +27,7 @@ func setupRouter() *gin.Engine {
 	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
+	router.POST("/mobile/token", githubApi.StoreMobileToken)
 
 	apiRoutes := router.Group("/api")
 	{
@@ -51,7 +52,6 @@ func setupRouter() *gin.Engine {
 			github.POST("/callback", func(ctx *gin.Context) {
 				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
-			github.POST("/mobile/token", githubApi.StoreMobileToken)
 		}
 		workflow := apiRoutes.Group("/workflow", middlewares.Authorization())
 		{

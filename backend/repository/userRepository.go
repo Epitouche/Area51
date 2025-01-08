@@ -17,6 +17,9 @@ type UserRepository interface {
 	FindByEmail(email string) schemas.User
 	FindAllServicesByUserId(id uint64) []schemas.ServiceToken
 	FindAllWorkflowsByUserId(id uint64) []schemas.Workflow
+	AddServiceToUser(user schemas.User, service schemas.ServiceToken)
+	GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error)
+	GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error)
 }
 
 type userRepository struct {
@@ -104,12 +107,20 @@ func (r *userRepository) FindByEmail(email string) (user schemas.User) {
 }
 
 func (r *userRepository) FindAllServicesByUserId(id uint64) []schemas.ServiceToken {
-	var services []schemas.ServiceToken
-	err := r.db.Connection.Where(&schemas.ServiceToken{UserId: id}).Find(&services)
-	if err.Error != nil || len(services) == 0 {
-		return []schemas.ServiceToken{}
+	// var services []schemas.ServiceToken
+	// err := r.db.Connection.Where(&schemas.ServiceToken{UserId: id}).Find(&services)
+	// if err.Error != nil || len(services) == 0 {
+	// 	return []schemas.ServiceToken{}
+	// }
+	// return services
+	user := r.FindById(id)
+	r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	for _, service := range user.Services {
+		if service.UserId == id {
+			return user.Services
+		}
 	}
-	return services
+	return []schemas.ServiceToken{}
 }
 
 func (r *userRepository) FindAllWorkflowsByUserId(id uint64) []schemas.Workflow {
@@ -119,4 +130,28 @@ func (r *userRepository) FindAllWorkflowsByUserId(id uint64) []schemas.Workflow 
 		return []schemas.Workflow{}
 	}
 	return workflows
+}
+
+func (r *userRepository) AddServiceToUser(user schemas.User, service schemas.ServiceToken) {
+	r.db.Connection.Model(&user).Association("Services").Append(&service)
+	r.db.Connection.Save(&user)
+}
+
+func (r *userRepository) GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error) {
+	var services []schemas.ServiceToken
+	err := r.db.Connection.Where(&schemas.ServiceToken{UserId: userId}).Find(&services)
+	if err.Error != nil {
+		return []schemas.ServiceToken{}, err.Error
+	}
+	return services, nil
+}
+
+func (r *userRepository) GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error) {
+	r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	for _, service := range user.Services {
+		if service.ServiceId == serviceId {
+			return service, nil
+		}
+	}
+	return schemas.ServiceToken{}, nil
 }
