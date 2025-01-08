@@ -9,7 +9,9 @@ const props = defineProps<{
 }>();
 
 const filteredWorkflows = computed(() =>
-  props.rows.map(({checked, action_id, reaction_id, workflow_id, ...rest}) => rest)
+  props.rows.map(
+    ({ checked, action_id, reaction_id, workflow_id, ...rest }) => rest
+  )
 );
 
 const emit = defineEmits<{
@@ -54,6 +56,44 @@ const handleClickOutside = (event: MouseEvent) => {
     activeDropdownIndex.value = null;
   }
 };
+
+const token = useCookie("access_token");
+
+async function launchAction(option: string, workflow: Workflow) {
+  switch (option) {
+    case "Edit":
+      console.log("Edit");
+      break;
+    case "Switch Activity":
+      await switchState(workflow);
+      break;
+    case "Delete":
+      console.log("Delete");
+      break;
+    default:
+      break;
+  }
+}
+
+async function switchState(workflow: Workflow) {
+  try {
+    workflow.is_active = !workflow.is_active;
+    await $fetch("/api/workflows/switchState", {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workflow_id: workflow.workflow_id,
+        workflow_state: workflow.is_active,
+      }),
+    });
+  } catch (error) {
+    workflow.is_active = !workflow.is_active;
+    console.error(error);
+  }
+}
 
 onMounted(() => {
   window.addEventListener("click", handleClickOutside);
@@ -135,7 +175,11 @@ onBeforeUnmount(() => {
                 class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700"
               >
                 <button
-                  v-for="(option, index) in ['Edit', 'Switch Activity', 'Delete']"
+                  v-for="(option, index) in [
+                    'Edit',
+                    'Switch Activity',
+                    'Delete',
+                  ]"
                   :key="index"
                   class="text-center px-4 py-2 text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
                   :class="
@@ -143,9 +187,15 @@ onBeforeUnmount(() => {
                       ? ' hover:bg-error dark:hover:bg-error'
                       : ''
                   "
-                  @click="() => console.log(`Action ${option} for row ${i}`)"
+                  @click="launchAction(option, row)"
                 >
-                  <p :class="option.includes('Delete') ? 'text-error hover:text-white' : ''">
+                  <p
+                    :class="
+                      option.includes('Delete')
+                        ? 'text-error hover:text-white'
+                        : ''
+                    "
+                  >
                     {{ option }}
                   </p>
                 </button>
