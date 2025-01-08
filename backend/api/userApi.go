@@ -24,44 +24,36 @@ func NewUserApi(controller controllers.UserController) *UserApi {
 }
 
 func (api *UserApi) Login(ctx *gin.Context) {
-	token, err := api.userController.Login(ctx)
-	if err != nil {
+	if token, err := api.userController.Login(ctx); err != nil {
 		ctx.JSON(http.StatusUnauthorized, &schemas.BasicResponse{
 			Message: err.Error(),
 		})
-		return
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.JWT{
+			Token: token,
+		})
 	}
-	ctx.JSON(http.StatusOK, &schemas.JWT{
-		Token: token,
-	})
 }
 
 func (api *UserApi) Register(ctx *gin.Context) {
-	token, err := api.userController.Register(ctx)
-	if err != nil {
+	if token, err := api.userController.Register(ctx); err != nil {
 		ctx.JSON(http.StatusConflict, &schemas.BasicResponse{
 			Message: err.Error(),
 		})
-		return
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.JWT{
+			Token: token,
+		})
 	}
-	ctx.JSON(http.StatusOK, &schemas.JWT{
-		Token: token,
-	})
 }
 
 func (api *UserApi) GetServices(ctx *gin.Context) {
-	allServices, err := api.userController.GetAllServices(ctx)
-	if allServices == nil {
+	if allServices, err := api.userController.GetAllServices(ctx); err != nil {
 		ctx.JSON(http.StatusOK, []schemas.Service{})
-		return
+	} else {
+		ctx.JSON(http.StatusOK, allServices)
 	}
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
-		return
-	}
-	ctx.JSON(http.StatusOK, allServices)
 }
-
 
 func (api *UserApi) GetWorkflows(ctx *gin.Context) {
 	allWorkflows, err := api.userController.GetAllWorkflows(ctx)

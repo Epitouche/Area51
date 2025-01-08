@@ -8,7 +8,6 @@ type Password interface {
 }
 
 func HashPassword(password string) (string, error) {
-
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 
 	return string(passwordHash), err

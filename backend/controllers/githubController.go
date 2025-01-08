@@ -51,13 +51,8 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 	}
 
 	ctx.SetCookie("latestCSRFToken", state, 3600, "/", "localhost", false, true)
-	redirectUri := appAdressHost + appPort + "/callback"
-	authUrl := "https://github.com/login/oauth/authorize" +
-		"?client_id=" + clientId +
-		"&response_type=code" +
-		"&scope=repo" +
-		"&redirect_uri=" + redirectUri +
-		"&state=" + state
+	redirectUri := fmt.Sprintf("%s%s/callback", appAdressHost, appPort)
+	authUrl := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&response_type=code&scope=repo&redirect_uri=%s&state=%s", clientId, redirectUri, state)
 	return authUrl, nil
 }
 
@@ -68,25 +63,17 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	if err != nil {
 		return "", err
 	}
-	// code := ctx.Query("code")
 	if codeCredentials.Code == "" {
 		return "", nil
 	}
-	// state := ctx.Query("state")
-	// latestCSRFToken, err := ctx.Cookie("latestCSRFToken")
 	if codeCredentials.State == "" {
 		return "", nil
 	}
-	// if state != latestCSRFToken {
-	// 	return "", nil
-	// }
 	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(codeCredentials.Code, path)
 	if err != nil {
 		return "", err
 	}
-
 	githubService := controller.servicesService.FindByName(schemas.Github)
-
 	userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
 
 	if err != nil {
@@ -175,7 +162,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 				break
 			}
 		}
-
 	}
 
 	if isAlreadyRegistered {
@@ -192,9 +178,10 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 }
 
 func (controller *githubController) GetUserInfos(ctx *gin.Context) (userInfos schemas.GithubUserInfo, err error) {
-	authHeader := ctx.GetHeader("Authorization")
-	tokenString := authHeader[len("Bearer "):]
-
+	tokenString, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		return schemas.GithubUserInfo{}, err
+	}
 	user, err := controller.userService.GetUserInfos(tokenString)
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
@@ -219,7 +206,6 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 		return "", err
 	}
 	githubService := controller.servicesService.FindByName(schemas.Github)
-
 	userInfo, err := controller.service.GetUserInfo(result.Token)
 	if err != nil {
 		return "", fmt.Errorf("unable to get user info because %w", err)
@@ -303,7 +289,6 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 				break
 			}
 		}
-
 	}
 
 	if isAlreadyRegistered {

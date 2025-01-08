@@ -51,6 +51,7 @@ func (api *WorkflowApi) GetMostRecentReaction(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
+	} else {
+		ctx.JSON(http.StatusOK, reaction)
 	}
-	ctx.JSON(http.StatusOK, reaction)
 }

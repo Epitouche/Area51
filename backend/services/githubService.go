@@ -58,7 +58,6 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	redirectUri := appAdressHost + appPort + path
-
 	apiUrl := "https://github.com/login/oauth/access_token"
 
 	data := url.Values{}
@@ -71,21 +70,25 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
+
 	req.URL.RawQuery = data.Encode()
 	req.Header.Set("Accept", "application/json")
-
 	client := &http.Client{
 		Timeout: time.Second * 45,
 	}
+
 	response, err := client.Do(req)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
-	var resultToken schemas.GitHubResponseToken
+
+	resultToken := schemas.GitHubResponseToken{}
+
 	err = json.NewDecoder(response.Body).Decode(&resultToken)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
+
 	response.Body.Close()
 	return resultToken, nil
 }
@@ -95,17 +98,22 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
-	request.Header.Set("Authorization", "Bearer "+accessToken)
+
+	request.Header.Set("Authorization", "Bearer " + accessToken)
 	client := &http.Client{}
+
 	response, err := client.Do(request)
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
+
 	result := schemas.GithubUserInfo{}
+
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
+
 	response.Body.Close()
 	return result, nil
 }
@@ -135,7 +143,7 @@ type transportWithToken struct {
 }
 
 func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", "Bearer "+t.token)
+	req.Header.Set("Authorization", "Bearer " + t.token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	return http.DefaultTransport.RoundTrip(req)
@@ -145,21 +153,25 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 	ctx := context.Background()
+
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	token := service.tokenRepository.FindByUserId(workflow.UserId)
 	client := github.NewClient(&http.Client{
-		Transport: &transportWithToken{token: token[len(token)-1].Token},
+		Transport: &transportWithToken{token: token[len(token) - 1].Token},
 	})
+
 	pullRequests, _, err := client.PullRequests.List(ctx, "JsuisSayker", "TestAreaGithub", nil)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
 		return
 	}
+
 	if nbPR != len(pullRequests) {
 		nbPR = len(pullRequests)
 		reaction := service.reactionRepository.FindById(workflow.ReactionId)
@@ -196,6 +208,7 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		fmt.Println("Error creating request:", err)
 		return
 	}
+
 	request.Header.Set("Accept", "application/vnd.github+json")
 	for _, token := range accessToken {
 		actualUser := service.userService.GetUserById(token.UserId)
@@ -203,12 +216,14 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
+
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Error making request:", err)
 		return
 	}
+
 	defer response.Body.Close()
 
 	var result []schemas.GithubListCommentsResponse

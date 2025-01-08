@@ -67,6 +67,7 @@ func (service *servicesService) GetServices() []interface{} {
 
 func (service *servicesService) GetAllServices() (allServicesJson []schemas.ServiceJson, err error) {
 	allServices := service.repository.FindAll()
+
 	for _, oneService := range allServices {
 		allServicesJson = append(allServicesJson, schemas.ServiceJson{
 			Name: schemas.ServiceName(oneService.Name),
