@@ -24,6 +24,7 @@ func setupRouter() *gin.Engine {
 		AllowCredentials: true,
 	})
 	router.Use(fullCors)
+	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
 

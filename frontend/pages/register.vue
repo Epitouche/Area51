@@ -1,32 +1,64 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
+import { useNotificationStore } from "@/stores/notification";
 
-const username = ref("");
-const email = ref("");
-const password = ref("");
+const username = ref<string>("");
+const email = ref<string>("");
+const password = ref<string>("");
+
+const notificationStore = useNotificationStore();
+
+type NotificationType = "success" | "error" | "warning";
+
+function triggerNotification(type: NotificationType, title: string, message: string) {
+  notificationStore.addNotification({
+    type,
+    title,
+    message,
+  });
+}
+
+interface RegisterResponse {
+  access_token: string;
+}
 
 async function onSubmit() {
   try {
-    const { access_token } = await $fetch("http://localhost:8080/api/auth/register", {
-      method: "POST",
-      body: {
-        username: username.value,
-        email: email.value,
-        password: password.value,
-      },
-    });
+    const { access_token }: RegisterResponse = await $fetch(
+      "http://localhost:8080/api/auth/register",
+      {
+        method: "POST",
+        body: {
+          username: username.value,
+          email: email.value,
+          password: password.value,
+        },
+      }
+    );
+
     if (access_token) {
-      localStorage.setItem("access_token", access_token);
-      navigateTo("/services");
+      const tokenCookie = useCookie("access_token");
+      tokenCookie.value = access_token;
+
+      triggerNotification("success", "Registration successful", "You have successfully registered.");
+      navigateTo("/workflows");
+    } else {
+      triggerNotification("error", "Registration failed", "Please check your credentials.");
     }
   } catch (error) {
     console.error("API response:", error.response?.data || error.message);
+    
+    triggerNotification("error", "Registration failed", "An error occurred during registration.");
   }
+}
+
+interface GitHubAuthResponse {
+  github_authentication_url: string;
 }
 
 async function redirectToGitHubOAuth() {
   try {
-    const { github_authentication_url } = await $fetch(
+    const { github_authentication_url }: GitHubAuthResponse = await $fetch(
       "http://localhost:8080/api/github/auth",
       {
         method: "GET",
@@ -39,16 +71,19 @@ async function redirectToGitHubOAuth() {
     }
   } catch (error) {
     console.error("Error fetching GitHub OAuth URL:", error);
+    
+    triggerNotification("error", "GitHub Authentication failed", "Could not fetch GitHub authentication URL.");
   }
 }
 </script>
+
 
 <template>
   <div
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-primaryDark-500"
   >
     <div
-      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
+      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-600 to-tertiary-700 dark:from-tertiary-700 dark:to-tertiary-600 text-fontWhite rounded-lg shadow-lg"
     >
       <h2 class="text-2xl font-bold text-center">REGISTER</h2>
       <form class="space-y-6" @submit.prevent="onSubmit">
