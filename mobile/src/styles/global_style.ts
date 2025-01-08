@@ -9,13 +9,10 @@ export const globalStyles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    padding: '5%',
+    padding: '1%',
     paddingTop: '20%',
     alignItems: 'center',
     gap: 20,
-  },
-  buttonColor: {
-    backgroundColor: '#B454FD',
   },
   line: {
     width: '90%',
@@ -32,6 +29,8 @@ export const globalStyles = StyleSheet.create({
   },
   text: {
     color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 30,
@@ -62,7 +61,9 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: '#1A1A1A',
   },
   textBlack: {
-    color: '#1A1A1A',
+    color: '#F7FAFB',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   titleBlack: {
     fontSize: 30,
@@ -84,5 +85,26 @@ export const globalStyles = StyleSheet.create({
   },
   lineColorBlack: {
     backgroundColor: '#F7FAFB',
+  },
+
+  //color
+  primaryDark: {
+    backgroundColor: '#1A1A1A',
+  },
+  secondaryDark: {
+    backgroundColor: '#222831',
+  },
+  terciaryDark: {
+    backgroundColor: '#B454FD',
+  },
+
+  primaryLight: {
+    backgroundColor: '#E8E9E9',
+  },
+  secondaryLight: {
+    backgroundColor: '#F7FAFB',
+  },
+  terciaryLight: {
+    backgroundColor: '#B454FD',
   },
 });

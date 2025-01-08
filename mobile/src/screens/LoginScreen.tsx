@@ -11,17 +11,25 @@ import { Button } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
 import { loginApiCall, githubLogin } from '../service';
 import { LoginProps } from '../types';
-import { GithubLoginButton, IpInput } from '../components';
+import { OauthLoginButton, IpInput } from '../components';
 import { globalStyles } from '../styles/global_style';
 
-export default function LoginScreen() {
+interface LoginFunctionProps {
+  serverIp: string;
+  setIsConnected: Function;
+  isBlackTheme: boolean;
+}
+
+interface NoIpProps {
+  isBlackTheme: boolean;
+}
+
+function Login({ isBlackTheme, serverIp, setIsConnected }: LoginFunctionProps) {
   const [forms, setForms] = useState<LoginProps>({
     username: '',
     password: '',
   });
-  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
   const [message, setMessage] = useState('');
-  const [token, setToken] = useState('');
 
   const handleLogin = async () => {
     const loginSuccessful = await loginApiCall({
@@ -31,17 +39,15 @@ export default function LoginScreen() {
     });
     if (loginSuccessful) {
       setIsConnected(true);
-      console.log('register');
     }
   };
 
   const handleGithubLogin = async () => {
-    const githubLoginSuccessful = await githubLogin(serverIp, setToken);
+    const githubLoginSuccessful = await githubLogin(serverIp);
     if (githubLoginSuccessful) {
       setIsConnected(true);
     }
   };
-
   return (
     <View
       style={
@@ -52,79 +58,101 @@ export default function LoginScreen() {
           style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
           LOG IN
         </Text>
-        {serverIp === '' ? (
-          <IpInput />
-        ) : (
-          <>
-            <View style={styles.inputBox}>
-              <TextInput
-                style={
-                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
-                }
-                autoCapitalize="none"
-                placeholder="Username"
-                value={forms.username}
-                onChangeText={username => setForms({ ...forms, username })}
-              />
-              <TextInput
-                style={
-                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
-                }
-                secureTextEntry
-                value={forms.password}
-                placeholder="Password"
-                onChangeText={password => setForms({ ...forms, password })}
-                autoCapitalize="none"
-              />
-            </View>
-            <Button
-              mode="contained"
-              style={globalStyles.buttonColor}
-              onPress={handleLogin}>
-              <Text
-                style={[
-                  isBlackTheme ? globalStyles.textBlack : globalStyles.text,
-                  { fontSize: 14, fontWeight: 'bold' },
-                ]}>
-                Login
-              </Text>
-            </Button>
-            <View
-              style={[
-                globalStyles.line,
-                isBlackTheme
-                  ? globalStyles.lineColorBlack
-                  : globalStyles.lineColor,
-              ]}
-            />
-            <View style={styles.socialButtonBox}>
-              <GithubLoginButton handleGithubLogin={handleGithubLogin} />
-              <Button style={globalStyles.buttonColor}>
-                <View style={styles.buttonContent}>
-                  <Image
-                    source={{
-                      uri: 'https://img.icons8.com/color/48/google-logo.png',
-                    }}
-                    style={styles.icon}
-                  />
-                  <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-                    Google
-                  </Text>
-                </View>
-              </Button>
-            </View>
-            {message !== '' && (
-              <Text style={styles.passwordText}>{message}</Text>
-            )}
-            <View style={styles.forgotPasswordBox}>
-              <TouchableOpacity>
-                <Text style={styles.forgotPassword}>Forgot Password?</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
+        <View style={styles.inputBox}>
+          <TextInput
+            style={[
+              isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
+              { width: '90%' },
+            ]}
+            autoCapitalize="none"
+            placeholder="Username"
+            value={forms.username}
+            onChangeText={username => setForms({ ...forms, username })}
+          />
+          <TextInput
+            style={[
+              isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
+              { width: '90%' },
+            ]}
+            secureTextEntry
+            value={forms.password}
+            placeholder="Password"
+            onChangeText={password => setForms({ ...forms, password })}
+            autoCapitalize="none"
+          />
+        </View>
+        <View>
+          {message != '' && <Text style={{ color: 'red' }}>{message}</Text>}
+        </View>
+        <Button
+          mode="contained"
+          style={globalStyles.terciaryDark}
+          onPress={handleLogin}>
+          <Text
+            style={[
+              isBlackTheme ? globalStyles.textBlack : globalStyles.text,
+              { fontSize: 14, fontWeight: 'bold' },
+            ]}>
+            Login
+          </Text>
+        </Button>
+        <View
+          style={[
+            globalStyles.line,
+            isBlackTheme ? globalStyles.lineColorBlack : globalStyles.lineColor,
+          ]}
+        />
+        <View style={styles.socialButtonBox}>
+          <OauthLoginButton
+            handleOauthLogin={handleGithubLogin}
+            name="Github"
+            img="https://img.icons8.com/?size=100&id=12599&format=png"
+          />
+          {/* <OauthLoginButton
+            handleOauthLogin={handleGithubLogin}
+            name="Google"
+            img="https://img.icons8.com/?size=100&id=12599&format=png"
+          /> */}
+        </View>
+        {message !== '' && <Text style={styles.passwordText}>{message}</Text>}
+        <View style={styles.forgotPasswordBox}>
+          <TouchableOpacity>
+            <Text style={styles.forgotPassword}>Forgot Password?</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
+  );
+}
+
+function NoIp({ isBlackTheme }: NoIpProps) {
+  return (
+    <View
+      style={
+        isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
+      }>
+      <View style={globalStyles.container}>
+        <Text
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          LOG IN
+        </Text>
+        <IpInput />
+      </View>
+    </View>
+  );
+}
+
+export default function LoginScreen() {
+  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
+
+  return serverIp ? (
+    <Login
+      serverIp={serverIp}
+      setIsConnected={setIsConnected}
+      isBlackTheme={isBlackTheme}
+    />
+  ) : (
+    <NoIp isBlackTheme={isBlackTheme} />
   );
 }
 

@@ -2,50 +2,56 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 
 	"area51/schemas"
 	"area51/services"
+	"area51/toolbox"
 )
 
 type UserController interface {
 	Login(ctx *gin.Context) (string, error)
 	Register(ctx *gin.Context) (string, error)
 	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
+	GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error)
 }
 
 type userController struct {
 	userService     services.UserService
 	jWtService      services.JWTService
 	servicesService services.ServicesService
+	reactionService services.ReactionService
+	actionService   services.ActionService
 }
 
 func NewUserController(
 	userService services.UserService,
 	jWtService services.JWTService,
 	servicesService services.ServicesService,
+	reactionService services.ReactionService,
+	actionService services.ActionService,
 ) UserController {
 	return &userController{
 		userService:     userService,
 		jWtService:      jWtService,
 		servicesService: servicesService,
+		reactionService: reactionService,
+		actionService:   actionService,
 	}
 }
 
 func (controller *userController) Login(ctx *gin.Context) (string, error) {
 	var credentials schemas.LoginCredentials
-	err := ctx.ShouldBind(&credentials)
-	if err != nil {
+	if err := ctx.ShouldBind(&credentials); err != nil {
 		return "", err
 	}
 
-	newUser := schemas.User{
+	token, err := controller.userService.Login(schemas.User{
 		Username: credentials.Username,
 		Password: credentials.Password,
-	}
-
-	token, err := controller.userService.Login(newUser)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -68,12 +74,11 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 		return "", errors.New("email must be at least 4 characters long")
 	}
 
-	newUser := schemas.User{
+	token, err := controller.userService.Register(schemas.User{
 		Username: credentials.Username,
 		Email:    credentials.Email,
 		Password: credentials.Password,
-	}
-	token, err := controller.userService.Register(newUser)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -81,20 +86,56 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 }
 
 func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Service, error) {
-	authHeader := ctx.GetHeader("Authorization")
-	tokenString := authHeader[len("Bearer "):]
-	var allServices []schemas.Service
-	userId, err := controller.jWtService.GetUserIdFromToken(tokenString)
+	bearer, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		return []schemas.Service{}, err
+	}
+	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
 	if err != nil {
 		return nil, err
 	}
 	services, err := controller.userService.GetAllServices(userId)
+	if len(services) == 0 {
+		return nil, fmt.Errorf("no services found")
+	}
 	if err != nil {
 		return nil, err
 	}
+	var allServices []schemas.Service
 	for _, service := range services {
 		allServices = append(allServices, controller.servicesService.FindById(service.ServiceId))
-
 	}
 	return allServices, nil
+}
+
+func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error) {
+	bearer, _ := toolbox.GetBearerToken(ctx)
+	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
+	if err != nil {
+		return nil, err
+	}
+	workflows, err := controller.userService.GetAllWorkflows(userId)
+	if len(workflows) == 0 {
+		return nil, fmt.Errorf("no services found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	var allWorkflows []schemas.WorkflowJson
+	for _, workflow := range workflows {
+		action := controller.actionService.FindById(workflow.ActionId)
+		reaction := controller.reactionService.FindById(workflow.ReactionId)
+		allWorkflows = append(allWorkflows, schemas.WorkflowJson{
+			Name:         workflow.Name,
+			WorkflowId:   workflow.Id,
+			ActionId:     workflow.ActionId,
+			ReactionId:   workflow.ReactionId,
+			ActionName:   action.Name,
+			ReactionName: reaction.Name,
+			IsActive:     workflow.IsActive,
+			CreatedAt:    workflow.CreatedAt,
+		})
+
+	}
+	return allWorkflows, nil
 }
