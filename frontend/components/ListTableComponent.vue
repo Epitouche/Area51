@@ -63,12 +63,15 @@ async function launchAction(option: string, workflow: Workflow) {
   switch (option) {
     case "Edit":
       console.log("Edit");
+      activeDropdownIndex.value = null;
       break;
     case "Switch Activity":
       await switchState(workflow);
+      activeDropdownIndex.value = null;
       break;
     case "Delete":
       console.log("Delete");
+      activeDropdownIndex.value = null;
       break;
     default:
       break;

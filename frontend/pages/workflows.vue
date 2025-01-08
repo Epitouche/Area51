@@ -24,8 +24,8 @@ function triggerNotification(
 
 const columns = [
   "Name",
-  "Action ID",
-  "Reaction ID",
+  "Action",
+  "Reaction",
   "Activity",
   "Creation Date",
 ];
@@ -208,10 +208,11 @@ async function addWorkflow() {
         reaction_id: reactionSelected.reaction_id,
       };
 
+      console.log("WorkflowName", WorkflowName.value);
+
       if (WorkflowName.value) {
         body.name = WorkflowName.value;
       }
-
 
       await $fetch("/api/workflows/addWorkflows", {
         method: "POST",
