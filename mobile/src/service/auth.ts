@@ -36,7 +36,6 @@ export async function loginApiCall({
       return false;
     }
     await saveToken('token', data.access_token);
-    console.log('API login success');
     return true;
   } catch (error) {
     setMessage('Error: Internal Server Error');
