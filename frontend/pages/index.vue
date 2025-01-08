@@ -66,7 +66,7 @@ const features = ref([
 <!-- Layout -->
    <NuxtLayout/>
 
-  <div class="flex flex-col bg-primaryWhite-500 dark:bg-primaryDark-500">
+  <div class="flex flex-col bg-secondaryWhite-500 dark:bg-primaryDark-500">
     <!-- Hero Section -->
     <div class="items-center justify-center mx-8">
       <div class="mt-32 mb-40 mx-8 sm:mx-16 md:mx-24 lg:mx-48 xl:mx-60">
