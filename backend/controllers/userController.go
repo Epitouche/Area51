@@ -88,7 +88,7 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Service, error) {
 	bearer, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
-		panic(err.Error())
+		return []schemas.Service{}, err
 	}
 	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
 	if err != nil {
