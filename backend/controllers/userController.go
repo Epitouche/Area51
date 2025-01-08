@@ -85,15 +85,6 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 	return token, nil
 }
 
-func (controller *userController) GetAccessToken(ctx *gin.Context) (string, error) {
-	cookies, err := ctx.Request.Cookie("token")
-	if err != nil {
-		return "", err
-	}
-	token := cookies.Name
-	return token, nil
-}
-
 func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Service, error) {
 	bearer, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
