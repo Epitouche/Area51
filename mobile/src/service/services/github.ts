@@ -45,7 +45,7 @@ export async function sendGithubToken(
     }
     const data = await response.json();
     if (response.status === 200) {
-      console.log('API send Github Token success', token);
+      console.log('API send Github Token success');
     }
     deleteToken('token');
     saveToken('token', data.token);

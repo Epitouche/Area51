@@ -6,7 +6,7 @@ export async function microsoftLogin(apiEndpoint: string, email?: string) {
   const setToken = (accessToken: string) => {
     // if (email) sendGithubToken(apiEndpoint, accessToken, email);
     // else sendGithubToken(apiEndpoint, accessToken);
-    console.log('Microsoft token:', accessToken);
+    console.log('Microsoft token');
   };
   const config = {
     clientId: MICROSOFT_CLIENT_ID,
