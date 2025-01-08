@@ -7,24 +7,29 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import { Button } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
-import { loginApiCall, githubLogin } from '../service';
-import { LoginProps } from '../types';
+import { loginApiCall } from '../service';
+import { AboutJson, LoginProps } from '../types';
 import { OauthLoginButton, IpInput } from '../components';
 import { globalStyles } from '../styles/global_style';
 
 interface LoginFunctionProps {
   serverIp: string;
-  setIsConnected: Function;
+  setIsConnected: (isConnected: boolean) => void;
   isBlackTheme: boolean;
+  aboutJson?: AboutJson;
 }
 
 interface NoIpProps {
   isBlackTheme: boolean;
 }
 
-function Login({ isBlackTheme, serverIp, setIsConnected }: LoginFunctionProps) {
+function Login({
+  isBlackTheme,
+  serverIp,
+  setIsConnected,
+  aboutJson,
+}: LoginFunctionProps) {
   const [forms, setForms] = useState<LoginProps>({
     username: '',
     password: '',
@@ -42,12 +47,6 @@ function Login({ isBlackTheme, serverIp, setIsConnected }: LoginFunctionProps) {
     }
   };
 
-  const handleGithubLogin = async () => {
-    const githubLoginSuccessful = await githubLogin(serverIp);
-    if (githubLoginSuccessful) {
-      setIsConnected(true);
-    }
-  };
   return (
     <View
       style={
@@ -84,18 +83,26 @@ function Login({ isBlackTheme, serverIp, setIsConnected }: LoginFunctionProps) {
         <View>
           {message != '' && <Text style={{ color: 'red' }}>{message}</Text>}
         </View>
-        <Button
-          mode="contained"
-          style={globalStyles.terciaryDark}
-          onPress={handleLogin}>
-          <Text
+        <View style={{ width: '90%' }}>
+          <TouchableOpacity
             style={[
-              isBlackTheme ? globalStyles.textBlack : globalStyles.text,
-              { fontSize: 14, fontWeight: 'bold' },
-            ]}>
-            Login
-          </Text>
-        </Button>
+              globalStyles.buttonFormat,
+              isBlackTheme
+                ? globalStyles.terciaryDark
+                : globalStyles.terciaryLight,
+            ]}
+            onPress={handleLogin}>
+            <Text
+              style={[
+                isBlackTheme
+                  ? globalStyles.textColorBlack
+                  : globalStyles.textColor,
+                globalStyles.textFormat,
+              ]}>
+              Login
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View
           style={[
             globalStyles.line,
@@ -103,16 +110,17 @@ function Login({ isBlackTheme, serverIp, setIsConnected }: LoginFunctionProps) {
           ]}
         />
         <View style={styles.socialButtonBox}>
-          <OauthLoginButton
-            handleOauthLogin={handleGithubLogin}
-            name="Github"
-            img="https://img.icons8.com/?size=100&id=12599&format=png"
-          />
-          {/* <OauthLoginButton
-            handleOauthLogin={handleGithubLogin}
-            name="Google"
-            img="https://img.icons8.com/?size=100&id=12599&format=png"
-          /> */}
+          {aboutJson &&
+            aboutJson.server.services.map((service, index) => (
+              <OauthLoginButton
+                key={index}
+                serverIp={serverIp}
+                setIsConnected={setIsConnected}
+                name={service.name}
+                img={service.image}
+                isBlackTheme={isBlackTheme}
+              />
+            ))}
         </View>
         {message !== '' && <Text style={styles.passwordText}>{message}</Text>}
         <View style={styles.forgotPasswordBox}>
@@ -143,13 +151,15 @@ function NoIp({ isBlackTheme }: NoIpProps) {
 }
 
 export default function LoginScreen() {
-  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
+  const { serverIp, setIsConnected, isBlackTheme, aboutJson } =
+    useContext(AppContext);
 
   return serverIp ? (
     <Login
       serverIp={serverIp}
       setIsConnected={setIsConnected}
       isBlackTheme={isBlackTheme}
+      aboutJson={aboutJson}
     />
   ) : (
     <NoIp isBlackTheme={isBlackTheme} />
@@ -202,7 +212,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   socialButtonBox: {
     flexDirection: 'row',
     width: '80%',

@@ -1,121 +1,155 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import { Button } from 'react-native-paper';
+import {
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { getToken, getWorkflows } from '../service';
-import { Workflow } from '../types';
+import { AppStackList, Workflow } from '../types';
+import { NavigationProp } from '@react-navigation/native';
 
-type WorkflowTableProps = {
-  detailsModalVisible: boolean;
-  setDetailsModalVisible: (detailsModalVisible: boolean) => void;
+type WorkflowTabProps = {
   workflows?: Workflow[];
   isBlackTheme?: boolean;
+  navigation: NavigationProp<AppStackList>;
 };
 
-export function WorkflowTable({
-  setDetailsModalVisible,
-  detailsModalVisible,
+export function WorkflowTab({
   workflows,
   isBlackTheme,
-}: WorkflowTableProps) {
-
+  navigation,
+}: WorkflowTabProps) {
   return (
-    <ScrollView horizontal>
-      <View style={styles.container}>
-        <View
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.headerRow,
+          isBlackTheme
+            ? globalStyles.secondaryLight
+            : globalStyles.secondaryDark,
+        ]}>
+        <Text
           style={[
-            styles.headerRow,
-            isBlackTheme
-              ? globalStyles.secondaryLight
-              : globalStyles.secondaryDark,
+            styles.headerCell,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.textFormat,
           ]}>
-          <Text
+          Name
+        </Text>
+        {/* <Text
             style={[
               styles.headerCell,
-              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
-            ]}>
-            Name
-          </Text>
-          <Text
-            style={[
-              styles.headerCell,
-              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+              isBlackTheme
+                ? globalStyles.textColor
+                : globalStyles.textColorBlack,
+              globalStyles.textFormat,
             ]}>
             Action
           </Text>
           <Text
             style={[
               styles.headerCell,
-              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+              isBlackTheme
+                ? globalStyles.textColor
+                : globalStyles.textColorBlack,
+              globalStyles.textFormat,
             ]}>
             Reaction
-          </Text>
-          <Text
+          </Text> */}
+        <Text
+          style={[
+            styles.headerCell,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.textFormat,
+          ]}>
+          Is Active
+        </Text>
+        <Text
+          style={[
+            styles.headerCell,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.textFormat,
+          ]}>
+          Details
+        </Text>
+      </View>
+      {workflows &&
+        workflows.map((workflow, index) => (
+          <View
+            key={index}
             style={[
-              styles.headerCell,
-              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+              styles.row,
+              isBlackTheme
+                ? globalStyles.secondaryLight
+                : globalStyles.secondaryDark,
             ]}>
-            Is Active
-          </Text>
-          <Text
-            style={[
-              styles.headerCell,
-              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
-            ]}>
-            Details
-          </Text>
-        </View>
-        {workflows &&
-          workflows.map((workflow, index) => (
-            <View
-              key={index}
-              style={[
-                styles.row,
-                isBlackTheme
-                  ? globalStyles.secondaryLight
-                  : globalStyles.secondaryDark,
-              ]}>
-              <View style={styles.cell}>
-                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
-                  {workflow.name}
-                </Text>
-              </View>
-              <View style={styles.cell}>
-                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
+            <View style={styles.cell}>
+              <Text
+                style={
+                  isBlackTheme
+                    ? globalStyles.textColor
+                    : globalStyles.textColorBlack
+                }>
+                {workflow.name}
+              </Text>
+            </View>
+            {/* <View style={styles.cell}>
+                <Text
+                  style={
+                    isBlackTheme
+                      ? globalStyles.textColor
+                      : globalStyles.textColorBlack
+                  }>
                   {workflow.action_name}
                 </Text>
               </View>
               <View style={styles.cell}>
-                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
+                <Text
+                  style={
+                    isBlackTheme
+                      ? globalStyles.textColor
+                      : globalStyles.textColorBlack
+                  }>
                   {workflow.reaction_name}
                 </Text>
-              </View>
-              <View style={styles.cell}>
-                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
-                  {workflow.is_active ? 'Yes' : 'No'}
-                </Text>
-              </View>
-              <View style={styles.cell}>
-                <Button
-                  onPress={() => setDetailsModalVisible(!detailsModalVisible)}>
-                  <Text style={isBlackTheme ? styles.text : styles.textBlack}>
-                    ...
-                  </Text>
-                </Button>
-              </View>
+              </View>*/}
+            <View style={styles.cell}>
+              <Text
+                style={
+                  isBlackTheme
+                    ? globalStyles.textColor
+                    : globalStyles.textColorBlack
+                }>
+                {workflow.is_active ? 'Yes' : 'No'}
+              </Text>
             </View>
-          ))}
-      </View>
-    </ScrollView>
+            <View style={styles.cell}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('Workflow Details', { workflow })
+                }>
+                <Text
+                  style={
+                    isBlackTheme
+                      ? globalStyles.textColor
+                      : globalStyles.textColorBlack
+                  }>
+                  ...
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    width: '100%',
-    borderColor: '#ccc',
-    borderRadius: 5,
+    alignContent: 'center',
+    justifyContent: 'center',
+    width: '90%',
   },
   headerRow: {
     alignContent: 'center',
@@ -126,7 +160,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   headerCell: {
-    width: 100,
+    width: '33%',
     flex: 1,
     padding: 10,
     fontWeight: 'bold',
@@ -134,38 +168,17 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   row: {
+    height: 40,
     alignContent: 'center',
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     justifyContent: 'center',
   },
-  textBlack: {
-    textAlign: 'center',
-    color: '#F7FAFB',
-    fontWeight: 'bold',
-  },
-  text: {
-    textAlign: 'center',
-    color: '#1A1A1A',
-    fontWeight: 'bold',
-  },
   cell: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 100,
-  },
-  cellValidate: {
-    backgroundColor: 'green',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-  },
-  cellUnvalide: {
-    backgroundColor: 'red',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
+    width: '33%',
   },
   buttonText: {
     color: '#fff',

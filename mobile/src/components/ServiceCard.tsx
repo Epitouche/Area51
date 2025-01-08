@@ -3,22 +3,24 @@ import { globalStyles } from '../styles/global_style';
 import { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { Button } from 'react-native-paper';
+import { selectServicesParams } from '../service';
 
 interface ServiceCardProps {
   title: string;
   image: string;
   status: boolean;
-  handleOauthLogin: () => void;
 }
 
-export function ServiceCard({ image, status, title, handleOauthLogin }: ServiceCardProps) {
-  const { isBlackTheme } = useContext(AppContext);
+export function ServiceCard({ image, status, title }: ServiceCardProps) {
+  const { isBlackTheme, serverIp } = useContext(AppContext);
+
+  const handleOauthLogin = async () => {
+    if (await selectServicesParams({ serverIp, serviceName: title })) {
+    }
+  };
   return (
     <View
-      style={[
-        styles.card,
-        status ? styles.connected : styles.disconnected,
-      ]}>
+      style={[styles.card, status ? styles.connected : styles.disconnected]}>
       <Image
         source={{
           uri: image,
@@ -27,7 +29,7 @@ export function ServiceCard({ image, status, title, handleOauthLogin }: ServiceC
       />
       <Text
         style={[
-          isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+          isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
           styles.title,
         ]}>
         {title[0].toLocaleUpperCase() + title.slice(1)}
@@ -38,7 +40,9 @@ export function ServiceCard({ image, status, title, handleOauthLogin }: ServiceC
           styles.statusBar,
           status ? styles.connectedBar : styles.disconnectedBar,
         ]}>
-        <Text style={styles.statusText}>{status ? 'Connected' : 'Disconnected'}</Text>
+        <Text style={styles.statusText}>
+          {status ? 'Connected' : 'Disconnected'}
+        </Text>
       </Button>
     </View>
   );

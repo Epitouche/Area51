@@ -1,7 +1,7 @@
 export async function sendWorkflows(
   token: string,
   apiEndpoint: string,
-  formsRegister: { action_id: number; reaction_id: number },
+  formsRegister: { action_id: number; reaction_id: number; name?: string },
 ) {
   try {
     const response = await fetch(`http://${apiEndpoint}:8080/api/workflow`, {
@@ -13,6 +13,7 @@ export async function sendWorkflows(
       body: JSON.stringify({
         action_id: formsRegister.action_id,
         reaction_id: formsRegister.reaction_id,
+        name: formsRegister.name,
       }),
     });
     if (response.status === 200) {

@@ -1,4 +1,4 @@
-import { AboutJsonParse, Action, Reaction } from "./aboutJson";
+import { AboutJsonParse, Action, Reaction, Workflow } from "./aboutJson";
 
 export type AuthParamList = {
   Login: undefined;
@@ -6,17 +6,23 @@ export type AuthParamList = {
   Home: undefined;
 };
 
-type ActionOrReactionProps = {
+type OptionsProps = {
   isAction: boolean;
   setAction?: (isAction: Action) => void;
   setReaction?: (isReaction: Reaction) => void;
 }
 
+type WorkflowDetailsProps = {
+  workflow: Workflow;
+};
+
 export type AppStackList = {
   App: undefined;
-  ActionOrReaction: ActionOrReactionProps;
+  Options: OptionsProps;
   Home: undefined;
   Workflows: undefined;
   Service: undefined;
   Auth: undefined;
+  Parameters: undefined;
+  'Workflow Details': WorkflowDetailsProps;
 };

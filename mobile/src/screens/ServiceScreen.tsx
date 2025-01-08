@@ -46,7 +46,6 @@ export default function ServiceScreen() {
                   'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000'
                 }
                 status={service.isConnected}
-                handleOauthLogin={() => console.log('pressed')}
               />
             ))}
         </View>

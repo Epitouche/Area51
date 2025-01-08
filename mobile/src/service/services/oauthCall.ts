@@ -7,8 +7,7 @@ type AuthApiCall = {
 
 export async function OauthLogin({ config, setToken }: AuthApiCall) {
   const authState = await authorize(config);
-  if (!authState.accessToken)
-    return false;
+  if (!authState.accessToken) return false;
   setToken(authState.accessToken);
   return true;
 }

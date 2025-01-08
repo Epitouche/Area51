@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppContext } from '../context/AppContext';
-import { AuthParamList, AppStackList} from '../types';
+import { AuthParamList, AppStackList } from '../types';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -11,6 +11,7 @@ import WorkflowScreen from '../screens/WorkflowScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ServiceScreen from '../screens/ServiceScreen';
 import ActionOrReactionScreen from '../screens/ActionOrReactionScreen';
+import WorkflowDetailsScreen from '../screens/WorkflowDetailsScreen';
 
 const Tab = createBottomTabNavigator<AppStackList>();
 const AppStack = createNativeStackNavigator<AppStackList>();
@@ -24,7 +25,8 @@ function AppStackScreen() {
         name="App"
         component={OptionsStackScreen}
       />
-      <AppStack.Screen name="ActionOrReaction" component={ActionOrReactionScreen} />
+      <AppStack.Screen name="Options" component={ActionOrReactionScreen} />
+      <AppStack.Screen name="Workflow Details" component={WorkflowDetailsScreen} />
     </AppStack.Navigator>
   );
 }

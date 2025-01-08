@@ -6,7 +6,7 @@ import { Action, AppStackList, Reaction, ServicesParse } from '../types';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
 
-type LoginScreenRouteProp = RouteProp<AppStackList, 'ActionOrReaction'>;
+type ActionOrReactionProps = RouteProp<AppStackList, 'Options'>;
 
 function NoService() {
   const { isBlackTheme } = useContext(AppContext);
@@ -35,7 +35,7 @@ function ActionOrReaction() {
     reactions: [],
   };
 
-  const route = useRoute<LoginScreenRouteProp>();
+  const route = useRoute<ActionOrReactionProps>();
   const [selectedService, setSelectedService] =
     useState<ServicesParse>(defaultService);
   const [selectedActionOrReactionId, setSelectedActionOrReactionId] = useState<
@@ -56,7 +56,12 @@ function ActionOrReaction() {
             {isAction ? 'Creating an Action' : 'Creating an Reaction'}
           </Text>
           <Text
-            style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+            style={[
+              isBlackTheme
+                ? globalStyles.textColorBlack
+                : globalStyles.textColor,
+              globalStyles.textFormat,
+            ]}>
             Select a service
           </Text>
           {servicesConnected.services.map((service, index) => {
@@ -65,14 +70,21 @@ function ActionOrReaction() {
                 <Button
                   key={index}
                   mode="contained"
-                  style={globalStyles.terciaryDark}
+                  style={
+                    isBlackTheme
+                      ? globalStyles.primaryLight
+                      : globalStyles.secondaryDark
+                  }
                   onPress={() => {
                     setSelectedService(service);
                   }}>
                   <Text
-                    style={
-                      isBlackTheme ? globalStyles.textBlack : globalStyles.text
-                    }>
+                    style={[
+                      isBlackTheme
+                        ? globalStyles.textColor
+                        : globalStyles.textColorBlack,
+                      globalStyles.textFormat,
+                    ]}>
                     {service.name}
                   </Text>
                 </Button>
@@ -83,9 +95,12 @@ function ActionOrReaction() {
           {selectedService && (
             <View style={styles.textContainer}>
               <Text
-                style={
-                  isBlackTheme ? globalStyles.textBlack : globalStyles.text
-                }>
+                style={[
+                  isBlackTheme
+                    ? globalStyles.textColorBlack
+                    : globalStyles.textColor,
+                  globalStyles.textFormat,
+                ]}>
                 {isAction ? 'Select an Action for ' : 'Select an Reaction for '}
                 {selectedService.name}
               </Text>
@@ -96,16 +111,21 @@ function ActionOrReaction() {
                         <Button
                           key={index}
                           mode="contained"
-                          style={globalStyles.terciaryDark}
+                          style={
+                            isBlackTheme
+                              ? globalStyles.primaryLight
+                              : globalStyles.secondaryDark
+                          }
                           onPress={() => {
                             setSelectedActionOrReactionId(action);
                           }}>
                           <Text
-                            style={
+                            style={[
                               isBlackTheme
-                                ? globalStyles.textBlack
-                                : globalStyles.text
-                            }>
+                                ? globalStyles.textColor
+                                : globalStyles.textColorBlack,
+                              globalStyles.textFormat,
+                            ]}>
                             {action.name}
                           </Text>
                         </Button>
@@ -118,16 +138,21 @@ function ActionOrReaction() {
                         <Button
                           key={index}
                           mode="contained"
-                          style={globalStyles.terciaryDark}
+                          style={
+                            isBlackTheme
+                              ? globalStyles.primaryLight
+                              : globalStyles.secondaryDark
+                          }
                           onPress={() => {
                             setSelectedActionOrReactionId(reaction);
                           }}>
                           <Text
-                            style={
+                            style={[
                               isBlackTheme
-                                ? globalStyles.textBlack
-                                : globalStyles.text
-                            }>
+                                ? globalStyles.textColor
+                                : globalStyles.textColorBlack,
+                              globalStyles.textFormat,
+                            ]}>
                             {reaction.name}
                           </Text>
                         </Button>
@@ -139,7 +164,12 @@ function ActionOrReaction() {
         </View>
         <View style={styles.containerSaveButton}>
           <Button
-            style={[styles.saveButton, globalStyles.terciaryDark]}
+            style={[
+              styles.saveButton,
+              isBlackTheme
+                ? globalStyles.primaryLight
+                : globalStyles.secondaryDark,
+            ]}
             onPress={() => {
               if (isAction) {
                 if (selectedActionOrReactionId)
@@ -152,7 +182,12 @@ function ActionOrReaction() {
               navigation.goBack();
             }}>
             <Text
-              style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+              style={[
+                isBlackTheme
+                  ? globalStyles.textColor
+                  : globalStyles.textColorBlack,
+                globalStyles.textFormat
+              ]}>
               Save
             </Text>
           </Button>
@@ -218,16 +253,14 @@ const styles = StyleSheet.create({
     width: '90%',
   },
   containerSaveButton: {
-    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
-    marginBottom: 40,
   },
   saveButton: {
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
+    marginBottom: 40,
   },
 });

@@ -1,12 +1,10 @@
-import { deleteToken, saveToken } from "../token";
 import { MICROSOFT_CLIENT_ID } from '@env';
-import { OauthLogin } from '../oauth/oauthCall';
+import { OauthLogin } from './oauthCall';
+import { sendServiceToken } from "./sendServiceToken";
 
-export async function microsoftLogin(apiEndpoint: string, email?: string) {
+export async function microsoftLogin(apiEndpoint: string) {
   const setToken = (accessToken: string) => {
-    // if (email) sendGithubToken(apiEndpoint, accessToken, email);
-    // else sendGithubToken(apiEndpoint, accessToken);
-    console.log('Microsoft token');
+      sendServiceToken(apiEndpoint, accessToken, 'microsoft');
   };
   const config = {
     clientId: MICROSOFT_CLIENT_ID,
@@ -22,41 +20,4 @@ export async function microsoftLogin(apiEndpoint: string, email?: string) {
 
   if (await OauthLogin({ config, setToken })) return true;
   return false;
-}
-
-export async function sendMicrosoftToken(
-  apiEndpoint: string,
-  token: string,
-  email?: string,
-) {
-  try {
-    let response;
-    if (email) {
-      response = await fetch(
-        `http://${apiEndpoint}:8080/api/github/mobile/token`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ token: token, email: email }),
-        },
-      );
-    } else {
-      response = await fetch(
-        `http://${apiEndpoint}:8080/api/github/mobile/token`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ token: token }),
-        },
-      );
-    }
-    const data = await response.json();
-    if (response.status === 200) {
-      console.log('API send Github Token success');
-    }
-    deleteToken('token');
-    saveToken('token', data.token);
-    return true;
-  } catch (error) {
-    console.error('Error:', error);
-    return false;
-  }
 }

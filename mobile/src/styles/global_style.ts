@@ -20,6 +20,17 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 2,
     marginBottom: 16,
   },
+  textFormat: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonFormat: {
+    width: 'auto',
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   // White Theme
   wallpaper: {
@@ -27,10 +38,8 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#E8E9E9',
   },
-  text: {
+  textColor: {
     color: '#1A1A1A',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   title: {
     fontSize: 30,
@@ -60,10 +69,8 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1A1A1A',
   },
-  textBlack: {
+  textColorBlack: {
     color: '#F7FAFB',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   titleBlack: {
     fontSize: 30,

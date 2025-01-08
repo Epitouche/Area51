@@ -14,19 +14,10 @@ export type Reaction = {
 
 export type Service = {
   name: string;
+  description: string;
   actions: Action[];
   reactions: Reaction[];
-};
-
-export type Workflow = {
-  action_id: number;
-  action_name: string;
-  created_at: string;
-  is_active: boolean;
-  name: string;
-  reaction_id: number;
-  reaction_name: string;
-  workflow_id: number;
+  image: string;
 };
 
 export type Server = {
@@ -41,6 +32,17 @@ export type Client = {
 export type AboutJson = {
   client: Client;
   server: Server;
+};
+
+export type Workflow = {
+  action_id: number;
+  action_name: string;
+  created_at: string;
+  is_active: boolean;
+  name: string;
+  reaction_id: number;
+  reaction_name: string;
+  workflow_id: number;
 };
 
 export type PullRequestComment = {

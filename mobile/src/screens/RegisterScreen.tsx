@@ -22,10 +22,11 @@ export default function RegisterScreen() {
     password: '',
     username: '',
   });
-  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
+  const { serverIp, setIsConnected, isBlackTheme, aboutJson } =
+    useContext(AppContext);
   const [token, setToken] = useState('');
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setMessage('');
     if (
       await registerApiCall({
@@ -35,10 +36,6 @@ export default function RegisterScreen() {
       })
     )
       setIsConnected(true);
-  };
-
-  const handleGithubLogin = async () => {
-    if (await githubLogin(serverIp)) setIsConnected(true);
   };
 
   return (
@@ -90,33 +87,39 @@ export default function RegisterScreen() {
                 autoCapitalize="none"
               />
             </View>
-            {message !== '' && (
-              <Text style={styles.errorMessage}>{message}</Text>
-            )}
-            <Button
-              mode="contained"
-              style={globalStyles.terciaryDark}
-              onPress={handleLogin}>
-              <Text
+            <View style={{ width: '90%', marginTop: 20 }}>
+              <TouchableOpacity
                 style={[
-                  isBlackTheme ? globalStyles.textBlack : globalStyles.text,
-                  { fontSize: 14, fontWeight: 'bold' },
-                ]}>
-                Register
-              </Text>
-            </Button>
+                  globalStyles.buttonFormat,
+                  isBlackTheme
+                    ? globalStyles.terciaryDark
+                    : globalStyles.terciaryLight,
+                ]}
+                onPress={handleRegister}>
+                <Text
+                  style={[
+                    isBlackTheme
+                      ? globalStyles.textColorBlack
+                      : globalStyles.textColor,
+                    globalStyles.textFormat,
+                  ]}>
+                  Register
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.line} />
             <View style={styles.socialButtonBox}>
-              <OauthLoginButton
-                handleOauthLogin={handleGithubLogin}
-                name="Github"
-                img="https://img.icons8.com/?size=100&id=12599&format=png"
-              />
-              {/* <OauthLoginButton
-                handleOauthLogin={handleGithubLogin}
-                name="Google"
-                img="https://img.icons8.com/?size=100&id=12599&format=png"
-              /> */}
+              {aboutJson &&
+                aboutJson.server.services.map((service, index) => (
+                  <OauthLoginButton
+                    key={index}
+                    serverIp={serverIp}
+                    setIsConnected={setIsConnected}
+                    name={service.name}
+                    img={service.image}
+                    isBlackTheme={isBlackTheme}
+                  />
+                ))}
             </View>
             <View style={styles.forgotPasswordBox}>
               <TouchableOpacity>
