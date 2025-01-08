@@ -1,20 +1,22 @@
 import { deleteToken, saveToken } from "../token";
-import { SPOTIFY_CLIENT_ID, SPOTIFY_SECRET } from '@env';
+import { MICROSOFT_CLIENT_ID } from '@env';
 import { OauthLogin } from '../oauth/oauthCall';
 
-export async function spotifyLogin(apiEndpoint: string, email?: string) {
+export async function microsoftLogin(apiEndpoint: string, email?: string) {
   const setToken = (accessToken: string) => {
-    console.log('Spotify token');
-    // sendSpotifyToken(apiEndpoint, accessToken);
+    // if (email) sendGithubToken(apiEndpoint, accessToken, email);
+    // else sendGithubToken(apiEndpoint, accessToken);
+    console.log('Microsoft token');
   };
   const config = {
-    clientId: SPOTIFY_CLIENT_ID,
-    clientSecret: SPOTIFY_SECRET,
+    clientId: MICROSOFT_CLIENT_ID,
+    scopes: ['Mail.ReadWrite', 'User.Read', 'Mail.Send', 'offline_access'],
     redirectUrl: 'com.area51-epitech://oauthredirect',
-    scopes: ['user-read-email', 'playlist-modify-public'],
     serviceConfiguration: {
-      authorizationEndpoint: 'https://accounts.spotify.com/authorize',
-      tokenEndpoint: 'https://accounts.spotify.com/api/token',
+      authorizationEndpoint:
+        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+      tokenEndpoint:
+        'https://login.microsoftonline.com/common/oauth2/v2.0/token',
     },
   };
 
@@ -22,7 +24,7 @@ export async function spotifyLogin(apiEndpoint: string, email?: string) {
   return false;
 }
 
-export async function sendSpotifyToken(
+export async function sendMicrosoftToken(
   apiEndpoint: string,
   token: string,
   email?: string,
@@ -48,7 +50,7 @@ export async function sendSpotifyToken(
     }
     const data = await response.json();
     if (response.status === 200) {
-      console.log('API send Spotify Token success');
+      console.log('API send Github Token success');
     }
     deleteToken('token');
     saveToken('token', data.token);

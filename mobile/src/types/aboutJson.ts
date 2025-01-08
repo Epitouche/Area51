@@ -19,16 +19,19 @@ export type Service = {
 };
 
 export type Workflow = {
-  name: string;
   action_id: number;
-  reaction_id: number;
-  is_active: boolean;
+  action_name: string;
   created_at: string;
+  is_active: boolean;
+  name: string;
+  reaction_id: number;
+  reaction_name: string;
+  workflow_id: number;
 };
+
 export type Server = {
   current_time: string;
   services: Service[];
-  workflows: Workflow[];
 };
 
 export type Client = {
@@ -57,7 +60,7 @@ export type AboutJsonParse = {
   services: ServicesParse[];
 };
 
-export type Workflows = {
+export interface GetConnectedServiceProps {
   apiEndpoint: string;
   token: string;
   setConnectedService: (connectedService: ConnectedService[]) => void;
