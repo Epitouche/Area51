@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
-import { AboutJson, AboutJsonParse, ConnectedService } from '../types';
+import { AboutJson, AboutJsonParse, ConnectedService, ParseConnectedServicesProps, ParseServicesProps, Workflows } from '../types';
 import { getToken } from './token';
 
-type Workflows = {
-  apiEndpoint: string;
-  token: string;
-  setConnectedService: (connectedService: ConnectedService[]) => void;
-};
 
-interface ParseConnectedServicesProps {
-  aboutjson: AboutJson;
-  apiEndpoint: string;
-  token: string;
-  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
-}
 
-interface ParseServicesProps {
-  aboutJson: AboutJson;
-  serverIp: string;
-  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
+export async function getAboutJson(
+  apiEndpoint: string,
+  setAboutJson: (aboutjson: AboutJson) => void,
+) {
+  try {
+    const response = await fetch(`http://${apiEndpoint}:8080/about.json`, {
+      method: 'GET',
+      body: null,
+    });
+    const data = await response.json();
+    if (response.status === 200) {
+      console.log('API get AboutJson success');
+      setAboutJson(data);
+    }
+    return data;
+  } catch (error) {
+    console.error('Error fetching AboutJson data:', error);
+  }
 }
 
 export async function parseServices({

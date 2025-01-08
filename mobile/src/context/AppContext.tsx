@@ -1,8 +1,7 @@
 // src/context/AppContext.tsx
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { AboutJson, AboutJsonParse } from '../types';
-import { checkToken, getToken, saveToken } from '../service';
-import { getAboutJson } from '../service/getAboutJson';
+import { getAboutJson, checkToken, getToken, saveToken } from '../service';
 
 interface AppContextProps {
   serverIp: string;
@@ -56,7 +55,6 @@ export default function AppProvider({ children }: AppProviderProps) {
       }
     };
     aboutJson();
-    saveToken('serverIp', serverIp);
   }, [serverIp]);
 
   useEffect(() => {

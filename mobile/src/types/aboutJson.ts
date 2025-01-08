@@ -1,3 +1,5 @@
+import { ConnectedService } from "./servicesModals";
+
 export type Action = {
   action_id: number;
   name: string;
@@ -54,3 +56,22 @@ export type ServicesParse = {
 export type AboutJsonParse = {
   services: ServicesParse[];
 };
+
+export type Workflows = {
+  apiEndpoint: string;
+  token: string;
+  setConnectedService: (connectedService: ConnectedService[]) => void;
+};
+
+export interface ParseConnectedServicesProps {
+  aboutjson: AboutJson;
+  apiEndpoint: string;
+  token: string;
+  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
+}
+
+export interface ParseServicesProps {
+  aboutJson: AboutJson;
+  serverIp: string;
+  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
+}

@@ -1,10 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Button } from 'react-native-paper';
-import { deleteToken, checkToken, getToken } from '../service/token';
 import { WorkflowTable } from '../components';
 import { AppContext } from '../context/AppContext';
-import { parseServices, sendWorkflows, getAboutJson } from '../service';
+import {
+  parseServices,
+  sendWorkflows,
+  getAboutJson,
+  deleteToken,
+  checkToken,
+  getToken,
+} from '../service';
 import { globalStyles } from '../styles/global_style';
 import { Action, AppStackList, Reaction } from '../types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';

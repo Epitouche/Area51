@@ -3,9 +3,11 @@ import { globalStyles } from '../styles/global_style';
 import { Button } from 'react-native-paper';
 import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
+import { getToken, saveToken } from '../service';
 
 export function IpInput() {
   const [ipTmp, setIpTmp] = useState('');
+  const [checkIp, setcheckIp] = useState('');
   const { setServerIp, serverIp, isBlackTheme } = useContext(AppContext);
 
   // const validateIp = (ip: string) => {
@@ -15,16 +17,19 @@ export function IpInput() {
   // };
 
   useEffect(() => {
+    const getIp = async () => {
+      await getToken('serverIp', setcheckIp);
+    };
+    getIp();
+  }, []);
+
+  useEffect(() => {
     setIpTmp(serverIp);
   }, [serverIp]);
 
   const handleSave = () => {
-    // if (validateIp(serverIp)) {
     setServerIp(ipTmp);
-    // } else {
-    //   alert('Please enter a valid IP address');
-    //   setIsValidIp(false);
-    // }
+    saveToken('serverIp', ipTmp);
   };
 
   return (

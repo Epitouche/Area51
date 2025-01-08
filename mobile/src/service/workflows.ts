@@ -18,7 +18,7 @@ export async function sendWorkflows(
     if (response.status === 200) {
       console.log('API send Workflows success');
     } else {
-      console.error('API send Workflows error:', response.status, response.statusText, token);
+      console.error('API send Workflows error',);
   }
     return true;
   } catch (error) {
