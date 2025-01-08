@@ -5,9 +5,9 @@ import AppProvider from './context/AppContext';
 export default function App() {
   return (
     <NavigationContainer>
-        <AppProvider>
-          <AppNavigator />
-        </AppProvider>
-      </NavigationContainer>
+      <AppProvider>
+        <AppNavigator />
+      </AppProvider>
+    </NavigationContainer>
   );
 }
