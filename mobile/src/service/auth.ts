@@ -28,7 +28,7 @@ export async function loginApiCall({
     const data = await response.json();
     if (response.status !== 200) {
       if (response.status === 401) {
-        setMessage('Error: invalid credentials');
+        setMessage('Username or password is incorrect');
         return false;
       }
       setMessage('Error: token not found');

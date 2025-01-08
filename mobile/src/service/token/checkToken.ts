@@ -8,6 +8,6 @@ export async function checkToken(tokenName: string): Promise<boolean> {
 
   if ((await getToken(tokenName, setToken)) === false) return false;
 
-  if (token === 'Error: getting the token') return false;
+  if (token === 'Error: token not found') return false;
   return true;
 }

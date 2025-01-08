@@ -18,12 +18,11 @@ export async function sendWorkflows(
     if (response.status === 200) {
       console.log('API send Workflows success');
     } else {
-      console.error('API send Workflows error:', response.status);
-      console.error('action_id', formsRegister.action_id, 'reaction_id', formsRegister.reaction_id, 'token', token);
+      console.error('API send Workflows error',);
   }
     return true;
   } catch (error) {
-    console.error('Error fetching workflows data:', error, apiEndpoint);
+    console.error('Error fetching workflows data:', error);
     return false;
   }
 }
@@ -42,7 +41,6 @@ export async function getWorkflows(apiEndpoint: string, token: string, sendWorkf
     );
     const data = await response.json();
     if (response.status === 200) {
-      console.log('API get workflows success');
       if (data !== null)
         sendWorkflows(data);
     }

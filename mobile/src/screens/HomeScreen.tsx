@@ -1,17 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { AppContext } from '../context/AppContext';
-import { getAboutJson } from '../service';
 import { globalStyles } from '../styles/global_style';
 import { IpInput } from '../components';
 
 export default function HomeScreen() {
-  const { serverIp, setAboutJson, isConnected, isBlackTheme } =
-    useContext(AppContext);
-
-  useEffect(() => {
-    if (isConnected) getAboutJson(serverIp, setAboutJson);
-  }, [isConnected, serverIp]);
+  const { isBlackTheme } = useContext(AppContext);
 
   return (
     <View
