@@ -29,15 +29,15 @@ func NewServiceController(
 	}
 }
 
-func (controller *servicesController) AboutJson(
-	ctx *gin.Context,
-) (allServicesJson []schemas.ServiceJson, err error) {
+func (controller *servicesController) AboutJson(*gin.Context) (allServicesJson []schemas.ServiceJson, err error) {
 	allServices := controller.service.FindAll()
 	for _, oneService := range allServices {
 		allServicesJson = append(allServicesJson, schemas.ServiceJson{
 			Name:     schemas.ServiceName(oneService.Name),
+			Description: oneService.Description,
 			Action:   controller.serviceAction.GetAllServicesByServiceId(oneService.Id),
 			Reaction: controller.serviceReaction.GetAllServicesByServiceId(oneService.Id),
+			Image: oneService.Image,
 		})
 	}
 	return allServicesJson, nil

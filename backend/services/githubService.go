@@ -20,7 +20,7 @@ type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
-	FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
 }
 
 type githubService struct {
@@ -58,7 +58,6 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	redirectUri := appAdressHost + appPort + path
-
 	apiUrl := "https://github.com/login/oauth/access_token"
 
 	data := url.Values{}
@@ -71,21 +70,25 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
+
 	req.URL.RawQuery = data.Encode()
 	req.Header.Set("Accept", "application/json")
-
 	client := &http.Client{
 		Timeout: time.Second * 45,
 	}
+
 	response, err := client.Do(req)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
-	var resultToken schemas.GitHubResponseToken
+
+	resultToken := schemas.GitHubResponseToken{}
+
 	err = json.NewDecoder(response.Body).Decode(&resultToken)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
+
 	response.Body.Close()
 	return resultToken, nil
 }
@@ -95,17 +98,22 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
-	request.Header.Set("Authorization", "Bearer "+accessToken)
+
+	request.Header.Set("Authorization", "Bearer " + accessToken)
 	client := &http.Client{}
+
 	response, err := client.Do(request)
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
+
 	result := schemas.GithubUserInfo{}
+
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
 		return schemas.GithubUserInfo{}, err
 	}
+
 	response.Body.Close()
 	return result, nil
 }
@@ -119,7 +127,7 @@ func (service *githubService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *githubService) FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
 	switch name {
 	case string(schemas.GithubReactionListComments):
 		return service.ListAllReviewComments
@@ -135,7 +143,7 @@ type transportWithToken struct {
 }
 
 func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", "Bearer "+t.token)
+	req.Header.Set("Authorization", "Bearer " + t.token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	return http.DefaultTransport.RoundTrip(req)
@@ -143,22 +151,27 @@ func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error
 
 func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
 	service.mutex.Lock()
+	defer service.mutex.Unlock()
 	ctx := context.Background()
+
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	token := service.tokenRepository.FindByUserId(workflow.UserId)
 	client := github.NewClient(&http.Client{
-		Transport: &transportWithToken{token: token[len(token)-1].Token},
+		Transport: &transportWithToken{token: token[len(token) - 1].Token},
 	})
+
 	pullRequests, _, err := client.PullRequests.List(ctx, "JsuisSayker", "TestAreaGithub", nil)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
 		return
 	}
+
 	if nbPR != len(pullRequests) {
 		nbPR = len(pullRequests)
 		reaction := service.reactionRepository.FindById(workflow.ReactionId)
@@ -166,14 +179,14 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		reaction.Id = workflow.ReactionId
 		service.reactionRepository.Update(reaction)
 	}
-	channel <- "Workflow done"
-	service.mutex.Unlock()
-	time.Sleep(5 * time.Second)
+	channel <- "Action workflow done"
 }
 
-func (service *githubService) ListAllReviewComments(workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
 	service.mutex.Lock()
-	// var actualReaction schemas.Reaction
+	defer service.mutex.Unlock()
+
+	// Iterate over all tokens
 	for _, token := range accessToken {
 		actualUser := service.userService.GetUserById(token.UserId)
 		if token.UserId == actualUser.Id {
@@ -182,6 +195,7 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 				if workflow.Id == workflowId {
 					actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
 					if !actualReaction.Trigger {
+						fmt.Println("Trigger is already false, skipping reaction.")
 						return
 					}
 				}
@@ -191,8 +205,10 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 
 	request, err := http.NewRequest("GET", "https://api.github.com/repos/Epitouche/Area51/pulls/comments", nil)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error creating request:", err)
+		return
 	}
+
 	request.Header.Set("Accept", "application/vnd.github+json")
 	for _, token := range accessToken {
 		actualUser := service.userService.GetUserById(token.UserId)
@@ -200,38 +216,33 @@ func (service *githubService) ListAllReviewComments(workflowId uint64, accessTok
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
+
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error making request:", err)
+		return
 	}
+
 	defer response.Body.Close()
 
-	result := []schemas.GithubListCommentsResponse{}
-	savedResult := schemas.ReactionResponseData{
-		WorkflowId: workflowId,
-	}
-
+	var result []schemas.GithubListCommentsResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error decoding response:", err)
+		return
 	}
 
+	savedResult := schemas.ReactionResponseData{
+		WorkflowId:  workflowId,
+		ApiResponse: json.RawMessage{},
+	}
 	jsonValue, err := json.Marshal(result)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error marshalling response:", err)
+		return
 	}
-	savedResult.ApiResponse = json.RawMessage(jsonValue)
-
-	if err != nil {
-		fmt.Println(err)
-	}
+	savedResult.ApiResponse = jsonValue
 	service.reactionResponseDataService.Save(savedResult)
-	//! Need to update the trigger to false
-	workflow, _ := service.workflowRepository.FindByIds(workflowId)
-	actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
-	actualReaction.Trigger = false
-	service.reactionRepository.Update(actualReaction)
-	service.mutex.Unlock()
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Minute)
 }

@@ -1,7 +1,7 @@
 package services
 
 import (
-	"os"
+	"area51/toolbox"
 	"strconv"
 	"time"
 
@@ -27,17 +27,9 @@ type jwtCustomClaims struct {
 
 func NewJWTService() JWTService {
 	return &jwtService{
-		secretKey: getSecretKey(),
+		secretKey: toolbox.GetInEnv("JWT_SECRET"),
 		issuer:    "email@example.com",
 	}
-}
-
-func getSecretKey() string {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic("JWT_SECRET is not set")
-	}
-	return secret
 }
 
 func (service *jwtService) GenerateJWTToken(userId string, username string, isAdmin bool) string {
@@ -57,6 +49,7 @@ func (service *jwtService) GenerateJWTToken(userId string, username string, isAd
 	if err != nil {
 		panic(err)
 	}
+
 	return signedToken
 }
 
@@ -74,6 +67,7 @@ func (service *jwtService) GetUserIdFromToken(tokenString string) (userId uint64
 	if err != nil {
 		return 0, err
 	}
+
 	if token.Valid {
 		claims := token.Claims.(jwt.MapClaims)
 		if jti, ok := claims["jti"].(string); ok {

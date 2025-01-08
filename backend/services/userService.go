@@ -20,6 +20,7 @@ type UserService interface {
 	GetUserByEmail(email string) schemas.User
 	CreateUser(newUser schemas.User) error
 	GetAllServices(userId uint64) ([]schemas.ServiceToken, error)
+	GetAllWorkflows(userId uint64) ([]schemas.Workflow, error)
 }
 
 type userService struct {
@@ -41,8 +42,9 @@ func NewUserService(repository repository.UserRepository, serviceJWT JWTService)
 func (service *userService) Login(newUser schemas.User) (JWTtoken string, err error) {
 	user := service.repository.FindByUsername(newUser.Username)
 	if user.Username == "" {
-		return "", errors.New("User not found")
+		return "", errors.New("user not found")
 	}
+
 	if database.CompareHashAndPassword(user.Password, newUser.Password) {
 		return service.serviceJWT.GenerateJWTToken(
 			strconv.FormatUint(user.Id, 10),
@@ -61,8 +63,7 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 		}
 	}
 
-	return "", errors.New("Invalid password")
-
+	return "", errors.New("invalid password")
 }
 
 func (service *userService) Register(newUser schemas.User) (JWTtoken string, err error) {
@@ -88,6 +89,7 @@ func (service *userService) GetUserInfos(token string) (userInfos schemas.User, 
 	if err != nil {
 		return schemas.User{}, err
 	}
+
 	userInfos = service.repository.FindById(userId)
 	return userInfos, nil
 }
@@ -116,4 +118,8 @@ func (service *userService) CreateUser(newUser schemas.User) error {
 
 func (service *userService) GetAllServices(userId uint64) ([]schemas.ServiceToken, error) {
 	return service.repository.FindAllServicesByUserId(userId), nil
+}
+
+func (service *userService) GetAllWorkflows(userId uint64) ([]schemas.Workflow, error) {
+	return service.repository.FindAllWorkflowsByUserId(userId), nil
 }

@@ -8,6 +8,7 @@ import (
 
 	"area51/repository"
 	"area51/schemas"
+	"area51/toolbox"
 )
 
 type ActionService interface {
@@ -53,20 +54,24 @@ func NewActionService(
 }
 
 func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
-	var result schemas.ActionResult
+	result := schemas.ActionResult{}
+
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
 	if err != nil {
 		return "", err
 	}
-	authHeader := ctx.GetHeader("Authorization")
-	tokenString := authHeader[len("Bearer "):]
+
+	tokenString, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		return "", err
+	}
 
 	_, err = service.userService.GetUserInfos(tokenString)
 	if err != nil {
 		return "", err
 	}
-	serviceInfo := service.serviceService.FindByName(schemas.Github)
 
+	serviceInfo := service.serviceService.FindByName(schemas.Github)
 	newAction := schemas.Action{
 		Name:        result.Name,
 		CreatedAt:   time.Now(),
@@ -75,6 +80,7 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 		ServiceId:   serviceInfo.Id,
 		Options:     result.Options,
 	}
+
 	service.repository.Save(newAction)
 	return "Action Created successfully", nil
 }
@@ -87,6 +93,7 @@ func (service *actionService) GetAllServicesByServiceId(
 	serviceId uint64,
 ) (actionJson []schemas.ActionJson) {
 	allActionForService := service.repository.FindByServiceId(serviceId)
+
 	for _, oneAction := range allActionForService {
 		actionJson = append(actionJson, schemas.ActionJson{
 			Name:        oneAction.Name,
