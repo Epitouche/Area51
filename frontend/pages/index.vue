@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FooterComponent from '~/components/FooterComponent.vue';
+import IconComponent from '~/components/IconComponent.vue';
 
 const workflows = ref([
 {
@@ -100,25 +101,34 @@ const navigateToRegister = () => {
               <div v-for="workflow in workflows" :key="workflow.id" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
                 <div class="mx-6">
                   <h3 class="text-md mb-4 text-fontBlack dark:text-fontWhite">{{ workflow.hero_card.title }}</h3>
-                  <div class="flex items-center space-x-4 mb-4 mx-4">
+                  <div class="flex items-center space-x-4 mb-4">
                     <div class="flex flex-col items-center">
-                      <div :class="`${workflow.hero_card.first_logo.color} text-white p-3 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200`">
-                        <Icon :name="workflow.hero_card.first_logo.icon" class="h-8 w-8 mx-1 mt-1" />
-                      </div>
+                      <IconComponent
+                        :bgColor=workflow.hero_card.first_logo.color
+                        textColor="text-white"
+                        iconHeight="8"
+                        iconWidth="8"
+                        :icon=workflow.hero_card.first_logo.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.first_logo.label }}</span>
                     </div>
                     <Icon name="mdi-arrow-right" class="h-7 w-7 text-gray-400 mb-5" />
                     <div class="flex flex-col items-center">
-                      <div :class="`${workflow.hero_card.trigger.color} text-white p-3 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200`">
-                        <Icon :name="workflow.hero_card.trigger.icon" class="h-8 w-8 mx-1 mt-1" />
-                      </div>
+                      <IconComponent
+                        :bgColor=workflow.hero_card.trigger.color
+                        textColor="text-white"
+                        iconHeight="8"
+                        iconWidth="8"
+                        :icon=workflow.hero_card.trigger.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.trigger.label }}</span>
                     </div>
                     <Icon name="mdi-arrow-right" class="h-7 w-7 text-gray-400 mb-5" />
                     <div class="flex flex-col items-center">
-                      <div :class="`${workflow.hero_card.second_logo.color} text-white p-3 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200`">
-                        <Icon :name="workflow.hero_card.second_logo.icon" class="h-8 w-8 mx-1 mt-1" />
-                      </div>
+                      <IconComponent
+                        :bgColor=workflow.hero_card.second_logo.color
+                        textColor="text-white"
+                        iconHeight="8"
+                        iconWidth="8"
+                        :icon=workflow.hero_card.second_logo.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.second_logo.label }}</span>
                     </div>
                   </div>
@@ -141,17 +151,19 @@ const navigateToRegister = () => {
           <h3 class="text-xl font-semibold mb-4 text-fontBlack dark:text-fontWhite">{{ workflow.title }}</h3>
           <div class="flex items-center space-x-4 mb-4">
             <div class="flex items-center">
-              <div class="bg-purple-100 p-3 rounded-lg">
-                <Icon :name="workflow.trigger.icon" class="h-6 w-6 text-purple-700" />
-              </div>
-              <span class="ml-2 text-fontBlack dark:text-fontWhite">{{ workflow.trigger.name }}</span>
+              <IconComponent
+                bgColor="bg-purple-100"
+                textColor="text-purple-700"
+                :icon=workflow.trigger.icon />
+              <span class="ml-4 text-fontBlack dark:text-fontWhite">{{ workflow.trigger.name }}</span>
             </div>
             <Icon name="mdi-arrow-right" class="h-5 w-5 text-gray-400" />
             <div class="flex items-center">
-              <div class="bg-purple-100 p-3 rounded-lg">
-                <Icon :name="workflow.action.icon" class="h-6 w-6 text-purple-700" />
-              </div>
-              <span class="ml-2 text-fontBlack dark:text-fontWhite">{{ workflow.action.name }}</span>
+              <IconComponent
+                bgColor="bg-purple-100"
+                textColor="text-purple-700"
+                :icon=workflow.action.icon />
+              <span class="ml-4 text-fontBlack dark:text-fontWhite">{{ workflow.action.name }}</span>
             </div>
           </div>
           <p class="text-gray-600 dark:text-fontWhite">{{ workflow.description }}</p>
@@ -170,9 +182,11 @@ const navigateToRegister = () => {
         </div>
         <div class="grid md:grid-cols-3 gap-8">
           <div v-for="feature in features" :key="feature.title" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
-            <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <Icon :name="feature.icon" class="h-6 w-6 text-purple-700" />
-            </div>
+            <IconComponent
+              bgColor="bg-purple-100"
+              textColor="text-purple-700"
+              :icon=feature.icon
+              class="w-14 h-14 flex justify-center mb-4" />
             <h3 class="text-xl font-semibold mb-2 text-fontBlack dark:text-fontWhite">{{ feature.title }}</h3>
             <p class="text-gray-600 dark:text-fontWhite">{{ feature.description }}</p>
           </div>
