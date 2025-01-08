@@ -36,6 +36,7 @@ func NewServicesService(
 			{
 				Name:        schemas.Github,
 				Description: "This is a code storage service",
+				Image:       "https://pngimg.com/uploads/github/github_PNG80.png",
 			},
 		},
 		allServices: []interface{}{githubService},
