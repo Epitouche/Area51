@@ -6,9 +6,13 @@ export type WorkflowResponse = {
 export type Workflow = {
   name: string;
   action_id: number;
+  action_name: string;
   reaction_id: number;
+  reaction_name: string;
   is_active: boolean;
   created_at: string;
+  checked?: boolean;
+  workflow_id: number;
 };
 
 export type Action = {
@@ -23,15 +27,27 @@ export type Reaction = {
   description: string;
 };
 
-export type Service = {
-  name: string;
-  actions: Action[];
-  reactions: Reaction[];
+export type AboutResponse = {
+  server: {
+    services: [
+      {
+        name: string;
+        description: string;
+        actions: Action[];
+        reactions: Reaction[];
+        image: string;
+      }
+    ]
+  }
 };
 
-export type ServerResponse = {
-  server: {
-    services: Service[];
-    workflows: Workflow[];
-  };
+export type Service = {
+  name: string;
+  created_at: string;
+  description: string;
+  id: number;
+  image: string;
+  updated_at: string;
+  actions: Action[];
+  reactions: Reaction[];
 };

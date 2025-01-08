@@ -1,32 +1,35 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import type { Workflow } from "~/src/types";
 
 const props = defineProps<{
   columns: string[];
-  rows: Record<string, string | number | boolean>[];
-  modelValue: boolean[];
+  rows: Workflow[];
+  modelValue: Workflow[];
 }>();
+
+const filteredWorkflows = computed(() =>
+  props.rows.map(({checked, action_id, reaction_id, workflow_id, ...rest}) => rest)
+);
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: boolean[]): void;
+  (e: "update:modelValue", value: Workflow[]): void;
 }>();
-
-const checkboxList = ref(props.modelValue);
 
 const headCheckbox = ref(false);
 
 const checkAll = () => {
   headCheckbox.value = !headCheckbox.value;
-  checkboxList.value = checkboxList.value.map(() => headCheckbox.value);
+  props.rows.forEach((row) => (row.checked = headCheckbox.value));
   emitCheckboxes();
 };
 
 const emitCheckboxes = () => {
-  emit("update:modelValue", checkboxList.value);
+  emit("update:modelValue", props.rows);
 };
 
-const toggleCheckbox = (index: number) => {
-  checkboxList.value[index] = !checkboxList.value[index];
+const toggleCheckbox = (workflow: Workflow) => {
+  workflow.checked = !workflow.checked;
   emitCheckboxes();
 };
 
@@ -96,12 +99,12 @@ onBeforeUnmount(() => {
           <td class="px-6 py-4">
             <input
               type="checkbox"
-              :checked="checkboxList[i]"
-              @change="toggleCheckbox(i)"
+              :checked="row.checked"
+              @change="toggleCheckbox(row)"
             >
           </td>
           <td
-            v-for="(value, key) in row"
+            v-for="(value, key) in filteredWorkflows[i]"
             :key="key"
             class="px-6 py-4 text-sm"
             :class="
