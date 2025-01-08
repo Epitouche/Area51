@@ -1,145 +1,62 @@
 <script setup lang="ts">
-import type {
-  Action,
-  Reaction,
-  ServerResponse,
-  Service,
-  Workflow,
-} from "~/src/types";
+import type { ServerResponse, Service } from "~/src/types";
 
-const columns = ["Name", "Action", "Reaction", "Status", "Member ID", "Date"];
-
-const rows = [
-  {
-    id: 1,
-    name: "Service",
-    action: "On push",
-    reaction: "Send message",
-    status: "Active",
-    memberId: 1,
-    date: "12/02/2024",
-  },
-  {
-    id: 2,
-    name: "Service 2",
-    action: "On pull request",
-    reaction: "Play Music",
-    status: "Inactive",
-    memberId: 2,
-    date: "10/25/2024",
-  },
-  {
-    id: 3,
-    name: "Service 3",
-    action: "On push",
-    reaction: "Fill mail",
-    status: "Active",
-    memberId: 3,
-    date: "10/14/2024",
-  },
-];
-
-const actionSelected = ref(<Action>{});
-const reactionSelected = ref(<Reaction>{});
-const isModalActionOpen = ref(false);
-const isModalReactionOpen = ref(false);
-
-const openModalAction = () => {
-  isModalActionOpen.value = true;
+type ServiceCard = {
+  name: string;
+  description: string;
+  image: string;
+  isConnected: boolean;
 };
 
-const closeModalAction = () => {
-  isModalActionOpen.value = false;
-};
+const allServices = reactive<ServiceCard[]>([]);
 
-const confirmModalAction = () => {
-  closeModalAction();
-};
+const token = useCookie("access_token");
 
-const openModalReaction = () => {
-  isModalReactionOpen.value = true;
-};
+// Fetch services from the API
+onMounted(async () => {
 
-const closeModalReaction = () => {
-  isModalReactionOpen.value = false;
-};
+  // fetch the services
+  const response = await $fetch<ServerResponse>(
+    "http://localhost:8080/about.json"
+  );
 
-const confirmModalReaction = () => {
-  closeModalReaction();
-};
-
-const services = ref<Service[]>([]);
-
-const token = useCookie("token");
-
-async function fetchServices() {
-  try {
-    const response = await $fetch<ServerResponse>(
-      "http://localhost:8080/about.json",
-      {
-        method: "GET",
-      }
-    );
-    response.server.services.forEach((service: Service) => {
-      services.value.push(service);
+  // create a new array with the services
+  response.server.services.forEach((service: Service) => {
+    allServices.push({
+      name: service.name,
+      description:
+        "Description of the service. This text has to be long enough to be able to see the overflow of the text.",
+      image: "IMG",
+      isConnected: false,
     });
-  } catch (error) {
-    console.error("Error fetching services:", error);
-  }
-}
+  });
 
-const lastWorkflow = ref<Workflow[]>([]);
+  // fetch the connected services
+  const connectedServices = await $fetch<ServiceCard[]>(
+    "http://localhost:8080/api/user/services",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    }
+  );
 
-async function addWorkflow() {
-  try {
-    console.log("actionSelected", actionSelected.value.action_id);
-    console.log("reactionSelected", reactionSelected.value.reaction_id);
-    const response = await $fetch<ServerResponse>(
-      "http://localhost:8080/api/workflow",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-        body: {
-          action_id: actionSelected.value.action_id,
-          reaction_id: reactionSelected.value.reaction_id,
-        },
+  // if the service is connected, set the isConnected property to true
+  allServices.forEach((service) => {
+    connectedServices.forEach((connectedService) => {
+      if (service.name === connectedService.name) {
+        service.isConnected = true;
       }
-    );
-    console.log(response);
-  } catch (error) {
-    console.error("Error adding workflow:", error);
-  }
-}
+    });
+  });
 
-async function getLastWorkflow() {
-  try {
-    const response = await $fetch<Workflow[]>(
-      "http://localhost:8080/api/workflow/reaction",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    lastWorkflow.value = response;
-    console.log(response);
-  } catch (error) {
-    console.error("Error getting last workflow:", error);
-  }
-}
-
-onMounted(() => {
-  fetchServices();
-  console.log("token", token.value);
-  getLastWorkflow();
+  // capitalize the first letter of the service name
+  allServices.forEach((service) => {
+    service.name = service.name.charAt(0).toUpperCase() + service.name.slice(1);
+  });
 });
 </script>
-
 <template>
   <div
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
@@ -152,122 +69,48 @@ onMounted(() => {
     <div class="flex justify-center">
       <hr
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
-    </div>
-    <div class="flex flex-col justify-center m-16 gap-10">
-      <div class="flex justify-center gap-5">
-        <ButtonComponent
-          :text="actionSelected.name ? actionSelected.name : 'Choose an action'"
-          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
-          :on-click="openModalAction"
-        />
-        <ModalComponent
-          title="Choose an action"
-          :is-open="isModalActionOpen"
-          @close="closeModalAction"
-          @confirm="confirmModalAction"
-        >
-          <div class="grid grid-cols-3 gap-4">
-            <div
-              v-for="(service, index) in services"
-              :key="index"
-              class="flex justify-center"
-            >
-              <DropdownComponent
-                v-if="service.actions"
-                v-model="actionSelected"
-                :label="service.name"
-                :options="service.actions.map((action) => action)"
-              />
-            </div>
-          </div>
-        </ModalComponent>
-        <ButtonComponent
-          :text="
-            reactionSelected.name ? reactionSelected.name : 'Choose a reaction'
-          "
-          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
-          :on-click="openModalReaction"
-        />
-        <ModalComponent
-          title="Choose a reaction"
-          :is-open="isModalReactionOpen"
-          @close="closeModalReaction"
-          @confirm="confirmModalReaction"
-        >
-          <div class="grid grid-cols-3 gap-4">
-            <div
-              v-for="(service, index) in services"
-              :key="index"
-              class="flex justify-center"
-            >
-              <DropdownComponent
-                v-if="service.reactions"
-                v-model="reactionSelected"
-                :label="service.name"
-                :options="service.reactions.map((reaction) => reaction)"
-              />
-            </div>
-          </div>
-        </ModalComponent>
-      </div>
-      <div class="flex justify-center">
-        <ButtonComponent
-          :class="
-            actionSelected && reactionSelected
-              ? ''
-              : 'cursor-not-allowed opacity-50'
-          "
-          text="Add Workflow"
-          :bg-color="
-            actionSelected && reactionSelected
-              ? 'bg-tertiary-500'
-              : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'
-          "
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
-          :on-click="addWorkflow"
-        />
-      </div>
-    </div>
-    <div class="flex justify-center">
-      <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      />
-    </div>
-    <div class="flex justify-start gap-5 m-20">
-      <ButtonComponent
-        text="Filter"
-        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-        text-color="text-fontBlack dark:text-fontWhite"
-      />
-      <ButtonComponent
-        text="All Status"
-        bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-        hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-        text-color="text-fontBlack dark:text-fontWhite"
-      />
-    </div>
-    <ListTableComponent
-      v-show="columns && rows"
-      :columns="columns"
-      :rows="rows"
-    />
-    <div class="flex flex-col justify-center m-20 p-5 rounded-xl">
-      <p
-        v-for="workflow in lastWorkflow"
-        class="text-2xl font-bold text-fontBlack dark:text-fontWhite"
       >
-        BODY: {{ workflow.body }}
-        <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
+    </div>
+    <div class="grid grid-cols-3 gap-4 m-20">
+      <div
+        v-for="(service, index) in allServices"
+        :key="index"
+        class="flex justify-center"
+      >
+        <div
+          class="flex flex-col w-full p-7 bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-lg shadow-lg gap-5"
         >
-      </p>
+          <div class="flex items-center justify-between w-full">
+            <div
+              class="w-12 h-12 bg-primaryWhite-400 dark:bg-secondaryDark-400 rounded-full flex items-center justify-center"
+            >
+              <p>{{ service.image }}</p>
+            </div>
+            <div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  :checked="service.isConnected"
+                  class="sr-only peer"
+                >
+                <div
+                  class="w-11 h-6 bg-primaryWhite-500 dark:bg-secondaryDark-400 rounded-full peer peer-checked:bg-tertiary-500 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                />
+              </label>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <h3
+              class="text-2xl font-semibold text-fontBlack dark:text-fontWhite"
+            >
+              {{ service.name }}
+            </h3>
+            <p class="text-fontBlack dark:text-fontWhite">
+              {{ service.description }}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -6,6 +6,7 @@ const props = defineProps<{
   bgColor?: string;
   textColor?: string;
   hoverColor?: string;
+  icon?: string;
   onClick?: () => void;
 }>();
 
@@ -24,13 +25,14 @@ const computedHoverColor = computed(
 <template>
   <button
     :class="[
-      'rounded-full px-6 py-2 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2',
+      'rounded-full px-4 py-2 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 flex flex-row gap-2 justify-center items-center',
       computedBgColor,
       computedTextColor,
       computedHoverColor,
     ]"
     @click="props.onClick"
   >
-    <slot>{{ props.text }}</slot>
+    <p>{{ props.text }}</p>
+    <Icon v-if="props.icon" :name="props.icon" />
   </button>
 </template>
