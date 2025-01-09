@@ -16,17 +16,15 @@
                 </div>
 
                 <div class="grid gap-6 lg:grid-cols-3 mb-8">
-                    <!-- <div class="lg:col-span-2">
-                        <WorkflowGraph />
+                    <div class="lg:col-span-2">
+                        <DashboardWorkflowGraph />
                     </div>
                     <div>
-                        <Integrations />
-                    </div> -->
+                        <DashboardServicesIntegrations />
+                    </div>
                 </div>
 
                 <!-- <div class="grid gap-6 lg:grid-cols-2">
-                    <WorkflowsList />
-                    <RecentActivity />
                 </div> -->
             </div>
         </div>
