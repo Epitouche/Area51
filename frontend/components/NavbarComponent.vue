@@ -6,14 +6,14 @@ const registered = computed(() => {
 </script>
 <template>
   <div class="bg-secondaryWhite-500 dark:bg-primaryDark-500">
-    <nav class="p-4 border-b border-primaryWhite-500 dark:border-secondaryDark-500">
+    <nav class="p-4 border-b border-secondaryDark-100 dark:border-secondaryDark-500">
       <div class="container mx-auto flex justify-between items-center text-fontBlack dark:text-fontWhite">
         <div class="text-lg font-bold">
-          <NuxtLink to="/">MyLogo</NuxtLink>
+          <NuxtLink to="/"><img src="/logo_Area51.png" alt="Logo of the Website 'Area51'" class="h-10 w-auto"></NuxtLink>
         </div>
         <div v-if="registered" class="space-x-9 flex items-center">
           <ThemeSwitch/>
-          <NuxtLink to="/">Dashboard</NuxtLink>
+          <NuxtLink to="/dashboard">Dashboard</NuxtLink>
           <NuxtLink to="/workflows">Workflow</NuxtLink>
           <NuxtLink to="/services">Services</NuxtLink>
         </div>

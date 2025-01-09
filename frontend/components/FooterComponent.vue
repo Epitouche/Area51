@@ -10,7 +10,7 @@ const currentYear = computed(() => {
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
                 <div class="flex items-center mb-4">
-                    <!-- Logo -->
+                    <img src="/logo_Area51.png" alt="Logo of the Website 'Area51'" class="h-8 w-auto">
                     <span class="ml-2 text-xl font-bold text-gray-900 dark:text-primaryWhite-700">AREA</span>
                 </div>
                 <p class="text-gray-500 text-sm">
