@@ -11,42 +11,6 @@ const systemes = ref([
         icon: 'material-symbols:mail-outline',
         connected: false,
         color: 'bg-red-500'
-    },
-    {
-        name: 'Gmail',
-        icon: 'material-symbols:mail-outline',
-        connected: false,
-        color: 'bg-red-500'
-    },
-    {
-        name: 'Gmail',
-        icon: 'material-symbols:mail-outline',
-        connected: false,
-        color: 'bg-red-500'
-    },
-    {
-        name: 'Gmail',
-        icon: 'material-symbols:mail-outline',
-        connected: false,
-        color: 'bg-red-500'
-    },
-    {
-        name: 'Gmail',
-        icon: 'material-symbols:mail-outline',
-        connected: false,
-        color: 'bg-red-500'
-    },
-    {
-        name: 'Gmail',
-        icon: 'material-symbols:mail-outline',
-        connected: false,
-        color: 'bg-red-500'
-    },
-    {
-        name: 'Gmail',
-        icon: 'material-symbols:mail-outline',
-        connected: false,
-        color: 'bg-red-500'
     }
 ])
 </script>
