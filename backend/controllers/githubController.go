@@ -92,7 +92,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 			ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
 			return newSessionToken, nil
 		}
-
 	}
 	githubService := controller.servicesService.FindByName(schemas.Github)
 	userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
@@ -253,6 +252,23 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 	}
 	if actualUser.Email != "" {
 		isAlreadyRegistered = true
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	if authHeader != "" && len(authHeader) >= len("Bearer ") {
+		token := authHeader[len("Bearer "):]
+		user, err := controller.userService.GetUserInfos(token)
+		if err != nil {
+			return "", err
+		}
+		if user.Username != "" {
+			controller.userService.AddServiceToUser(user, schemas.ServiceToken{
+				Token:   result.Token,
+				Service: controller.servicesService.FindByName(result.Service),
+				UserId:  user.Id,
+			})
+			newSessionToken, _ := controller.userService.Login(user, controller.servicesService.FindByName(result.Service))
+			return newSessionToken, nil
+		}
 	}
 	var newGithubToken schemas.ServiceToken
 	var newUser schemas.User

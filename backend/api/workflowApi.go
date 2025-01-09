@@ -55,3 +55,16 @@ func (api *WorkflowApi) GetMostRecentReaction(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, reaction)
 	}
 }
+
+
+func (api *WorkflowApi) DeleteWorkflow(ctx *gin.Context) {
+	err := api.workflowController.DeleteWorkflow(ctx)
+	if err != nil && err.Error() == "no authorization header found" {
+		return
+	}
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, schemas.BasicResponse{Message: "Workflow Deleted"})
+}

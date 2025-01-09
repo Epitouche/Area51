@@ -57,6 +57,7 @@ func setupRouter() *gin.Engine {
 		{
 			workflow.POST("", workflowApi.CreateWorkflow)
 			workflow.PUT("/activation", workflowApi.ActivateWorkflow)
+			workflow.DELETE("", workflowApi.DeleteWorkflow)
 			workflow.GET("/reaction", workflowApi.GetMostRecentReaction)
 		}
 

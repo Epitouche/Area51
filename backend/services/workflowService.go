@@ -22,6 +22,7 @@ type WorkflowService interface {
 	GetWorkflowByName(name string) schemas.Workflow
 	GetWorkflowById(workflowId uint64) schemas.Workflow
 	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
+	DeleteWorkflow(ctx *gin.Context) error
 }
 
 type workflowService struct {
@@ -61,6 +62,7 @@ func (service *workflowService) FindAll() []schemas.Workflow {
 func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error) {
 	result := schemas.WorkflowResult{}
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	fmt.Printf("result value: %+v\n", result)
 	if err != nil {
 		return "", err
 	}
@@ -71,6 +73,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	}
 
 	user, err := service.userService.GetUserInfos(tokenString)
+	fmt.Printf("user value: %+v\n", user)
 	if err != nil {
 		return "", err
 	}
@@ -250,4 +253,39 @@ func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schem
 		}
 	}
 	return reactionResponse, nil
+}
+
+func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
+	var result schemas.WorkflowJson
+	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	if err != nil {
+		return err
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) <= len("Bearer ") {
+		return fmt.Errorf("no authorization header found")
+	}
+	tokenString := authHeader[len("Bearer "):]
+
+	user, err := service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return err
+	}
+	workflow := service.repository.FindAll()
+	for _, wf := range workflow {
+		if wf.Name == result.Name && wf.UserId == user.Id && wf.ReactionId == result.ReactionId && wf.ActionId == result.ActionId {
+			actualReactionData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
+			for _, data := range actualReactionData {
+				service.reactionResponseDataService.Delete(data)
+			}
+			err := service.repository.Delete(wf.Id)
+			if err != nil {
+				return err
+			}
+			return nil
+		} else {
+			return fmt.Errorf("Workflow not found")
+		}
+	}
+	return nil
 }
