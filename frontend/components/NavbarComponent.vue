@@ -1,38 +1,34 @@
 <script setup>
-const registered = false
+const token = ref(useCookie("access_token"));
+const registered = computed(() => {
+  return token.value !== null && token.value !== '' && token.value !== undefined;
+})
 </script>
 <template>
-    <div class="bg-primaryWhite-500 dark:bg-primaryDark-500">
-      <nav v-if="registered" class="p-4 border-b border-gray-200 dark:border-secondaryDark-500">
-        <div class="container mx-auto flex justify-between items-center text-fontBlack dark:text-fontWhite">
-          <div class="text-lg font-bold">
-            <NuxtLink to="/">MyLogo</NuxtLink>
-          </div>
-          <div class="space-x-9">
-            <NuxtLink to="/">Dashboard</NuxtLink>
-            <NuxtLink to="/services">Services</NuxtLink>
-            <!-- <NuxtLink to="/workflow">Workflow</NuxtLink> -->
-          </div>
-          <!-- Here -->
+  <div class="bg-secondaryWhite-500 dark:bg-primaryDark-500">
+    <nav class="p-4 border-b border-primaryWhite-500 dark:border-secondaryDark-500">
+      <div class="container mx-auto flex justify-between items-center text-fontBlack dark:text-fontWhite">
+        <div class="text-lg font-bold">
+          <NuxtLink to="/">MyLogo</NuxtLink>
         </div>
-      </nav>
-      <nav v-else class="p-4 border-b border-gray-200 dark:border-secondaryDark-500">
-        <div class="container mx-auto flex justify-between items-center">
-          <div class="text-lg font-bold">
-            <NuxtLink to="/">MyLogo</NuxtLink>
-          </div>
-          <div class="space-x-9">
-            <NuxtLink to="/login" class="text-fontBlack dark:text-fontWhite">Login</NuxtLink>
-            <NuxtLink to="/register" class="text-fontBlack dark:text-fontWhite">
-              <ButtonComponent
-                bgColor="bg-tertiary-500"
-                hoverColor="hover:bg-purple-600"
-              >
-                Sign up
-              </ButtonComponent>
-            </NuxtLink>
-          </div>
+        <div v-if="registered" class="space-x-9 flex items-center">
+          <ThemeSwitch/>
+          <NuxtLink to="/">Dashboard</NuxtLink>
+          <NuxtLink to="/workflows">Workflow</NuxtLink>
+          <NuxtLink to="/services">Services</NuxtLink>
         </div>
-      </nav>
-    </div>
+        <div v-else class="space-x-9 flex items-center">
+          <ThemeSwitch/>
+          <NuxtLink to="/login">Login</NuxtLink>
+          <NuxtLink to="/register">
+            <ButtonComponent
+              bg-color="bg-tertiary-500"
+              hover-color="hover:bg-purple-600"
+              text="Sign up"
+            />
+          </NuxtLink>
+        </div>
+      </div>
+    </nav>
+  </div>
 </template>
