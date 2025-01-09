@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
       body: {
         action_id: params.action_id,
         reaction_id: params.reaction_id,
+        name: params.name,
       },
     });
 

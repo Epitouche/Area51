@@ -1,35 +1,110 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import type { Workflow } from "~/src/types";
 
 const props = defineProps<{
   columns: string[];
-  rows: Record<string, string | number | boolean>[];
-  modelValue: boolean[];
+  rows: Workflow[];
+  modelValue: Workflow[];
 }>();
+
+const filteredWorkflows = computed(() =>
+  props.rows.map(
+    ({ checked, action_id, reaction_id, workflow_id, ...rest }) => rest
+  )
+);
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean[]): void;
+  (e: "update:modelValue", value: Workflow[]): void;
 }>();
-
-const checkboxList = ref(props.modelValue);
 
 const headCheckbox = ref(false);
 
 const checkAll = () => {
   headCheckbox.value = !headCheckbox.value;
-  checkboxList.value = checkboxList.value.map(() => headCheckbox.value);
+  props.rows.forEach((row) => (row.checked = headCheckbox.value));
   emitCheckboxes();
 };
 
 const emitCheckboxes = () => {
-  emit('update:modelValue', checkboxList.value);
+  emit("update:modelValue", props.rows);
 };
 
-
-const toggleCheckbox = (index: number) => {
-  checkboxList.value[index] = !checkboxList.value[index];
+const toggleCheckbox = (workflow: Workflow) => {
+  workflow.checked = !workflow.checked;
   emitCheckboxes();
 };
+
+const activeDropdownIndex = ref<number | null>(null);
+
+const toggleDropdown = (index: number) => {
+  activeDropdownIndex.value =
+    activeDropdownIndex.value === index ? null : index;
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+  const dropdowns = document.querySelectorAll(".dropdown");
+  let clickedInside = false;
+
+  dropdowns.forEach((dropdown) => {
+    if (dropdown.contains(event.target as Node)) {
+      clickedInside = true;
+    }
+  });
+
+  if (!clickedInside) {
+    activeDropdownIndex.value = null;
+  }
+};
+
+const token = useCookie("access_token");
+
+async function launchAction(option: string, workflow: Workflow) {
+  switch (option) {
+    case "Edit":
+      console.log("Edit");
+      activeDropdownIndex.value = null;
+      break;
+    case "Switch Activity":
+      await switchState(workflow);
+      activeDropdownIndex.value = null;
+      break;
+    case "Delete":
+      console.log("Delete");
+      activeDropdownIndex.value = null;
+      break;
+    default:
+      break;
+  }
+}
+
+async function switchState(workflow: Workflow) {
+  try {
+    workflow.is_active = !workflow.is_active;
+    await $fetch("/api/workflows/switchState", {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workflow_id: workflow.workflow_id,
+        workflow_state: workflow.is_active,
+      }),
+    });
+  } catch (error) {
+    workflow.is_active = !workflow.is_active;
+    console.error(error);
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("click", handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("click", handleClickOutside);
+});
 </script>
 
 <template>
@@ -42,7 +117,7 @@ const toggleCheckbox = (index: number) => {
           <th
             class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
-            <input type="checkbox" :checked="headCheckbox" @click="checkAll">
+            <input type="checkbox" :checked="headCheckbox" @click="checkAll" >
           </th>
           <th
             v-for="column in columns"
@@ -50,6 +125,11 @@ const toggleCheckbox = (index: number) => {
             class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
             {{ column }}
+          </th>
+          <th
+            class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
+          >
+            Actions
           </th>
         </tr>
       </thead>
@@ -60,10 +140,14 @@ const toggleCheckbox = (index: number) => {
           class="odd:bg-secondaryWhite-500 text-center even:bg-bg-primaryWhite-50 dark:odd:bg-primaryDark-500 dark:even:bg-secondaryDark-500"
         >
           <td class="px-6 py-4">
-            <input type="checkbox" :checked="checkboxList[i]" @change="toggleCheckbox(i)">
+            <input
+              type="checkbox"
+              :checked="row.checked"
+              @change="toggleCheckbox(row)"
+            >
           </td>
           <td
-            v-for="(value, key) in row"
+            v-for="(value, key) in filteredWorkflows[i]"
             :key="key"
             class="px-6 py-4 text-sm"
             :class="
@@ -75,6 +159,51 @@ const toggleCheckbox = (index: number) => {
             "
           >
             {{ key === "is_active" ? (value ? "Active" : "Inactive") : value }}
+          </td>
+          <td class="relative dropdown">
+            <Icon
+              name="material-symbols:more-vert"
+              class="cursor-pointer h-6 w-6 text-fontBlack dark:text-fontWhite"
+              @click.stop="toggleDropdown(i)"
+            />
+            <div
+              v-show="activeDropdownIndex === i"
+              :class="{
+                '-translate-y-40': i >= Math.floor(rows.length / 2),
+                '': i < Math.floor(rows.length / 2),
+              }"
+              class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
+            >
+              <div
+                class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700"
+              >
+                <button
+                  v-for="(option, index) in [
+                    'Edit',
+                    'Switch Activity',
+                    'Delete',
+                  ]"
+                  :key="index"
+                  class="text-center px-4 py-2 text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
+                  :class="
+                    option.includes('Delete')
+                      ? ' hover:bg-error dark:hover:bg-error'
+                      : ''
+                  "
+                  @click="launchAction(option, row)"
+                >
+                  <p
+                    :class="
+                      option.includes('Delete')
+                        ? 'text-error hover:text-white'
+                        : ''
+                    "
+                  >
+                    {{ option }}
+                  </p>
+                </button>
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>

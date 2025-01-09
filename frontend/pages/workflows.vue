@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import DropdownComponent from "~/components/DropdownComponent.vue";
-import { useNotificationStore } from '@/stores/notification';
+import { useNotificationStore } from "@/stores/notification";
 
 import type {
-  ServerResponse,
   Service,
   WorkflowResponse,
   Workflow,
+  AboutResponse
 } from "~/src/types";
 
 const notificationStore = useNotificationStore();
 
-function triggerNotification(type: "success" | "error" | "warning", title: string, message: string) {
+function triggerNotification(
+  type: "success" | "error" | "warning",
+  title: string,
+  message: string
+) {
   notificationStore.addNotification({
     type,
     title,
@@ -21,8 +24,8 @@ function triggerNotification(type: "success" | "error" | "warning", title: strin
 
 const columns = [
   "Name",
-  "Action ID",
-  "Reaction ID",
+  "Action",
+  "Reaction",
   "Activity",
   "Creation Date",
 ];
@@ -40,11 +43,11 @@ const reactionString = ref("");
 const selectedFilter = ref("All Status");
 const selectedSort = ref("Name");
 
-const checkboxList = ref<boolean[]>([]);
-
 const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 const token = useCookie("access_token");
+
+const WorkflowName = ref("");
 
 const filteredWorkflows = computed(() => {
   sortWorkflows();
@@ -54,7 +57,7 @@ const filteredWorkflows = computed(() => {
     case "Inactive":
       return workflowsInList.filter((workflow) => workflow.is_active === false);
     case "Selected":
-      return workflowsInList.filter((_, index) => checkboxList.value[index]);
+      return workflowsInList.filter((workflow) => workflow.checked === true);
     default:
       return workflowsInList;
   }
@@ -112,28 +115,75 @@ const sortWorkflows = () => {
   });
 };
 
-async function fetchWorflows() {
+async function fetchServices() {
   try {
-    const response = await $fetch<ServerResponse>(
-      "http://localhost:8080/about.json",
+    const responseServices = await $fetch<Service[]>(
+      "http://localhost:8080/api/user/services",
       {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
-    response.server.services.forEach((service: Service) => {
+
+    responseServices.forEach((service: Service) => {
       services.push(service);
     });
 
+    // add actions and reactions to services in about.json fetch
+    const responseAbout = await $fetch<AboutResponse>(
+      "http://localhost:8080/about.json",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    responseAbout.server.services.forEach((service) => {
+      const serviceFound = services.find(
+        (s) => s.name === service.name
+      );
+
+      if (serviceFound) {
+        serviceFound.actions = service.actions;
+        serviceFound.reactions = service.reactions;
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching services:", error);
+  }
+}
+
+async function fetchWorkflows() {
+  try {
+    const response = await $fetch<Workflow[]>(
+      "http://localhost:8080/api/user/workflows",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+
     workflowsInList.length = 0;
-    workflowsInList.push(...response.server.workflows);
+    workflowsInList.push(...response);
 
     workflowsInList.forEach((workflow) => {
       const dateString = workflow.created_at;
       const date = new Date(dateString);
       const formattedDate = date.toLocaleDateString("en-GB");
       workflow.created_at = formattedDate;
-      checkboxList.value.push(false);
+      workflow.checked = false;
     });
 
     sortWorkflows();
@@ -145,32 +195,59 @@ async function fetchWorflows() {
 async function addWorkflow() {
   try {
     const actionSelected = services
-      .map((service) => service.actions)
-      .flat()
+      .flatMap((service) => service.actions)
       .find((action) => action.name === actionString.value);
 
     const reactionSelected = services
-      .map((service) => service.reactions)
-      .flat()
+      .flatMap((service) => service.reactions)
       .find((reaction) => reaction.name === reactionString.value);
 
     if (actionSelected && reactionSelected) {
-      await $fetch<ServerResponse>("/api/workflows/addWorkflows", {
+      const body: { action_id: number; reaction_id: number; name?: string } = {
+        action_id: actionSelected.action_id,
+        reaction_id: reactionSelected.reaction_id,
+      };
+
+      console.log("WorkflowName", WorkflowName.value);
+
+      if (WorkflowName.value) {
+        body.name = WorkflowName.value;
+      }
+
+      await $fetch("/api/workflows/addWorkflows", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
-        body: {
-          action_id: actionSelected.action_id,
-          reaction_id: reactionSelected.reaction_id,
-        },
+        body,
       });
-      fetchWorflows();
-      triggerNotification("success", "Workflow added", "The workflow has been added successfully");
+
+      await fetchWorkflows();
+
+      triggerNotification(
+        "success",
+        "Workflow added",
+        "The workflow has been added successfully"
+      );
+
+      actionString.value = "";
+      reactionString.value = "";
+      WorkflowName.value = "";
+    } else {
+      triggerNotification(
+        "error",
+        "Workflow error",
+        "Action or reaction not found. Please check your selections."
+      );
     }
   } catch (error) {
     console.error("Error adding workflow:", error);
+    triggerNotification(
+      "error",
+      "Error",
+      "An error occurred while adding the workflow. Please try again."
+    );
   }
 }
 
@@ -193,7 +270,8 @@ async function getLastWorkflowResult() {
 }
 
 onMounted(() => {
-  fetchWorflows();
+  fetchServices();
+  fetchWorkflows();
   getLastWorkflowResult();
 });
 </script>
@@ -212,7 +290,12 @@ onMounted(() => {
         class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
       >
     </div>
-    <div class="flex flex-col justify-center m-16 gap-10">
+    <div class="flex flex-col justify-center m-16 gap-10 items-center">
+      <InputComponent
+        v-model="WorkflowName"
+        type="text"
+        label="Workflow Name"
+      />
       <div class="flex justify-center gap-5">
         <ButtonComponent
           :text="actionString ? actionString : 'Choose an action'"
@@ -309,7 +392,7 @@ onMounted(() => {
     </div>
     <ListTableComponent
       v-show="columns && filteredWorkflows"
-      v-model="checkboxList"
+      v-model="workflowsInList"
       :columns="columns"
       :rows="filteredWorkflows"
     />
