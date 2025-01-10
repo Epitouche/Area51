@@ -100,8 +100,6 @@ const features = ref([
                       <IconComponent
                         :bgColor=workflow.hero_card.first_logo.color
                         textColor="text-white"
-                        iconHeight="8"
-                        iconWidth="8"
                         :icon=workflow.hero_card.first_logo.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.first_logo.label }}</span>
                     </div>
@@ -110,8 +108,6 @@ const features = ref([
                       <IconComponent
                         :bgColor=workflow.hero_card.trigger.color
                         textColor="text-white"
-                        iconHeight="8"
-                        iconWidth="8"
                         :icon=workflow.hero_card.trigger.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.trigger.label }}</span>
                     </div>
@@ -120,8 +116,6 @@ const features = ref([
                       <IconComponent
                         :bgColor=workflow.hero_card.second_logo.color
                         textColor="text-white"
-                        iconHeight="8"
-                        iconWidth="8"
                         :icon=workflow.hero_card.second_logo.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.second_logo.label }}</span>
                     </div>
