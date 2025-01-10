@@ -147,7 +147,10 @@ func (r *userRepository) GetAllServicesForUser(userId uint64) ([]schemas.Service
 }
 
 func (r *userRepository) GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error) {
-	r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	err := r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	if err != nil {
+		return schemas.ServiceToken{}, err
+	}
 	for _, service := range user.Services {
 		if service.ServiceId == serviceId {
 			return service, nil
