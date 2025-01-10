@@ -17,7 +17,7 @@ type UserService interface {
 	UpdateUserInfos(newUser schemas.User) error
 	GetUserById(userId uint64) schemas.User
 	GetUserByUsername(username string) schemas.User
-	GetUserByEmail(email string) schemas.User
+	GetUserByEmail(email *string) schemas.User
 	CreateUser(newUser schemas.User) error
 	AddServiceToUser(user schemas.User, serviceToAdd schemas.ServiceToken) error
 	GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error)
@@ -75,16 +75,16 @@ func (service *userService) Login(newUser schemas.User, actualService schemas.Se
 
 func (service *userService) Register(newUser schemas.User) (JWTtoken string, err error) {
 	user := service.repository.FindByEmail(newUser.Email)
-	if user.Email != "" {
+	if user.Email != nil {
 		return "", errors.New("email already in use")
 	}
 
-	if newUser.Password != "" {
-		hashedPassword, err := database.HashPassword(newUser.Password)
+	if newUser.Password != nil {
+		hashedPassword, err := database.HashPassword(*newUser.Password)
 		if err != nil {
 			return "", errors.New("error while hashing the password")
 		}
-		newUser.Password = hashedPassword
+		newUser.Password = &hashedPassword
 	}
 
 	service.repository.Save(newUser)
@@ -114,7 +114,7 @@ func (service *userService) GetUserByUsername(username string) schemas.User {
 	return service.repository.FindByUsername(username)
 }
 
-func (service *userService) GetUserByEmail(email string) schemas.User {
+func (service *userService) GetUserByEmail(email *string) schemas.User {
 	return service.repository.FindByEmail(email)
 }
 

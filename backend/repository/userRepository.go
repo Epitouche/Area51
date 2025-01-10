@@ -14,7 +14,7 @@ type UserRepository interface {
 	FindAll() []schemas.User
 	FindById(id uint64) schemas.User
 	FindByUsername(username string) schemas.User
-	FindByEmail(email string) schemas.User
+	FindByEmail(email *string) schemas.User
 	FindAllServicesByUserId(id uint64) []schemas.ServiceToken
 	FindAllWorkflowsByUserId(id uint64) []schemas.Workflow
 	AddServiceToUser(user schemas.User, service schemas.ServiceToken)
@@ -95,7 +95,7 @@ func (r *userRepository) FindByUsername(username string) (user schemas.User) {
 	return user
 }
 
-func (r *userRepository) FindByEmail(email string) (user schemas.User) {
+func (r *userRepository) FindByEmail(email *string) (user schemas.User) {
 	err := r.db.Connection.Where(&schemas.User{
 		Email: email,
 	}).First(&user)

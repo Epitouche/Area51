@@ -50,7 +50,7 @@ func (controller *userController) Login(ctx *gin.Context) (string, error) {
 
 	token, err := controller.userService.Login(schemas.User{
 		Username: credentials.Username,
-		Password: credentials.Password,
+		Password: &credentials.Password,
 	}, schemas.Service{})
 	if err != nil {
 		return "", err
@@ -76,8 +76,8 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 
 	token, err := controller.userService.Register(schemas.User{
 		Username: credentials.Username,
-		Email:    credentials.Email,
-		Password: credentials.Password,
+		Email:    &credentials.Email,
+		Password: &credentials.Password,
 	})
 	if err != nil {
 		return "", err

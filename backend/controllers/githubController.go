@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"area51/database"
 	"area51/schemas"
 	"area51/services"
 	"area51/toolbox"
@@ -107,9 +108,9 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		}
 	}
 	if userInfo.Email != "" {
-		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
+		actualUser = controller.userService.GetUserByEmail(&userInfo.Email)
 	}
-	if actualUser.Email != "" {
+	if actualUser.Email != nil {
 		isAlreadyRegistered = true
 	}
 
@@ -136,11 +137,22 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 			}
 		}
 	} else {
+		var email *string
+		if userInfo.Email == "" {
+			email = nil
+		} else {
+			email = &userInfo.Email
+		}
+		password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+		if err != nil {
+			return "", fmt.Errorf("unable to hash password because %w", err)
+		}
 		newUser = schemas.User{
 			Username: userInfo.Login,
-			Email:    userInfo.Email,
+			Email:    email,
+			Password: &password,
 		}
-		err := controller.userService.CreateUser(newUser)
+		err = controller.userService.CreateUser(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to create user because %w", err)
 		}
@@ -162,22 +174,44 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	}
 
 	if newUser.Username == "" {
+		var email *string
+		if userInfo.Email == "" {
+			email = nil
+		} else {
+			email = &userInfo.Email
+		}
+		password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+		if err != nil {
+			return "", fmt.Errorf("unable to hash password because %w", err)
+		}
 		newUser = schemas.User{
 			Username: userInfo.Login,
-			Email:    userInfo.Email,
+			Email:    email,
+			Password: &password,
 			// TokenId:  tokenId,
 		}
 	} else {
 		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
 		for _, token := range tokens {
 			if token.UserId == actualUser.Id {
+				var email *string
+				if userInfo.Email == "" {
+					email = nil
+				} else {
+					email = &userInfo.Email
+				}
+				password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+				if err != nil {
+					return "", fmt.Errorf("unable to hash password because %w", err)
+				}
 				newUser = schemas.User{
 					Username: userInfo.Login,
-					Email:    userInfo.Email,
+					Email:    email,
+					Password: &password,
 					// TokenId:  &token.Id,
 				}
 				serviceToken.Id = token.Id
-				err := controller.userService.UpdateUserInfos(actualUser)
+				err = controller.userService.UpdateUserInfos(actualUser)
 				if err != nil {
 					return "", fmt.Errorf("unable to update user infos because %w", err)
 				}
@@ -248,9 +282,9 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 		}
 	}
 	if userInfo.Email != "" {
-		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
+		actualUser = controller.userService.GetUserByEmail(&userInfo.Email)
 	}
-	if actualUser.Email != "" {
+	if actualUser.Email != nil {
 		isAlreadyRegistered = true
 	}
 	authHeader := ctx.GetHeader("Authorization")
@@ -292,11 +326,22 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 			}
 		}
 	} else {
+		var email *string
+		if userInfo.Email == "" {
+			email = nil
+		} else {
+			email = &userInfo.Email
+		}
+		password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+		if err != nil {
+			return "", fmt.Errorf("unable to hash password because %w", err)
+		}
 		newUser = schemas.User{
 			Username: userInfo.Login,
-			Email:    userInfo.Email,
+			Email:    email,
+			Password: &password,
 		}
-		err := controller.userService.CreateUser(newUser)
+		err = controller.userService.CreateUser(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to create user because %w", err)
 		}
@@ -314,22 +359,44 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 	}
 
 	if newUser.Username == "" {
+		var email *string
+		if userInfo.Email == "" {
+			email = nil
+		} else {
+			email = &userInfo.Email
+		}
+		password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+		if err != nil {
+			return "", fmt.Errorf("unable to hash password because %w", err)
+		}
 		newUser = schemas.User{
 			Username: userInfo.Login,
-			Email:    userInfo.Email,
+			Email:    email,
+			Password: &password,
 			// TokenId:  tokenId,
 		}
 	} else {
 		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
 		for _, token := range tokens {
 			if token.UserId == actualUser.Id {
+				var email *string
+				if userInfo.Email == "" {
+					email = nil
+				} else {
+					email = &userInfo.Email
+				}
+				password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+				if err != nil {
+					return "", fmt.Errorf("unable to hash password because %w", err)
+				}
 				newUser = schemas.User{
 					Username: userInfo.Login,
-					Email:    userInfo.Email,
+					Email:    email,
+					Password: &password,
 					// TokenId:  &token.Id,
 				}
 				serviceToken.Id = token.Id
-				err := controller.userService.UpdateUserInfos(actualUser)
+				err = controller.userService.UpdateUserInfos(actualUser)
 				if err != nil {
 					return "", fmt.Errorf("unable to update user infos because %w", err)
 				}
