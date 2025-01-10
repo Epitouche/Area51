@@ -42,7 +42,7 @@ func NewServicesService(
 			{
 				Name:        schemas.Spotify,
 				Description: "This is the Spotify Service",
-				Image:       "tmp",
+				Image:       "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-spotify-symbol-3.png",
 			},
 		},
 		allServices: []interface{}{

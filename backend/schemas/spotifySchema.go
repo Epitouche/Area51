@@ -24,14 +24,18 @@ type SpotifyUserInfo struct {
 }
 
 type SpotifyActionOptions struct {
-	Playlist string `json:"playlist"`
+	PlaylistURL string `json:"playlist_url"`
 	NbSongs uint64 `json:"nbSongs"`
 	IsOld   bool `json:"is_old"`
 }
 
 type SpotifyActionOptionsInfo struct {
-	PlaylistId string `json:"playlist_id"`
-	NbSongs string `json:"nbSongs"`
+	PlaylistURL string `json:"playlist_url"`
+}
+
+type SpotifyReactionOptions struct {
+	PlaylistURL string `json:"playlist_url"`
+	TrackURL string `json:"track_url"`
 }
 
 type SpotifyTracksInfos struct {

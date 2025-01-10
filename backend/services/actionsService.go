@@ -51,7 +51,7 @@ func NewActionService(
 				Description: "Add a track to a playlist",
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
 				Options: toolbox.MustMarshal(schemas.SpotifyActionOptionsInfo{
-					PlaylistId: "string",
+					PlaylistURL: "string",
 				}),
 			},
 		},

@@ -106,7 +106,7 @@ var (
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
-	spotifyService              services.SpotifyService              = services.NewSpotifyService(spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository)
+	spotifyService              services.SpotifyService              = services.NewSpotifyService(spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository, userRepository)
 
 	// Controllers
 	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService)

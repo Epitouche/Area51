@@ -54,6 +54,8 @@ func (controller *spotifyController) RedirectionToSpotifyService(ctx *gin.Contex
 	redirectUri := fmt.Sprintf("%s%s/callback", appAddressHost, appPort)
 	scopes := []string {
 		"playlist-read-private",
+		"playlist-modify-public",
+		"playlist-modify-private",
 		"user-read-private",
 		"user-read-email",
 	}
