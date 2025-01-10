@@ -83,7 +83,7 @@ async function redirectToGitHubOAuth() {
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-primaryDark-500"
   >
     <div
-      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-600 to-tertiary-700 dark:from-tertiary-700 dark:to-tertiary-600 text-fontWhite rounded-lg shadow-lg"
+      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
     >
       <h2 class="text-2xl font-bold text-center">REGISTER</h2>
       <form class="space-y-6" @submit.prevent="onSubmit">

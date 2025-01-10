@@ -108,26 +108,26 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex justify-center overflow-x-auto">
+  <div class="flex justify-center overflow-x-auto p-16">
     <table
-      class="justify-center w-11/12 border-collapse bg-primaryWhite-500 dark:bg-secondaryDark-500"
+      class="w-full sm:w-11/12 border-collapse bg-primaryWhite-500 dark:bg-secondaryDark-500 text-sm sm:text-base"
     >
       <thead>
-        <tr class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-full">
+        <tr class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-t-lg">
           <th
-            class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
+            class="px-3 py-2 sm:px-6 sm:py-3 text-center text-xs sm:text-sm text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
             <input type="checkbox" :checked="headCheckbox" @click="checkAll" >
           </th>
           <th
             v-for="column in columns"
             :key="column"
-            class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
+            class="px-3 py-2 sm:px-6 sm:py-3 text-center text-xs sm:text-sm text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
             {{ column }}
           </th>
           <th
-            class="px-6 py-3 text-center text-xs text-fontBlack dark:text-gray-300 uppercase tracking-wider"
+            class="px-3 py-2 sm:px-6 sm:py-3 text-center text-xs sm:text-sm text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
             Actions
           </th>
@@ -137,9 +137,9 @@ onBeforeUnmount(() => {
         <tr
           v-for="(row, i) in rows"
           :key="i"
-          class="odd:bg-secondaryWhite-500 text-center even:bg-bg-primaryWhite-50 dark:odd:bg-primaryDark-500 dark:even:bg-secondaryDark-500"
+          class="odd:bg-secondaryWhite-500 even:bg-bg-primaryWhite-50 dark:odd:bg-primaryDark-500 dark:even:bg-secondaryDark-500 text-center"
         >
-          <td class="px-6 py-4">
+          <td class="px-3 py-2 sm:px-6 sm:py-4">
             <input
               type="checkbox"
               :checked="row.checked"
@@ -149,21 +149,27 @@ onBeforeUnmount(() => {
           <td
             v-for="(value, key) in filteredWorkflows[i]"
             :key="key"
-            class="px-6 py-4 text-sm"
-            :class="
-              key === 'is_active'
-                ? value
-                  ? 'font-bold text-tertiary-500'
-                  : 'font-bold text-red-500'
-                : 'text-fontBlack dark:text-gray-200'
-            "
+            class="px-3 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm"
           >
-            {{ key === "is_active" ? (value ? "Active" : "Inactive") : value }}
+            <p
+              class="text-fontBlack dark:text-fontWhite p-1 rounded-full"
+              :class="
+                key === 'is_active'
+                  ? value
+                    ? 'font-bold text-fontWhite bg-tertiary-500'
+                    : 'font-bold bg-error text-fontWhite'
+                  : 'text-fontBlack dark:text-gray-200'
+              "
+            >
+              {{
+                key === "is_active" ? (value ? "Active" : "Inactive") : value
+              }}
+            </p>
           </td>
           <td class="relative dropdown">
             <Icon
               name="material-symbols:more-vert"
-              class="cursor-pointer h-6 w-6 text-fontBlack dark:text-fontWhite"
+              class="cursor-pointer h-5 w-5 sm:h-6 sm:w-6 text-fontBlack dark:text-fontWhite"
               @click.stop="toggleDropdown(i)"
             />
             <div
@@ -172,7 +178,7 @@ onBeforeUnmount(() => {
                 '-translate-y-40': i >= Math.floor(rows.length / 2),
                 '': i < Math.floor(rows.length / 2),
               }"
-              class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
+              class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-28 sm:w-32 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
             >
               <div
                 class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700"
@@ -184,10 +190,10 @@ onBeforeUnmount(() => {
                     'Delete',
                   ]"
                   :key="index"
-                  class="text-center px-4 py-2 text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
+                  class="text-center px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
                   :class="
                     option.includes('Delete')
-                      ? ' hover:bg-error dark:hover:bg-error'
+                      ? 'hover:bg-error dark:hover:bg-error'
                       : ''
                   "
                   @click="launchAction(option, row)"
