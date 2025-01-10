@@ -28,15 +28,17 @@ type WorkflowJson struct {
 }
 
 type Workflow struct {
-	Id         uint64    `json:"id,omitempty" gorm:"primary_key;auto_increment"`
-	UserId     uint64    `json:"-"`
-	User       User      `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id"`
-	ActionId   uint64    `json:"-"`
-	Action     Action    `json:"action,omitempty" gorm:"foreignkey:ActionId;references:Id"`
-	ReactionId uint64    `json:"-"`
-	Reaction   Reaction  `json:"reaction,omitempty" gorm:"foreignkey:ReactionId;references:Id"`
-	CreatedAt  time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt  time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	IsActive   bool      `json:"is_active" default:"false" gorm:"column:is_active"`
-	Name       string    `json:"name" gorm:"type:varchar(100)"`
+	Id              uint64    `json:"id,omitempty" gorm:"primary_key;auto_increment"`
+	UserId          uint64    `json:"-"`
+	User            User      `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id"`
+	ActionId        uint64    `json:"-"`
+	Action          Action    `json:"action,omitempty" gorm:"foreignkey:ActionId;references:Id"`
+	ActionOptions   string    `json:"action_options"`
+	ReactionId      uint64    `json:"-"`
+	Reaction        Reaction  `json:"reaction,omitempty" gorm:"foreignkey:ReactionId;references:Id"`
+	ReactionOptions string    `json:"reaction_options"`
+	CreatedAt       time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt       time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
+	IsActive        bool      `json:"is_active" default:"false" gorm:"column:is_active"`
+	Name            string    `json:"name" gorm:"type:varchar(100)"`
 }

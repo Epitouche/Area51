@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -12,51 +14,61 @@ import (
 	"area51/toolbox"
 )
 
-type GithubController interface {
-	RedirectionToGithubService(ctx *gin.Context, path string) (string, error)
-	ServiceGithubCallback(ctx *gin.Context, path string) (string, error)
-	GetUserInfos(ctx *gin.Context) (userInfos schemas.GithubUserInfo, err error)
-	StoreMobileToken(ctx *gin.Context) (string, error)
+type SpotifyController interface {
+	RedirectionToSpotifyService(*gin.Context, string) (string, error)
+	ServiceSpotifyCallback(*gin.Context, string) (string, error)
+	StoreMobileToken(*gin.Context) (string, error)
 }
 
-type githubController struct {
-	service         services.GithubService
-	userService     services.UserService
-	serviceToken    services.TokenService
+type spotifyController struct {
+	service services.SpotifyService
 	servicesService services.ServicesService
+	userService services.UserService
+	serviceToken services.TokenService
 }
 
-func NewGithubController(
-	service services.GithubService,
+func NewSpotifyController(
+	service services.SpotifyService,
+	servicesService services.ServicesService,
 	userService services.UserService,
 	serviceToken services.TokenService,
-	servicesService services.ServicesService,
-) GithubController {
-	return &githubController{
-		service:         service,
-		userService:     userService,
-		serviceToken:    serviceToken,
+) SpotifyController {
+	return &spotifyController{
+		service: service,
 		servicesService: servicesService,
+		userService: userService,
+		serviceToken: serviceToken,
 	}
 }
 
-func (controller *githubController) RedirectionToGithubService(ctx *gin.Context, path string) (string, error) {
-	clientId := toolbox.GetInEnv("GITHUB_CLIENT_ID")
+func (controller *spotifyController) RedirectionToSpotifyService(ctx *gin.Context, path string) (string, error) {
+	clientId := toolbox.GetInEnv("SPOTIFY_CLIENT_ID")
 	appPort := toolbox.GetInEnv("FRONTEND_PORT")
-	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
+	appAddressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	state, err := toolbox.GenerateCSRFToken()
 	if err != nil {
 		return "", err
 	}
-
 	ctx.SetCookie("latestCSRFToken", state, 3600, "/", "localhost", false, true)
-	redirectUri := fmt.Sprintf("%s%s/callback", appAdressHost, appPort)
-	authUrl := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&response_type=code&scope=repo&redirect_uri=%s&state=%s", clientId, redirectUri, state)
+	redirectUri := fmt.Sprintf("%s%s/callback", appAddressHost, appPort)
+	scopes := []string {
+		"playlist-read-private",
+		"user-read-private",
+		"user-read-email",
+	}
+	scope := strings.Join(scopes, " ")
+	authUrl := fmt.Sprintf(
+		"https://accounts.spotify.com/authorize?client_id=%s&redirect_uri=%s&state=%s&response_type=code&scope=%s",
+		clientId,
+		redirectUri,
+		state,
+		url.QueryEscape(scope),
+	)
 	return authUrl, nil
 }
 
-func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path string) (string, error) {
+func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, path string) (string, error) {
 	var isAlreadyRegistered bool = false
 	var codeCredentials schemas.OAuth2CodeCredentials
 	err := json.NewDecoder(ctx.Request.Body).Decode(&codeCredentials)
@@ -69,45 +81,39 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	if codeCredentials.State == "" {
 		return "", nil
 	}
-	githubTokenResponse, err := controller.service.AuthGetServiceAccessToken(codeCredentials.Code, path)
+	spotifyTokenResponse, err := controller.service.AuthGetServiceAccessToken(codeCredentials.Code, path)
 	if err != nil {
 		return "", err
 	}
-	githubService := controller.servicesService.FindByName(schemas.Github)
-	userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
+	fmt.Println("spotify: ", spotifyTokenResponse)
+	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
+	userInfo, err := controller.service.GetUserInfo(spotifyTokenResponse.AccessToken)
 
+	fmt.Println("userinfo", userInfo)
 	if err != nil {
 		return "", fmt.Errorf("unable to get user info because %w", err)
 	}
 	var actualUser schemas.User
-	if userInfo.Email == "" {
-		actualUser = controller.userService.GetUserByUsername(userInfo.Login)
-		if actualUser.Username != "" {
-			isAlreadyRegistered = true
-		}
-	}
-	if userInfo.Email != "" {
 		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
-	}
 	if actualUser.Email != "" {
 		isAlreadyRegistered = true
 	}
 
-	var newGithubToken schemas.ServiceToken
+	var newSpotifyToken schemas.ServiceToken
 	var newUser schemas.User
 	var tokenId *uint64
 	if isAlreadyRegistered {
-		newGithubToken = schemas.ServiceToken{
+		newSpotifyToken = schemas.ServiceToken{
 			Id:      *actualUser.TokenId,
-			Token:   githubTokenResponse.AccessToken,
-			Service: githubService,
+			Token:   spotifyTokenResponse.AccessToken,
+			Service: spotifyService,
 			UserId:  actualUser.Id,
 			User:    actualUser,
 		}
 		if actualUser.TokenId != nil {
-			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, githubService.Id)
+			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, spotifyService.Id)
 			if actualServiceToken.Token != "" {
-				err := controller.serviceToken.Update(newGithubToken)
+				err := controller.serviceToken.Update(newSpotifyToken)
 				if err != nil {
 					return "", fmt.Errorf("unable to update token because %w", err)
 				}
@@ -116,18 +122,18 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		}
 	} else {
 		newUser = schemas.User{
-			Username: userInfo.Login,
+			Username: userInfo.DisplayName,
 			Email:    userInfo.Email,
 		}
 		err := controller.userService.CreateUser(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to create user because %w", err)
 		}
-		actualUser = controller.userService.GetUserByUsername(userInfo.Login)
-		newGithubToken = schemas.ServiceToken{
-			Token:        githubTokenResponse.AccessToken,
-			RefreshToken: githubTokenResponse.RefreshToken,
-			Service:      githubService,
+		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
+		newSpotifyToken = schemas.ServiceToken{
+			Token:        spotifyTokenResponse.AccessToken,
+			RefreshToken: spotifyTokenResponse.RefreshToken,
+			Service:      spotifyService,
 			UserId:       actualUser.Id,
 			User:         actualUser,
 		}
@@ -135,13 +141,13 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	}
 
 	if tokenId == nil {
-		savedTokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
+		savedTokenId, _ := controller.serviceToken.SaveToken(newSpotifyToken)
 		tokenId = &savedTokenId
 	}
 
 	if newUser.Username == "" {
 		newUser = schemas.User{
-			Username: userInfo.Login,
+			Username: userInfo.DisplayName,
 			Email:    userInfo.Email,
 			TokenId:  tokenId,
 		}
@@ -150,7 +156,7 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		for _, token := range tokens {
 			if token.UserId == actualUser.Id {
 				newUser = schemas.User{
-					Username: userInfo.Login,
+					Username: userInfo.DisplayName,
 					Email:    userInfo.Email,
 					TokenId:  &token.Id,
 				}
@@ -166,10 +172,12 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 
 	if isAlreadyRegistered {
 		token, _ := controller.userService.Login(newUser)
+		fmt.Println("true", token)
 		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
 		return token, nil
 	} else {
 		token, err := controller.userService.Register(newUser)
+		fmt.Println("false", token)
 		if err != nil {
 			return "", fmt.Errorf("unable to register user because %w", err)
 		}
@@ -177,66 +185,37 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	}
 }
 
-func (controller *githubController) GetUserInfos(ctx *gin.Context) (userInfos schemas.GithubUserInfo, err error) {
-	tokenString, err := toolbox.GetBearerToken(ctx)
-	if err != nil {
-		return schemas.GithubUserInfo{}, err
-	}
-	user, err := controller.userService.GetUserInfos(tokenString)
-	if err != nil {
-		return schemas.GithubUserInfo{}, err
-	}
-	token, err := controller.serviceToken.GetTokenById(*user.TokenId)
-	if err != nil {
-		return schemas.GithubUserInfo{}, err
-	}
-
-	githubUserInfos, err := controller.service.GetUserInfo(token.Token)
-	if err != nil {
-		return schemas.GithubUserInfo{}, err
-	}
-	return githubUserInfos, nil
-}
-
-func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, error) {
+func (controller *spotifyController) StoreMobileToken(ctx *gin.Context) (string, error) {
 	var result schemas.MobileToken
 	var isAlreadyRegistered bool = false
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
 	if err != nil {
 		return "", err
 	}
-	githubService := controller.servicesService.FindByName(schemas.Github)
+	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
 	userInfo, err := controller.service.GetUserInfo(result.Token)
 	if err != nil {
 		return "", fmt.Errorf("unable to get user info because %w", err)
 	}
 	var actualUser schemas.User
-	if userInfo.Email == "" {
-		actualUser = controller.userService.GetUserByUsername(userInfo.Login)
-		if actualUser.Username != "" {
-			isAlreadyRegistered = true
-		}
-	}
-	if userInfo.Email != "" {
 		actualUser = controller.userService.GetUserByEmail(userInfo.Email)
-	}
 	if actualUser.Email != "" {
 		isAlreadyRegistered = true
 	}
-	var newGithubToken schemas.ServiceToken
+	var newSpotifyToken schemas.ServiceToken
 	var newUser schemas.User
 	var tokenId *uint64
 	if isAlreadyRegistered {
-		newGithubToken = schemas.ServiceToken{
+		newSpotifyToken = schemas.ServiceToken{
 			Id:      *actualUser.TokenId,
 			Token:   result.Token,
-			Service: githubService,
+			Service: spotifyService,
 			UserId:  actualUser.Id,
 		}
 		if actualUser.TokenId != nil {
-			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, githubService.Id)
+			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, spotifyService.Id)
 			if actualServiceToken.Token != "" {
-				err := controller.serviceToken.Update(newGithubToken)
+				err := controller.serviceToken.Update(newSpotifyToken)
 				if err != nil {
 					return "", fmt.Errorf("unable to update token because %w", err)
 				}
@@ -245,30 +224,30 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 		}
 	} else {
 		newUser = schemas.User{
-			Username: userInfo.Login,
+			Username: userInfo.DisplayName,
 			Email:    userInfo.Email,
 		}
 		err := controller.userService.CreateUser(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to create user because %w", err)
 		}
-		actualUser = controller.userService.GetUserByUsername(userInfo.Login)
-		newGithubToken = schemas.ServiceToken{
+		actualUser = controller.userService.GetUserByUsername(userInfo.DisplayName)
+		newSpotifyToken = schemas.ServiceToken{
 			Token:   result.Token,
-			Service: githubService,
+			Service: spotifyService,
 			UserId:  actualUser.Id,
 		}
 		isAlreadyRegistered = true
 	}
 
 	if tokenId == nil {
-		savedTokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
+		savedTokenId, _ := controller.serviceToken.SaveToken(newSpotifyToken)
 		tokenId = &savedTokenId
 	}
 
 	if newUser.Username == "" {
 		newUser = schemas.User{
-			Username: userInfo.Login,
+			Username: userInfo.DisplayName,
 			Email:    userInfo.Email,
 			TokenId:  tokenId,
 		}
@@ -277,7 +256,7 @@ func (controller *githubController) StoreMobileToken(ctx *gin.Context) (string, 
 		for _, token := range tokens {
 			if token.UserId == actualUser.Id {
 				newUser = schemas.User{
-					Username: userInfo.Login,
+					Username: userInfo.DisplayName,
 					Email:    userInfo.Email,
 					TokenId:  &token.Id,
 				}

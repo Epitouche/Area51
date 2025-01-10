@@ -29,17 +29,26 @@ type servicesService struct {
 func NewServicesService(
 	repository repository.ServiceRepository,
 	githubService GithubService,
+	spotifyService SpotifyService,
 ) ServicesService {
 	newService := servicesService{
 		repository: repository,
 		allServicesSchema: []schemas.Service{
 			{
 				Name:        schemas.Github,
-				Description: "This is a code storage service",
+				Description: "This is the Github service",
 				Image:       "https://pngimg.com/uploads/github/github_PNG80.png",
 			},
+			{
+				Name:        schemas.Spotify,
+				Description: "This is the Spotify Service",
+				Image:       "tmp",
+			},
 		},
-		allServices: []interface{}{githubService},
+		allServices: []interface{}{
+			githubService,
+			spotifyService,
+		},
 	}
 	newService.InitialSaveService()
 	return &newService
