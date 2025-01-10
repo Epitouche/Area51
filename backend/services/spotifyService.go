@@ -153,7 +153,12 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		return
 	}
 	playlistId := ""
-	fmt.Sscanf(options.PlaylistURL, "https://open.spotify.com/playlist/%s", &playlistId)
+	_, err = fmt.Sscanf(options.PlaylistURL, "https://open.spotify.com/playlist/%s", &playlistId)
+	if err != nil {
+		fmt.Printf("unable to create request because: %s", err)
+		time.Sleep(30 * time.Second)
+		return
+	}
 
 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/" + playlistId, nil)
 	if err != nil {
@@ -223,10 +228,21 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 		time.Sleep(30 * time.Second)
 		return
 	}
+
 	trackId := ""
-	fmt.Sscanf(options.TrackURL, "https://open.spotify.com/track/%s", &trackId)
+	_, err = fmt.Sscanf(options.TrackURL, "https://open.spotify.com/track/%s", &trackId)
+	if err != nil {
+		fmt.Printf("unable to create request because: %s", err)
+		time.Sleep(30 * time.Second)
+		return
+	}
 	playlistId := ""
-	fmt.Sscanf(options.PlaylistURL, "https://open.spotify.com/playlist/%s", &playlistId)
+	_, err = fmt.Sscanf(options.PlaylistURL, "https://open.spotify.com/playlist/%s", &playlistId)
+	if err != nil {
+		fmt.Printf("unable to create request because: %s", err)
+		time.Sleep(30 * time.Second)
+		return
+	}
 
 	reqBody := fmt.Sprintf(`{"uris":["spotify:track:%s"],"position":0}`, trackId)
 	request, err := http.NewRequest("POST", "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks", strings.NewReader(reqBody))
