@@ -5,7 +5,7 @@ import type {
   Service,
   WorkflowResponse,
   Workflow,
-  AboutResponse
+  AboutResponse,
 } from "~/src/types";
 
 const notificationStore = useNotificationStore();
@@ -22,13 +22,7 @@ function triggerNotification(
   });
 }
 
-const columns = [
-  "Name",
-  "Action",
-  "Reaction",
-  "Activity",
-  "Creation Date",
-];
+const columns = ["Name", "Action", "Reaction", "Activity", "Creation Date"];
 
 const filters = ["All Status", "Active", "Inactive", "Selected"];
 const sorts = ["Name", "Creation Date", "Action ID", "Reaction ID"];
@@ -128,7 +122,6 @@ async function fetchServices() {
       }
     );
 
-
     responseServices.forEach((service: Service) => {
       services.push(service);
     });
@@ -146,16 +139,13 @@ async function fetchServices() {
     );
 
     responseAbout.server.services.forEach((service) => {
-      const serviceFound = services.find(
-        (s) => s.name === service.name
-      );
+      const serviceFound = services.find((s) => s.name === service.name);
 
       if (serviceFound) {
         serviceFound.actions = service.actions;
         serviceFound.reactions = service.reactions;
       }
     });
-
   } catch (error) {
     console.error("Error fetching services:", error);
   }
@@ -173,7 +163,6 @@ async function fetchWorkflows() {
         },
       }
     );
-
 
     workflowsInList.length = 0;
     workflowsInList.push(...response);
@@ -280,23 +269,28 @@ onMounted(() => {
   <div
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
   >
-    <div class="m-20">
-      <h1 class="text-6xl font-bold text-fontBlack dark:text-fontWhite">
+    <NuxtLayout />
+    <div class="m-5 sm:m-10">
+      <h1
+        class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
+      >
         Workflows
       </h1>
     </div>
     <div class="flex justify-center">
       <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
+        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
       >
     </div>
-    <div class="flex flex-col justify-center m-16 gap-10 items-center">
+    <div
+      class="flex flex-col justify-center m-5 sm:m-10 gap-5 sm:gap-10 items-center"
+    >
       <InputComponent
         v-model="WorkflowName"
         type="text"
         label="Workflow Name"
       />
-      <div class="flex justify-center gap-5">
+      <div class="flex flex-wrap justify-center gap-3 sm:gap-5">
         <ButtonComponent
           :text="actionString ? actionString : 'Choose an action'"
           bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
@@ -310,7 +304,7 @@ onMounted(() => {
           @close="closeModalAction"
           @confirm="confirmModalAction"
         >
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div
               v-for="(service, index) in services"
               :key="index"
@@ -338,7 +332,7 @@ onMounted(() => {
           @close="closeModalReaction"
           @confirm="confirmModalReaction"
         >
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div
               v-for="(service, index) in services"
               :key="index"
@@ -375,10 +369,10 @@ onMounted(() => {
     </div>
     <div class="flex justify-center">
       <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
+        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
       >
     </div>
-    <div class="flex justify-start gap-5 m-20">
+    <div class="flex flex-wrap justify-start gap-3 sm:gap-5 m-5 sm:m-10">
       <DropdownComponent
         v-model="selectedFilter"
         :label="selectedFilter"
@@ -398,25 +392,25 @@ onMounted(() => {
     />
     <div class="flex justify-center">
       <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
+        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
       >
     </div>
-    <div class="flex justify-center m-20">
+    <div class="flex justify-center m-5 sm:m-10">
       <div
-        class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-10/12"
+        class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-full sm:w-10/12"
       >
         <button
-          class="absolute top-4 right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
-          aria-label="Copier le JSON"
+          class="absolute top-2 right-2 sm:top-4 sm:right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
+          aria-label="Copy JSON"
           @click="copyToClipboard(JSON.stringify(lastWorkflowResult, null, 2))"
         >
           <Icon :name="copyIcon" />
         </button>
         <pre
-          class="whitespace-pre-wrap break-words text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
+          class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
         >
-    {{ JSON.stringify(lastWorkflowResult, null, 2) }}
-  </pre
+        {{ JSON.stringify(lastWorkflowResult, null, 2) }}
+      </pre
         >
       </div>
     </div>
