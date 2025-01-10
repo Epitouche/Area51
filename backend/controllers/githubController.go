@@ -134,6 +134,8 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 					return "", fmt.Errorf("unable to update token because %w", err)
 				}
 				tokenId = &actualServiceToken.Id
+			} else {
+				tokenId = nil
 			}
 		}
 	} else {
@@ -169,8 +171,10 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	}
 
 	if tokenId == nil {
-		savedTokenId, _ := controller.serviceToken.SaveToken(newGithubToken)
-		tokenId = &savedTokenId
+		_, err := controller.serviceToken.SaveToken(newGithubToken)
+		if err != nil {
+			return "", fmt.Errorf("unable to save token because %w", err)
+		}
 	}
 
 	if newUser.Username == "" {

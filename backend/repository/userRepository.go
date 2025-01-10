@@ -110,12 +110,6 @@ func (r *userRepository) FindByEmail(email *string) (user schemas.User) {
 }
 
 func (r *userRepository) FindAllServicesByUserId(id uint64) []schemas.ServiceToken {
-	// var services []schemas.ServiceToken
-	// err := r.db.Connection.Where(&schemas.ServiceToken{UserId: id}).Find(&services)
-	// if err.Error != nil || len(services) == 0 {
-	// 	return []schemas.ServiceToken{}
-	// }
-	// return services
 	user := r.FindById(id)
 	r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
 	for _, service := range user.Services {
