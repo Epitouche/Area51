@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 
 	"area51/schemas"
@@ -20,6 +22,7 @@ type UserRepository interface {
 	AddServiceToUser(user schemas.User, service schemas.ServiceToken)
 	GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error)
 	GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error)
+	LogoutFromService(user schemas.User, serviceToDelete schemas.Service) error
 }
 
 type userRepository struct {
@@ -154,4 +157,16 @@ func (r *userRepository) GetServiceByIdForUser(user schemas.User, serviceId uint
 		}
 	}
 	return schemas.ServiceToken{}, nil
+}
+
+func (r *userRepository) LogoutFromService(user schemas.User, serviceToDelete schemas.Service) error {
+	r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+
+	for _, service := range user.Services {
+		if service.ServiceId == serviceToDelete.Id {
+			r.db.Connection.Model(&user).Association("Services").Delete(&service)
+			return nil
+		}
+	}
+	return fmt.Errorf("service not found")
 }

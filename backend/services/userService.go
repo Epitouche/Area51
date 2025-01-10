@@ -24,6 +24,7 @@ type UserService interface {
 	GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error)
 	GetAllServices(userId uint64) ([]schemas.ServiceToken, error)
 	GetAllWorkflows(userId uint64) ([]schemas.Workflow, error)
+	LogoutFromService(userId uint64, serviceToDelete schemas.Service) error
 }
 
 type userService struct {
@@ -142,4 +143,9 @@ func (service *userService) GetAllServicesForUser(userId uint64) ([]schemas.Serv
 
 func (service *userService) GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error) {
 	return service.repository.GetServiceByIdForUser(user, serviceId)
+}
+
+func (service *userService) LogoutFromService(userId uint64, serviceToDelete schemas.Service) error {
+	user := service.GetUserById(userId)
+	return service.repository.LogoutFromService(user, serviceToDelete)
 }
