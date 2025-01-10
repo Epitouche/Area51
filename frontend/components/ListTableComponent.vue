@@ -150,15 +150,21 @@ onBeforeUnmount(() => {
             v-for="(value, key) in filteredWorkflows[i]"
             :key="key"
             class="px-3 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm"
-            :class="
-              key === 'is_active'
-                ? value
-                  ? 'font-bold text-tertiary-500'
-                  : 'font-bold text-red-500'
-                : 'text-fontBlack dark:text-gray-200'
-            "
           >
-            {{ key === "is_active" ? (value ? "Active" : "Inactive") : value }}
+            <p
+              class="text-fontBlack dark:text-fontWhite p-1 rounded-full"
+              :class="
+                key === 'is_active'
+                  ? value
+                    ? 'font-bold text-fontWhite bg-tertiary-500'
+                    : 'font-bold bg-error text-fontWhite'
+                  : 'text-fontBlack dark:text-gray-200'
+              "
+            >
+              {{
+                key === "is_active" ? (value ? "Active" : "Inactive") : value
+              }}
+            </p>
           </td>
           <td class="relative dropdown">
             <Icon
