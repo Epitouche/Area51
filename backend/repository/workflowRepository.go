@@ -12,7 +12,8 @@ type WorkflowRepository interface {
 	Save(workflow schemas.Workflow)
 	Update(workflow schemas.Workflow)
 	UpdateActiveStatus(workflow schemas.Workflow)
-	Delete(workflowId uint64)
+	Delete(workflowId uint64) error
+
 	FindAll() []schemas.Workflow
 	FindByIds(workflowId uint64) (schemas.Workflow, error)
 	FindByUserId(userId uint64) []schemas.Workflow
@@ -70,14 +71,14 @@ func (repo *workflowRepository) UpdateActiveStatus(workflow schemas.Workflow) {
 	}
 }
 
-func (repo *workflowRepository) Delete(workflowId uint64) {
+func (repo *workflowRepository) Delete(workflowId uint64) error {
 	err := repo.db.Connection.Delete(&schemas.Workflow{
 		Id: workflowId,
 	})
-
 	if err.Error != nil {
-		panic(err.Error)
+		return err.Error
 	}
+	return nil
 }
 
 func (repo *workflowRepository) FindAll() (workflows []schemas.Workflow) {

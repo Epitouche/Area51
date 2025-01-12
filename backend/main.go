@@ -27,6 +27,7 @@ func setupRouter() *gin.Engine {
 	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
+	router.POST("/mobile/token", githubApi.StoreMobileToken)
 
 	apiRoutes := router.Group("/api")
 	{
@@ -35,6 +36,7 @@ func setupRouter() *gin.Engine {
 		{
 			user.GET("services", userApi.GetServices)
 			user.GET("workflows", userApi.GetWorkflows)
+			user.PUT("service/logout", userApi.LogoutService)
 		}
 
 		auth := apiRoutes.Group("/auth")
@@ -51,12 +53,12 @@ func setupRouter() *gin.Engine {
 			github.POST("/callback", func(ctx *gin.Context) {
 				githubApi.HandleGithubTokenCallback(ctx, github.BasePath()+"/callback")
 			})
-			github.POST("/mobile/token", githubApi.StoreMobileToken)
 		}
 		workflow := apiRoutes.Group("/workflow", middlewares.Authorization())
 		{
 			workflow.POST("", workflowApi.CreateWorkflow)
 			workflow.PUT("/activation", workflowApi.ActivateWorkflow)
+			workflow.DELETE("", workflowApi.DeleteWorkflow)
 			workflow.GET("/reaction", workflowApi.GetMostRecentReaction)
 		}
 
@@ -84,17 +86,17 @@ var (
 	reactionResponseDataRepository repository.ReactionResponseDataRepository = repository.NewReactionResponseDataRepository(databaseConnection)
 	// Services
 	jwtService                  services.JWTService                  = services.NewJWTService()
+	serviceToken                services.TokenService                = services.NewTokenService(tokenRepository, userService)
 	userService                 services.UserService                 = services.NewUserService(userRepository, jwtService)
 	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
 	githubService               services.GithubService               = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
-	serviceToken                services.TokenService                = services.NewTokenService(tokenRepository)
 	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService)
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 
 	// Controllers
-	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService)
+	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)
 	githubController   controllers.GithubController   = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
 	actionController   controllers.ActionController   = controllers.NewActionController(actionService)
 	servicesController controllers.ServicesController = controllers.NewServiceController(servicesService, actionService, reactionService)

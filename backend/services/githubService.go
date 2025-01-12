@@ -99,7 +99,7 @@ func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUse
 		return schemas.GithubUserInfo{}, err
 	}
 
-	request.Header.Set("Authorization", "Bearer " + accessToken)
+	request.Header.Set("Authorization", "Bearer "+accessToken)
 	client := &http.Client{}
 
 	response, err := client.Do(request)
@@ -143,7 +143,7 @@ type transportWithToken struct {
 }
 
 func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", "Bearer " + t.token)
+	req.Header.Set("Authorization", "Bearer "+t.token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	return http.DefaultTransport.RoundTrip(req)
@@ -159,10 +159,11 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		fmt.Println(err)
 		return
 	}
+	user := service.userService.GetUserById(workflow.UserId)
+	token := service.tokenRepository.FindByUserId(user)
 
-	token := service.tokenRepository.FindByUserId(workflow.UserId)
 	client := github.NewClient(&http.Client{
-		Transport: &transportWithToken{token: token[len(token) - 1].Token},
+		Transport: &transportWithToken{token: token[len(token)-1].Token},
 	})
 
 	pullRequests, _, err := client.PullRequests.List(ctx, "JsuisSayker", "TestAreaGithub", nil)
@@ -177,7 +178,7 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		reaction := service.reactionRepository.FindById(workflow.ReactionId)
 		reaction.Trigger = true
 		reaction.Id = workflow.ReactionId
-		service.reactionRepository.Update(reaction)
+		service.reactionRepository.UpdateTrigger(reaction)
 	}
 	channel <- "Action workflow done"
 }
@@ -244,5 +245,13 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	}
 	savedResult.ApiResponse = jsonValue
 	service.reactionResponseDataService.Save(savedResult)
+	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	reaction := service.reactionRepository.FindById(workflow.ReactionId)
+	reaction.Trigger = false
+	service.reactionRepository.UpdateTrigger(reaction)
 	time.Sleep(1 * time.Minute)
 }

@@ -11,16 +11,20 @@ import (
 )
 
 type UserService interface {
-	Login(user schemas.User) (JWTtoken string, err error)
+	Login(user schemas.User, actualService schemas.Service) (JWTtoken string, err error)
 	Register(newUser schemas.User) (JWTtoken string, err error)
 	GetUserInfos(token string) (userInfos schemas.User, err error)
 	UpdateUserInfos(newUser schemas.User) error
 	GetUserById(userId uint64) schemas.User
 	GetUserByUsername(username string) schemas.User
-	GetUserByEmail(email string) schemas.User
+	GetUserByEmail(email *string) schemas.User
 	CreateUser(newUser schemas.User) error
+	AddServiceToUser(user schemas.User, serviceToAdd schemas.ServiceToken) error
+	GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error)
+	GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error)
 	GetAllServices(userId uint64) ([]schemas.ServiceToken, error)
 	GetAllWorkflows(userId uint64) ([]schemas.Workflow, error)
+	LogoutFromService(userId uint64, serviceToDelete schemas.Service) error
 }
 
 type userService struct {
@@ -30,7 +34,10 @@ type userService struct {
 	serviceJWT         JWTService
 }
 
-func NewUserService(repository repository.UserRepository, serviceJWT JWTService) UserService {
+func NewUserService(
+	repository repository.UserRepository,
+	serviceJWT JWTService,
+) UserService {
 	return &userService{
 		authorizedUsername: "root",
 		authorizedPassword: "password",
@@ -39,7 +46,7 @@ func NewUserService(repository repository.UserRepository, serviceJWT JWTService)
 	}
 }
 
-func (service *userService) Login(newUser schemas.User) (JWTtoken string, err error) {
+func (service *userService) Login(newUser schemas.User, actualService schemas.Service) (JWTtoken string, err error) {
 	user := service.repository.FindByUsername(newUser.Username)
 	if user.Username == "" {
 		return "", errors.New("user not found")
@@ -54,7 +61,8 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 	}
 
 	if user.Username == newUser.Username {
-		if newUser.TokenId != nil && *newUser.TokenId != 0 {
+		serviceToken, _ := service.GetServiceByIdForUser(user, actualService.Id)
+		if serviceToken.Id != 0 {
 			return service.serviceJWT.GenerateJWTToken(
 				strconv.FormatUint(user.Id, 10),
 				user.Username,
@@ -68,16 +76,16 @@ func (service *userService) Login(newUser schemas.User) (JWTtoken string, err er
 
 func (service *userService) Register(newUser schemas.User) (JWTtoken string, err error) {
 	user := service.repository.FindByEmail(newUser.Email)
-	if user.Email != "" {
+	if user.Email != nil {
 		return "", errors.New("email already in use")
 	}
 
-	if newUser.Password != "" {
-		hashedPassword, err := database.HashPassword(newUser.Password)
+	if newUser.Password != nil {
+		hashedPassword, err := database.HashPassword(*newUser.Password)
 		if err != nil {
 			return "", errors.New("error while hashing the password")
 		}
-		newUser.Password = hashedPassword
+		newUser.Password = &hashedPassword
 	}
 
 	service.repository.Save(newUser)
@@ -107,7 +115,7 @@ func (service *userService) GetUserByUsername(username string) schemas.User {
 	return service.repository.FindByUsername(username)
 }
 
-func (service *userService) GetUserByEmail(email string) schemas.User {
+func (service *userService) GetUserByEmail(email *string) schemas.User {
 	return service.repository.FindByEmail(email)
 }
 
@@ -122,4 +130,22 @@ func (service *userService) GetAllServices(userId uint64) ([]schemas.ServiceToke
 
 func (service *userService) GetAllWorkflows(userId uint64) ([]schemas.Workflow, error) {
 	return service.repository.FindAllWorkflowsByUserId(userId), nil
+}
+
+func (service *userService) AddServiceToUser(user schemas.User, serviceToAdd schemas.ServiceToken) error {
+	service.repository.AddServiceToUser(user, serviceToAdd)
+	return nil
+}
+
+func (service *userService) GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error) {
+	return service.repository.GetAllServicesForUser(userId)
+}
+
+func (service *userService) GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error) {
+	return service.repository.GetServiceByIdForUser(user, serviceId)
+}
+
+func (service *userService) LogoutFromService(userId uint64, serviceToDelete schemas.Service) error {
+	user := service.GetUserById(userId)
+	return service.repository.LogoutFromService(user, serviceToDelete)
 }
