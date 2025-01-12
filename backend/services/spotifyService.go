@@ -23,15 +23,17 @@ type SpotifyService interface {
 }
 
 type spotifyService struct {
-	spotifyRepository repository.SpotifyRepository
+	userService        UserService
+	spotifyRepository  repository.SpotifyRepository
 	workflowRepository repository.WorkflowRepository
-	actionRepository repository.ActionRepository
+	actionRepository   repository.ActionRepository
 	reactionRepository repository.ReactionRepository
-	tokenRepository repository.TokenRepository
-	mutex sync.Mutex
+	tokenRepository    repository.TokenRepository
+	mutex              sync.Mutex
 }
 
 func NewSpotifyService(
+	userService UserService,
 	spotifyRepository repository.SpotifyRepository,
 	workflowRepository repository.WorkflowRepository,
 	actionRepository repository.ActionRepository,
@@ -39,11 +41,12 @@ func NewSpotifyService(
 	tokenRepository repository.TokenRepository,
 ) SpotifyService {
 	return &spotifyService{
-		spotifyRepository: spotifyRepository,
+		userService:        userService,
+		spotifyRepository:  spotifyRepository,
 		workflowRepository: workflowRepository,
-		actionRepository: actionRepository,
+		actionRepository:   actionRepository,
 		reactionRepository: reactionRepository,
-		tokenRepository: tokenRepository,
+		tokenRepository:    tokenRepository,
 	}
 }
 
@@ -90,11 +93,11 @@ func (service *spotifyService) AuthGetServiceAccessToken(code string, path strin
 
 func (service *spotifyService) GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error) {
 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
-	if err != nil { 
+	if err != nil {
 		return schemas.SpotifyUserInfo{}, err
 	}
 
-	request.Header.Set("Authorization", "Bearer " + accessToken)
+	request.Header.Set("Authorization", "Bearer "+accessToken)
 	client := &http.Client{}
 
 	response, err := client.Do(request)
@@ -130,7 +133,7 @@ func (service *spotifyService) FindReactionByName(name string) func(channel chan
 func (service *spotifyService) AddTrackAction(channel chan string, option string, workflowId uint64) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
-	
+
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
@@ -138,7 +141,8 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		return
 	}
 
-	accessToken := service.tokenRepository.FindByUserId(workflow.UserId)
+	user := service.userService.GetUserById(workflow.UserId)
+	accessToken := service.tokenRepository.FindByUserId(user)
 
 	options := schemas.SpotifyActionOptions{}
 	err = json.NewDecoder(strings.NewReader(option)).Decode(&options)
@@ -148,14 +152,14 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		return
 	}
 
-	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/" + options.Playlist, nil)
+	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+options.Playlist, nil)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
 		time.Sleep(30 * time.Second)
 		return
 	}
 	client := &http.Client{}
-	request.Header.Set("Authorization", "Bearer " + accessToken[len(accessToken) - 1].Token)
+	request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	response, err := client.Do(request)
 	if err != nil {
