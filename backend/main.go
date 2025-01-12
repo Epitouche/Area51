@@ -86,7 +86,7 @@ var (
 	reactionResponseDataRepository repository.ReactionResponseDataRepository = repository.NewReactionResponseDataRepository(databaseConnection)
 	// Services
 	jwtService                  services.JWTService                  = services.NewJWTService()
-	serviceToken                services.TokenService                = services.NewTokenService(tokenRepository)
+	serviceToken                services.TokenService                = services.NewTokenService(tokenRepository, userService)
 	userService                 services.UserService                 = services.NewUserService(userRepository, jwtService)
 	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
 	githubService               services.GithubService               = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)

@@ -133,7 +133,10 @@ func (r *userRepository) FindAllWorkflowsByUserId(id uint64) []schemas.Workflow 
 }
 
 func (r *userRepository) AddServiceToUser(user schemas.User, service schemas.ServiceToken) {
-	r.db.Connection.Model(&user).Association("Services").Append(&service)
+	err := r.db.Connection.Model(&user).Association("Services").Append(&service)
+	if err != nil {
+		return
+	}
 	r.db.Connection.Save(&user)
 }
 
