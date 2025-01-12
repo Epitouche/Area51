@@ -1,67 +1,106 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
 import { globalStyles } from '../styles/global_style';
-
-type Workflow = {
-  name: string;
-  action_id: number;
-  reaction_id: number;
-  is_active: boolean;
-  created_at: string;
-};
+import { getToken, getWorkflows } from '../service';
+import { Workflow } from '../types';
 
 type WorkflowTableProps = {
-  workflows: Workflow[];
   detailsModalVisible: boolean;
   setDetailsModalVisible: (detailsModalVisible: boolean) => void;
+  workflows?: Workflow[];
+  isBlackTheme?: boolean;
 };
 
 export function WorkflowTable({
-  workflows,
   setDetailsModalVisible,
   detailsModalVisible,
+  workflows,
+  isBlackTheme,
 }: WorkflowTableProps) {
+
   return (
     <ScrollView horizontal>
       <View style={styles.container}>
-        <View style={[styles.headerRow, globalStyles.secondaryDark]}>
-          <Text style={[styles.headerCell, globalStyles.textBlack]}>Name</Text>
-          <Text style={[styles.headerCell, globalStyles.textBlack]}>
+        <View
+          style={[
+            styles.headerRow,
+            isBlackTheme
+              ? globalStyles.secondaryLight
+              : globalStyles.secondaryDark,
+          ]}>
+          <Text
+            style={[
+              styles.headerCell,
+              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+            ]}>
+            Name
+          </Text>
+          <Text
+            style={[
+              styles.headerCell,
+              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+            ]}>
             Action
           </Text>
-          <Text style={[styles.headerCell, globalStyles.textBlack]}>
+          <Text
+            style={[
+              styles.headerCell,
+              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+            ]}>
             Reaction
           </Text>
-          <Text style={[styles.headerCell, globalStyles.textBlack]}>
+          <Text
+            style={[
+              styles.headerCell,
+              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+            ]}>
             Is Active
           </Text>
-          <Text style={[styles.headerCell, globalStyles.textBlack]}>
+          <Text
+            style={[
+              styles.headerCell,
+              isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+            ]}>
             Details
           </Text>
         </View>
         {workflows &&
           workflows.map((workflow, index) => (
-            <View key={index} style={[styles.row, globalStyles.secondaryDark]}>
+            <View
+              key={index}
+              style={[
+                styles.row,
+                isBlackTheme
+                  ? globalStyles.secondaryLight
+                  : globalStyles.secondaryDark,
+              ]}>
               <View style={styles.cell}>
-                <Text style={styles.text}>{workflow.name}</Text>
+                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
+                  {workflow.name}
+                </Text>
               </View>
               <View style={styles.cell}>
-                <Text style={styles.text}>{workflow.action_id}</Text>
+                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
+                  {workflow.action_name}
+                </Text>
               </View>
               <View style={styles.cell}>
-                <Text style={styles.text}>{workflow.reaction_id}</Text>
+                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
+                  {workflow.reaction_name}
+                </Text>
               </View>
               <View style={styles.cell}>
-                <Text style={styles.text}>
+                <Text style={isBlackTheme ? styles.text : styles.textBlack}>
                   {workflow.is_active ? 'Yes' : 'No'}
                 </Text>
               </View>
               <View style={styles.cell}>
                 <Button
-                  mode="contained"
                   onPress={() => setDetailsModalVisible(!detailsModalVisible)}>
-                  <Text style={styles.buttonText}>details</Text>
+                  <Text style={isBlackTheme ? styles.text : styles.textBlack}>
+                    ...
+                  </Text>
                 </Button>
               </View>
             </View>
@@ -101,11 +140,29 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     justifyContent: 'center',
   },
-  text: {
-    color: '#F7FAFB',
+  textBlack: {
     textAlign: 'center',
+    color: '#F7FAFB',
+    fontWeight: 'bold',
+  },
+  text: {
+    textAlign: 'center',
+    color: '#1A1A1A',
+    fontWeight: 'bold',
   },
   cell: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+  },
+  cellValidate: {
+    backgroundColor: 'green',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+  },
+  cellUnvalide: {
+    backgroundColor: 'red',
     justifyContent: 'center',
     alignItems: 'center',
     width: 100,

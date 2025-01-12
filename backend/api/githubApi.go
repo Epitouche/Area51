@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"area51/controllers"
+	"area51/schemas"
 )
 
 type GithubApi struct {
@@ -36,7 +37,7 @@ func (api *GithubApi) HandleGithubTokenCallback(ctx *gin.Context, path string) {
 
 func (api *GithubApi) StoreMobileToken(ctx *gin.Context) {
 	if token, err := api.controller.StoreMobileToken(ctx); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusNotFound, schemas.BasicResponse{Message: err.Error()})
 	} else {
 		ctx.JSON(http.StatusOK, gin.H{"token": token})
 	}
