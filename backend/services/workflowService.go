@@ -1,3 +1,4 @@
+
 package services
 
 import (
@@ -93,7 +94,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		workflowName = "Workflow " + workflowValue
 	}
 
-	githubServiceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
+	serviceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
 	newWorkflow := schemas.Workflow{
 		UserId:     user.Id,
 		User:       user,
@@ -114,13 +115,14 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 			return "Workflow already exists and is not active", nil
 		}
 	}
+	fmt.Println(newWorkflow)
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
 		return "", err
 	}
 
 	newWorkflow.Id = workflowId
-	service.InitWorkflow(newWorkflow, githubServiceToken)
+	service.InitWorkflow(newWorkflow, serviceToken)
 	return "Workflow Created succesfully", nil
 
 }
@@ -149,6 +151,8 @@ func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 		Id:       workflow.Id,
 		UserId:   user.Id,
 		IsActive: result.WorflowState,
+		ActionOptions: workflow.ActionOptions,
+		ReactionOptions: workflow.ReactionOptions,
 	}
 	service.repository.UpdateActiveStatus(newWorkflow)
 	reaction := service.reactionService.FindById(workflow.ReactionId)

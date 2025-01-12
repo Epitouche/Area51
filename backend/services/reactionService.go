@@ -3,6 +3,7 @@ package services
 import (
 	"area51/repository"
 	"area51/schemas"
+	"area51/toolbox"
 )
 
 type ReactionService interface {
@@ -41,6 +42,10 @@ func NewReactionService(
 				Name:        "add_track_reaction",
 				Description: "Add a track to a playlist",
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
+				Options: toolbox.MustMarshal(schemas.SpotifyReactionOptions{
+					PlaylistURL: "string",
+					TrackURL: "string",
+				}),
 			},
 		},
 		allReactions: []interface{}{serviceService},
@@ -63,6 +68,7 @@ func (service *reactionService) GetAllServicesByServiceId(
 			Name:        oneReaction.Name,
 			Description: oneReaction.Description,
 			ReactionId:  oneReaction.Id,
+			Options: oneReaction.Options,
 		})
 	}
 	return reactionJson
