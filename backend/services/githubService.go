@@ -245,5 +245,13 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	}
 	savedResult.ApiResponse = jsonValue
 	service.reactionResponseDataService.Save(savedResult)
+	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	reaction := service.reactionRepository.FindById(workflow.ReactionId)
+	reaction.Trigger = false
+	service.reactionRepository.UpdateTrigger(reaction)
 	time.Sleep(1 * time.Minute)
 }

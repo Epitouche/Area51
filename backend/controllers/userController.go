@@ -162,11 +162,11 @@ func (controller *userController) LogoutService(ctx *gin.Context) error {
 	if actualService.Id == 0 {
 		return fmt.Errorf("service not found")
 	}
-	err = controller.userService.LogoutFromService(userId, actualService)
+	tokens, err := controller.serviceToken.GetTokenByUserId(userId)
 	if err != nil {
 		return err
 	}
-	tokens, err := controller.serviceToken.GetTokenByUserId(userId)
+	err = controller.userService.LogoutFromService(userId, actualService)
 	if err != nil {
 		return err
 	}

@@ -163,11 +163,17 @@ func (r *userRepository) GetServiceByIdForUser(user schemas.User, serviceId uint
 }
 
 func (r *userRepository) LogoutFromService(user schemas.User, serviceToDelete schemas.Service) error {
-	r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	err := r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	if err != nil {
+		return err
+	}
 
 	for _, service := range user.Services {
 		if service.ServiceId == serviceToDelete.Id {
-			r.db.Connection.Model(&user).Association("Services").Delete(&service)
+			err = r.db.Connection.Model(&user).Association("Services").Delete(&service)
+			if err != nil {
+				return err
+			}
 			return nil
 		}
 	}
