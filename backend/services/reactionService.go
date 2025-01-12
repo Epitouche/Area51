@@ -37,6 +37,11 @@ func NewReactionService(
 				Description: "List all comments of a repository",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
 			},
+			{
+				Name:        "add_track_reaction",
+				Description: "Add a track to a playlist",
+				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
+			},
 		},
 		allReactions: []interface{}{serviceService},
 	}

@@ -62,6 +62,18 @@ func setupRouter() *gin.Engine {
 			workflow.GET("/reaction", workflowApi.GetMostRecentReaction)
 		}
 
+		spotify := apiRoutes.Group("/spotify")
+		{
+			spotify.GET("/auth", func(ctx *gin.Context) {
+				spotifyApi.RedirectToSpotify(ctx, spotify.BasePath()+"/callback")
+			})
+			spotify.POST("/callback", func(ctx *gin.Context) {
+				spotifyApi.HandleSpotifyTokenCallback(ctx, spotify.BasePath()+"/callback")
+			})
+
+			spotify.POST("/mobile/token", spotifyApi.StoreMobileToken)
+		}
+
 		action := apiRoutes.Group("/action", middlewares.Authorization())
 		{
 			action.POST("", actionApi.CreateAction)
@@ -84,16 +96,19 @@ var (
 	reactionRepository             repository.ReactionRepository             = repository.NewReactionRepository(databaseConnection)
 	workflowsRepository            repository.WorkflowRepository             = repository.NewWorkflowRepository(databaseConnection)
 	reactionResponseDataRepository repository.ReactionResponseDataRepository = repository.NewReactionResponseDataRepository(databaseConnection)
+	spotifyRepository              repository.SpotifyRepository              = repository.NewSpotifyRepository(databaseConnection)
+
 	// Services
 	jwtService                  services.JWTService                  = services.NewJWTService()
 	serviceToken                services.TokenService                = services.NewTokenService(tokenRepository, userService)
 	userService                 services.UserService                 = services.NewUserService(userRepository, jwtService)
 	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
 	githubService               services.GithubService               = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
-	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService)
+	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService)
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
+	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository)
 
 	// Controllers
 	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)
@@ -101,6 +116,7 @@ var (
 	actionController   controllers.ActionController   = controllers.NewActionController(actionService)
 	servicesController controllers.ServicesController = controllers.NewServiceController(servicesService, actionService, reactionService)
 	workflowController controllers.WorkflowController = controllers.NewWorkflowController(workflowsService, reactionService, actionService)
+	spotifyController  controllers.SpotifyController  = controllers.NewSpotifyController(spotifyService, servicesService, userService, serviceToken)
 )
 
 var (
@@ -109,6 +125,7 @@ var (
 	servicesApi *api.ServicesApi = api.NewServicesApi(servicesController, workflowController)
 	workflowApi *api.WorkflowApi = api.NewWorkflowApi(workflowController)
 	actionApi   *api.ActionApi   = api.NewActionApi(actionController)
+	spotifyApi  *api.SpotifyApi  = api.NewSpotifyApi(spotifyController)
 )
 
 // func initDependencies(dependencies *api.UserDependencies) {

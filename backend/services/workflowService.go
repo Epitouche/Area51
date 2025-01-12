@@ -101,7 +101,9 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		ActionId:   result.ActionId,
 		ReactionId: result.ReactionId,
 		Action:     service.actionService.FindById(result.ActionId),
+		ActionOptions: result.ActionOption,
 		Reaction:   service.reactionService.FindById(result.ReactionId),
+		ReactionOptions: result.ReactionOption,
 		Name:       workflowName,
 	}
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
@@ -173,7 +175,6 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 				fmt.Println("Error")
 				return
 			}
-
 			action := service.servicesService.FindActionByName(workflow.Action.Name)
 			if action == nil {
 				fmt.Println("Action not found")
@@ -181,7 +182,7 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			}
 
 			if workflow.IsActive {
-				action(channel, workflow.Action.Name, workflow.Id)
+				action(channel, workflow.ActionOptions, workflow.Id)
 			} else {
 				time.Sleep(30 * time.Second)
 			}

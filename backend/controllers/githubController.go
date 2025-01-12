@@ -60,7 +60,7 @@ func (controller *githubController) RedirectionToGithubService(ctx *gin.Context,
 func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path string) (string, error) {
 
 	var isAlreadyRegistered bool = false
-	var codeCredentials schemas.GithubCodeCredentials
+	var codeCredentials schemas.OAuth2CodeCredentials
 	err := json.NewDecoder(ctx.Request.Body).Decode(&codeCredentials)
 	if err != nil {
 		return "", err

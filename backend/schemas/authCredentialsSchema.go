@@ -16,7 +16,7 @@ type MobileToken struct {
 	Service ServiceName `json:"service"`
 }
 
-type GithubCodeCredentials struct {
+type OAuth2CodeCredentials struct {
 	Code  string `json:"code" binding:"required"`
 	State string `json:"state" binding:"required"`
 }
