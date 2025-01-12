@@ -73,7 +73,7 @@ func (repo *serviceRepository) FindByName(serviceName schemas.ServiceName) (serv
 	}).First(&service)
 
 	if err.Error != nil {
-		panic(err.Error)
+		return schemas.Service{}
 	}
 	return service
 }

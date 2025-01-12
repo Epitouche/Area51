@@ -23,30 +23,30 @@ type SpotifyService interface {
 }
 
 type spotifyService struct {
-	spotifyRepository repository.SpotifyRepository
+	userService        UserService
+	spotifyRepository  repository.SpotifyRepository
 	workflowRepository repository.WorkflowRepository
-	actionRepository repository.ActionRepository
+	actionRepository   repository.ActionRepository
 	reactionRepository repository.ReactionRepository
-	tokenRepository repository.TokenRepository
-	userRepository repository.UserRepository
-	mutex sync.Mutex
+	tokenRepository    repository.TokenRepository
+	mutex              sync.Mutex
 }
 
 func NewSpotifyService(
+	userService UserService,
 	spotifyRepository repository.SpotifyRepository,
 	workflowRepository repository.WorkflowRepository,
 	actionRepository repository.ActionRepository,
 	reactionRepository repository.ReactionRepository,
 	tokenRepository repository.TokenRepository,
-	userRepository repository.UserRepository,
 ) SpotifyService {
 	return &spotifyService{
-		spotifyRepository: spotifyRepository,
+		userService:        userService,
+		spotifyRepository:  spotifyRepository,
 		workflowRepository: workflowRepository,
-		actionRepository: actionRepository,
+		actionRepository:   actionRepository,
 		reactionRepository: reactionRepository,
-		tokenRepository: tokenRepository,
-		userRepository: userRepository,
+		tokenRepository:    tokenRepository,
 	}
 }
 
@@ -93,11 +93,11 @@ func (service *spotifyService) AuthGetServiceAccessToken(code string, path strin
 
 func (service *spotifyService) GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error) {
 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
-	if err != nil { 
+	if err != nil {
 		return schemas.SpotifyUserInfo{}, err
 	}
 
-	request.Header.Set("Authorization", "Bearer " + accessToken)
+	request.Header.Set("Authorization", "Bearer "+accessToken)
 	client := &http.Client{}
 
 	response, err := client.Do(request)
@@ -143,7 +143,8 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		return
 	}
 
-	accessToken := service.tokenRepository.FindByUserId(workflow.UserId)
+	user := service.userService.GetUserById(workflow.UserId)
+	accessToken := service.tokenRepository.FindByUserId(user)
 
 	options := schemas.SpotifyActionOptions{}
 	err = json.NewDecoder(strings.NewReader(option)).Decode(&options)
@@ -160,14 +161,14 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		return
 	}
 
-	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/" + playlistId, nil)
+	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+playlistId, nil)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
 		time.Sleep(30 * time.Second)
 		return
 	}
 	client := &http.Client{}
-	request.Header.Set("Authorization", "Bearer " + accessToken[len(accessToken) - 1].Token)
+	request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -245,7 +246,7 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	}
 
 	reqBody := fmt.Sprintf(`{"uris":["spotify:track:%s"],"position":0}`, trackId)
-	request, err := http.NewRequest("POST", "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks", strings.NewReader(reqBody))
+	request, err := http.NewRequest("POST", "https://api.spotify.com/v1/playlists/"+playlistId+"/tracks", strings.NewReader(reqBody))
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
@@ -253,7 +254,7 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	}
 
 	client := &http.Client{}
-	request.Header.Set("Authorization", "Bearer " + accessToken[len(accessToken) - 1].Token)
+	request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	_, err = client.Do(request)
 	if err != nil {
@@ -261,7 +262,7 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 		time.Sleep(30 * time.Second)
 		return
 	}
-	
+
 	reaction.Trigger = false
 	service.reactionRepository.UpdateTrigger(reaction)
 }

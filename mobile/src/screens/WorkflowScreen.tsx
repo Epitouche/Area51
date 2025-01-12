@@ -10,14 +10,17 @@ import {
   deleteToken,
   checkToken,
   getToken,
+  microsoftLogin,
+  getWorkflows,
 } from '../service';
 import { globalStyles } from '../styles/global_style';
-import { Action, AppStackList, Reaction } from '../types';
+import { Action, AppStackList, Reaction, Workflow } from '../types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export default function WorkflowScreen() {
   const [token, setToken] = useState('');
   const [detailsModals, setdetailsModals] = useState(false);
+  const [workflows, setWorkflows] = useState<Workflow[]>();
   const [action, setAction] = useState<Action>({
     action_id: 0,
     name: '',
@@ -34,11 +37,10 @@ export default function WorkflowScreen() {
   const {
     serverIp,
     aboutJson,
-    setAboutJson,
+    isConnected,
     setIsConnected,
     isBlackTheme,
     setServicesConnected,
-    servicesConnected,
   } = useContext(AppContext);
 
   const handleLogout = () => {
@@ -46,27 +48,41 @@ export default function WorkflowScreen() {
     deleteToken('token');
   };
 
+  const grabWorkflows = async () => {
+    if (token !== 'Error: token not found' && token !== ''){
+      await getWorkflows(serverIp, token, setWorkflows);
+    }
+  };
+
+  const checkIsToken = async () => {
+    if ((await checkToken('token')) !== true) {
+      setIsConnected(false);
+    } else {
+      await getToken('token', setToken);
+    }
+  };
+
   useEffect(() => {
-    const checkIsToken = async () => {
-      if ((await checkToken('token')) !== true) setIsConnected(false);
-    };
-    checkIsToken();
+    grabWorkflows();
     if (aboutJson)
       parseServices({
         aboutJson,
         serverIp,
         setServicesConnected,
       });
+  }, [token]);
+
+  useEffect(() => {
+    checkIsToken();
   }, []);
 
   const handleSendWorkflow = async () => {
-    await getToken('token', setToken);
     if (token !== 'Error: token not found' && action && reaction) {
       await sendWorkflows(token, serverIp, {
         action_id: action.action_id,
         reaction_id: reaction.reaction_id,
       });
-      await getAboutJson(serverIp, setAboutJson);
+      await getWorkflows(serverIp, token, setWorkflows);
       setAction({ action_id: 0, name: '', description: '' });
       setReaction({ reaction_id: 0, name: '', description: '' });
     }
@@ -85,17 +101,27 @@ export default function WorkflowScreen() {
           </Text>
           <Button
             mode="contained"
-            style={styles.loginButton}
+            style={[
+              styles.button,
+              isBlackTheme
+                ? globalStyles.primaryLight
+                : globalStyles.secondaryDark,
+            ]}
             onPress={handleLogout}>
             <Text
-              style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+              style={isBlackTheme ? globalStyles.text : globalStyles.textBlack}>
               Logout
             </Text>
           </Button>
           <View style={styles.buttonContainer}>
             <Button
               mode="contained"
-              style={[styles.button, globalStyles.secondaryDark]}
+              style={[
+                styles.Actionbutton,
+                isBlackTheme
+                  ? globalStyles.primaryLight
+                  : globalStyles.secondaryDark,
+              ]}
               onPress={() => {
                 navigation.navigate('ActionOrReaction', {
                   isAction: true,
@@ -105,14 +131,14 @@ export default function WorkflowScreen() {
               {action.name === '' ? (
                 <Text
                   style={
-                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                    isBlackTheme ? globalStyles.text : globalStyles.textBlack
                   }>
                   Add Action
                 </Text>
               ) : (
                 <Text
                   style={
-                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                    isBlackTheme ? globalStyles.text : globalStyles.textBlack
                   }>
                   {action.name}
                 </Text>
@@ -120,7 +146,12 @@ export default function WorkflowScreen() {
             </Button>
             <Button
               mode="contained"
-              style={[styles.button, globalStyles.secondaryDark]}
+              style={[
+                styles.Actionbutton,
+                isBlackTheme
+                  ? globalStyles.primaryLight
+                  : globalStyles.secondaryDark,
+              ]}
               onPress={() => {
                 navigation.navigate('ActionOrReaction', {
                   isAction: false,
@@ -130,14 +161,14 @@ export default function WorkflowScreen() {
               {reaction.name === '' ? (
                 <Text
                   style={
-                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                    isBlackTheme ? globalStyles.text : globalStyles.textBlack
                   }>
                   Add Reaction
                 </Text>
               ) : (
                 <Text
                   style={
-                    isBlackTheme ? globalStyles.textBlack : globalStyles.text
+                    isBlackTheme ? globalStyles.text : globalStyles.textBlack
                   }>
                   {reaction.name}
                 </Text>
@@ -147,23 +178,27 @@ export default function WorkflowScreen() {
           <Button
             disabled={action.name === '' || reaction.name === ''}
             mode="contained"
-            style={[styles.button, globalStyles.secondaryDark]}
+            style={[
+              styles.Actionbutton,
+              isBlackTheme
+                ? globalStyles.primaryLight
+                : globalStyles.secondaryDark,
+            ]}
             onPress={handleSendWorkflow}>
             <Text
-              style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+              style={isBlackTheme ? globalStyles.text : globalStyles.textBlack}>
               Send Workflow
             </Text>
           </Button>
         </View>
-        {aboutJson && (
-          <View style={styles.tabContainer}>
-            <WorkflowTable
-              workflows={aboutJson.server.workflows}
-              setDetailsModalVisible={setdetailsModals}
-              detailsModalVisible={detailsModals}
-            />
-          </View>
-        )}
+        <View style={styles.tabContainer}>
+          <WorkflowTable
+            workflows={workflows}
+            setDetailsModalVisible={setdetailsModals}
+            detailsModalVisible={detailsModals}
+            isBlackTheme={isBlackTheme}
+          />
+        </View>
       </ScrollView>
     </View>
   );
@@ -176,9 +211,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: '20%',
   },
-  loginButton: {
+  button: {
     width: 'auto',
-    backgroundColor: '#B454FD',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -192,7 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: '2%',
   },
-  button: {
+  Actionbutton: {
     width: '48%',
     alignItems: 'center',
     justifyContent: 'center',

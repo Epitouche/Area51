@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Modal } from 'react-native';
-import { getWorkflows } from '../service/workflows';
+import { getReaction } from '../service';
 import { PullRequestComment } from '../types';
 
 interface DetailsModalsProps {
