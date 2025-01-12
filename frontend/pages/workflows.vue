@@ -299,6 +299,7 @@ onMounted(() => {
           :on-click="openModalAction"
         />
         <ModalComponent
+          v-motion-pop
           title="Choose an action"
           :is-open="isModalActionOpen"
           @close="closeModalAction"
@@ -327,6 +328,7 @@ onMounted(() => {
           :on-click="openModalReaction"
         />
         <ModalComponent
+          v-motion-pop
           title="Choose a reaction"
           :is-open="isModalReactionOpen"
           @close="closeModalReaction"

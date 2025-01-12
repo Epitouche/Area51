@@ -34,7 +34,7 @@ async function fetchGitHubToken() {
       if (access_token) {
         access_token.value = response.access_token;
 
-        navigateTo("/workflows");
+        navigateTo("/dashboard");
       } else {
         console.error("Token not received in API response");
       }

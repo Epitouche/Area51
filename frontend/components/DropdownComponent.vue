@@ -51,10 +51,12 @@ onUnmounted(() => {
     />
 
     <div
-      v-show="isOpen"
+      v-if="isOpen"
       class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
     >
-      <div class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700">
+      <div
+        class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700"
+      >
         <button
           v-for="(option, index) in props.options"
           :key="index"

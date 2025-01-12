@@ -41,13 +41,12 @@ async function onSubmit() {
       tokenCookie.value = access_token;
 
       triggerNotification("success", "Registration successful", "You have successfully registered.");
-      navigateTo("/workflows");
+      navigateTo("/login");
     } else {
       triggerNotification("error", "Registration failed", "Please check your credentials.");
     }
   } catch (error) {
-    console.error("API response:", error.response?.data || error.message);
-    
+    console.error("Error registering user:", error);
     triggerNotification("error", "Registration failed", "An error occurred during registration.");
   }
 }

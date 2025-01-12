@@ -9,7 +9,7 @@ const notificationStore = useNotificationStore();
     <div
       v-for="notification in notificationStore.notifications"
       :key="notification.id"
-      v-motion-fade
+      v-motion-pop
       :class="[
         'flex items-center gap-2 p-4 rounded-md shadow-md transition-transform transform bg-opacity-90 text-fontWhite',
         notification.type === 'success' ? 'bg-success'
