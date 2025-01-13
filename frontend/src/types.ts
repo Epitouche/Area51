@@ -36,6 +36,7 @@ export type AboutResponse = {
         actions: Action[];
         reactions: Reaction[];
         image: string;
+        is_oauth: boolean;
       }
     ]
   }

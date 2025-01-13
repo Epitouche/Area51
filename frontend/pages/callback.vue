@@ -8,8 +8,11 @@ interface ApiResponse {
   access_token?: string;
 }
 
-async function fetchGitHubToken() {
+async function fetchServiceToken() {
   const route = useRoute();
+  
+  const serviceUsedLogin = localStorage.getItem("serviceUsedLogin");
+  console.log("serviceUsedLogin", serviceUsedLogin);
 
   const code = route.query.code;
   const state = route.query.state;
@@ -19,11 +22,12 @@ async function fetchGitHubToken() {
         $fetch<ApiResponse>("/api/auth/callback", {
           method: "POST",
           body: {
+            service: serviceUsedLogin,
             code: code as string,
             state: state as string,
             authorization: access_token.value
-              ? `Bearer ${access_token.value}`
-              : "",
+            ? `Bearer ${access_token.value}`
+            : "",
           },
         }),
         new Promise((_, reject) =>
@@ -39,18 +43,18 @@ async function fetchGitHubToken() {
         console.error("Token not received in API response");
       }
     } catch (error) {
-      console.error("Error during GitHub callback:", error);
+      console.error("Error during Service callback:", error);
     }
   } else {
     console.error("Required parameters (code or state) are missing in URL");
   }
 }
 
-onMounted(fetchGitHubToken);
+onMounted(fetchServiceToken);
 </script>
 
 <template>
   <div>
-    <p>Processing GitHub login...</p>
+    <p>Processing Service login...</p>
   </div>
 </template>
