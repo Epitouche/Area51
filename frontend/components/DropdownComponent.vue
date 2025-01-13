@@ -43,7 +43,7 @@ onUnmounted(() => {
   <div ref="dropdownRef" class="relative inline-block text-left">
     <ButtonComponent
       :text="props.label || 'Select an option'"
-      bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+      bg-color="bg-primaryWhite-300 dark:bg-secondaryDark-500"
       hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
       text-color="text-fontBlack dark:text-fontWhite"
       icon="material-symbols:keyboard-arrow-down-rounded"
@@ -52,7 +52,7 @@ onUnmounted(() => {
 
     <div
       v-if="isOpen"
-      class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-white dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
+      class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-secondaryWhite-500 dark:bg-secondaryDark-500 shadow-lg rounded-lg overflow-hidden z-10"
     >
       <div
         class="flex flex-col divide-y divide-secondaryWhite-700 dark:divide-secondaryDark-700"

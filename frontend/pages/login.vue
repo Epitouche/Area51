@@ -97,7 +97,6 @@ interface RedirectResponse {
 async function redirectToService(index: number) {
   try {
     const selectedService = services.value[index];
-    console.log("selectedService", selectedService);
     
     const { service_authentication_url }: RedirectResponse = await $fetch(
       `http://localhost:8080/api/${selectedService.name.toLowerCase()}/auth`,

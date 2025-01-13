@@ -80,11 +80,14 @@ const closeModalAction = () => {
 };
 
 const confirmModalAction = () => {
+  actionOption.value = services
+    .flatMap((service) => service.actions)
+    .find((action) => action.name === actionString.value)?.options || '';
   closeModalAction();
 };
 
 const openModalReaction = () => {
-  isModalReactionOpen.value = true;
+  isModalReactionOpen.value = true;  
 };
 
 const closeModalReaction = () => {
@@ -92,6 +95,9 @@ const closeModalReaction = () => {
 };
 
 const confirmModalReaction = () => {
+  reactionOption.value = services
+  .flatMap((service) => service.reactions)
+  .find((reaction) => reaction.name === reactionString.value)?.options || '';
   closeModalReaction();
 };
 
@@ -124,13 +130,11 @@ async function fetchServices() {
         },
       }
     );
-    console.log("responseServices", responseServices);
 
     responseServices.forEach((service: Service) => {
       services.push(service);
     });
 
-    // add actions and reactions to services in about.json fetch
     const responseAbout = await $fetch<AboutResponse>(
       "http://localhost:8080/about.json",
       {
@@ -196,9 +200,11 @@ async function addWorkflow() {
       .find((reaction) => reaction.name === reactionString.value);
 
     if (actionSelected && reactionSelected) {
-      const body: { action_id: number; reaction_id: number; name?: string } = {
+      const body: { action_id: number; reaction_id: number; name?: string, action_option?: string, reaction_option?: string } = {
         action_id: actionSelected.action_id,
         reaction_id: reactionSelected.reaction_id,
+        action_option: actionOption.value,
+        reaction_option: reactionOption.value,
       };
 
       if (WorkflowName.value) {
@@ -225,6 +231,8 @@ async function addWorkflow() {
       actionString.value = "";
       reactionString.value = "";
       WorkflowName.value = "";
+      actionOption.value = "";
+      reactionOption.value = "";
     }
   } catch (error) {
     console.error("Error adding workflow:", error);
@@ -355,12 +363,12 @@ onMounted(() => {
           <InputComponent
             v-model="actionOption"
             type="text"
-            label="Action settings"
+            label="Action options"
           />
           <InputComponent
             v-model="reactionOption"
             type="text"
-            label="Reaction settings"
+            label="Reaction options"
           />
         </div>
         <div class="flex justify-center">

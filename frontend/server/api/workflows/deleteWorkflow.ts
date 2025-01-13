@@ -1,7 +1,6 @@
 export default defineEventHandler(async (event) => {
   const params = await readBody(event);
   const access_token = event.headers.get("Authorization");
-  console.log("params", params);
   if (!params.action_id || !access_token || !params.reaction_id || !params.name || !params.workflow_id) {
     throw createError({
       statusCode: 400,
