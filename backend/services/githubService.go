@@ -183,10 +183,8 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 
 	if nbPR != len(pullRequests) {
 		nbPR = len(pullRequests)
-		reaction := service.reactionRepository.FindById(workflow.ReactionId)
-		reaction.Trigger = true
-		reaction.Id = workflow.ReactionId
-		service.reactionRepository.UpdateTrigger(reaction)
+		workflow.ReactionTrigger = true
+		service.workflowRepository.Update(workflow)
 	}
 	channel <- "Action workflow done"
 }
@@ -202,8 +200,7 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
 			for _, workflow := range actualWorkflow {
 				if workflow.Id == workflowId {
-					actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
-					if !actualReaction.Trigger {
+					if !workflow.ReactionTrigger {
 						fmt.Println("Trigger is already false, skipping reaction.")
 						return
 					}
@@ -264,9 +261,8 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		fmt.Println(err)
 		return
 	}
-	reaction := service.reactionRepository.FindById(workflow.ReactionId)
-	reaction.Trigger = false
-	service.reactionRepository.UpdateTrigger(reaction)
+	workflow.ReactionTrigger = false
+	service.workflowRepository.UpdateReactionTrigger(workflow)
 	time.Sleep(1 * time.Minute)
 }
 

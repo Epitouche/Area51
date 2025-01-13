@@ -27,7 +27,6 @@ func setupRouter() *gin.Engine {
 	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
-	// router.POST("/mobile/token", githubApi.StoreMobileToken)
 
 	apiRoutes := router.Group("/api")
 	{
@@ -74,8 +73,6 @@ func setupRouter() *gin.Engine {
 			spotify.POST("/callback", func(ctx *gin.Context) {
 				spotifyApi.HandleSpotifyTokenCallback(ctx, spotify.BasePath()+"/callback")
 			})
-
-			// spotify.POST("/mobile/token", spotifyApi.StoreMobileToken)
 		}
 
 		action := apiRoutes.Group("/action", middlewares.Authorization())

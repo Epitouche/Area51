@@ -150,16 +150,12 @@ func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 		Id:              workflow.Id,
 		UserId:          user.Id,
 		IsActive:        result.WorflowState,
+		ReactionTrigger: result.WorflowState,
 		ActionOptions:   workflow.ActionOptions,
 		ReactionOptions: workflow.ReactionOptions,
 	}
 	service.repository.UpdateActiveStatus(newWorkflow)
-	reaction := service.reactionService.FindById(workflow.ReactionId)
-	newReaction := schemas.Reaction{
-		Id:      reaction.Id,
-		Trigger: result.WorflowState,
-	}
-	service.reactionService.UpdateTrigger(newReaction)
+	service.repository.UpdateReactionTrigger(newWorkflow)
 	return nil
 }
 

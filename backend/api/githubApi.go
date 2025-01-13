@@ -33,11 +33,3 @@ func (api *GithubApi) HandleGithubTokenCallback(ctx *gin.Context, path string) {
 		ctx.JSON(http.StatusOK, gin.H{"access_token": github_token})
 	}
 }
-
-// func (api *GithubApi) StoreMobileToken(ctx *gin.Context) {
-// 	if token, err := api.controller.StoreMobileToken(ctx); err != nil {
-// 		ctx.JSON(http.StatusNotFound, schemas.BasicResponse{Message: err.Error()})
-// 	} else {
-// 		ctx.JSON(http.StatusOK, gin.H{"token": token})
-// 	}
-// }

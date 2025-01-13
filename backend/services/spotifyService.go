@@ -188,11 +188,8 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 	defer response.Body.Close()
 	if options.IsOld {
 		if options.NbSongs < result.Tracks.Total {
-			reaction := service.reactionRepository.FindById(workflow.ReactionId)
-			reaction.Trigger = true
-			reaction.Id = workflow.ReactionId
-			service.reactionRepository.UpdateTrigger(reaction)
 			options.NbSongs = result.Tracks.Total
+			workflow.ReactionTrigger = true
 			workflow.ActionOptions = toolbox.MustMarshal(options)
 			service.workflowRepository.Update(workflow)
 		}
@@ -217,8 +214,7 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 		time.Sleep(30 * time.Second)
 		return
 	}
-	reaction := service.reactionRepository.FindById(workflow.ReactionId)
-	if !reaction.Trigger {
+	if !workflow.ReactionTrigger {
 		time.Sleep(30 * time.Second)
 		return
 	}
@@ -263,9 +259,8 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 		time.Sleep(30 * time.Second)
 		return
 	}
-
-	reaction.Trigger = false
-	service.reactionRepository.UpdateTrigger(reaction)
+	workflow.ReactionTrigger = false
+	service.workflowRepository.UpdateReactionTrigger(workflow)
 }
 
 func (service *spotifyService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {

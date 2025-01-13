@@ -10,7 +10,6 @@ type ReactionService interface {
 	FindAll() []schemas.Reaction
 	SaveAllReaction()
 	FindById(reactionId uint64) schemas.Reaction
-	UpdateTrigger(reaction schemas.Reaction)
 	GetAllServicesByServiceId(serviceId uint64) (reactionJson []schemas.ReactionJson)
 }
 
@@ -89,8 +88,4 @@ func (service *reactionService) SaveAllReaction() {
 
 func (service *reactionService) FindById(reactionId uint64) schemas.Reaction {
 	return service.repository.FindById(reactionId)
-}
-
-func (service *reactionService) UpdateTrigger(reaction schemas.Reaction) {
-	service.repository.UpdateTrigger(reaction)
 }
