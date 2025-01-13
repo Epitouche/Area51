@@ -21,7 +21,8 @@
               "aleksandra.go-group-imports",
               "Cardinal90.multi-cursor-case-preserve",
               "cweijan.vscode-database-client2",
-              "cweijan.dbclient-jdbc"
+              "cweijan.dbclient-jdbc",
+              "WakaTime.vscode-wakatime"
           ]
       }
   },
