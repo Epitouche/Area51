@@ -3,13 +3,13 @@ package services
 import (
 	"area51/repository"
 	"area51/schemas"
+	"area51/toolbox"
 )
 
 type ReactionService interface {
 	FindAll() []schemas.Reaction
 	SaveAllReaction()
 	FindById(reactionId uint64) schemas.Reaction
-	UpdateTrigger(reaction schemas.Reaction)
 	GetAllServicesByServiceId(serviceId uint64) (reactionJson []schemas.ReactionJson)
 }
 
@@ -36,6 +36,19 @@ func NewReactionService(
 				Name:        "list_comments",
 				Description: "List all comments of a repository",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
+				Options: toolbox.MustMarshal(schemas.GithubListAllReviewCommentsOptions{
+					Owner: "string",
+					Repo:  "string",
+				}),
+			},
+			{
+				Name:        "add_track_reaction",
+				Description: "Add a track to a playlist",
+				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
+				Options: toolbox.MustMarshal(schemas.SpotifyReactionOptions{
+					PlaylistURL: "string",
+					TrackURL:    "string",
+				}),
 			},
 		},
 		allReactions: []interface{}{serviceService},
@@ -58,6 +71,7 @@ func (service *reactionService) GetAllServicesByServiceId(
 			Name:        oneReaction.Name,
 			Description: oneReaction.Description,
 			ReactionId:  oneReaction.Id,
+			Options:     oneReaction.Options,
 		})
 	}
 	return reactionJson
@@ -74,8 +88,4 @@ func (service *reactionService) SaveAllReaction() {
 
 func (service *reactionService) FindById(reactionId uint64) schemas.Reaction {
 	return service.repository.FindById(reactionId)
-}
-
-func (service *reactionService) UpdateTrigger(reaction schemas.Reaction) {
-	service.repository.UpdateTrigger(reaction)
 }
