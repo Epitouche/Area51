@@ -20,3 +20,7 @@ type OAuth2CodeCredentials struct {
 	Code  string `json:"code" binding:"required"`
 	State string `json:"state" binding:"required"`
 }
+
+type OAuthConnectionResponse struct {
+	ServiceAuthenticationUrl string `json:"service_authentication_url"`
+}
