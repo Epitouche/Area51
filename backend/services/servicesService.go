@@ -13,11 +13,13 @@ type ServicesService interface {
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
 	GetServices() []interface{}
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
+	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
 }
 
 type ServiceInterface interface {
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
+	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
 }
 
 type servicesService struct {
@@ -106,4 +108,13 @@ func (service *servicesService) FindReactionByName(name string) func(channel cha
 
 func (service *servicesService) FindById(serviceId uint64) schemas.Service {
 	return service.repository.FindById(serviceId)
+}
+
+func (service *servicesService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
+	for _, oneService := range service.allServices {
+		if oneService.(ServiceInterface).GetUserInfosByToken(accessToken) != nil {
+			return oneService.(ServiceInterface).GetUserInfosByToken(accessToken)
+		}
+	}
+	return nil
 }

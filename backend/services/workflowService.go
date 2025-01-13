@@ -1,4 +1,3 @@
-
 package services
 
 import (
@@ -96,16 +95,16 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 
 	serviceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
 	newWorkflow := schemas.Workflow{
-		UserId:     user.Id,
-		User:       user,
-		IsActive:   true,
-		ActionId:   result.ActionId,
-		ReactionId: result.ReactionId,
-		Action:     service.actionService.FindById(result.ActionId),
-		ActionOptions: result.ActionOption,
-		Reaction:   service.reactionService.FindById(result.ReactionId),
+		UserId:          user.Id,
+		User:            user,
+		IsActive:        true,
+		ActionId:        result.ActionId,
+		ReactionId:      result.ReactionId,
+		Action:          service.actionService.FindById(result.ActionId),
+		ActionOptions:   result.ActionOption,
+		Reaction:        service.reactionService.FindById(result.ReactionId),
 		ReactionOptions: result.ReactionOption,
-		Name:       workflowName,
+		Name:            workflowName,
 	}
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
 	if actualWorkflow.Id != 0 {
@@ -148,10 +147,10 @@ func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 		return err
 	}
 	newWorkflow := schemas.Workflow{
-		Id:       workflow.Id,
-		UserId:   user.Id,
-		IsActive: result.WorflowState,
-		ActionOptions: workflow.ActionOptions,
+		Id:              workflow.Id,
+		UserId:          user.Id,
+		IsActive:        result.WorflowState,
+		ActionOptions:   workflow.ActionOptions,
 		ReactionOptions: workflow.ReactionOptions,
 	}
 	service.repository.UpdateActiveStatus(newWorkflow)
@@ -187,9 +186,8 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 
 			if workflow.IsActive {
 				action(channel, workflow.ActionOptions, workflow.Id)
-			} else {
-				time.Sleep(30 * time.Second)
 			}
+			time.Sleep(30 * time.Second)
 		}
 		fmt.Println("Clear")
 		channel <- "Workflow finished"
@@ -215,9 +213,8 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 				result := <-channel
 				reaction(channel, workflow.Id, githubServiceToken)
 				fmt.Printf("result value: %+v\n", result)
-			} else {
-				time.Sleep(30 * time.Second)
 			}
+			time.Sleep(30 * time.Second)
 		}
 	}(workflowStartingPoint, channel)
 }

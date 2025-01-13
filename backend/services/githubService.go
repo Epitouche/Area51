@@ -18,9 +18,10 @@ import (
 
 type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
-	GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
+	// GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
+	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
 }
 
 type githubService struct {
@@ -93,30 +94,30 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	return resultToken, nil
 }
 
-func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUserInfo, error) {
-	request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
-	if err != nil {
-		return schemas.GithubUserInfo{}, err
-	}
+// func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUserInfo, error) {
+// 	request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
+// 	if err != nil {
+// 		return schemas.GithubUserInfo{}, err
+// 	}
 
-	request.Header.Set("Authorization", "Bearer "+accessToken)
-	client := &http.Client{}
+// 	request.Header.Set("Authorization", "Bearer "+accessToken)
+// 	client := &http.Client{}
 
-	response, err := client.Do(request)
-	if err != nil {
-		return schemas.GithubUserInfo{}, err
-	}
+// 	response, err := client.Do(request)
+// 	if err != nil {
+// 		return schemas.GithubUserInfo{}, err
+// 	}
 
-	result := schemas.GithubUserInfo{}
+// 	result := schemas.GithubUserInfo{}
 
-	err = json.NewDecoder(response.Body).Decode(&result)
-	if err != nil {
-		return schemas.GithubUserInfo{}, err
-	}
+// 	err = json.NewDecoder(response.Body).Decode(&result)
+// 	if err != nil {
+// 		return schemas.GithubUserInfo{}, err
+// 	}
 
-	response.Body.Close()
-	return result, nil
-}
+// 	response.Body.Close()
+// 	return result, nil
+// }
 
 func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
 	switch name {
@@ -254,4 +255,28 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	reaction.Trigger = false
 	service.reactionRepository.UpdateTrigger(reaction)
 	time.Sleep(1 * time.Minute)
+}
+
+func (service *githubService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
+	return func(userInfos *schemas.ServicesUserInfos) {
+		request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
+		if err != nil {
+			return
+		}
+
+		request.Header.Set("Authorization", "Bearer "+accessToken)
+		client := &http.Client{}
+
+		response, err := client.Do(request)
+		if err != nil {
+			return
+		}
+
+		err = json.NewDecoder(response.Body).Decode(&userInfos.GithubUserInfos)
+		if err != nil {
+			return
+		}
+
+		response.Body.Close()
+	}
 }

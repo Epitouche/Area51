@@ -27,10 +27,14 @@ func setupRouter() *gin.Engine {
 	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
-	router.POST("/mobile/token", githubApi.StoreMobileToken)
+	// router.POST("/mobile/token", githubApi.StoreMobileToken)
 
 	apiRoutes := router.Group("/api")
 	{
+		mobile := apiRoutes.Group("/mobile")
+		{
+			mobile.POST("/token", mobileApi.StoreMobileToken)
+		}
 
 		user := apiRoutes.Group("/user", middlewares.Authorization())
 		{
@@ -71,7 +75,7 @@ func setupRouter() *gin.Engine {
 				spotifyApi.HandleSpotifyTokenCallback(ctx, spotify.BasePath()+"/callback")
 			})
 
-			spotify.POST("/mobile/token", spotifyApi.StoreMobileToken)
+			// spotify.POST("/mobile/token", spotifyApi.StoreMobileToken)
 		}
 
 		action := apiRoutes.Group("/action", middlewares.Authorization())
@@ -117,6 +121,7 @@ var (
 	servicesController controllers.ServicesController = controllers.NewServiceController(servicesService, actionService, reactionService)
 	workflowController controllers.WorkflowController = controllers.NewWorkflowController(workflowsService, reactionService, actionService)
 	spotifyController  controllers.SpotifyController  = controllers.NewSpotifyController(spotifyService, servicesService, userService, serviceToken)
+	mobileController   controllers.MobileController   = controllers.NewMobileController(userService, serviceToken, servicesService)
 )
 
 var (
@@ -126,6 +131,7 @@ var (
 	workflowApi *api.WorkflowApi = api.NewWorkflowApi(workflowController)
 	actionApi   *api.ActionApi   = api.NewActionApi(actionController)
 	spotifyApi  *api.SpotifyApi  = api.NewSpotifyApi(spotifyController)
+	mobileApi   *api.MobileApi   = api.NewMobileApi(mobileController)
 )
 
 // func initDependencies(dependencies *api.UserDependencies) {

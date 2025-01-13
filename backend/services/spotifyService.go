@@ -17,9 +17,10 @@ import (
 
 type SpotifyService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.SpotifyResponseToken, error)
-	GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error)
+	// GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
+	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
 }
 
 type spotifyService struct {
@@ -91,28 +92,28 @@ func (service *spotifyService) AuthGetServiceAccessToken(code string, path strin
 	return resultToken, nil
 }
 
-func (service *spotifyService) GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error) {
-	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
-	if err != nil {
-		return schemas.SpotifyUserInfo{}, err
-	}
+// func (service *spotifyService) GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error) {
+// 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
+// 	if err != nil {
+// 		return schemas.SpotifyUserInfo{}, err
+// 	}
 
-	request.Header.Set("Authorization", "Bearer "+accessToken)
-	client := &http.Client{}
+// 	request.Header.Set("Authorization", "Bearer "+accessToken)
+// 	client := &http.Client{}
 
-	response, err := client.Do(request)
-	if err != nil {
-		return schemas.SpotifyUserInfo{}, err
-	}
+// 	response, err := client.Do(request)
+// 	if err != nil {
+// 		return schemas.SpotifyUserInfo{}, err
+// 	}
 
-	result := schemas.SpotifyUserInfo{}
-	err = json.NewDecoder(response.Body).Decode(&result)
-	if err != nil {
-		return schemas.SpotifyUserInfo{}, err
-	}
-	response.Body.Close()
-	return result, nil
-}
+// 	result := schemas.SpotifyUserInfo{}
+// 	err = json.NewDecoder(response.Body).Decode(&result)
+// 	if err != nil {
+// 		return schemas.SpotifyUserInfo{}, err
+// 	}
+// 	response.Body.Close()
+// 	return result, nil
+// }
 
 func (service *spotifyService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
 	switch name {
@@ -265,4 +266,27 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 
 	reaction.Trigger = false
 	service.reactionRepository.UpdateTrigger(reaction)
+}
+
+func (service *spotifyService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
+	return func(userInfos *schemas.ServicesUserInfos) {
+		request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
+		if err != nil {
+			return
+		}
+
+		request.Header.Set("Authorization", "Bearer "+accessToken)
+		client := &http.Client{}
+
+		response, err := client.Do(request)
+		if err != nil {
+			return
+		}
+
+		err = json.NewDecoder(response.Body).Decode(&userInfos.SpotifyUserInfos)
+		if err != nil {
+			return
+		}
+		response.Body.Close()
+	}
 }

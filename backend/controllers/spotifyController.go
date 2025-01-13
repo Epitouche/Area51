@@ -18,7 +18,7 @@ import (
 type SpotifyController interface {
 	RedirectionToSpotifyService(*gin.Context, string) (string, error)
 	ServiceSpotifyCallback(*gin.Context, string) (string, error)
-	StoreMobileToken(*gin.Context) (string, error)
+	// StoreMobileToken(*gin.Context) (string, error)
 }
 
 type spotifyController struct {
@@ -113,9 +113,11 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 
 	fmt.Println("spotify: ", spotifyTokenResponse)
 	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
-	userInfo, err := controller.service.GetUserInfo(spotifyTokenResponse.AccessToken)
-
-	fmt.Println("userinfo", userInfo)
+	// userInfo, err := controller.service.GetUserInfo(spotifyTokenResponse.AccessToken)
+	var ServicesUserInfos schemas.ServicesUserInfos
+	userInfos := controller.servicesService.GetUserInfosByToken(spotifyTokenResponse.AccessToken)
+	userInfos(&ServicesUserInfos)
+	userInfo := ServicesUserInfos.SpotifyUserInfos
 	if err != nil {
 		return "", fmt.Errorf("unable to get user info because %w", err)
 	}
@@ -227,121 +229,121 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 	}
 }
 
-func (controller *spotifyController) StoreMobileToken(ctx *gin.Context) (string, error) {
-	var result schemas.MobileToken
-	var isAlreadyRegistered bool = false
-	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
-	if err != nil {
-		return "", err
-	}
-	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
-	userInfo, err := controller.service.GetUserInfo(result.Token)
-	if err != nil {
-		return "", fmt.Errorf("unable to get user info because %w", err)
-	}
-	var actualUser schemas.User
-	actualUser = controller.userService.GetUserByEmail(&userInfo.Email)
-	if actualUser.Email != nil {
-		isAlreadyRegistered = true
-	}
-	authHeader := ctx.GetHeader("Authorization")
-	if authHeader != "" && len(authHeader) >= len("Bearer ") {
-		token := authHeader[len("Bearer "):]
-		user, err := controller.userService.GetUserInfos(token)
-		if err != nil {
-			return "", err
-		}
-		if user.Username != "" {
-			err := controller.userService.AddServiceToUser(user, schemas.ServiceToken{
-				Token:     result.Token,
-				Service:   controller.servicesService.FindByName(schemas.Spotify),
-				UserId:    user.Id,
-				ServiceId: controller.servicesService.FindByName(schemas.Spotify).Id,
-			})
-			if err != nil {
-				return "", err
-			}
-			newSessionToken, _ := controller.userService.Login(user, controller.servicesService.FindByName(result.Service))
-			return newSessionToken, nil
-		}
-	}
-	var newSpotifyToken schemas.ServiceToken
-	var newUser schemas.User
-	password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
-	if err != nil {
-		return "", fmt.Errorf("unable to hash password because %w", err)
-	}
-	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, spotifyService.Id)
+// func (controller *spotifyController) StoreMobileToken(ctx *gin.Context) (string, error) {
+// 	var result schemas.MobileToken
+// 	var isAlreadyRegistered bool = false
+// 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
+// 	userInfo, err := controller.service.GetUserInfo(result.Token)
+// 	if err != nil {
+// 		return "", fmt.Errorf("unable to get user info because %w", err)
+// 	}
+// 	var actualUser schemas.User
+// 	actualUser = controller.userService.GetUserByEmail(&userInfo.Email)
+// 	if actualUser.Email != nil {
+// 		isAlreadyRegistered = true
+// 	}
+// 	authHeader := ctx.GetHeader("Authorization")
+// 	if authHeader != "" && len(authHeader) >= len("Bearer ") {
+// 		token := authHeader[len("Bearer "):]
+// 		user, err := controller.userService.GetUserInfos(token)
+// 		if err != nil {
+// 			return "", err
+// 		}
+// 		if user.Username != "" {
+// 			err := controller.userService.AddServiceToUser(user, schemas.ServiceToken{
+// 				Token:     result.Token,
+// 				Service:   controller.servicesService.FindByName(schemas.Spotify),
+// 				UserId:    user.Id,
+// 				ServiceId: controller.servicesService.FindByName(schemas.Spotify).Id,
+// 			})
+// 			if err != nil {
+// 				return "", err
+// 			}
+// 			newSessionToken, _ := controller.userService.Login(user, controller.servicesService.FindByName(result.Service))
+// 			return newSessionToken, nil
+// 		}
+// 	}
+// 	var newSpotifyToken schemas.ServiceToken
+// 	var newUser schemas.User
+// 	password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+// 	if err != nil {
+// 		return "", fmt.Errorf("unable to hash password because %w", err)
+// 	}
+// 	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, spotifyService.Id)
 
-	if isAlreadyRegistered {
-		newSpotifyToken = schemas.ServiceToken{
-			Id:      serviceToken.Id,
-			Token:   result.Token,
-			Service: spotifyService,
-			UserId:  actualUser.Id,
-		}
+// 	if isAlreadyRegistered {
+// 		newSpotifyToken = schemas.ServiceToken{
+// 			Id:      serviceToken.Id,
+// 			Token:   result.Token,
+// 			Service: spotifyService,
+// 			UserId:  actualUser.Id,
+// 		}
 
-	} else {
-		newUser = schemas.User{
-			Username: userInfo.DisplayName,
-			Email:    &userInfo.Email,
-			Password: &password,
-		}
-		err := controller.userService.CreateUser(newUser)
-		if err != nil {
-			return "", fmt.Errorf("unable to create user because %w", err)
-		}
-		actualUser = controller.userService.GetUserByUsername(userInfo.DisplayName)
-		newSpotifyToken = schemas.ServiceToken{
-			Token:   result.Token,
-			Service: spotifyService,
-			UserId:  actualUser.Id,
-		}
-		isAlreadyRegistered = true
-	}
-	if serviceToken.Id != 0 {
-		actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, spotifyService.Id)
-		if actualServiceToken.Token != "" {
-			err := controller.serviceToken.Update(newSpotifyToken)
-			if err != nil {
-				return "", fmt.Errorf("unable to update token because %w", err)
-			}
-		}
-	}
+// 	} else {
+// 		newUser = schemas.User{
+// 			Username: userInfo.DisplayName,
+// 			Email:    &userInfo.Email,
+// 			Password: &password,
+// 		}
+// 		err := controller.userService.CreateUser(newUser)
+// 		if err != nil {
+// 			return "", fmt.Errorf("unable to create user because %w", err)
+// 		}
+// 		actualUser = controller.userService.GetUserByUsername(userInfo.DisplayName)
+// 		newSpotifyToken = schemas.ServiceToken{
+// 			Token:   result.Token,
+// 			Service: spotifyService,
+// 			UserId:  actualUser.Id,
+// 		}
+// 		isAlreadyRegistered = true
+// 	}
+// 	if serviceToken.Id != 0 {
+// 		actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, spotifyService.Id)
+// 		if actualServiceToken.Token != "" {
+// 			err := controller.serviceToken.Update(newSpotifyToken)
+// 			if err != nil {
+// 				return "", fmt.Errorf("unable to update token because %w", err)
+// 			}
+// 		}
+// 	}
 
-	if newUser.Username == "" {
-		newUser = schemas.User{
-			Username: userInfo.DisplayName,
-			Email:    &userInfo.Email,
-			Password: &password,
-		}
-	} else {
-		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
-		for _, token := range tokens {
-			if token.UserId == actualUser.Id {
-				newUser = schemas.User{
-					Username: userInfo.DisplayName,
-					Email:    &userInfo.Email,
-					Password: &password,
-				}
-				serviceToken.Id = token.Id
-				err := controller.userService.UpdateUserInfos(actualUser)
-				if err != nil {
-					return "", fmt.Errorf("unable to update user infos because %w", err)
-				}
-				break
-			}
-		}
-	}
+// 	if newUser.Username == "" {
+// 		newUser = schemas.User{
+// 			Username: userInfo.DisplayName,
+// 			Email:    &userInfo.Email,
+// 			Password: &password,
+// 		}
+// 	} else {
+// 		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
+// 		for _, token := range tokens {
+// 			if token.UserId == actualUser.Id {
+// 				newUser = schemas.User{
+// 					Username: userInfo.DisplayName,
+// 					Email:    &userInfo.Email,
+// 					Password: &password,
+// 				}
+// 				serviceToken.Id = token.Id
+// 				err := controller.userService.UpdateUserInfos(actualUser)
+// 				if err != nil {
+// 					return "", fmt.Errorf("unable to update user infos because %w", err)
+// 				}
+// 				break
+// 			}
+// 		}
+// 	}
 
-	if isAlreadyRegistered {
-		token, _ := controller.userService.Login(newUser, spotifyService)
-		return token, nil
-	} else {
-		token, err := controller.userService.Register(newUser)
-		if err != nil {
-			return "", fmt.Errorf("unable to register user because %w", err)
-		}
-		return token, nil
-	}
-}
+// 	if isAlreadyRegistered {
+// 		token, _ := controller.userService.Login(newUser, spotifyService)
+// 		return token, nil
+// 	} else {
+// 		token, err := controller.userService.Register(newUser)
+// 		if err != nil {
+// 			return "", fmt.Errorf("unable to register user because %w", err)
+// 		}
+// 		return token, nil
+// 	}
+// }
