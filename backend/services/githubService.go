@@ -137,8 +137,6 @@ func (service *githubService) FindReactionByName(name string) func(channel chan 
 	}
 }
 
-// var nbPR int
-
 type transportWithToken struct {
 	token string
 }
