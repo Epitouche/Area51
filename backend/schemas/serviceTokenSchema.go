@@ -13,4 +13,5 @@ type ServiceToken struct {
 	ExpireAt     time.Time `                                          json:"expireAt"`
 	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"          json:"createdAt"`
 	UpdateAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"          json:"updateAt"`
+	Users        []User    `gorm:"many2many:user_service_tokens;"`
 }

@@ -5,6 +5,7 @@ import "time"
 type ActionJson struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Options     string `json:"options"`
 	ActionId    uint64 `json:"action_id"`
 }
 

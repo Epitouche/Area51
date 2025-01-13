@@ -11,6 +11,7 @@ type WorkflowController interface {
 	CreateWorkflow(ctx *gin.Context) (string, error)
 	ActivateWorkflow(ctx *gin.Context) error
 	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
+	DeleteWorkflow(ctx *gin.Context) error
 }
 
 type workflowController struct {
@@ -41,4 +42,8 @@ func (controller *workflowController) ActivateWorkflow(ctx *gin.Context) error {
 
 func (controller *workflowController) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
 	return controller.service.GetMostRecentReaction(ctx)
+}
+
+func (controller *workflowController) DeleteWorkflow(ctx *gin.Context) error {
+	return controller.service.DeleteWorkflow(ctx)
 }
