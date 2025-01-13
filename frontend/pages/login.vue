@@ -35,7 +35,7 @@ async function onSubmit() {
       const tokenCookie = useCookie("access_token");
       tokenCookie.value = access_token;
 
-      navigateTo("/workflows");
+      navigateTo("/dashboard");
     } else {
       triggerNotification("error", "Login failed", "Please check your credentials");
     }
@@ -45,13 +45,13 @@ async function onSubmit() {
   }
 }
 
-interface GitHubAuthResponse {
+interface RedirectResponse {
   github_authentication_url: string;
 }
 
-async function redirectToGitHubOAuth() {
+async function redirectToService() {
   try {
-    const { github_authentication_url }: GitHubAuthResponse = await $fetch(
+    const { github_authentication_url }: RedirectResponse = await $fetch(
       "http://localhost:8080/api/github/auth",
       {
         method: "GET",
@@ -123,7 +123,7 @@ async function redirectToGitHubOAuth() {
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
-          :on-click="redirectToGitHubOAuth"
+          :on-click="redirectToService"
         />
         <ButtonComponent
           text="Google"

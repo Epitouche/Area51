@@ -63,6 +63,21 @@ const handleClickOutside = (event: MouseEvent) => {
 
 const token = useCookie("access_token");
 
+const notificationStore = useNotificationStore();
+
+function triggerNotification(
+  type: "success" | "error" | "warning",
+  title: string,
+  message: string
+) {
+  notificationStore.addNotification({
+    type,
+    title,
+    message,
+  });
+}
+
+
 async function launchAction(option: string, workflow: Workflow) {
   switch (option) {
     case "Edit":
@@ -74,11 +89,32 @@ async function launchAction(option: string, workflow: Workflow) {
       activeDropdownIndex.value = null;
       break;
     case "Delete":
-      console.log("Delete");
+      await deleteWorkflow(workflow);
       activeDropdownIndex.value = null;
       break;
     default:
       break;
+  }
+}
+
+async function deleteWorkflow(workflow:Workflow) {
+  try {
+    await $fetch("/api/workflows/deleteWorkflow", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workflow_id: workflow.workflow_id,
+        name: workflow.name,
+        action_id: workflow.action_id,
+        reaction_id: workflow.reaction_id,
+      }),
+    });
+    triggerNotification("success", "Success", "Workflow deleted successfully");
+  } catch (error) {
+    console.error(error);
   }
 }
 

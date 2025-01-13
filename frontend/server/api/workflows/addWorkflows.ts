@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
         action_id: params.action_id,
         reaction_id: params.reaction_id,
         name: params.name,
+        action_options: params.action_options ? params.action_options : "",
+        reaction_options: params.reaction_options ? params.reaction_options : "",
       },
     });
 
