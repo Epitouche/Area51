@@ -45,6 +45,18 @@ func NewActionService(
 				Name:        "pull_request",
 				Description: "Creation or deletion of a pull request",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
+				Options: toolbox.MustMarshal(schemas.GithubPullRequestOptions{
+					Owner: "string",
+					Repo:  "string",
+				}),
+			},
+			{
+				Name:        string(schemas.SpotifyAddTrackAction),
+				Description: "Add a track to a playlist",
+				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
+				Options: toolbox.MustMarshal(schemas.SpotifyActionOptionsInfo{
+					PlaylistURL: "string",
+				}),
 			},
 		},
 		allActions: []interface{}{serviceService},
@@ -98,6 +110,7 @@ func (service *actionService) GetAllServicesByServiceId(
 		actionJson = append(actionJson, schemas.ActionJson{
 			Name:        oneAction.Name,
 			Description: oneAction.Description,
+			Options:     oneAction.Options,
 			ActionId:    oneAction.Id,
 		})
 	}

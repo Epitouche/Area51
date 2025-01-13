@@ -17,11 +17,12 @@ type WorkflowService interface {
 	FindAll() []schemas.Workflow
 	CreateWorkflow(ctx *gin.Context) (string, error)
 	ActivateWorkflow(ctx *gin.Context) error
-	InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken)
+	InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken, actionOption string, reactionOption string)
 	ExistWorkflow(workflowId uint64) bool
 	GetWorkflowByName(name string) schemas.Workflow
 	GetWorkflowById(workflowId uint64) schemas.Workflow
 	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
+	DeleteWorkflow(ctx *gin.Context) error
 }
 
 type workflowService struct {
@@ -61,6 +62,7 @@ func (service *workflowService) FindAll() []schemas.Workflow {
 func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error) {
 	result := schemas.WorkflowResult{}
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	fmt.Printf("result value: %+v\n", result)
 	if err != nil {
 		return "", err
 	}
@@ -71,6 +73,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	}
 
 	user, err := service.userService.GetUserInfos(tokenString)
+	fmt.Printf("user value: %+v\n", user)
 	if err != nil {
 		return "", err
 	}
@@ -90,33 +93,35 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		workflowName = "Workflow " + workflowValue
 	}
 
-	githubServiceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
+	serviceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
 	newWorkflow := schemas.Workflow{
-		UserId:     user.Id,
-		User:       user,
-		IsActive:   true,
-		ActionId:   result.ActionId,
-		ReactionId: result.ReactionId,
-		Action:     service.actionService.FindById(result.ActionId),
-		Reaction:   service.reactionService.FindById(result.ReactionId),
-		Name:       workflowName,
+		UserId:          user.Id,
+		User:            user,
+		IsActive:        true,
+		ActionId:        result.ActionId,
+		ReactionId:      result.ReactionId,
+		Action:          service.actionService.FindById(result.ActionId),
+		ActionOptions:   result.ActionOption,
+		Reaction:        service.reactionService.FindById(result.ReactionId),
+		ReactionOptions: result.ReactionOption,
+		Name:            workflowName,
 	}
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
-	fmt.Printf("Workflow %+v", actualWorkflow)
-	if actualWorkflow != (schemas.Workflow{}) {
+	if actualWorkflow.Id != 0 {
 		if actualWorkflow.IsActive {
 			return "Workflow already exists and is active", nil
 		} else {
 			return "Workflow already exists and is not active", nil
 		}
 	}
+	fmt.Println(newWorkflow)
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
 		return "", err
 	}
 
 	newWorkflow.Id = workflowId
-	service.InitWorkflow(newWorkflow, githubServiceToken)
+	service.InitWorkflow(newWorkflow, serviceToken, result.ActionOption, result.ReactionOption)
 	return "Workflow Created succesfully", nil
 
 }
@@ -142,27 +147,25 @@ func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 		return err
 	}
 	newWorkflow := schemas.Workflow{
-		Id:       workflow.Id,
-		UserId:   user.Id,
-		IsActive: result.WorflowState,
+		Id:              workflow.Id,
+		UserId:          user.Id,
+		IsActive:        result.WorflowState,
+		ReactionTrigger: result.WorflowState,
+		ActionOptions:   workflow.ActionOptions,
+		ReactionOptions: workflow.ReactionOptions,
 	}
 	service.repository.UpdateActiveStatus(newWorkflow)
-	reaction := service.reactionService.FindById(workflow.ReactionId)
-	newReaction := schemas.Reaction{
-		Id:      reaction.Id,
-		Trigger: result.WorflowState,
-	}
-	service.reactionService.UpdateTrigger(newReaction)
+	service.repository.UpdateReactionTrigger(newWorkflow)
 	return nil
 }
 
-func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken) {
+func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken, actionOption string, reactionOption string) {
 	workflowChannel := make(chan string)
-	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel)
-	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken)
+	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel, actionOption)
+	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken, reactionOption)
 }
 
-func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string) {
+func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string, actionOption string) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		fmt.Println("Start of WorkflowActionChannel")
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
@@ -171,7 +174,6 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 				fmt.Println("Error")
 				return
 			}
-
 			action := service.servicesService.FindActionByName(workflow.Action.Name)
 			if action == nil {
 				fmt.Println("Action not found")
@@ -179,17 +181,16 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			}
 
 			if workflow.IsActive {
-				action(channel, workflow.Action.Name, workflow.Id)
-			} else {
-				time.Sleep(30 * time.Second)
+				action(channel, workflow.ActionOptions, workflow.Id, actionOption)
 			}
+			time.Sleep(30 * time.Second)
 		}
 		fmt.Println("Clear")
 		channel <- "Workflow finished"
-	} (workflowStartingPoint, channel)
+	}(workflowStartingPoint, channel)
 }
 
-func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken) {
+func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken, reactionOption string) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
@@ -206,13 +207,12 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 
 			if workflow.IsActive {
 				result := <-channel
-				reaction(channel, workflow.Id, githubServiceToken)
+				reaction(channel, workflow.Id, githubServiceToken, reactionOption)
 				fmt.Printf("result value: %+v\n", result)
-			} else {
-				time.Sleep(30 * time.Second)
 			}
+			time.Sleep(30 * time.Second)
 		}
-	} (workflowStartingPoint, channel)
+	}(workflowStartingPoint, channel)
 }
 
 func (service *workflowService) ExistWorkflow(workflowId uint64) bool {
@@ -251,4 +251,39 @@ func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schem
 		}
 	}
 	return reactionResponse, nil
+}
+
+func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
+	var result schemas.WorkflowJson
+	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	if err != nil {
+		return err
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) <= len("Bearer ") {
+		return fmt.Errorf("no authorization header found")
+	}
+	tokenString := authHeader[len("Bearer "):]
+
+	user, err := service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return err
+	}
+	workflow := service.repository.FindAll()
+	for _, wf := range workflow {
+		if wf.Name == result.Name && wf.UserId == user.Id && wf.ReactionId == result.ReactionId && wf.ActionId == result.ActionId {
+			actualReactionData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
+			for _, data := range actualReactionData {
+				service.reactionResponseDataService.Delete(data)
+			}
+			err := service.repository.Delete(wf.Id)
+			if err != nil {
+				return err
+			}
+			return nil
+		} else {
+			return fmt.Errorf("Workflow not found")
+		}
+	}
+	return nil
 }

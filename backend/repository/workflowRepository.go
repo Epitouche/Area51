@@ -12,7 +12,9 @@ type WorkflowRepository interface {
 	Save(workflow schemas.Workflow)
 	Update(workflow schemas.Workflow)
 	UpdateActiveStatus(workflow schemas.Workflow)
-	Delete(workflowId uint64)
+	UpdateReactionTrigger(workflow schemas.Workflow)
+	Delete(workflowId uint64) error
+
 	FindAll() []schemas.Workflow
 	FindByIds(workflowId uint64) (schemas.Workflow, error)
 	FindByUserId(userId uint64) []schemas.Workflow
@@ -70,14 +72,14 @@ func (repo *workflowRepository) UpdateActiveStatus(workflow schemas.Workflow) {
 	}
 }
 
-func (repo *workflowRepository) Delete(workflowId uint64) {
+func (repo *workflowRepository) Delete(workflowId uint64) error {
 	err := repo.db.Connection.Delete(&schemas.Workflow{
 		Id: workflowId,
 	})
-
 	if err.Error != nil {
-		panic(err.Error)
+		return err.Error
 	}
+	return nil
 }
 
 func (repo *workflowRepository) FindAll() (workflows []schemas.Workflow) {
@@ -175,4 +177,13 @@ func (repo *workflowRepository) SaveWorkflow(workflow schemas.Workflow) (workflo
 		return 0, result.Error
 	}
 	return workflow.Id, nil
+}
+
+func (repo *workflowRepository) UpdateReactionTrigger(workflow schemas.Workflow) {
+	err := repo.db.Connection.Model(&schemas.Workflow{}).Where(&schemas.Workflow{Id: workflow.Id}).Updates(map[string]interface{}{
+		"reaction_trigger": workflow.ReactionTrigger,
+	})
+	if err.Error != nil {
+		return
+	}
 }
