@@ -45,6 +45,10 @@ func NewActionService(
 				Name:        "pull_request",
 				Description: "Creation or deletion of a pull request",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
+				Options: toolbox.MustMarshal(schemas.GithubPullRequestOptions{
+					Owner: "string",
+					Repo:  "string",
+				}),
 			},
 			{
 				Name:        string(schemas.SpotifyAddTrackAction),

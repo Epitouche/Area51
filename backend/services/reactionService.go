@@ -10,7 +10,6 @@ type ReactionService interface {
 	FindAll() []schemas.Reaction
 	SaveAllReaction()
 	FindById(reactionId uint64) schemas.Reaction
-	UpdateTrigger(reaction schemas.Reaction)
 	GetAllServicesByServiceId(serviceId uint64) (reactionJson []schemas.ReactionJson)
 }
 
@@ -37,6 +36,10 @@ func NewReactionService(
 				Name:        "list_comments",
 				Description: "List all comments of a repository",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
+				Options: toolbox.MustMarshal(schemas.GithubListAllReviewCommentsOptions{
+					Owner: "string",
+					Repo:  "string",
+				}),
 			},
 			{
 				Name:        "add_track_reaction",
@@ -44,7 +47,7 @@ func NewReactionService(
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
 				Options: toolbox.MustMarshal(schemas.SpotifyReactionOptions{
 					PlaylistURL: "string",
-					TrackURL: "string",
+					TrackURL:    "string",
 				}),
 			},
 		},
@@ -68,7 +71,7 @@ func (service *reactionService) GetAllServicesByServiceId(
 			Name:        oneReaction.Name,
 			Description: oneReaction.Description,
 			ReactionId:  oneReaction.Id,
-			Options: oneReaction.Options,
+			Options:     oneReaction.Options,
 		})
 	}
 	return reactionJson
@@ -85,8 +88,4 @@ func (service *reactionService) SaveAllReaction() {
 
 func (service *reactionService) FindById(reactionId uint64) schemas.Reaction {
 	return service.repository.FindById(reactionId)
-}
-
-func (service *reactionService) UpdateTrigger(reaction schemas.Reaction) {
-	service.repository.UpdateTrigger(reaction)
 }

@@ -1,11 +1,13 @@
 package schemas
 
 type SpotifyAction string
+
 const (
 	SpotifyAddTrackAction SpotifyAction = "add_track_action"
 )
 
 type SpotifyReaction string
+
 const (
 	SpotifyAddTrackReaction SpotifyReaction = "add_track_reaction"
 )
@@ -18,15 +20,15 @@ type SpotifyResponseToken struct {
 }
 
 type SpotifyUserInfo struct {
-	Id           string `json:"id" gorm:"primaryKey"`
-	Email        string `json:"email"`
-	DisplayName  string `json:"display_name"`
+	Id          string `json:"id" gorm:"primaryKey"`
+	Email       string `json:"email"`
+	DisplayName string `json:"display_name"`
 }
 
 type SpotifyActionOptions struct {
 	PlaylistURL string `json:"playlist_url"`
-	NbSongs uint64 `json:"nbSongs"`
-	IsOld   bool `json:"is_old"`
+	NbSongs     uint64 `json:"nbSongs"`
+	IsOld       bool   `json:"is_old"`
 }
 
 type SpotifyActionOptionsInfo struct {
@@ -35,7 +37,7 @@ type SpotifyActionOptionsInfo struct {
 
 type SpotifyReactionOptions struct {
 	PlaylistURL string `json:"playlist_url"`
-	TrackURL string `json:"track_url"`
+	TrackURL    string `json:"track_url"`
 }
 
 type SpotifyTracksInfos struct {

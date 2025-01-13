@@ -40,5 +40,6 @@ type Workflow struct {
 	CreatedAt       time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt       time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 	IsActive        bool      `json:"is_active" default:"false" gorm:"column:is_active"`
+	ReactionTrigger bool      `json:"reaction_trigger" default:"false" gorm:"column:reaction_trigger"`
 	Name            string    `json:"name" gorm:"type:varchar(100)"`
 }
