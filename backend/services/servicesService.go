@@ -40,11 +40,13 @@ func NewServicesService(
 				Name:        schemas.Github,
 				Description: "This is the Github service",
 				Image:       "https://pngimg.com/uploads/github/github_PNG80.png",
+				IsOAuth:     true,
 			},
 			{
 				Name:        schemas.Spotify,
 				Description: "This is the Spotify Service",
 				Image:       "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-spotify-symbol-3.png",
+				IsOAuth:     true,
 			},
 		},
 		allServices: []interface{}{

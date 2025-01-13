@@ -33,11 +33,12 @@ func (controller *servicesController) AboutJson(*gin.Context) (allServicesJson [
 	allServices := controller.service.FindAll()
 	for _, oneService := range allServices {
 		allServicesJson = append(allServicesJson, schemas.ServiceJson{
-			Name:     schemas.ServiceName(oneService.Name),
+			Name:        schemas.ServiceName(oneService.Name),
 			Description: oneService.Description,
-			Action:   controller.serviceAction.GetAllServicesByServiceId(oneService.Id),
-			Reaction: controller.serviceReaction.GetAllServicesByServiceId(oneService.Id),
-			Image: oneService.Image,
+			Action:      controller.serviceAction.GetAllServicesByServiceId(oneService.Id),
+			Reaction:    controller.serviceReaction.GetAllServicesByServiceId(oneService.Id),
+			Image:       oneService.Image,
+			IsOAuth:     oneService.IsOAuth,
 		})
 	}
 	return allServicesJson, nil
