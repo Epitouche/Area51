@@ -6,7 +6,7 @@ Chart.register(...registerables);
 
 export default {
     setup() {
-        const chart = ref(null);
+        let chart = null;
         const timeRanges = ['day', 'week', 'month']
         const selectedRange = ref(timeRanges[0])
 
@@ -20,10 +20,10 @@ export default {
         };
 
         const weekData = {
-            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
             datasets: [{
                 label: 'Number of executions',
-                data: [10, 15, 8, 12, 6, 9, 4],
+                data: [10, 15, 8, 12, 6, 9],
                 borderWidth: 1
             }]
         };
@@ -38,25 +38,23 @@ export default {
         };
 
         const setData = (period) => {
-            selectedRange = period;
-            console.log(period);
+            selectedRange.value = period;
             switch (period) {
                 case 'day':
-                    chart.value.data = dayData;
+                    chart.data = dayData;
                     break;
                 case 'week':
-                    chart.value.data = weekData;
+                    chart.data = weekData;
                     break;
                 case 'month':
-                    chart.value.data = monthData;
+                    chart.data = monthData;
                     break;
             }
-            chart.value.update();
-            console.log(period);
+            chart.update()
         };
         onMounted(() => {
             const ctx = document.getElementById("myChart").getContext('2d');
-            chart.value = new Chart(ctx, {
+            chart = new Chart(ctx, {
                 type: 'bar',
                 data: dayData,
                 options: {
@@ -64,8 +62,7 @@ export default {
                         y: {
                             beginAtZero: true
                         }
-                    },
-                    responsive: true
+                    }
                 }
             });
         });
@@ -89,8 +86,6 @@ export default {
                 </button>
             </div>
         </div>
-        <div style="position: relative; height: 290px;">
-            <canvas id="myChart"></canvas>
-        </div>
+        <canvas id="myChart"></canvas>
     </div>
 </template>
