@@ -12,7 +12,6 @@ async function fetchServiceToken() {
   const route = useRoute();
   
   const serviceUsedLogin = localStorage.getItem("serviceUsedLogin");
-  console.log("serviceUsedLogin", serviceUsedLogin);
 
   const code = route.query.code;
   const state = route.query.state;
