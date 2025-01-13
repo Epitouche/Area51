@@ -12,22 +12,24 @@ const systemes = ref([
         connected: false,
         color: 'bg-red-500'
     }
-])
+]);
+
+const shouldOverflow = computed(() => systemes.value.length > 4);
 </script>
 
 <template>
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6">
         <h2 class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6">Integrations</h2>
-        <div class="space-y-4 max-h-96 overflow-y-auto">
+        <div :class="['space-y-4', shouldOverflow ? 'overflow-y-auto max-h-96' : 'h-96']">
             <div v-for="systeme in systemes"
                 :key="systeme.name"
-                class="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-brand-purple/30 transition-colors">
+                class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-900 hover:border-purple-200 transition-colors">
                 <div class="flex items-center space-x-3">
                     <IconComponent
                         :bgColor=systeme.color
                         textColor="text-white"
                         :icon=systeme.icon />
-                    <span class="font-medium text-fontBlack dar:text-fontWhite">
+                    <span class="font-medium text-fontBlack dark:text-fontWhite">
                         {{ systeme.name }}
                     </span>
                 </div>
