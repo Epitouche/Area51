@@ -137,7 +137,7 @@ func (service *githubService) FindReactionByName(name string) func(channel chan 
 	}
 }
 
-var nbPR int
+// var nbPR int
 
 type transportWithToken struct {
 	token string
@@ -181,10 +181,22 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		return
 	}
 
-	if nbPR != len(pullRequests) {
-		nbPR = len(pullRequests)
+	existingRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
+	if existingRecords.UserId == 0 {
+		service.githubRepository.Save(schemas.GithubPullRequestOptionsTable{
+			UserId: user.Id,
+			Repo:   actionData.Repo,
+			Owner:  actionData.Owner,
+			NumPR:  0,
+		})
+	}
+
+	if existingRecords.NumPR != len(pullRequests) {
+		actualRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
+		actualRecords.NumPR = len(pullRequests)
 		workflow.ReactionTrigger = true
 		service.workflowRepository.Update(workflow)
+		service.githubRepository.UpdateNumPRs(actualRecords)
 	}
 	channel <- "Action workflow done"
 }
