@@ -19,8 +19,8 @@ import (
 type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	// GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
 	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
 }
 
@@ -119,7 +119,7 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 // 	return result, nil
 // }
 
-func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
+func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
 	switch name {
 	case string(schemas.GithubPullRequest):
 		return service.LookAtPullRequest
@@ -128,7 +128,7 @@ func (service *githubService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	switch name {
 	case string(schemas.GithubReactionListComments):
 		return service.ListAllReviewComments
@@ -150,7 +150,7 @@ func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
+func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64, actionOption string) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 	ctx := context.Background()
@@ -167,7 +167,14 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		Transport: &transportWithToken{token: token[len(token)-1].Token},
 	})
 
-	pullRequests, _, err := client.PullRequests.List(ctx, "JsuisSayker", "TestAreaGithub", nil)
+	var actionData schemas.GithubPullRequestOptions
+	err = json.Unmarshal([]byte(actionOption), &actionData)
+	if err != nil {
+		fmt.Println("Error parsing actionOption:", err)
+		return
+	}
+
+	pullRequests, _, err := client.PullRequests.List(ctx, actionData.Owner, actionData.Repo, nil)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
@@ -184,7 +191,7 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 	channel <- "Action workflow done"
 }
 
-func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -205,7 +212,13 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		}
 	}
 
-	request, err := http.NewRequest("GET", "https://api.github.com/repos/Epitouche/Area51/pulls/comments", nil)
+	var reactionData schemas.GithubListAllReviewCommentsOptions
+	err := json.Unmarshal([]byte(reactionOption), &reactionData)
+	if err != nil {
+		fmt.Println("Error parsing actionOption:", err)
+		return
+	}
+	request, err := http.NewRequest("GET", "https://api.github.com/repos/"+reactionData.Owner+"/"+reactionData.Repo+"/pulls/comments", nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return

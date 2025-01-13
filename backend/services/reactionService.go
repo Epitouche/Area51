@@ -37,6 +37,10 @@ func NewReactionService(
 				Name:        "list_comments",
 				Description: "List all comments of a repository",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
+				Options: toolbox.MustMarshal(schemas.GithubListAllReviewCommentsOptions{
+					Owner: "string",
+					Repo:  "string",
+				}),
 			},
 			{
 				Name:        "add_track_reaction",
@@ -44,7 +48,7 @@ func NewReactionService(
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
 				Options: toolbox.MustMarshal(schemas.SpotifyReactionOptions{
 					PlaylistURL: "string",
-					TrackURL: "string",
+					TrackURL:    "string",
 				}),
 			},
 		},
@@ -68,7 +72,7 @@ func (service *reactionService) GetAllServicesByServiceId(
 			Name:        oneReaction.Name,
 			Description: oneReaction.Description,
 			ReactionId:  oneReaction.Id,
-			Options: oneReaction.Options,
+			Options:     oneReaction.Options,
 		})
 	}
 	return reactionJson

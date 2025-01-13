@@ -1,7 +1,5 @@
 package schemas
 
-import "time"
-
 type GithubAction string
 
 const (
@@ -37,7 +35,11 @@ type GithubListCommentsResponse struct {
 	//! Needs more fields in the future
 }
 type GithubPullRequestOptions struct {
-	Repo      string    `json:"-"`
-	Owner     string    `json:"-"`
-	CheckedAt time.Time `json:"-" gorm:"default:CURRENT_TIMESTAMP"`
+	Repo  string `json:"repo"`
+	Owner string `json:"owner"`
+}
+
+type GithubListAllReviewCommentsOptions struct {
+	Repo  string `json:"repo"`
+	Owner string `json:"owner"`
 }
