@@ -13,13 +13,13 @@ type ServicesService interface {
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
 	GetServices() []interface{}
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type ServiceInterface interface {
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type servicesService struct {
@@ -32,6 +32,7 @@ func NewServicesService(
 	repository repository.ServiceRepository,
 	githubService GithubService,
 	spotifyService SpotifyService,
+	microsoftService MicrosoftService,
 ) ServicesService {
 	newService := servicesService{
 		repository: repository,
@@ -48,10 +49,17 @@ func NewServicesService(
 				Image:       "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-spotify-symbol-3.png",
 				IsOAuth:     true,
 			},
+			{
+				Name:        schemas.Microsoft,
+				Description: "This is the Microsoft Service",
+				Image:       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1024px-Microsoft_logo.svg.png",
+				IsOAuth:     true,
+			},
 		},
 		allServices: []interface{}{
 			githubService,
 			spotifyService,
+			microsoftService,
 		},
 	}
 	newService.InitialSaveService()
@@ -112,10 +120,16 @@ func (service *servicesService) FindById(serviceId uint64) schemas.Service {
 	return service.repository.FindById(serviceId)
 }
 
-func (service *servicesService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
-	for _, oneService := range service.allServices {
-		if oneService.(ServiceInterface).GetUserInfosByToken(accessToken) != nil {
-			return oneService.(ServiceInterface).GetUserInfosByToken(accessToken)
+func (service *servicesService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
+	for i, s := range service.allServicesSchema {
+		for j, oneService := range service.allServices {
+			if s.Name == serviceName {
+				if j == i {
+					if oneService.(ServiceInterface).GetUserInfosByToken(accessToken, serviceName) != nil {
+						return oneService.(ServiceInterface).GetUserInfosByToken(accessToken, serviceName)
+					}
+				}
+			}
 		}
 	}
 	return nil

@@ -21,7 +21,7 @@ type GithubService interface {
 	// GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type githubService struct {
@@ -276,8 +276,9 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	time.Sleep(1 * time.Minute)
 }
 
-func (service *githubService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
+func (service *githubService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
 	return func(userInfos *schemas.ServicesUserInfos) {
+		// fmt.Printf("YAYYAYAYAYYAYAYYYAYYAYAYAYYAYAYYAYAYAY\n")
 		request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 		if err != nil {
 			return
@@ -287,9 +288,10 @@ func (service *githubService) GetUserInfosByToken(accessToken string) func(*sche
 		client := &http.Client{}
 
 		response, err := client.Do(request)
-		if err != nil {
+		if err != nil || response.StatusCode != http.StatusOK {
 			return
 		}
+		// fmt.Printf("Response: %+v\n", response)
 
 		err = json.NewDecoder(response.Body).Decode(&userInfos.GithubUserInfos)
 		if err != nil {

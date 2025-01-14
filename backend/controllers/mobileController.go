@@ -46,7 +46,7 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 		return "", fmt.Errorf("service %s not found", result.Service)
 	}
 	var ServicesUserInfoss schemas.ServicesUserInfos
-	userInfos := controller.servicesService.GetUserInfosByToken(result.Token)
+	userInfos := controller.servicesService.GetUserInfosByToken(result.Token, result.Service)
 	userInfos(&ServicesUserInfoss)
 	var infos schemas.MobileUsefulInfos
 	switch result.Service {

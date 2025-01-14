@@ -7,6 +7,7 @@ type ServiceName string
 const (
 	Github  ServiceName = "github"
 	Spotify ServiceName = "spotify"
+	Microsoft ServiceName = "microsoft"
 )
 
 type ServiceJson struct {

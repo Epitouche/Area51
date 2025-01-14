@@ -100,10 +100,10 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	}
 	githubService := controller.servicesService.FindByName(schemas.Github)
 	// userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
-	var ServicesUserInfos schemas.ServicesUserInfos
-	userInfos := controller.servicesService.GetUserInfosByToken(githubTokenResponse.AccessToken)
-	userInfos(&ServicesUserInfos)
-	userInfo := ServicesUserInfos.GithubUserInfos
+	servicesUserInfos := schemas.ServicesUserInfos{}
+	userInfos := controller.servicesService.GetUserInfosByToken(githubTokenResponse.AccessToken, schemas.Github)
+	userInfos(&servicesUserInfos)
+	userInfo := servicesUserInfos.GithubUserInfos
 
 	var actualUser schemas.User
 	if userInfo.Email == "" {
@@ -260,7 +260,7 @@ func (controller *githubController) GetUserInfos(ctx *gin.Context, serviceName s
 		if actualToken.ServiceId == controller.servicesService.FindByName(serviceName).Id {
 			// githubUserInfos, err := controller.service.GetUserInfo(actualToken.Token)
 			var ServicesUserInfos schemas.ServicesUserInfos
-			userInfos := controller.servicesService.GetUserInfosByToken(actualToken.Token)
+			userInfos := controller.servicesService.GetUserInfosByToken(actualToken.Token, serviceName)
 			userInfos(&ServicesUserInfos)
 			userInfo := ServicesUserInfos.GithubUserInfos
 			return userInfo, nil
