@@ -1,5 +1,12 @@
-<script setup>
-// Three last activities
+<script setup lang="ts">
+import type { WorkflowResponse } from '~/src/types';
+type ServiceCard = {
+  name: string;
+  description: string;
+  image: string;
+  isConnected: boolean;
+};
+
 const activities = ref([
     {
         name: 'GitHub Issue Notifications',
@@ -10,16 +17,37 @@ const activities = ref([
         name: 'New Spotify song',
         time: '15 minutes ago',
         description: 'Successfully notified of a new song'
-    },
-    {
-        name: 'Daily Report Generator',
-        time: '1 hour ago',
-        description: 'Generating monthly summary report'
     }
 ])
+
+const token = useCookie("access_token");
+
+onMounted(async () => {
+    const response = await $fetch<WorkflowResponse[]>(
+      "/api/workflows/getLastWorkflow",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response)
+    const connectedServices = await $fetch<ServiceCard[]>(
+        "http://localhost:8080/api/user/services",
+        {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token.value}`,
+            },
+        }
+    );
+    console.log(connectedServices)
+})
 </script>
 <template>
-    <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6">
+    <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 h-96">
         <h2 class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6">Recent Activity</h2>
         <div class="space-y-4">
             <div

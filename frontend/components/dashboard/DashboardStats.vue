@@ -1,23 +1,23 @@
 <script setup lang="ts">
 
-// import type { Workflow } from "~/src/types";
+import type { Workflow } from "~/src/types";
 
 const stats = ref([
     {
         name: 'Active Workflows',
-        value: '2',
+        value: 0,
         icon: 'mynaui:activity-solid',
         color: 'bg-amber-500'
     },
     {
         name: 'Total Executions',
-        value: '12',
+        value: 12,
         icon: 'jam:thunder',
         color: 'bg-tertiary-500'
     },
     {
         name: 'Last 24h Executions',
-        value: '4',
+        value: 4,
         icon: 'ic:round-loop',
         color: 'bg-green-500'
     },
@@ -29,20 +29,23 @@ const stats = ref([
     }
 ])
 
-// const token = useCookie("access_token");
+const token = useCookie("access_token");
 
-// onMounted(async () => {
-    // const response = await $fetch<Workflow[]>(
-    //   "http://localhost:8080/api/user/workflows",
-    //   {
-    //     method: "GET",
-    //     headers: {
-    //       Authorization: `Bearer ${token.value}`,
-    //       "Content-Type": "application/json",
-    //     },
-    //   }
-    // );
-// })
+onMounted(async () => {
+    const response = await $fetch<Workflow[]>(
+      "http://localhost:8080/api/user/workflows",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    response.forEach(() => {
+        stats.value[0].value = Number(stats.value[0].value) + 1;
+    })
+})
 </script>
 <template>
     <div v-for="stat in stats" :key="stat.name" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">

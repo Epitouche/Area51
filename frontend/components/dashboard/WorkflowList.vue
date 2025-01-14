@@ -30,10 +30,10 @@ onMounted(async () => {
 })
 </script>
 <template>
-    <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6">
+    <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 h-96">
         <h2 class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6">Your Workflow</h2>
-        <div class="space-y-4">
-            <div 
+        <div v-if="workflows.length === 0" class="space-y-4">
+            <div
                 v-for="workflow in workflows"
                 :key="workflow.name"
                 class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-900 hover:border-purple-200 transition-colors">
@@ -54,6 +54,10 @@ onMounted(async () => {
                     </span>
                 </div>
             </div>
+        </div>
+        <div v-else class="flex flex-col items-center justify-between text-gray-500 dark:text-gray-400">
+            <p>No Workflow created<br></p>
+            <p>Checkout the workflow page <NuxtLink to="/workflows" class="text-tertiary-500">here</NuxtLink> to create one</p>
         </div>
     </div>
 </template>
