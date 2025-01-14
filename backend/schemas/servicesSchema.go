@@ -8,6 +8,7 @@ const (
 	Github  ServiceName = "github"
 	Spotify ServiceName = "spotify"
 	Google  ServiceName = "google"
+	Microsoft ServiceName = "microsoft"
 )
 
 type ServiceJson struct {

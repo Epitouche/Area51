@@ -287,7 +287,7 @@ func (service *githubService) GetUserInfosByToken(accessToken string, serviceNam
 		client := &http.Client{}
 
 		response, err := client.Do(request)
-		if err != nil {
+		if err != nil || response.StatusCode != http.StatusOK {
 			return
 		}
 

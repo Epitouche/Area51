@@ -45,21 +45,30 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 	if githubService == (schemas.Service{}) {
 		return "", fmt.Errorf("service %s not found", result.Service)
 	}
-	var ServicesUserInfos schemas.ServicesUserInfos
+	var servicesUserInfos schemas.ServicesUserInfos
 	userInfos := controller.servicesService.GetUserInfosByToken(result.Token, result.Service)
-	userInfos(&ServicesUserInfos)
-	fmt.Printf("ServicesUserInfos: %++v\n", ServicesUserInfos)
+	userInfos(&servicesUserInfos)
 	var infos schemas.MobileUsefulInfos
 	switch result.Service {
 	case schemas.Github:
 		infos = schemas.MobileUsefulInfos{
-			Login: ServicesUserInfos.GithubUserInfos.Login,
-			Email: ServicesUserInfos.GithubUserInfos.Email,
+			Login: servicesUserInfos.GithubUserInfos.Login,
+			Email: servicesUserInfos.GithubUserInfos.Email,
 		}
 	case schemas.Spotify:
 		infos = schemas.MobileUsefulInfos{
-			Login: ServicesUserInfos.SpotifyUserInfos.DisplayName,
-			Email: ServicesUserInfos.SpotifyUserInfos.Email,
+			Login: servicesUserInfos.SpotifyUserInfos.DisplayName,
+			Email: servicesUserInfos.SpotifyUserInfos.Email,
+		}
+	case schemas.Google:
+		infos = schemas.MobileUsefulInfos{
+			Login: servicesUserInfos.GoogleUserInfos.Name,
+			Email: servicesUserInfos.GoogleUserInfos.Email,
+		}
+	case schemas.Microsoft:
+		infos = schemas.MobileUsefulInfos{
+			Login: servicesUserInfos.MicrosoftUserInfos.DisplayName,
+			Email: servicesUserInfos.MicrosoftUserInfos.Mail,
 		}
 	}
 

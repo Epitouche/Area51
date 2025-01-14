@@ -125,12 +125,13 @@ var (
 	userService                 services.UserService                 = services.NewUserService(userRepository, jwtService)
 	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
 	githubService               services.GithubService               = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
-	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService, googleService)
+	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService, googleService, microsoftService)
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository)
 	googleService               services.GoogleService               = services.NewGoogleService()
+	microsoftService            services.MicrosoftService            = services.NewMicrosoftService()
 
 	// Controllers
 	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)
@@ -139,7 +140,7 @@ var (
 	servicesController  controllers.ServicesController  = controllers.NewServiceController(servicesService, actionService, reactionService)
 	workflowController  controllers.WorkflowController  = controllers.NewWorkflowController(workflowsService, reactionService, actionService)
 	spotifyController   controllers.SpotifyController   = controllers.NewSpotifyController(spotifyService, servicesService, userService, serviceToken)
-	microsoftController controllers.MicrosoftController = controllers.NewMicrosoftController()
+	microsoftController controllers.MicrosoftController = controllers.NewMicrosoftController(microsoftService, userService, servicesService, serviceToken)
 	googleController    controllers.GoogleController    = controllers.NewGoogleController(googleService, userService, servicesService)
 	mobileController    controllers.MobileController    = controllers.NewMobileController(userService, serviceToken, servicesService)
 )

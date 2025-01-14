@@ -33,6 +33,7 @@ func NewServicesService(
 	githubService GithubService,
 	spotifyService SpotifyService,
 	googleService GoogleService,
+	microsoftService MicrosoftService,
 ) ServicesService {
 	newService := servicesService{
 		repository: repository,
@@ -55,11 +56,18 @@ func NewServicesService(
 				Image:       "https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-0.png",
 				IsOAuth:     true,
 			},
+			{
+				Name:        schemas.Microsoft,
+				Description: "This is the Microsoft Service",
+				Image:       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1024px-Microsoft_logo.svg.png",
+				IsOAuth:     true,
+			},
 		},
 		allServices: []interface{}{
 			githubService,
 			spotifyService,
 			googleService,
+			microsoftService,
 		},
 	}
 	newService.InitialSaveService()
