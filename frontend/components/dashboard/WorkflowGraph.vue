@@ -79,13 +79,14 @@ export default {
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-lg font-semibold text-fontBlack dark:text-fontWhite">Workflow Executions</h2>
             <div class="flex space-x-2">
-                <button v-for="time in timeRanges" :key="time" :class="[
+                <button 
+                v-for="time in timeRanges" :key="time" :class="[
                     'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
                     selectedRange === time ? 'bg-tertiary-500 text-white' : 'text-gray-600 dark:text-fontWhite hover:bg-gray-100',
                 ]" @click="setData(time)"> {{ time }}
                 </button>
             </div>
         </div>
-        <canvas id="myChart"></canvas>
+        <canvas id="myChart"/>
     </div>
 </template>

@@ -30,8 +30,8 @@ const stats = ref([
     <div v-for="stat in stats" :key="stat.name" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center">
             <IconComponent
-                :bgColor="stat.color"
-                textColor="text-white"
+                :bg-color="stat.color"
+                text-color="text-white"
                 :icon="stat.icon" />
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ stat.name }}</p>
