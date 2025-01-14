@@ -21,7 +21,7 @@ type GithubService interface {
 	// GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type githubService struct {
@@ -276,7 +276,7 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	time.Sleep(1 * time.Minute)
 }
 
-func (service *githubService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
+func (service *githubService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
 	return func(userInfos *schemas.ServicesUserInfos) {
 		request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 		if err != nil {

@@ -114,7 +114,7 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
 	// userInfo, err := controller.service.GetUserInfo(spotifyTokenResponse.AccessToken)
 	var ServicesUserInfos schemas.ServicesUserInfos
-	userInfos := controller.servicesService.GetUserInfosByToken(spotifyTokenResponse.AccessToken)
+	userInfos := controller.servicesService.GetUserInfosByToken(spotifyTokenResponse.AccessToken, schemas.Spotify)
 	userInfos(&ServicesUserInfos)
 	userInfo := ServicesUserInfos.SpotifyUserInfos
 	var actualUser schemas.User

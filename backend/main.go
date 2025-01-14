@@ -85,6 +85,16 @@ func setupRouter() *gin.Engine {
 			})
 		}
 
+		google := apiRoutes.Group("/google")
+		{
+			google.GET("/auth", func(ctx *gin.Context) {
+				googleApi.RedirectToGoogle(ctx, google.BasePath()+"/callback")
+			})
+			google.POST("/callback", func(ctx *gin.Context) {
+				googleApi.HandleGoogleTokenCallback(ctx, google.BasePath()+"/callback")
+			})
+		}
+
 		action := apiRoutes.Group("/action", middlewares.Authorization())
 		{
 			action.POST("", actionApi.CreateAction)
@@ -115,11 +125,12 @@ var (
 	userService                 services.UserService                 = services.NewUserService(userRepository, jwtService)
 	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
 	githubService               services.GithubService               = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
-	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService)
+	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService, googleService)
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository)
+	googleService               services.GoogleService               = services.NewGoogleService()
 
 	// Controllers
 	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)
@@ -129,6 +140,7 @@ var (
 	workflowController  controllers.WorkflowController  = controllers.NewWorkflowController(workflowsService, reactionService, actionService)
 	spotifyController   controllers.SpotifyController   = controllers.NewSpotifyController(spotifyService, servicesService, userService, serviceToken)
 	microsoftController controllers.MicrosoftController = controllers.NewMicrosoftController()
+	googleController    controllers.GoogleController    = controllers.NewGoogleController(googleService, userService, servicesService)
 	mobileController    controllers.MobileController    = controllers.NewMobileController(userService, serviceToken, servicesService)
 )
 
@@ -141,6 +153,7 @@ var (
 	spotifyApi   *api.SpotifyApi   = api.NewSpotifyApi(spotifyController)
 	mobileApi    *api.MobileApi    = api.NewMobileApi(mobileController)
 	microsoftApi *api.MicrosoftApi = api.NewMicrosoftApi(microsoftController)
+	googleApi    *api.GoogleApi    = api.NewGoogleApi(googleController)
 )
 
 // func initDependencies(dependencies *api.UserDependencies) {
