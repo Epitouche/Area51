@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import { deleteToken } from '../service';
-import { Button } from 'react-native-paper';
 
 interface DeconnectionPopUpProps {
   service: string;
@@ -33,18 +32,18 @@ export function DeconnectionPopUp({
               Tu es déjà connecté à {service}, veux-tu te déconnecter ?
             </Text>
             <View style={styles.buttonContainer}>
-              <Button
+              <TouchableOpacity
                 style={styles.button}
                 onPress={handleDeconnection}>
                 <Text style={{ color: 'white', fontSize: 16 }}>
                   Déconnecter
                 </Text>
-              </Button>
-              <Button
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={() => setModalVisible(false)}>
                 <Text style={{ color: 'black', fontSize: 16 }}>Annuler</Text>
-              </Button>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -66,7 +65,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: "70%",
+    width: '70%',
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 20,

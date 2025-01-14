@@ -1,11 +1,26 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
 import { IpInput } from '../components';
+import { getAboutJson, parseServices } from '../service';
 
 export default function HomeScreen() {
-  const { isBlackTheme } = useContext(AppContext);
+  const {
+    isBlackTheme,
+    serverIp,
+    aboutJson,
+    setAboutJson,
+    setServicesConnected,
+  } = useContext(AppContext);
+
+  const handleRefresh = async () => {
+    if (serverIp != '') {
+      await getAboutJson(serverIp, setAboutJson);
+      if (aboutJson)
+        await parseServices({ serverIp, aboutJson, setServicesConnected });
+    }
+  };
 
   return (
     <View
@@ -43,6 +58,22 @@ export default function HomeScreen() {
           </View>
         </View>
         <IpInput />
+        <TouchableOpacity
+          style={[
+            globalStyles.buttonFormat,
+            isBlackTheme ? globalStyles.primaryLight : globalStyles.primaryDark,
+          ]}
+          onPress={handleRefresh}>
+          <Text
+            style={[
+              isBlackTheme
+                ? globalStyles.textColor
+                : globalStyles.textColorBlack,
+              globalStyles.textFormat,
+            ]}>
+            Refresh
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

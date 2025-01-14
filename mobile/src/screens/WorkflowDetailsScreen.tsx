@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import {} from 'react-native-paper';
 import { globalStyles } from '../styles/global_style';
 import { AppStackList } from '../types';
 import { AppContext } from '../context/AppContext';

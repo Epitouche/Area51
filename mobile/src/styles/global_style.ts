@@ -36,7 +36,7 @@ export const globalStyles = StyleSheet.create({
   wallpaper: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#E8E9E9',
+    backgroundColor: '#F7FAFB',
   },
   textColor: {
     color: '#1A1A1A',

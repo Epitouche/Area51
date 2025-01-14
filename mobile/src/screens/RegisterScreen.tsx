@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import { Button } from 'react-native-paper';
 import { RegisterProps } from '../types';
 import { registerApiCall } from '../service/auth';
 import { AppContext } from '../context/AppContext';

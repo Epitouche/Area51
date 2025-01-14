@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { useContext, useState } from 'react';
-import { AppContext } from '../context/AppContext';
-import { Button } from 'react-native-paper';
-import { getToken, parseServices, selectServicesParams } from '../service';
+import {
+  parseServices,
+  selectServicesParams,
+  logoutServices,
+} from '../service';
 import { AboutJson, AboutJsonParse } from '../types';
 
 interface ServiceCardProps {
@@ -27,23 +28,28 @@ export function ServiceCard({
   token,
   setServicesConnected,
 }: ServiceCardProps) {
-  useContext(AppContext);
 
-  const handleOauthLogin = async () => {
-    if (
-      (await selectServicesParams({
+  const handleOauthLogin = async (
+    isConnected: boolean,
+    serviceName: string,
+  ) => {
+    if (isConnected) {
+      await logoutServices(serverIp, serviceName, token);
+    } else {
+      await selectServicesParams({
         serverIp,
-        serviceName: title,
+        serviceName: serviceName,
         sessionToken: token,
-      })) &&
-      aboutJson
-    )
-      parseServices({
+      });
+    }
+    if (aboutJson)
+      await parseServices({
         aboutJson,
         serverIp,
         setServicesConnected,
       });
   };
+
   return (
     <View
       style={[styles.card, status ? styles.connected : styles.disconnected]}>
@@ -60,8 +66,8 @@ export function ServiceCard({
         ]}>
         {title[0].toLocaleUpperCase() + title.slice(1)}
       </Text>
-      <Button
-        onPress={handleOauthLogin}
+      <TouchableOpacity
+        onPress={() => handleOauthLogin(status, title)}
         style={[
           styles.statusBar,
           status ? styles.connectedBar : styles.disconnectedBar,
@@ -69,7 +75,7 @@ export function ServiceCard({
         <Text style={styles.statusText}>
           {status ? 'Connected' : 'Disconnected'}
         </Text>
-      </Button>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -100,6 +106,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
+    padding: 8,
   },
   statusText: {
     fontSize: 12,

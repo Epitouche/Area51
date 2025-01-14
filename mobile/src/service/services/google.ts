@@ -1,7 +1,7 @@
 import { GITHUB_CLIENT_ID, GITHUB_SECRET } from '@env';
 import { sendServiceToken, OauthLogin } from './services';
 
-export async function githubLogin(apiEndpoint: string, sessionToken?: string) {
+export async function googleLogin(apiEndpoint: string, sessionToken?: string) {
   const setToken = (accessToken: string) => {
     if (sessionToken)
       sendServiceToken(apiEndpoint, accessToken, 'github', sessionToken);
