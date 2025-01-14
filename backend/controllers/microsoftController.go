@@ -45,7 +45,7 @@ func (controller *microsoftController) RedirectionToMicrosoftService(ctx *gin.Co
 		return "", err
 	}
 	redirectUri := fmt.Sprintf("%s%s/callback", appAdressHost, appPort)
-	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type&scope=Mail.ReadWrite Mail.Read User.Read Mail.Send offline_access calendars.Read calendars.ReadWrite&redirect_uri=%s&state=%s", clientId, redirectUri, state)
+	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type=code&scope=Mail.ReadWrite Mail.Read User.Read Mail.Send offline_access calendars.Read calendars.ReadWrite&redirect_uri=%s&state=%s", clientId, redirectUri, state)
 	return authUrl, nil
 }
 
