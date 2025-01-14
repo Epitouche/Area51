@@ -141,7 +141,7 @@ var (
 	workflowController  controllers.WorkflowController  = controllers.NewWorkflowController(workflowsService, reactionService, actionService)
 	spotifyController   controllers.SpotifyController   = controllers.NewSpotifyController(spotifyService, servicesService, userService, serviceToken)
 	microsoftController controllers.MicrosoftController = controllers.NewMicrosoftController(microsoftService, userService, servicesService, serviceToken)
-	googleController    controllers.GoogleController    = controllers.NewGoogleController(googleService, userService, servicesService)
+	googleController    controllers.GoogleController    = controllers.NewGoogleController(googleService, userService, servicesService, serviceToken)
 	mobileController    controllers.MobileController    = controllers.NewMobileController(userService, serviceToken, servicesService)
 )
 
