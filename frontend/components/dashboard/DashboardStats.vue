@@ -1,4 +1,7 @@
-<script setup>
+<script setup lang="ts">
+
+// import type { Workflow } from "~/src/types";
+
 const stats = ref([
     {
         name: 'Active Workflows',
@@ -25,6 +28,21 @@ const stats = ref([
         color: 'bg-blue-500'
     }
 ])
+
+// const token = useCookie("access_token");
+
+// onMounted(async () => {
+    // const response = await $fetch<Workflow[]>(
+    //   "http://localhost:8080/api/user/workflows",
+    //   {
+    //     method: "GET",
+    //     headers: {
+    //       Authorization: `Bearer ${token.value}`,
+    //       "Content-Type": "application/json",
+    //     },
+    //   }
+    // );
+// })
 </script>
 <template>
     <div v-for="stat in stats" :key="stat.name" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">

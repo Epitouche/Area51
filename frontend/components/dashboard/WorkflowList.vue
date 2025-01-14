@@ -1,22 +1,33 @@
-<script setup>
-// Three last activities
-const workflows = ref([
-    {
-        name: 'GitHub Issue Notifications',
-        lastRun: '2 minutes ago',
-        executions: 156
-    },
-    {
-        name: 'New Spotify song',
-        lastRun: '15 minutes ago',
-        executions: 45
-    },
-    {
-        name: 'Daily Report Generator',
-        lastRun: '1 hour ago',
-        executions: 89
-    }
-])
+<script setup lang="ts">
+import type { Workflow } from '~/src/types';
+
+interface ExtendedWorkflow extends Workflow {
+  executions: number;
+}
+
+const workflows = reactive<ExtendedWorkflow[]>([]);
+
+const token = useCookie("access_token");
+
+onMounted(async () => {
+    const response = await $fetch<Workflow[]>(
+      "http://localhost:8080/api/user/workflows",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    response.forEach((workflow) => {
+        const transformedWorkflow: ExtendedWorkflow = {
+            ...workflow,
+            executions: 0
+        };
+        workflows.push(transformedWorkflow);
+    });
+})
 </script>
 <template>
     <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6">
@@ -30,7 +41,10 @@ const workflows = ref([
                     <div>
                         <h3 className="font-medium text-fontBlack dark:text-fontWhite">{{ workflow.name }}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-200">
-                            Last run: {{ workflow.lastRun }}
+                            Action: {{ workflow.action_name }}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-200">
+                            Reaction: {{ workflow.reaction_name }}
                         </p>
                     </div>
                 </div>
