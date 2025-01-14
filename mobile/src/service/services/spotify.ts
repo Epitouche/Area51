@@ -2,9 +2,11 @@ import { SPOTIFY_CLIENT_ID, SPOTIFY_SECRET } from '@env';
 import { OauthLogin } from './oauthCall';
 import { sendServiceToken } from './sendServiceToken';
 
-export async function spotifyLogin(apiEndpoint: string) {
+export async function spotifyLogin(apiEndpoint: string, sessionToken?: string) {
   const setToken = (accessToken: string) => {
-    sendServiceToken(apiEndpoint, accessToken, 'spotify');
+    if (sessionToken)
+      sendServiceToken(apiEndpoint, accessToken, 'spotify', sessionToken);
+    else sendServiceToken(apiEndpoint, accessToken, 'spotify');
   };
   const config = {
     clientId: SPOTIFY_CLIENT_ID,

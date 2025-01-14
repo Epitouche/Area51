@@ -1,9 +1,9 @@
 import { Text, View } from 'react-native';
 import { globalStyles } from '../styles/global_style';
 import { AppContext } from '../context/AppContext';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ServiceCard } from '../components';
-import { parseServices } from '../service';
+import { getToken, parseServices } from '../service';
 
 export default function ServiceScreen() {
   const {
@@ -13,8 +13,13 @@ export default function ServiceScreen() {
     serverIp,
     setServicesConnected,
   } = useContext(AppContext);
+  const [token, setToken] = useState('');
 
   useEffect(() => {
+    const getMyToken = async () => {
+      await getToken('token', setToken);
+    }
+    getMyToken();
     if (aboutJson) parseServices({ aboutJson, serverIp, setServicesConnected });
   }, [serverIp]);
 
@@ -37,15 +42,19 @@ export default function ServiceScreen() {
             gap: 10,
           }}>
           {servicesConnected &&
+            aboutJson &&
             servicesConnected.services &&
             servicesConnected.services.map((service, index) => (
               <ServiceCard
                 key={index}
                 title={service.name}
-                image={
-                  'https://img.icons8.com/?size=100&id=3tC9EQumUAuq&format=png&color=000000'
-                }
+                image={service.image}
                 status={service.isConnected}
+                isMobile={isBlackTheme}
+                aboutJson={aboutJson}
+                serverIp={serverIp}
+                setServicesConnected={setServicesConnected}
+                token={token}
               />
             ))}
         </View>

@@ -82,6 +82,7 @@ export async function parseConnectedServices({
         isConnected: connected,
         actions: service.actions,
         reactions: service.reactions,
+        image: service.image,
       };
     }),
   };

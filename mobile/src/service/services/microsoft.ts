@@ -1,10 +1,15 @@
 import { MICROSOFT_CLIENT_ID } from '@env';
 import { OauthLogin } from './oauthCall';
-import { sendServiceToken } from "./sendServiceToken";
+import { sendServiceToken } from './sendServiceToken';
 
-export async function microsoftLogin(apiEndpoint: string) {
+export async function microsoftLogin(
+  apiEndpoint: string,
+  sessionToken?: string,
+) {
   const setToken = (accessToken: string) => {
-      sendServiceToken(apiEndpoint, accessToken, 'microsoft');
+    if (sessionToken)
+      sendServiceToken(apiEndpoint, accessToken, 'microsoft', sessionToken);
+    else sendServiceToken(apiEndpoint, accessToken, 'microsoft');
   };
   const config = {
     clientId: MICROSOFT_CLIENT_ID,

@@ -37,26 +37,6 @@ export function WorkflowTab({
           ]}>
           Name
         </Text>
-        {/* <Text
-            style={[
-              styles.headerCell,
-              isBlackTheme
-                ? globalStyles.textColor
-                : globalStyles.textColorBlack,
-              globalStyles.textFormat,
-            ]}>
-            Action
-          </Text>
-          <Text
-            style={[
-              styles.headerCell,
-              isBlackTheme
-                ? globalStyles.textColor
-                : globalStyles.textColorBlack,
-              globalStyles.textFormat,
-            ]}>
-            Reaction
-          </Text> */}
         <Text
           style={[
             styles.headerCell,
@@ -94,26 +74,6 @@ export function WorkflowTab({
                 {workflow.name}
               </Text>
             </View>
-            {/* <View style={styles.cell}>
-                <Text
-                  style={
-                    isBlackTheme
-                      ? globalStyles.textColor
-                      : globalStyles.textColorBlack
-                  }>
-                  {workflow.action_name}
-                </Text>
-              </View>
-              <View style={styles.cell}>
-                <Text
-                  style={
-                    isBlackTheme
-                      ? globalStyles.textColor
-                      : globalStyles.textColorBlack
-                  }>
-                  {workflow.reaction_name}
-                </Text>
-              </View>*/}
             <View style={styles.cell}>
               <Text
                 style={

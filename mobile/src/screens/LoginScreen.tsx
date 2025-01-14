@@ -122,7 +122,6 @@ function Login({
               />
             ))}
         </View>
-        {message !== '' && <Text style={styles.passwordText}>{message}</Text>}
         <View style={styles.forgotPasswordBox}>
           <TouchableOpacity>
             <Text style={styles.forgotPassword}>Forgot Password?</Text>

@@ -5,19 +5,21 @@ import { spotifyLogin } from './spotify';
 interface SelectServicesParamsProps {
   serviceName: string;
   serverIp: string;
+  sessionToken?: string;
 }
 
 export async function selectServicesParams({
   serverIp,
   serviceName,
+  sessionToken,
 }: SelectServicesParamsProps) {
   switch (serviceName) {
     case 'spotify':
-      return await spotifyLogin(serverIp);
+      return await spotifyLogin(serverIp, sessionToken);
     case 'github':
-      return await githubLogin(serverIp);
+      return await githubLogin(serverIp, sessionToken);
     case 'microsoft':
-      return await microsoftLogin(serverIp);
+      return await microsoftLogin(serverIp, sessionToken);
     default:
       return false;
   }

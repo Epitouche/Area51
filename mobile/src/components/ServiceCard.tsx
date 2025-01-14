@@ -1,22 +1,49 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { Button } from 'react-native-paper';
-import { selectServicesParams } from '../service';
+import { getToken, parseServices, selectServicesParams } from '../service';
+import { AboutJson, AboutJsonParse } from '../types';
 
 interface ServiceCardProps {
   title: string;
   image: string;
   status: boolean;
+  isMobile?: boolean;
+  setServicesConnected: (services: AboutJsonParse) => void;
+  aboutJson: AboutJson;
+  serverIp: string;
+  token: string;
 }
 
-export function ServiceCard({ image, status, title }: ServiceCardProps) {
-  const { isBlackTheme, serverIp } = useContext(AppContext);
+export function ServiceCard({
+  image,
+  status,
+  title,
+  isMobile,
+  aboutJson,
+  serverIp,
+  token,
+  setServicesConnected,
+}: ServiceCardProps) {
+  useContext(AppContext);
 
   const handleOauthLogin = async () => {
-    if (await selectServicesParams({ serverIp, serviceName: title })) {
-    }
+    if (
+      (await selectServicesParams({
+        serverIp,
+        serviceName: title,
+        sessionToken: token,
+      })) &&
+      aboutJson
+    )
+      parseServices({
+        aboutJson,
+        serverIp,
+        setServicesConnected,
+      });
+    else console.log('Failed');
   };
   return (
     <View
@@ -29,7 +56,7 @@ export function ServiceCard({ image, status, title }: ServiceCardProps) {
       />
       <Text
         style={[
-          isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+          isMobile ? globalStyles.textColor : globalStyles.textColorBlack,
           styles.title,
         ]}>
         {title[0].toLocaleUpperCase() + title.slice(1)}

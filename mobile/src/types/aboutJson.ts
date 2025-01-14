@@ -56,6 +56,7 @@ export type ServicesParse = {
   isConnected: boolean;
   actions: Action[];
   reactions: Reaction[];
+  image: string;
 }
 
 export type AboutJsonParse = {

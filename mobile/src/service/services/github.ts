@@ -1,10 +1,12 @@
 import { GITHUB_CLIENT_ID, GITHUB_SECRET } from '@env';
 import { OauthLogin } from './oauthCall';
-import { sendServiceToken } from "./sendServiceToken";
+import { sendServiceToken } from './sendServiceToken';
 
-export async function githubLogin(apiEndpoint: string) {
+export async function githubLogin(apiEndpoint: string, sessionToken?: string) {
   const setToken = (accessToken: string) => {
-    sendServiceToken(apiEndpoint, accessToken, 'github');
+    if (sessionToken)
+      sendServiceToken(apiEndpoint, accessToken, 'github', sessionToken);
+    else sendServiceToken(apiEndpoint, accessToken, 'github');
   };
   const config = {
     clientId: GITHUB_CLIENT_ID,
