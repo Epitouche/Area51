@@ -53,7 +53,7 @@ func NewServicesService(
 			{
 				Name:        schemas.Google,
 				Description: "This is the Google service",
-				Image:       "https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-0.png",
+				Image:       "https://pngimg.com/uploads/google/google_PNG19630.png",
 				IsOAuth:     true,
 			},
 			{
