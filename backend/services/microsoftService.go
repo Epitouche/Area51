@@ -38,44 +38,38 @@ func (service *microsoftService) GetUserInfosByToken(accessToken string, service
 			return
 		}
 
-		// Set the Authorization header with the Bearer token
 		req.Header.Set("Authorization", "Bearer "+accessToken)
-		fmt.Printf("accessToken: %s\n", accessToken)
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
 			return
 		}
-		fmt.Printf("Response: %+v\n", resp)
 		defer resp.Body.Close()
-
 		if resp.StatusCode != http.StatusOK {
+			// READ THE BODY
+			bodyBytes, _ := io.ReadAll(resp.Body)
+			fmt.Println("response body: ", string(bodyBytes))
 			return
 		}
 		err = json.NewDecoder(resp.Body).Decode(&userInfos.MicrosoftUserInfos)
 		if err != nil {
 			return
 		}
-		// body, _ := io.ReadAll(resp.Body)
-		// if err := json.Unmarshal(body, &userInfos); err != nil {
-		// 	return
-		// }
 	}
 }
 
 func (service *microsoftService) AuthGetServiceAccessToken(code string, path string) (schemas.MicrosoftResponseToken, error) {
 	clientId := toolbox.GetInEnv("MICROSOFT_CLIENT_ID")
-	// clientSecret := toolbox.GetInEnv("MICROSOFT_SECRET")
 	appPort := toolbox.GetInEnv("FRONTEND_PORT")
+	tenantId := toolbox.GetInEnv("MICROSOFT_TENANT_ID")
 	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	redirectUri := appAdressHost + appPort + path
-	apiUrl := "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+	apiUrl := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", tenantId)
 
 	data := url.Values{}
 	data.Set("client_id", clientId)
-	// data.Set("client_secret", clientSecret)
 	data.Set("code", code)
 	data.Set("redirect_uri", redirectUri)
 	data.Set("grant_type", "authorization_code")
@@ -94,20 +88,13 @@ func (service *microsoftService) AuthGetServiceAccessToken(code string, path str
 		return schemas.MicrosoftResponseToken{}, err
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
-	// fmt.Println("response body: ", string(bodyBytes))
+	fmt.Println("response body: ", string(bodyBytes))
 
 	var result schemas.MicrosoftResponseToken
 	err = json.Unmarshal(bodyBytes, &result)
 	if err != nil {
 		return schemas.MicrosoftResponseToken{}, fmt.Errorf("unable to decode response because %w", err)
 	}
-	// fmt.Printf("Result: %+v\n", result)
-
-	// resultToken := schemas.MicrosoftResponseToken{}
-	// err = json.NewDecoder(response.Body).Decode(&resultToken)
-	// if err != nil {
-	// 	return schemas.MicrosoftResponseToken{}, err
-	// }
 	response.Body.Close()
 	return result, nil
 }

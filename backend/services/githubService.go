@@ -278,7 +278,6 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 
 func (service *githubService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
 	return func(userInfos *schemas.ServicesUserInfos) {
-		// fmt.Printf("YAYYAYAYAYYAYAYYYAYYAYAYAYYAYAYYAYAYAY\n")
 		request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 		if err != nil {
 			return
@@ -291,7 +290,6 @@ func (service *githubService) GetUserInfosByToken(accessToken string, serviceNam
 		if err != nil || response.StatusCode != http.StatusOK {
 			return
 		}
-		// fmt.Printf("Response: %+v\n", response)
 
 		err = json.NewDecoder(response.Body).Decode(&userInfos.GithubUserInfos)
 		if err != nil {

@@ -121,7 +121,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 
 	var newGithubToken schemas.ServiceToken
 	var newUser schemas.User
-	// var tokenId *uint64
 	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, githubService.Id)
 	if isAlreadyRegistered {
 		newGithubToken = schemas.ServiceToken{
@@ -139,7 +138,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 				if err != nil {
 					return "", fmt.Errorf("unable to update token because %w", err)
 				}
-				// tokenId = &actualServiceToken.Id
 			}
 		}
 	} else {
@@ -177,13 +175,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		}
 		isAlreadyRegistered = true
 	}
-
-	// if tokenId == nil {
-	// 	_, err := controller.serviceToken.SaveToken(newGithubToken)
-	// 	if err != nil {
-	// 		return "", fmt.Errorf("unable to save token because %w", err)
-	// 	}
-	// }
 
 	if newUser.Username == "" {
 		var email *string

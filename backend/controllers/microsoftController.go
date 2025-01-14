@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"area51/database"
 	"area51/schemas"
 	"area51/services"
 	"area51/toolbox"
@@ -21,17 +22,20 @@ type microsoftController struct {
 	service         services.MicrosoftService
 	userService     services.UserService
 	servicesService services.ServicesService
+	serviceToken    services.TokenService
 }
 
 func NewMicrosoftController(
 	service services.MicrosoftService,
 	userService services.UserService,
 	servicesService services.ServicesService,
+	serviceToken services.TokenService,
 ) MicrosoftController {
 	return &microsoftController{
 		service:         service,
 		userService:     userService,
 		servicesService: servicesService,
+		serviceToken:    serviceToken,
 	}
 }
 
@@ -45,12 +49,12 @@ func (controller *microsoftController) RedirectionToMicrosoftService(ctx *gin.Co
 		return "", err
 	}
 	redirectUri := fmt.Sprintf("%s%s/callback", appAdressHost, appPort)
-	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type=code&scope=Mail.ReadWrite Mail.Read User.Read Mail.Send offline_access calendars.Read calendars.ReadWrite&redirect_uri=%s&state=%s", clientId, redirectUri, state)
+	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type=code&scope=openid profile https://graph.microsoft.com/User.Read&redirect_uri=%s&state=%s", clientId, redirectUri, state)
 	return authUrl, nil
 }
 
 func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context, path string) (string, error) {
-	// var isAlreadyRegistered bool = false
+	var isAlreadyRegistered bool = false
 	var codeCredentials schemas.OAuth2CodeCredentials
 	err := json.NewDecoder(ctx.Request.Body).Decode(&codeCredentials)
 	if err != nil {
@@ -69,7 +73,6 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 	authHeader := ctx.GetHeader("Authorization")
 
 	if authHeader != "" && len(authHeader) >= len("Bearer ") {
-		fmt.Printf("JE SUIS DANS LE IF CE QUI N'A AUCUN SENS\n")
 		token := authHeader[len("Bearer "):]
 		user, err := controller.userService.GetUserInfos(token)
 		if err != nil {
@@ -91,7 +94,7 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 			return newSessionToken, nil
 		}
 	}
-	// githubService := controller.servicesService.FindByName(schemas.Github)
+	microsoftService := controller.servicesService.FindByName(schemas.Microsoft)
 	// userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
 	actualUserInfos := schemas.ServicesUserInfos{
 		GithubUserInfos:    nil,
@@ -100,7 +103,103 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 	}
 	userInfos := controller.servicesService.GetUserInfosByToken(microsoftTokenResponse.AccessToken, schemas.Microsoft)
 	userInfos(&actualUserInfos)
-	userInfo := actualUserInfos
-	fmt.Printf("UserInfos: %+v\n", userInfo)
-	return "", nil
+	userInfo := actualUserInfos.MicrosoftUserInfos
+	var actualUser schemas.User
+	actualUser = controller.userService.GetUserByEmail(&userInfo.Mail)
+	if actualUser.Email != nil {
+		isAlreadyRegistered = true
+	}
+
+	var newSpotifyToken schemas.ServiceToken
+	var newUser schemas.User
+	password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+	if err != nil {
+		return "", fmt.Errorf("unable to hash password because %w", err)
+	}
+	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, microsoftService.Id)
+	if isAlreadyRegistered {
+		newSpotifyToken = schemas.ServiceToken{
+			Id:        serviceToken.Id,
+			Token:     microsoftTokenResponse.AccessToken,
+			Service:   microsoftService,
+			ServiceId: controller.servicesService.FindByName(schemas.Microsoft).Id,
+			UserId:    actualUser.Id,
+			User:      actualUser,
+		}
+	} else {
+		newUser = schemas.User{
+			Username: userInfo.DisplayName,
+			Email:    &userInfo.Mail,
+			Password: &password,
+		}
+		err = controller.userService.CreateUser(newUser)
+		if err != nil {
+			return "", fmt.Errorf("unable to create user because %w", err)
+		}
+		actualUser = controller.userService.GetUserByEmail(&userInfo.Mail)
+
+		newSpotifyToken = schemas.ServiceToken{
+			Token:        microsoftTokenResponse.AccessToken,
+			RefreshToken: microsoftTokenResponse.RefreshToken,
+			Service:      microsoftService,
+			ServiceId:    controller.servicesService.FindByName(schemas.Microsoft).Id,
+			UserId:       actualUser.Id,
+			User:         actualUser,
+		}
+		err = controller.userService.AddServiceToUser(actualUser, newSpotifyToken)
+		if err != nil {
+			return "", fmt.Errorf("unable to add service to user because %w", err)
+		}
+		isAlreadyRegistered = true
+	}
+	if serviceToken.Id != 0 {
+		actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, microsoftService.Id)
+		if actualServiceToken.Token != "" {
+			err := controller.serviceToken.Update(newSpotifyToken)
+			if err != nil {
+				return "", fmt.Errorf("unable to update token because %w", err)
+			}
+		}
+	}
+
+	if newUser.Username == "" {
+
+		newUser = schemas.User{
+			Username: userInfo.DisplayName,
+			Email:    &userInfo.Mail,
+			Password: &password,
+		}
+	} else {
+		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
+		for _, token := range tokens {
+			if token.UserId == actualUser.Id {
+				newUser = schemas.User{
+					Username: userInfo.DisplayName,
+					Email:    &userInfo.Mail,
+					Password: &password,
+				}
+				serviceToken.Id = token.Id
+				err := controller.userService.UpdateUserInfos(actualUser)
+				if err != nil {
+					return "", fmt.Errorf("unable to update user infos because %w", err)
+				}
+				break
+			}
+		}
+	}
+
+	if isAlreadyRegistered {
+		token, _ := controller.userService.Login(newUser, microsoftService)
+		fmt.Println("true", token)
+		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
+		return token, nil
+	} else {
+		token, err := controller.userService.Register(newUser)
+		fmt.Println("false", token)
+		if err != nil {
+			return "", fmt.Errorf("unable to register user because %w", err)
+		}
+		return token, nil
+	}
+
 }

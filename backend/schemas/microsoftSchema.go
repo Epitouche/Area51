@@ -1,13 +1,8 @@
 package schemas
 
 type MicrosoftUserInfo struct {
-	Login     string `json:"login"`
-	Id        uint64 `json:"id"         gorm:"primaryKey"`
-	AvatarUrl string `json:"avatar_url"`
-	Type      string `json:"type"`
-	HtmlUrl   string `json:"html_url"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
+	Mail        string `json:"mail"`
+	DisplayName string `json:"displayName"`
 }
 
 type MicrosoftResponseToken struct {
