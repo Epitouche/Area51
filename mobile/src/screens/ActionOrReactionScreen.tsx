@@ -1,10 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
 import { Action, AppStackList, Reaction, ServicesParse } from '../types';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Button } from 'react-native-paper';
 
 type ActionOrReactionProps = RouteProp<AppStackList, 'Options'>;
 
@@ -18,7 +23,8 @@ function NoService() {
       }>
       <View style={globalStyles.container}>
         <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+          accessibilityLabel="No Service">
           No Service Connected
         </Text>
       </View>
@@ -33,6 +39,7 @@ function ActionOrReaction() {
     isConnected: false,
     actions: [],
     reactions: [],
+    image: '',
   };
 
   const route = useRoute<ActionOrReactionProps>();
@@ -52,7 +59,8 @@ function ActionOrReaction() {
       <View style={styles.flexContainer}>
         <View style={globalStyles.container}>
           <Text
-            style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+            style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+            accessibilityLabel={isAction ? "Creating Action" : "Creating Reaction"}>
             {isAction ? 'Creating an Action' : 'Creating an Reaction'}
           </Text>
           <Text
@@ -61,37 +69,41 @@ function ActionOrReaction() {
                 ? globalStyles.textColorBlack
                 : globalStyles.textColor,
               globalStyles.textFormat,
-            ]}>
+            ]}
+            accessibilityLabel="Select Service">
             Select a service
           </Text>
-          {servicesConnected.services.map((service, index) => {
-            if (service.isConnected) {
-              return (
-                <Button
-                  key={index}
-                  mode="contained"
-                  style={
-                    isBlackTheme
-                      ? globalStyles.primaryLight
-                      : globalStyles.secondaryDark
-                  }
-                  onPress={() => {
-                    setSelectedService(service);
-                  }}>
-                  <Text
+          <View style={styles.buttonContainer}>
+            {servicesConnected.services.map((service, index) => {
+              if (service.isConnected) {
+                return (
+                  <TouchableOpacity
+                    key={index}
                     style={[
+                      globalStyles.buttonFormat,
                       isBlackTheme
-                        ? globalStyles.textColor
-                        : globalStyles.textColorBlack,
-                      globalStyles.textFormat,
-                    ]}>
-                    {service.name}
-                  </Text>
-                </Button>
-              );
-            }
-            return null;
-          })}
+                        ? globalStyles.primaryLight
+                        : globalStyles.secondaryDark,
+                    ]}
+                    onPress={() => {
+                      setSelectedService(service);
+                    }}>
+                    <Text
+                      style={[
+                        isBlackTheme
+                          ? globalStyles.textColor
+                          : globalStyles.textColorBlack,
+                        globalStyles.textFormat,
+                      ]}
+                      accessibilityLabel={service.name}>
+                      {service.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }
+              return null;
+            })}
+          </View>
           {selectedService && (
             <View style={styles.textContainer}>
               <Text
@@ -100,7 +112,8 @@ function ActionOrReaction() {
                     ? globalStyles.textColorBlack
                     : globalStyles.textColor,
                   globalStyles.textFormat,
-                ]}>
+                ]}
+                accessibilityLabel={isAction ? "Select Action" : "Select Reaction"}>
                 {isAction ? 'Select an Action for ' : 'Select an Reaction for '}
                 {selectedService.name}
               </Text>
@@ -108,14 +121,14 @@ function ActionOrReaction() {
                 ? selectedService.actions.map((action, index) => {
                     if (setAction) {
                       return (
-                        <Button
+                        <TouchableOpacity
                           key={index}
-                          mode="contained"
-                          style={
+                          style={[
+                            globalStyles.buttonFormat,
                             isBlackTheme
                               ? globalStyles.primaryLight
-                              : globalStyles.secondaryDark
-                          }
+                              : globalStyles.secondaryDark,
+                          ]}
                           onPress={() => {
                             setSelectedActionOrReactionId(action);
                           }}>
@@ -125,24 +138,25 @@ function ActionOrReaction() {
                                 ? globalStyles.textColor
                                 : globalStyles.textColorBlack,
                               globalStyles.textFormat,
-                            ]}>
+                            ]}
+                            accessibilityLabel={action.name}>
                             {action.name}
                           </Text>
-                        </Button>
+                        </TouchableOpacity>
                       );
                     }
                   })
                 : selectedService.reactions.map((reaction, index) => {
                     if (setReaction) {
                       return (
-                        <Button
+                        <TouchableOpacity
                           key={index}
-                          mode="contained"
-                          style={
+                          style={[
+                            globalStyles.buttonFormat,
                             isBlackTheme
                               ? globalStyles.primaryLight
-                              : globalStyles.secondaryDark
-                          }
+                              : globalStyles.secondaryDark,
+                          ]}
                           onPress={() => {
                             setSelectedActionOrReactionId(reaction);
                           }}>
@@ -152,10 +166,11 @@ function ActionOrReaction() {
                                 ? globalStyles.textColor
                                 : globalStyles.textColorBlack,
                               globalStyles.textFormat,
-                            ]}>
+                            ]}
+                            accessibilityLabel={reaction.name}>
                             {reaction.name}
                           </Text>
-                        </Button>
+                        </TouchableOpacity>
                       );
                     }
                   })}
@@ -163,7 +178,7 @@ function ActionOrReaction() {
           )}
         </View>
         <View style={styles.containerSaveButton}>
-          <Button
+          <TouchableOpacity
             style={[
               styles.saveButton,
               isBlackTheme
@@ -186,11 +201,12 @@ function ActionOrReaction() {
                 isBlackTheme
                   ? globalStyles.textColor
                   : globalStyles.textColorBlack,
-                globalStyles.textFormat
-              ]}>
+                globalStyles.textFormat,
+              ]}
+              accessibilityLabel="Save">
               Save
             </Text>
-          </Button>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -246,7 +262,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonContainer: {
-    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 20,
@@ -262,5 +277,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 20,
     marginBottom: 40,
+    padding: 10,
   },
 });

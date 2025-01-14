@@ -45,7 +45,8 @@ export default function RegisterScreen() {
       }>
       <View style={globalStyles.container}>
         <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+          accessibilityLabel="Register">
           REGISTER IN
         </Text>
         {serverIp === '' ? (
@@ -63,6 +64,7 @@ export default function RegisterScreen() {
                 autoCapitalize="none"
                 value={forms.username}
                 onChangeText={text => setForms({ ...forms, username: text })}
+                accessibilityLabel="Username"
               />
               <TextInput
                 style={[
@@ -74,6 +76,7 @@ export default function RegisterScreen() {
                 autoCapitalize="none"
                 value={forms.email}
                 onChangeText={text => setForms({ ...forms, email: text })}
+                accessibilityLabel="Email"
               />
               <TextInput
                 style={[
@@ -85,6 +88,7 @@ export default function RegisterScreen() {
                 value={forms.password}
                 onChangeText={text => setForms({ ...forms, password: text })}
                 autoCapitalize="none"
+                accessibilityLabel="Password"
               />
             </View>
             <View style={{ width: '90%', marginTop: 20 }}>
@@ -102,7 +106,8 @@ export default function RegisterScreen() {
                       ? globalStyles.textColorBlack
                       : globalStyles.textColor,
                     globalStyles.textFormat,
-                  ]}>
+                  ]}
+                  accessibilityLabel="Register Button">
                   Register
                 </Text>
               </TouchableOpacity>
@@ -123,7 +128,11 @@ export default function RegisterScreen() {
             </View>
             <View style={styles.forgotPasswordBox}>
               <TouchableOpacity>
-                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+                <Text
+                  style={styles.forgotPassword}
+                  accessibilityLabel="Forgot Password">
+                  Forgot Password?
+                </Text>
               </TouchableOpacity>
             </View>
           </>

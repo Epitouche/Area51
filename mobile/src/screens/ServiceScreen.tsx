@@ -30,7 +30,8 @@ export default function ServiceScreen() {
       }>
       <View style={globalStyles.container}>
         <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+          accessibilityLabel="Service Screen">
           Service Screen
         </Text>
         <View

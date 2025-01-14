@@ -75,7 +75,8 @@ export default function WorkflowScreen() {
       <ScrollView>
         <View style={globalStyles.container}>
           <Text
-            style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+            style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+            accessibilityLabel="Dashboard">
             Dashboard
           </Text>
           <TouchableOpacity
@@ -92,7 +93,8 @@ export default function WorkflowScreen() {
                   ? globalStyles.textColor
                   : globalStyles.textColorBlack,
                 globalStyles.textFormat,
-              ]}>
+              ]}
+              accessibilityLabel="Logout">
               Logout
             </Text>
           </TouchableOpacity>

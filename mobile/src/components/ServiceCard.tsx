@@ -43,7 +43,6 @@ export function ServiceCard({
         serverIp,
         setServicesConnected,
       });
-    else console.log('Failed');
   };
   return (
     <View

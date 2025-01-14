@@ -14,7 +14,8 @@ export default function HomeScreen() {
       }>
       <View style={globalStyles.container}>
         <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+          accessibilityLabel="Area51">
           Area51
         </Text>
         <View style={styles.textAlign}>
@@ -24,7 +25,8 @@ export default function HomeScreen() {
                 isBlackTheme
                   ? globalStyles.subtitleBlack
                   : globalStyles.subtitle
-              }>
+              }
+              accessibilityLabel="Automate">
               Automate
             </Text>
           </View>
@@ -34,7 +36,8 @@ export default function HomeScreen() {
                 isBlackTheme
                   ? globalStyles.subtitleBlack
                   : globalStyles.subtitle
-              }>
+              }
+              accessibilityLabel="Without Limits">
               without limits
             </Text>
           </View>

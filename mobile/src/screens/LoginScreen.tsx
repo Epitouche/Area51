@@ -54,7 +54,8 @@ function Login({
       }>
       <View style={globalStyles.container}>
         <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+          accessibilityLabel="Login">
           LOG IN
         </Text>
         <View style={styles.inputBox}>
@@ -67,6 +68,7 @@ function Login({
             placeholder="Username"
             value={forms.username}
             onChangeText={username => setForms({ ...forms, username })}
+            accessibilityLabel="Username"
           />
           <TextInput
             style={[
@@ -78,10 +80,15 @@ function Login({
             placeholder="Password"
             onChangeText={password => setForms({ ...forms, password })}
             autoCapitalize="none"
+            accessibilityLabel="Password"
           />
         </View>
         <View>
-          {message != '' && <Text style={{ color: 'red' }}>{message}</Text>}
+          {message != '' && (
+            <Text style={{ color: 'red' }} accessibilityLabel="Error Message">
+              {message}
+            </Text>
+          )}
         </View>
         <View style={{ width: '90%' }}>
           <TouchableOpacity
@@ -98,7 +105,8 @@ function Login({
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
                 globalStyles.textFormat,
-              ]}>
+              ]}
+              accessibilityLabel="Login Button">
               Login
             </Text>
           </TouchableOpacity>
@@ -124,7 +132,11 @@ function Login({
         </View>
         <View style={styles.forgotPasswordBox}>
           <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
+            <Text
+              style={styles.forgotPassword}
+              accessibilityLabel="Forgot Password">
+              Forgot Password?
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

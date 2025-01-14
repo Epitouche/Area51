@@ -42,7 +42,8 @@ export default function WorkflowDetailsScreen() {
             <Text
               style={[
                 isBlackTheme ? globalStyles.title : globalStyles.titleBlack,
-              ]}>
+              ]}
+              accessibilityLabel={workflow.name}>
               {workflow.name.charAt(0).toUpperCase() + workflow.name.slice(1)}
             </Text>
           </View>
@@ -54,7 +55,8 @@ export default function WorkflowDetailsScreen() {
                 isBlackTheme
                   ? globalStyles.textColor
                   : globalStyles.textColorBlack,
-              ]}>
+              ]}
+              accessibilityLabel="Bullet">
               •
             </Text>
             <Text
@@ -63,7 +65,8 @@ export default function WorkflowDetailsScreen() {
                   ? globalStyles.textColor
                   : globalStyles.textColorBlack,
                 styles.subtitle,
-              ]}>
+              ]}
+              accessibilityLabel="Action and Reaction">
               Action et Reaction
             </Text>
           </View>
@@ -82,7 +85,8 @@ export default function WorkflowDetailsScreen() {
                     : globalStyles.textColor,
                   globalStyles.textFormat,
                   styles.textFormat,
-                ]}>
+                ]}
+                accessibilityLabel={workflow.action_name}>
                 {workflow.action_name}
               </Text>
             </View>
@@ -100,7 +104,8 @@ export default function WorkflowDetailsScreen() {
                     : globalStyles.textColor,
                   globalStyles.textFormat,
                   styles.textFormat,
-                ]}>
+                ]}
+                accessibilityLabel={workflow.reaction_name}>
                 {workflow.reaction_name}
               </Text>
             </View>
@@ -113,7 +118,8 @@ export default function WorkflowDetailsScreen() {
                 isBlackTheme
                   ? globalStyles.textColor
                   : globalStyles.textColorBlack,
-              ]}>
+              ]}
+              accessibilityLabel="Bullet">
               •
             </Text>
             <Text
@@ -122,7 +128,8 @@ export default function WorkflowDetailsScreen() {
                   ? globalStyles.textColor
                   : globalStyles.textColorBlack,
                 styles.subtitle,
-              ]}>
+              ]}
+              accessibilityLabel="Toggle Workflow">
               Active or disable the workflow
             </Text>
           </View>
@@ -139,7 +146,8 @@ export default function WorkflowDetailsScreen() {
                   isToggled
                     ? globalStyles.textColorBlack
                     : globalStyles.textColor,
-                ]}>
+                ]}
+                accessibilityLabel={isToggled ? "ON" : "OFF"}>
                 {isToggled ? 'ON' : 'OFF'}
               </Text>
             </TouchableOpacity>
