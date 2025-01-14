@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
 import { IpInput } from '../components';
-import { getAboutJson, parseServices } from '../service';
+import { refreshServices } from '../service';
 
 export default function HomeScreen() {
   const {
@@ -13,14 +13,6 @@ export default function HomeScreen() {
     setAboutJson,
     setServicesConnected,
   } = useContext(AppContext);
-
-  const handleRefresh = async () => {
-    if (serverIp != '') {
-      await getAboutJson(serverIp, setAboutJson);
-      if (aboutJson)
-        await parseServices({ serverIp, aboutJson, setServicesConnected });
-    }
-  };
 
   return (
     <View
@@ -63,7 +55,14 @@ export default function HomeScreen() {
             globalStyles.buttonFormat,
             isBlackTheme ? globalStyles.primaryLight : globalStyles.primaryDark,
           ]}
-          onPress={handleRefresh}>
+          onPress={() =>
+            refreshServices({
+              serverIp,
+              setAboutJson,
+              setServicesConnected,
+              aboutJson,
+            })
+          }>
           <Text
             style={[
               isBlackTheme

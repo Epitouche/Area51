@@ -10,19 +10,17 @@ import { WorkflowCard, WorkflowTab } from '../components';
 import { AppContext } from '../context/AppContext';
 import {
   parseServices,
-  sendWorkflows,
   deleteToken,
   checkToken,
   getToken,
   getWorkflows,
 } from '../service';
 import { globalStyles } from '../styles/global_style';
-import { Action, AppStackList, Reaction, Workflow } from '../types';
+import { AppStackList } from '../types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export default function WorkflowScreen() {
   const [token, setToken] = useState('');
-  const [workflows, setWorkflows] = useState<Workflow[]>();
 
   const navigation = useNavigation<NavigationProp<AppStackList>>();
 
@@ -32,6 +30,8 @@ export default function WorkflowScreen() {
     setIsConnected,
     isBlackTheme,
     setServicesConnected,
+    workflows,
+    setWorkflows,
   } = useContext(AppContext);
 
   const handleLogout = () => {

@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
-import { deleteToken } from '../service';
+import { deleteToken, logoutServices } from '../service';
+import { globalStyles } from '../styles/global_style';
 
 interface DeconnectionPopUpProps {
   service: string;
   modalVisible: boolean;
   setModalVisible: (modalVisible: boolean) => void;
+  token: string;
+  serverIp: string;
+  setNeedRefresh: (needRefresh: boolean) => void;
 }
 
 export function DeconnectionPopUp({
   service,
   modalVisible,
   setModalVisible,
+  token,
+  serverIp,
+  setNeedRefresh
 }: DeconnectionPopUpProps) {
-  const handleDeconnection = () => {
+  
+  const handleDeconnection = async () => {
+    await logoutServices(serverIp, service, token);
     deleteToken(service);
     setModalVisible(false);
+    setNeedRefresh(true);
   };
+
   return (
     <View style={styles.container}>
       <Modal
@@ -33,14 +44,14 @@ export function DeconnectionPopUp({
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={styles.button}
+                style={[styles.button, globalStyles.buttonFormat]}
                 onPress={handleDeconnection}>
                 <Text style={{ color: 'white', fontSize: 16 }}>
                   Déconnecter
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.cancelButton}
+                style={[styles.cancelButton, globalStyles.buttonFormat]}
                 onPress={() => setModalVisible(false)}>
                 <Text style={{ color: 'black', fontSize: 16 }}>Annuler</Text>
               </TouchableOpacity>

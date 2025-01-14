@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
 
   socialButtonBox: {
     flexDirection: 'row',
-    width: '80%',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,

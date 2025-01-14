@@ -6,16 +6,20 @@ import {
   logoutServices,
 } from '../service';
 import { AboutJson, AboutJsonParse } from '../types';
+import { useEffect } from 'react';
+import { refresh } from 'react-native-app-auth';
 
 interface ServiceCardProps {
   title: string;
   image: string;
   status: boolean;
   isMobile?: boolean;
-  setServicesConnected: (services: AboutJsonParse) => void;
   aboutJson: AboutJson;
   serverIp: string;
   token: string;
+  setNeedRefresh: (needRefresh: boolean) => void;
+  setModalVisible: (modalvisible: boolean) => void;
+  setSelectedService: (selectedServices: string) => void;
 }
 
 export function ServiceCard({
@@ -23,10 +27,11 @@ export function ServiceCard({
   status,
   title,
   isMobile,
-  aboutJson,
   serverIp,
   token,
-  setServicesConnected,
+  setNeedRefresh,
+  setModalVisible,
+  setSelectedService
 }: ServiceCardProps) {
 
   const handleOauthLogin = async (
@@ -34,20 +39,16 @@ export function ServiceCard({
     serviceName: string,
   ) => {
     if (isConnected) {
-      await logoutServices(serverIp, serviceName, token);
+      setModalVisible(true);
+      setSelectedService(serviceName);
     } else {
       await selectServicesParams({
         serverIp,
         serviceName: serviceName,
         sessionToken: token,
       });
+      setNeedRefresh(true);
     }
-    if (aboutJson)
-      await parseServices({
-        aboutJson,
-        serverIp,
-        setServicesConnected,
-      });
   };
 
   return (

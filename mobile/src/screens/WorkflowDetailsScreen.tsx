@@ -9,19 +9,70 @@ import {
 import { globalStyles } from '../styles/global_style';
 import { AppStackList } from '../types';
 import { AppContext } from '../context/AppContext';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  deleteToken,
+  deleteWorkflow,
+  getReaction,
+  getToken,
+  getWorkflows,
+  modifyWorkflows,
+} from '../service';
 
 type WorkflowDetailsProps = RouteProp<AppStackList, 'Workflow Details'>;
 
 export default function WorkflowDetailsScreen() {
-  const { isBlackTheme } = useContext(AppContext);
   const route = useRoute<WorkflowDetailsProps>();
+  const { isBlackTheme, serverIp, setWorkflows } = useContext(AppContext);
   const { workflow } = route.params;
+  const nav = useNavigation<NavigationProp<AppStackList>>();
 
   const [isToggled, setIsToggled] = useState(workflow.is_active);
+  const [token, setToken] = useState('');
+  const [reaction, setReaction] = useState<any>();
 
   const handleToggle = () => {
     setIsToggled(!isToggled);
+  };
+
+  useEffect(() => {
+    const grabToken = async () => {
+      await getToken('token', setToken);
+
+    };
+    grabToken();
+  }, []);
+
+  useEffect(() => {
+    const grabReaction = async () => {
+      if (token !== 'Error: token not found' && token !== '')
+        await getReaction(serverIp, token, setReaction);
+    };
+    grabReaction();
+  }, [token]);
+
+  const handleSave = async () => {
+    if (token !== 'Error: token not found' && token !== '') {
+      await modifyWorkflows(serverIp, token, isToggled, workflow.workflow_id);
+      await getWorkflows(serverIp, token, setWorkflows);
+      nav.goBack();
+    }
+  };
+
+  const handleDelete = async () => {
+    console.log(token);
+    if (token !== 'Error: token not found' && token !== '') {
+      await deleteWorkflow(
+        serverIp,
+        token,
+        workflow.workflow_id,
+        workflow.name,
+        workflow.action_id,
+        workflow.reaction_id,
+      );
+      await getWorkflows(serverIp, token, setWorkflows);
+      nav.goBack();
+    }
   };
 
   return (
@@ -146,8 +197,50 @@ export default function WorkflowDetailsScreen() {
                     ? globalStyles.textColorBlack
                     : globalStyles.textColor,
                 ]}
-                accessibilityLabel={isToggled ? "ON" : "OFF"}>
+                accessibilityLabel={isToggled ? 'ON' : 'OFF'}>
                 {isToggled ? 'ON' : 'OFF'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 5,
+            }}>
+            <TouchableOpacity
+              style={[
+                globalStyles.buttonFormat,
+                globalStyles.secondaryDark,
+                { width: '100%' },
+              ]}
+              onPress={handleSave}>
+              <Text
+                style={[
+                  globalStyles.textFormat,
+                  isBlackTheme
+                    ? globalStyles.textColorBlack
+                    : globalStyles.textColor,
+                ]}
+                accessibilityLabel={'Save Workflows modification'}>
+                Save
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                globalStyles.buttonFormat,
+                { width: '100%', backgroundColor: 'red' },
+              ]}
+              onPress={handleDelete}>
+              <Text
+                style={[
+                  globalStyles.textFormat,
+                  isBlackTheme
+                    ? globalStyles.textColorBlack
+                    : globalStyles.textColor,
+                ]}
+                accessibilityLabel={'Delete Workflows'}>
+                Delete
               </Text>
             </TouchableOpacity>
           </View>
@@ -156,6 +249,7 @@ export default function WorkflowDetailsScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   card: {
     gap: 20,

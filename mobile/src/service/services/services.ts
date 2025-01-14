@@ -1,7 +1,8 @@
 import { deleteToken, saveToken } from '../token';
 import { authorize } from 'react-native-app-auth';
 import { githubLogin, microsoftLogin, spotifyLogin } from './index';
-import { AuthApiCall, SelectServicesParamsProps } from '../../types';
+import { AuthApiCall, RefreshServicesProps, SelectServicesParamsProps } from '../../types';
+import { getAboutJson, parseServices } from '../aboutJs';
 
 export async function OauthLogin({ config, setToken }: AuthApiCall) {
   const authState = await authorize(config);
@@ -16,11 +17,11 @@ export async function selectServicesParams({
   sessionToken,
 }: SelectServicesParamsProps) {
   switch (serviceName) {
-    case 'microsoft':
+    case 'spotify':
       return await spotifyLogin(serverIp, sessionToken);
     case 'github':
       return await githubLogin(serverIp, sessionToken);
-    case 'spotify':
+    case 'microsoft':
       return await microsoftLogin(serverIp, sessionToken);
     default:
       return false;
@@ -56,9 +57,6 @@ export async function sendServiceToken(
     }
 
     const data = await response.json();
-    if (response.status === 200) {
-      console.log('API send service token success');
-    }
     if (!sessionToken) {
       deleteToken('token');
       saveToken('token', data.token);
@@ -88,7 +86,6 @@ export async function logoutServices(
       },
     );
     if (response.status === 200) {
-      console.log('API logout success');
       return true;
     }
     return false;
@@ -97,3 +94,17 @@ export async function logoutServices(
     return false;
   }
 }
+
+export async function refreshServices({
+  aboutJson,
+  serverIp,
+  setAboutJson,
+  setServicesConnected,
+}: RefreshServicesProps) {
+  if (serverIp != '') {
+    await getAboutJson(serverIp, setAboutJson);
+    if (aboutJson)
+      await parseServices({ serverIp, aboutJson, setServicesConnected });
+  }
+}
+

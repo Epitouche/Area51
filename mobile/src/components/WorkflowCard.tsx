@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ export function WorkflowCard({
   isBlackTheme,
   serverIp,
   token,
-  setWorkflows
+  setWorkflows,
 }: WorkflowCardProps) {
   const navigation = useNavigation<NavigationProp<AppStackList>>();
 
@@ -102,7 +102,9 @@ export function WorkflowCard({
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
                 styles.textFormat,
-              ]}>
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail">
               Add Action
             </Text>
           ) : (
@@ -112,7 +114,9 @@ export function WorkflowCard({
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
                 styles.textFormat,
-              ]}>
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail">
               {action.name}
             </Text>
           )}
@@ -134,7 +138,9 @@ export function WorkflowCard({
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
                 styles.textFormat,
-              ]}>
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail">
               Add Reaction
             </Text>
           ) : (
@@ -144,7 +150,9 @@ export function WorkflowCard({
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
                 styles.textFormat,
-              ]}>
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail">
               {reaction.name}
             </Text>
           )}
@@ -192,14 +200,15 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 10,
   },
   ActionReactionButton: {
-    width: '48%',
+    width: 140,
     padding: 10,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   textFormat: {
     fontSize: 15,

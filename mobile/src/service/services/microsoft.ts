@@ -6,10 +6,9 @@ export async function microsoftLogin(
   sessionToken?: string,
 ) {
   const setToken = (accessToken: string) => {
-    console.log('microsoftLogin', accessToken);
-    // if (sessionToken)
-    //   sendServiceToken(apiEndpoint, accessToken, 'microsoft', sessionToken);
-    // else sendServiceToken(apiEndpoint, accessToken, 'microsoft');
+    if (sessionToken)
+      sendServiceToken(apiEndpoint, accessToken, 'microsoft', sessionToken);
+    else sendServiceToken(apiEndpoint, accessToken, 'microsoft');
   };
   const config = {
     clientId: MICROSOFT_CLIENT_ID,
