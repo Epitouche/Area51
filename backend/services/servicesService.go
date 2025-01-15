@@ -15,13 +15,13 @@ type ServicesService interface {
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
 	GetServices() []interface{}
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type ServiceInterface interface {
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type servicesService struct {
@@ -34,6 +34,8 @@ func NewServicesService(
 	repository repository.ServiceRepository,
 	githubService GithubService,
 	spotifyService SpotifyService,
+	googleService GoogleService,
+	microsoftService MicrosoftService,
 	interpolService InterpolService,
 ) ServicesService {
 	newService := servicesService{
@@ -43,11 +45,25 @@ func NewServicesService(
 				Name:        schemas.Github,
 				Description: "This is the Github service",
 				Image:       "https://pngimg.com/uploads/github/github_PNG80.png",
+				IsOAuth:     true,
 			},
 			{
 				Name:        schemas.Spotify,
 				Description: "This is the Spotify Service",
 				Image:       "https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-logo-spotify-symbol-3.png",
+				IsOAuth:     true,
+			},
+			{
+				Name:        schemas.Google,
+				Description: "This is the Google service",
+				Image:       "https://pngimg.com/uploads/google/google_PNG19630.png",
+				IsOAuth:     true,
+			},
+			{
+				Name:        schemas.Microsoft,
+				Description: "This is the Microsoft Service",
+				Image:       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1024px-Microsoft_logo.svg.png",
+				IsOAuth:     true,
 			},
 			{
 				Name:        schemas.Interpol,
@@ -58,6 +74,8 @@ func NewServicesService(
 		allServices: []interface{}{
 			githubService,
 			spotifyService,
+			googleService,
+			microsoftService,
 			interpolService,
 		},
 	}
@@ -120,10 +138,16 @@ func (service *servicesService) FindById(serviceId uint64) schemas.Service {
 	return service.repository.FindById(serviceId)
 }
 
-func (service *servicesService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
-	for _, oneService := range service.allServices {
-		if oneService.(ServiceInterface).GetUserInfosByToken(accessToken) != nil {
-			return oneService.(ServiceInterface).GetUserInfosByToken(accessToken)
+func (service *servicesService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
+	for i, s := range service.allServicesSchema {
+		for j, oneService := range service.allServices {
+			if s.Name == serviceName {
+				if j == i {
+					if oneService.(ServiceInterface).GetUserInfosByToken(accessToken, serviceName) != nil {
+						return oneService.(ServiceInterface).GetUserInfosByToken(accessToken, serviceName)
+					}
+				}
+			}
 		}
 	}
 	return nil

@@ -62,7 +62,6 @@ func (service *workflowService) FindAll() []schemas.Workflow {
 func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error) {
 	result := schemas.WorkflowResult{}
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
-	fmt.Printf("result value: %+v\n", result)
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +72,6 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	}
 
 	user, err := service.userService.GetUserInfos(tokenString)
-	fmt.Printf("user value: %+v\n", user)
 	if err != nil {
 		return "", err
 	}

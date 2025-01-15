@@ -20,7 +20,7 @@ type SpotifyService interface {
 	// GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error)
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type spotifyService struct {
@@ -263,7 +263,7 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	service.workflowRepository.UpdateReactionTrigger(workflow)
 }
 
-func (service *spotifyService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
+func (service *spotifyService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
 	return func(userInfos *schemas.ServicesUserInfos) {
 		request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
 		if err != nil {

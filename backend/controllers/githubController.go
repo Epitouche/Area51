@@ -100,10 +100,10 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 	}
 	githubService := controller.servicesService.FindByName(schemas.Github)
 	// userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
-	var ServicesUserInfos schemas.ServicesUserInfos
-	userInfos := controller.servicesService.GetUserInfosByToken(githubTokenResponse.AccessToken)
-	userInfos(&ServicesUserInfos)
-	userInfo := ServicesUserInfos.GithubUserInfos
+	servicesUserInfos := schemas.ServicesUserInfos{}
+	userInfos := controller.servicesService.GetUserInfosByToken(githubTokenResponse.AccessToken, schemas.Github)
+	userInfos(&servicesUserInfos)
+	userInfo := servicesUserInfos.GithubUserInfos
 
 	var actualUser schemas.User
 	if userInfo.Email == "" {
@@ -121,7 +121,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 
 	var newGithubToken schemas.ServiceToken
 	var newUser schemas.User
-	// var tokenId *uint64
 	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, githubService.Id)
 	if isAlreadyRegistered {
 		newGithubToken = schemas.ServiceToken{
@@ -139,7 +138,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 				if err != nil {
 					return "", fmt.Errorf("unable to update token because %w", err)
 				}
-				// tokenId = &actualServiceToken.Id
 			}
 		}
 	} else {
@@ -177,13 +175,6 @@ func (controller *githubController) ServiceGithubCallback(ctx *gin.Context, path
 		}
 		isAlreadyRegistered = true
 	}
-
-	// if tokenId == nil {
-	// 	_, err := controller.serviceToken.SaveToken(newGithubToken)
-	// 	if err != nil {
-	// 		return "", fmt.Errorf("unable to save token because %w", err)
-	// 	}
-	// }
 
 	if newUser.Username == "" {
 		var email *string
@@ -260,7 +251,7 @@ func (controller *githubController) GetUserInfos(ctx *gin.Context, serviceName s
 		if actualToken.ServiceId == controller.servicesService.FindByName(serviceName).Id {
 			// githubUserInfos, err := controller.service.GetUserInfo(actualToken.Token)
 			var ServicesUserInfos schemas.ServicesUserInfos
-			userInfos := controller.servicesService.GetUserInfosByToken(actualToken.Token)
+			userInfos := controller.servicesService.GetUserInfosByToken(actualToken.Token, serviceName)
 			userInfos(&ServicesUserInfos)
 			userInfo := ServicesUserInfos.GithubUserInfos
 			return userInfo, nil
