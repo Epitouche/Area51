@@ -54,11 +54,9 @@ func NewReactionService(
 				Name:        string(schemas.WeatherCurrentReaction),
 				Description: "Get the current weather of a city",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
-				Options: toolbox.MustMarshal(schemas.WeatherCurrentOptions{
+				Options: toolbox.MustMarshal(schemas.WeatherCurrentReactionOptions{
 					CityName:     "string",
 					LanguageCode: "string",
-					Temperature:  0,
-					CompareSign:  "string",
 				}),
 			},
 		},

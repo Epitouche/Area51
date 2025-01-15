@@ -264,10 +264,10 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		return
 	}
 
-	worflow := service.workflowRepository.FindById(workflowId)
+	workflow := service.workflowRepository.FindById(workflowId)
 	savedResult := schemas.ReactionResponseData{
 		WorkflowId:  workflowId,
-		Workflow:    worflow,
+		Workflow:    workflow,
 		ApiResponse: json.RawMessage{},
 	}
 	jsonValue, err := json.Marshal(result)
@@ -277,7 +277,7 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	}
 	savedResult.ApiResponse = jsonValue
 	service.reactionResponseDataService.Save(savedResult)
-	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	workflow, err = service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
 		return
