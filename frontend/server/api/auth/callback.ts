@@ -1,15 +1,15 @@
 export default defineEventHandler(async (event) => {
   const params = await readBody(event);
-  if (!params.code || !params.state) {
+  if (!params.code || !params.state || !params.service) {
     throw createError({
       statusCode: 400,
-      message: "Missing parameters: code, or state",
+      message: "Missing parameters: code, service or state",
     });
   }
 
   try {
     const response = await $fetch(
-      `http://server:8080/api/github/callback`,
+      `http://server:8080/api/${params.service}/callback`,
       {
         method: "POST",
         body: {

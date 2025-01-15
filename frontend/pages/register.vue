@@ -1,16 +1,28 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useNotificationStore } from "@/stores/notification";
+import type { AboutResponse } from "~/src/types";
+
+type ServiceCard = {
+  name: string;
+  image: string;
+};
 
 const username = ref<string>("");
 const email = ref<string>("");
 const password = ref<string>("");
 
+const services = ref<ServiceCard[]>([]);
+
 const notificationStore = useNotificationStore();
 
 type NotificationType = "success" | "error" | "warning";
 
-function triggerNotification(type: NotificationType, title: string, message: string) {
+function triggerNotification(
+  type: NotificationType,
+  title: string,
+  message: string
+) {
   notificationStore.addNotification({
     type,
     title,
@@ -40,43 +52,81 @@ async function onSubmit() {
       const tokenCookie = useCookie("access_token");
       tokenCookie.value = access_token;
 
-      triggerNotification("success", "Registration successful", "You have successfully registered.");
-      navigateTo("/workflows");
+      triggerNotification(
+        "success",
+        "Registration successful",
+        "You have successfully registered."
+      );
+      navigateTo("/login");
     } else {
-      triggerNotification("error", "Registration failed", "Please check your credentials.");
+      triggerNotification(
+        "error",
+        "Registration failed",
+        "Please check your credentials."
+      );
     }
   } catch (error) {
-    console.error("API response:", error.response?.data || error.message);
-    
-    triggerNotification("error", "Registration failed", "An error occurred during registration.");
+    console.error("Error registering user:", error);
+    triggerNotification(
+      "error",
+      "Registration failed",
+      "An error occurred during registration."
+    );
   }
 }
 
-interface GitHubAuthResponse {
-  github_authentication_url: string;
+async function fetchOauthServices() {
+  try {
+    const responseAbout = await $fetch<AboutResponse>(
+      "http://localhost:8080/about.json"
+    );
+
+    responseAbout.server.services.forEach((service) => {
+      services.value.push({
+        name: service.name,
+        image: service.image || "IMG",
+      });
+    });
+
+    services.value.forEach((service) => {
+      service.name =
+        service.name.charAt(0).toUpperCase() + service.name.slice(1);
+    });
+  } catch (error) {
+    console.error("Error fetching services:", error);
+  }
 }
 
-async function redirectToGitHubOAuth() {
+
+interface RedirectResponse {
+  service_authentication_url: string;
+}
+
+async function redirectToService(index: number) {
   try {
-    const { github_authentication_url }: GitHubAuthResponse = await $fetch(
-      "http://localhost:8080/api/github/auth",
+    const selectedService = services.value[index];
+    const { service_authentication_url }: RedirectResponse = await $fetch(
+      `http://localhost:8080/api/${selectedService.name.toLowerCase()}/auth`,
       {
         method: "GET",
       }
     );
-    if (github_authentication_url) {
-      window.location.href = github_authentication_url;
+    if (service_authentication_url) {
+      localStorage.setItem(
+        "serviceUsedLogin",
+        selectedService.name.toLowerCase()
+      );
+      window.location.href = service_authentication_url;
     } else {
-      console.error("GitHub authentication URL not found");
+      console.error("${selectedService} authentication URL not found");
     }
   } catch (error) {
-    console.error("Error fetching GitHub OAuth URL:", error);
-    
-    triggerNotification("error", "GitHub Authentication failed", "Could not fetch GitHub authentication URL.");
+    console.error("Error fetching ${selectedService} OAuth URL:", error);
   }
 }
-</script>
 
+onMounted(fetchOauthServices);
+</script>
 
 <template>
   <div
@@ -130,22 +180,17 @@ async function redirectToGitHubOAuth() {
           />
         </div>
       </form>
-      <hr class="border-primaryWhite-400">
+      <hr class="border-primaryWhite-400" >
       <div class="flex justify-around space-x-4">
         <ButtonComponent
-          text="Github"
+          v-for="(service, index) in services"
+          :key="index"
+          :text="service.name"
           class="w-full"
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
-          :on-click="redirectToGitHubOAuth"
-        />
-        <ButtonComponent
-          text="Google"
-          class="w-full"
-          bg-color="bg-primaryWhite-500"
-          hover-color="hover:bg-secondaryWhite-500"
-          text-color="text-fontBlack"
+          @click="redirectToService(index)"
         />
       </div>
       <div class="flex justify-around">
