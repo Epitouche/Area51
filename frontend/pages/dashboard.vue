@@ -1,4 +1,7 @@
 <script setup>
+import RecentActivity from '~/components/dashboard/RecentActivity.vue';
+import WorkflowList from '~/components/dashboard/WorkflowList.vue';
+
 // const token = useCookie()
 </script>
 <!-- First line récap: Active Workflow | Total executions | Last 24h | Last Execution -->
@@ -24,8 +27,10 @@
                     </div>
                 </div>
 
-                <!-- <div class="grid gap-6 lg:grid-cols-2">
-                </div> -->
+                <div class="grid gap-6 lg:grid-cols-2">
+                    <WorkflowList />
+                    <RecentActivity />
+                </div>
             </div>
         </div>
     </div>

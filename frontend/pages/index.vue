@@ -98,24 +98,24 @@ const features = ref([
                   <div class="flex items-center space-x-4 mb-4">
                     <div class="flex flex-col items-center">
                       <IconComponent
-                        :bgColor=workflow.hero_card.first_logo.color
-                        textColor="text-white"
+                        :bg-color=workflow.hero_card.first_logo.color
+                        text-color="text-white"
                         :icon=workflow.hero_card.first_logo.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.first_logo.label }}</span>
                     </div>
                     <Icon name="mdi-arrow-right" class="h-7 w-7 text-gray-400 mb-5" />
                     <div class="flex flex-col items-center">
                       <IconComponent
-                        :bgColor=workflow.hero_card.trigger.color
-                        textColor="text-white"
+                        :bg-color=workflow.hero_card.trigger.color
+                        text-color="text-white"
                         :icon=workflow.hero_card.trigger.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.trigger.label }}</span>
                     </div>
                     <Icon name="mdi-arrow-right" class="h-7 w-7 text-gray-400 mb-5" />
                     <div class="flex flex-col items-center">
                       <IconComponent
-                        :bgColor=workflow.hero_card.second_logo.color
-                        textColor="text-white"
+                        :bg-color=workflow.hero_card.second_logo.color
+                        text-color="text-white"
                         :icon=workflow.hero_card.second_logo.icon />
                       <span class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite">{{ workflow.hero_card.second_logo.label }}</span>
                     </div>
@@ -140,16 +140,16 @@ const features = ref([
           <div class="flex items-center space-x-4 mb-4">
             <div class="flex items-center">
               <IconComponent
-                bgColor="bg-purple-100"
-                textColor="text-purple-700"
+                bg-color="bg-purple-100"
+                text-color="text-purple-700"
                 :icon=workflow.trigger.icon />
               <span class="ml-4 text-fontBlack dark:text-fontWhite">{{ workflow.trigger.name }}</span>
             </div>
             <Icon name="mdi-arrow-right" class="h-5 w-5 text-gray-400" />
             <div class="flex items-center">
               <IconComponent
-                bgColor="bg-purple-100"
-                textColor="text-purple-700"
+                bg-color="bg-purple-100"
+                text-color="text-purple-700"
                 :icon=workflow.action.icon />
               <span class="ml-4 text-fontBlack dark:text-fontWhite">{{ workflow.action.name }}</span>
             </div>
@@ -171,8 +171,8 @@ const features = ref([
         <div class="grid md:grid-cols-3 gap-8">
           <div v-for="feature in features" :key="feature.title" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
             <IconComponent
-              bgColor="bg-purple-100"
-              textColor="text-purple-700"
+              bg-color="bg-purple-100"
+              text-color="text-purple-700"
               :icon=feature.icon
               class="w-14 h-14 flex justify-center mb-4" />
             <h3 class="text-xl font-semibold mb-2 text-fontBlack dark:text-fontWhite">{{ feature.title }}</h3>

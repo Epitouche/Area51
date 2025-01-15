@@ -10,8 +10,9 @@ export default defineNuxtConfig({
 
   colorMode: {
     classSuffix: '',
-    preference: 'system',
-    fallback: 'light'
+    preference: 'light',
+    fallback: 'light',
+    storage: 'cookie'
   },
   modules: [
     "@nuxt/devtools",
