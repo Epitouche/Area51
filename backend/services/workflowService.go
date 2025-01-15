@@ -176,7 +176,7 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			}
 			action := service.servicesService.FindActionByName(workflow.Action.Name)
 			if action == nil {
-				fmt.Println("Action not found")
+				fmt.Println("Action not found", workflow.Action.Name)
 				return
 			}
 

@@ -18,8 +18,8 @@ import (
 type SpotifyService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.SpotifyResponseToken, error)
 	// GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken)
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
 	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
 }
 
@@ -115,7 +115,7 @@ func (service *spotifyService) AuthGetServiceAccessToken(code string, path strin
 // 	return result, nil
 // }
 
-func (service *spotifyService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
+func (service *spotifyService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
 	switch name {
 	case string(schemas.SpotifyAddTrackAction):
 		return service.AddTrackAction
@@ -124,7 +124,7 @@ func (service *spotifyService) FindActionByName(name string) func(channel chan s
 	}
 }
 
-func (service *spotifyService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *spotifyService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	switch name {
 	case string(schemas.SpotifyAddTrackReaction):
 		return service.AddTrackReaction
@@ -133,7 +133,7 @@ func (service *spotifyService) FindReactionByName(name string) func(channel chan
 	}
 }
 
-func (service *spotifyService) AddTrackAction(channel chan string, option string, workflowId uint64) {
+func (service *spotifyService) AddTrackAction(channel chan string, option string, workflowId uint64, actionOption string) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -204,7 +204,7 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 	time.Sleep(30 * time.Second)
 }
 
-func (service *spotifyService) AddTrackReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken) {
+func (service *spotifyService) AddTrackReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 

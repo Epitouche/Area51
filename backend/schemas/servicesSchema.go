@@ -5,8 +5,9 @@ import "time"
 type ServiceName string
 
 const (
-	Github  ServiceName = "github"
-	Spotify ServiceName = "spotify"
+	Github   ServiceName = "github"
+	Spotify  ServiceName = "spotify"
+	Interpol ServiceName = "interpol"
 )
 
 type ServiceJson struct {
