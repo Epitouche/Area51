@@ -125,11 +125,12 @@ var (
 	userService                 services.UserService                 = services.NewUserService(userRepository, jwtService)
 	reactionResponseDataService services.ReactionResponseDataService = services.NewReactionResponseDataService(reactionResponseDataRepository)
 	githubService               services.GithubService               = services.NewGithubService(githubRepository, tokenRepository, workflowsRepository, reactionRepository, reactionResponseDataService, userService)
-	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService, googleService, microsoftService)
+	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService, googleService, microsoftService, interpolService)
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
 	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository)
+	interpolService             services.InterpolService             = services.NewInterpolService(workflowsRepository)
 	googleService               services.GoogleService               = services.NewGoogleService()
 	microsoftService            services.MicrosoftService            = services.NewMicrosoftService()
 

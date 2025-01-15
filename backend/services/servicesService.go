@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"area51/repository"
 	"area51/schemas"
 )
@@ -34,6 +36,7 @@ func NewServicesService(
 	spotifyService SpotifyService,
 	googleService GoogleService,
 	microsoftService MicrosoftService,
+	interpolService InterpolService,
 ) ServicesService {
 	newService := servicesService{
 		repository: repository,
@@ -62,12 +65,18 @@ func NewServicesService(
 				Image:       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1024px-Microsoft_logo.svg.png",
 				IsOAuth:     true,
 			},
+			{
+				Name:        schemas.Interpol,
+				Description: "This is the Interpol Service",
+				Image:       "tmp",
+			},
 		},
 		allServices: []interface{}{
 			githubService,
 			spotifyService,
 			googleService,
 			microsoftService,
+			interpolService,
 		},
 	}
 	newService.InitialSaveService()
@@ -108,6 +117,7 @@ func (service *servicesService) GetAllServices() (allServicesJson []schemas.Serv
 
 func (service *servicesService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
 	for _, oneService := range service.allServices {
+		fmt.Println(oneService)
 		if oneService.(ServiceInterface).FindActionByName(name) != nil {
 			return oneService.(ServiceInterface).FindActionByName(name)
 		}
