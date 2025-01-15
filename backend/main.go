@@ -130,7 +130,7 @@ var (
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
-	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository)
+	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository, servicesRepository)
 	googleService               services.GoogleService               = services.NewGoogleService()
 	microsoftService            services.MicrosoftService            = services.NewMicrosoftService()
 
