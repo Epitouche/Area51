@@ -133,6 +133,7 @@ var (
 	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository, servicesRepository)
 	googleService               services.GoogleService               = services.NewGoogleService()
 	microsoftService            services.MicrosoftService            = services.NewMicrosoftService()
+	interpolService             services.InterpolService             = services.NewInterpolService(workflowsRepository)
 
 	// Controllers
 	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)
