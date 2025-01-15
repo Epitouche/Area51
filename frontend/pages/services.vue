@@ -1,12 +1,31 @@
 <script setup lang="ts">
 import type { AboutResponse } from "~/src/types";
 
+interface RedirectResponse {
+  service_authentication_url: string;
+}
+
 type ServiceCard = {
   name: string;
   description: string;
   image: string;
   isConnected: boolean;
+  isAllowed: boolean;
 };
+
+const notificationStore = useNotificationStore();
+
+function triggerNotification(
+  type: "success" | "error" | "warning",
+  title: string,
+  message: string
+) {
+  notificationStore.addNotification({
+    type,
+    title,
+    message,
+  });
+}
 
 const allServices = reactive<ServiceCard[]>([]);
 
@@ -15,6 +34,47 @@ const token = useCookie("access_token");
 const isConnected = computed(() => {
   return token.value !== undefined;
 });
+
+async function changeConnection(service: ServiceCard) {
+  if (service.isAllowed === false) {
+    triggerNotification(
+      "error",
+      "Service used for login",
+      "You cannot disconnect the service used for login"
+    );
+    service.isConnected = true;
+    return;
+  }
+  if (service.isConnected) {
+    await fetch(`/api/auth/logoutService`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+      body: JSON.stringify({
+        service_name: service.name.toLowerCase(),
+      }),
+    });
+  } else {
+    const { service_authentication_url }: RedirectResponse = await $fetch(
+      `http://localhost:8080/api/${service.name.toLowerCase()}/auth`,
+      {
+        method: "GET",
+      }
+    );
+    if (service_authentication_url) {
+      localStorage.setItem("serviceConnect", service.name.toLowerCase());
+      window.location.href = service_authentication_url;
+    } else {
+      triggerNotification(
+        "error",
+        `${service} authentication URL not found`,
+        "Please try again later"
+      );
+    }
+  }
+  service.isConnected = !service.isConnected;
+}
 
 onMounted(async () => {
   const response = await $fetch<AboutResponse>(
@@ -28,6 +88,7 @@ onMounted(async () => {
         service.description || "No description available for this service.",
       image: service.image || "IMG",
       isConnected: false,
+      isAllowed: true,
     });
   });
 
@@ -48,6 +109,13 @@ onMounted(async () => {
       }
     });
   });
+
+  const serviceUsedLogin = useCookie("serviceUsedLogin");
+  if (serviceUsedLogin.value) {
+    allServices.forEach((service) => {
+      if (service.name === serviceUsedLogin.value) service.isAllowed = false;
+    });
+  }
 
   allServices.forEach((service) => {
     service.name = service.name.charAt(0).toUpperCase() + service.name.slice(1);
@@ -104,10 +172,18 @@ onMounted(async () => {
                   <input
                     type="checkbox"
                     :checked="service.isConnected"
+                    :disabled="!service.isAllowed"
                     class="sr-only peer"
+                    @click="changeConnection(service)"
                   >
                   <div
-                    class="w-10 h-5 sm:w-11 sm:h-6 bg-secondaryWhite-500 dark:bg-secondaryDark-400 rounded-full peer peer-checked:bg-tertiary-500 peer-checked:after:translate-x-4 sm:peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 sm:after:h-5 after:w-4 sm:after:w-5 after:transition-all"
+                    :class="{
+                      'cursor-not-allowed dark:bg-secondaryDark-400 peer-checked:bg-tertiary-500':
+                        !service.isAllowed,
+                      'bg-secondaryWhite-500 dark:bg-secondaryDark-400 peer-checked:bg-tertiary-500':
+                        service.isAllowed,
+                    }"
+                    class="w-10 h-5 sm:w-11 sm:h-6 rounded-full peer peer-checked:after:translate-x-4 sm:peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 sm:after:h-5 after:w-4 sm:after:w-5 after:transition-all"
                   />
                 </label>
               </div>
@@ -135,7 +211,9 @@ onMounted(async () => {
         >
           ERROR 404 !
         </h1>
-        <h2 class="text-2xl sm:text-3xl font-bold text-fontBlack dark:text-fontWhite">
+        <h2
+          class="text-2xl sm:text-3xl font-bold text-fontBlack dark:text-fontWhite"
+        >
           You are not connected, please log in to access this page.
         </h2>
       </div>
