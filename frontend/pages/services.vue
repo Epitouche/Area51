@@ -126,7 +126,6 @@ onMounted(async () => {
   <div
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
   >
-    <NuxtLayout />
     <div v-if="isConnected">
       <div class="m-5 sm:m-10">
         <h1
