@@ -105,7 +105,7 @@ async function redirectToService(index: number) {
       }
     );
     if (service_authentication_url) {
-      localStorage.setItem("serviceUsedLogin", selectedService.name.toLowerCase());
+      useCookie("serviceUsedLogin").value = selectedService.name.toLowerCase();
       window.location.href = service_authentication_url;
     } else {
       console.error("${selectedService} authentication URL not found");

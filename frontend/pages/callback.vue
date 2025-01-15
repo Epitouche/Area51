@@ -8,10 +8,8 @@ interface ApiResponse {
   access_token?: string;
 }
 
-async function fetchServiceToken() {
+async function fetchServiceToken(service: string) {
   const route = useRoute();
-
-  const serviceUsedLogin = localStorage.getItem("serviceUsedLogin");
 
   const code = route.query.code;
   const state = route.query.state;
@@ -21,7 +19,7 @@ async function fetchServiceToken() {
         $fetch<ApiResponse>("/api/auth/callback", {
           method: "POST",
           body: {
-            service: serviceUsedLogin,
+            service: service,
             code: code as string,
             state: state as string,
             authorization: access_token.value
@@ -37,7 +35,6 @@ async function fetchServiceToken() {
       if (access_token) {
         access_token.value = response.access_token;
 
-        navigateTo("/dashboard");
       } else {
         console.error("Token not received in API response");
       }
@@ -49,11 +46,35 @@ async function fetchServiceToken() {
   }
 }
 
-onMounted(fetchServiceToken);
+const loginWithService = async () => {
+  const serviceUsedLogin = useCookie("serviceUsedLogin");
+  if (serviceUsedLogin.value) {
+    await fetchServiceToken(serviceUsedLogin.value as string);
+  } else {
+    console.error("Service used for login is not defined");
+  }
+  navigateTo("/dashboard");
+};
+
+onMounted(() => {
+  if (localStorage.getItem("serviceConnect")) {
+    localStorage.removeItem("serviceConnect");
+    navigateTo("/services");
+  } else {
+  loginWithService();
+  }
+});
 </script>
 
 <template>
-  <div>
-    <p>Processing Service login...</p>
+  <div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-tertiary-600 to-tertiary-800">
+    <div class="text-center">
+      <p class="text-fontWhite text-lg md:text-2xl font-semibold animate-pulse">
+        Processing Service Login...
+      </p>
+      <div class="mt-4 flex justify-center">
+        <div class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    </div>
   </div>
 </template>

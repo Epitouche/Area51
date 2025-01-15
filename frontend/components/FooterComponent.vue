@@ -6,8 +6,8 @@ const currentYear = computed(() => {
 });
 </script>
 <template>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-secondaryWhite-500 dark:bg-primaryDark-500">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <div class="px-4 sm:px-6 lg:px-8 py-12 bg-secondaryWhite-500 dark:bg-primaryDark-500 border-t border-gray-500">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 ">
             <div>
                 <div class="flex items-center mb-4">
                     <img src="/logo_Area51.png" alt="Logo of the Website 'Area51'" class="h-8 w-auto">
@@ -29,7 +29,7 @@ const currentYear = computed(() => {
             </div>
         </div>
 
-        <div class="mt-8 pt-8 border-t border-gray-200">
+        <div class="mt-8 pt-8 border-t border-gray-500">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <p class="text-gray-500 text-sm">
                     © {{ currentYear }} AREA. All rights reserved.
