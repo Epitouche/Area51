@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import type { Workflow } from "~/src/types";
+import type { Workflow, Reaction } from "~/src/types";
 
 const stats = ref([
     {
@@ -45,6 +45,17 @@ onMounted(async () => {
     response.forEach(() => {
         stats.value[0].value = Number(stats.value[0].value) + 1;
     })
+    const reaction = await $fetch<Reaction[]>(
+      "http://localhost:8080/api/workflow/reaction",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(reaction)
 })
 </script>
 <template>

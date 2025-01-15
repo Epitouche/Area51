@@ -32,11 +32,11 @@ onMounted(async () => {
 <template>
     <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 h-96">
         <h2 class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6">Your Workflow</h2>
-        <div v-if="workflows.length === 0" class="space-y-4">
+        <div v-if="workflows.values.length === 0" class="space-y-4">
             <div
                 v-for="workflow in workflows"
                 :key="workflow.name"
-                class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-900 hover:border-purple-200 transition-colors">
+                class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-900 hover:border-purple-200 dark:hover:border-tertiary-800 transition-colors">
                 <div className="flex items-center space-x-4">
                     <div>
                         <h3 className="font-medium text-fontBlack dark:text-fontWhite">{{ workflow.name }}</h3>
