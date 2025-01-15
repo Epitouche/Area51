@@ -10,14 +10,14 @@ interface ApiResponse {
 
 async function fetchServiceToken() {
   const route = useRoute();
-  
+
   const serviceUsedLogin = localStorage.getItem("serviceUsedLogin");
 
   const code = route.query.code;
   const state = route.query.state;
   if (code && state) {
     try {
-      const response = await Promise.race([
+      const response = (await Promise.race([
         $fetch<ApiResponse>("/api/auth/callback", {
           method: "POST",
           body: {
@@ -25,14 +25,14 @@ async function fetchServiceToken() {
             code: code as string,
             state: state as string,
             authorization: access_token.value
-            ? `Bearer ${access_token.value}`
-            : "",
+              ? `Bearer ${access_token.value}`
+              : "",
           },
         }),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error("API request timed out")), 5000)
         ),
-      ]) as ApiResponse;
+      ])) as ApiResponse;
 
       if (access_token) {
         access_token.value = response.access_token;

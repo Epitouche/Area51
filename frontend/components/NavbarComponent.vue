@@ -24,6 +24,7 @@ const registered = computed(() => {
             <ButtonComponent
               bg-color="bg-tertiary-500"
               hover-color="hover:bg-purple-600"
+              text-color="text-fontWhite"
               text="Sign up"
             />
           </NuxtLink>

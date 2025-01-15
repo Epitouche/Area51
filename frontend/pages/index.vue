@@ -79,13 +79,12 @@ const features = ref([
               Make your favorite apps connect with each other <br>
               and let us automatize tasks for you!
             </p>
-            <NuxtLink to="/register" class="text-fontBlack dark:text-fontWhite">
+            <NuxtLink to="/register" class="text-fontBlack dark:text-fontWhite mt-4 inline-block max-w-max">
               <ButtonComponent
                 text="Start now!"
                 bg-color="bg-tertiary-500"
                 hover-color="hover:bg-purple-600"
                 text-color="text-fontWhite"
-                class="mt-4 inline-block max-w-max"
               />
             </NuxtLink>
           </div>
@@ -160,7 +159,7 @@ const features = ref([
     </div>
 
     <!-- About us -->
-    <div class="bg-purple-50 dark:bg-tertiary-700 my-8">
+    <div class="bg-tertiary-100 dark:bg-tertiary-700 my-8">
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-20">
         <div class="text-center mb-16">
           <h2 class="text-4xl font-bold text-gray-900 dark:text-fontWhite mb-4">About Us</h2>
@@ -172,7 +171,7 @@ const features = ref([
           <div v-for="feature in features" :key="feature.title" class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
             <IconComponent
               bg-color="bg-purple-100"
-              text-color="text-purple-700"
+              text-color="text-tertiary-700"
               :icon=feature.icon
               class="w-14 h-14 flex justify-center mb-4" />
             <h3 class="text-xl font-semibold mb-2 text-fontBlack dark:text-fontWhite">{{ feature.title }}</h3>
@@ -180,7 +179,7 @@ const features = ref([
           </div>
         </div>
         <p class="text-center text-xl text-gray-600 dark:text-fontWhite max-w-3xl mx-auto mt-16">
-          You can see the documentation <a class="text-tertiary-100 dark:text-tertiary-200" href="https://github.com/Epitouche/Area51/blob/main/README.md">here</a> to learn more about us !
+          You can see the documentation <a class="text-tertiary-500 dark:text-tertiary-300" href="https://github.com/Epitouche/Area51/blob/main/README.md">here</a> to learn more about us !
         </p>
       </div>
     </div>
