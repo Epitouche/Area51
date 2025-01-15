@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 
 	"area51/schemas"
@@ -14,9 +16,13 @@ type UserRepository interface {
 	FindAll() []schemas.User
 	FindById(id uint64) schemas.User
 	FindByUsername(username string) schemas.User
-	FindByEmail(email string) schemas.User
+	FindByEmail(email *string) schemas.User
 	FindAllServicesByUserId(id uint64) []schemas.ServiceToken
 	FindAllWorkflowsByUserId(id uint64) []schemas.Workflow
+	AddServiceToUser(user schemas.User, service schemas.ServiceToken)
+	GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error)
+	GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error)
+	LogoutFromService(user schemas.User, serviceToDelete schemas.Service) error
 }
 
 type userRepository struct {
@@ -92,7 +98,7 @@ func (r *userRepository) FindByUsername(username string) (user schemas.User) {
 	return user
 }
 
-func (r *userRepository) FindByEmail(email string) (user schemas.User) {
+func (r *userRepository) FindByEmail(email *string) (user schemas.User) {
 	err := r.db.Connection.Where(&schemas.User{
 		Email: email,
 	}).First(&user)
@@ -104,12 +110,17 @@ func (r *userRepository) FindByEmail(email string) (user schemas.User) {
 }
 
 func (r *userRepository) FindAllServicesByUserId(id uint64) []schemas.ServiceToken {
-	var services []schemas.ServiceToken
-	err := r.db.Connection.Where(&schemas.ServiceToken{UserId: id}).Find(&services)
-	if err.Error != nil || len(services) == 0 {
+	user := r.FindById(id)
+	err := r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	if err != nil {
 		return []schemas.ServiceToken{}
 	}
-	return services
+	for _, service := range user.Services {
+		if service.UserId == id {
+			return user.Services
+		}
+	}
+	return []schemas.ServiceToken{}
 }
 
 func (r *userRepository) FindAllWorkflowsByUserId(id uint64) []schemas.Workflow {
@@ -119,4 +130,52 @@ func (r *userRepository) FindAllWorkflowsByUserId(id uint64) []schemas.Workflow 
 		return []schemas.Workflow{}
 	}
 	return workflows
+}
+
+func (r *userRepository) AddServiceToUser(user schemas.User, service schemas.ServiceToken) {
+	err := r.db.Connection.Model(&user).Association("Services").Append(&service)
+	if err != nil {
+		return
+	}
+	r.db.Connection.Save(&user)
+}
+
+func (r *userRepository) GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error) {
+	var services []schemas.ServiceToken
+	err := r.db.Connection.Where(&schemas.ServiceToken{UserId: userId}).Find(&services)
+	if err.Error != nil {
+		return []schemas.ServiceToken{}, err.Error
+	}
+	return services, nil
+}
+
+func (r *userRepository) GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error) {
+	err := r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	if err != nil {
+		return schemas.ServiceToken{}, err
+	}
+	for _, service := range user.Services {
+		if service.ServiceId == serviceId {
+			return service, nil
+		}
+	}
+	return schemas.ServiceToken{}, nil
+}
+
+func (r *userRepository) LogoutFromService(user schemas.User, serviceToDelete schemas.Service) error {
+	err := r.db.Connection.Model(&user).Association("Services").Find(&user.Services)
+	if err != nil {
+		return err
+	}
+
+	for _, service := range user.Services {
+		if service.ServiceId == serviceToDelete.Id {
+			err = r.db.Connection.Model(&user).Association("Services").Delete(&service)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("service not found")
 }

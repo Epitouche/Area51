@@ -8,6 +8,7 @@ import (
 type ReactionJson struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Options     string `json:"options"`
 	ReactionId  uint64 `json:"reaction_id"`
 }
 
@@ -27,5 +28,5 @@ type Reaction struct {
 	Description string    `json:"description" gorm:"type:varchar(100)"`
 	CreatedAt   time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt   time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	Trigger     bool      `json:"trigger" default:"false" gorm:"column:trigger"`
+	Options     string    `json:"options"`
 }

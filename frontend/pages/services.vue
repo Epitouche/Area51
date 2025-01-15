@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ServerResponse, Service } from "~/src/types";
+import type { AboutResponse } from "~/src/types";
 
 type ServiceCard = {
   name: string;
@@ -12,16 +12,12 @@ const allServices = reactive<ServiceCard[]>([]);
 
 const token = useCookie("access_token");
 
-// Fetch services from the API
 onMounted(async () => {
-
-  // fetch the services
-  const response = await $fetch<ServerResponse>(
+  const response = await $fetch<AboutResponse>(
     "http://localhost:8080/about.json"
   );
 
-  // create a new array with the services
-  response.server.services.forEach((service: Service) => {
+  response.server.services.forEach((service) => {
     allServices.push({
       name: service.name,
       description:
@@ -31,7 +27,6 @@ onMounted(async () => {
     });
   });
 
-  // fetch the connected services
   const connectedServices = await $fetch<ServiceCard[]>(
     "http://localhost:8080/api/user/services",
     {
@@ -42,7 +37,6 @@ onMounted(async () => {
     }
   );
 
-  // if the service is connected, set the isConnected property to true
   allServices.forEach((service) => {
     connectedServices.forEach((connectedService) => {
       if (service.name === connectedService.name) {
@@ -51,7 +45,6 @@ onMounted(async () => {
     });
   });
 
-  // capitalize the first letter of the service name
   allServices.forEach((service) => {
     service.name = service.name.charAt(0).toUpperCase() + service.name.slice(1);
   });
@@ -61,30 +54,35 @@ onMounted(async () => {
   <div
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
   >
-    <div class="m-20">
-      <h1 class="text-6xl font-bold text-fontBlack dark:text-fontWhite">
+    <NuxtLayout />
+    <div class="m-5 sm:m-10">
+      <h1
+        class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
+      >
         Services
       </h1>
     </div>
     <div class="flex justify-center">
       <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
+        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
       >
     </div>
-    <div class="grid grid-cols-3 gap-4 m-20">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 m-5 sm:m-10"
+    >
       <div
         v-for="(service, index) in allServices"
         :key="index"
         class="flex justify-center"
       >
         <div
-          class="flex flex-col w-full p-7 bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-lg shadow-lg gap-5"
+          class="flex flex-col w-full p-5 sm:p-7 bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-lg shadow-lg gap-4 sm:gap-5"
         >
           <div class="flex items-center justify-between w-full">
             <div
-              class="w-12 h-12 bg-primaryWhite-400 dark:bg-secondaryDark-400 rounded-full flex items-center justify-center"
+              class="w-10 h-10 sm:w-12 sm:h-12 bg-primaryWhite-400 dark:bg-secondaryDark-400 rounded-full flex items-center justify-center"
             >
-              <p>{{ service.image }}</p>
+              <p class="text-sm sm:text-base">{{ service.image }}</p>
             </div>
             <div>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -94,18 +92,18 @@ onMounted(async () => {
                   class="sr-only peer"
                 >
                 <div
-                  class="w-11 h-6 bg-primaryWhite-500 dark:bg-secondaryDark-400 rounded-full peer peer-checked:bg-tertiary-500 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                  class="w-10 h-5 sm:w-11 sm:h-6 bg-secondaryWhite-500 dark:bg-secondaryDark-400 rounded-full peer peer-checked:bg-tertiary-500 peer-checked:after:translate-x-4 sm:peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 sm:after:h-5 after:w-4 sm:after:w-5 after:transition-all"
                 />
               </label>
             </div>
           </div>
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1 sm:gap-2">
             <h3
-              class="text-2xl font-semibold text-fontBlack dark:text-fontWhite"
+              class="text-lg sm:text-xl md:text-2xl font-semibold text-fontBlack dark:text-fontWhite"
             >
               {{ service.name }}
             </h3>
-            <p class="text-fontBlack dark:text-fontWhite">
+            <p class="text-sm sm:text-base text-fontBlack dark:text-fontWhite">
               {{ service.description }}
             </p>
           </div>

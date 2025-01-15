@@ -67,3 +67,15 @@ func (api *UserApi) GetWorkflows(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, allWorkflows)
 }
+
+func (api *UserApi) LogoutService(ctx *gin.Context) {
+	if err := api.userController.LogoutService(ctx); err != nil {
+		ctx.JSON(http.StatusNotFound, &schemas.BasicResponse{
+			Message: err.Error(),
+		})
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.BasicResponse{
+			Message: "Successfully logged out",
+		})
+	}
+}

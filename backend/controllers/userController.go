@@ -16,6 +16,7 @@ type UserController interface {
 	Register(ctx *gin.Context) (string, error)
 	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
 	GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error)
+	LogoutService(ctx *gin.Context) error
 }
 
 type userController struct {
@@ -24,6 +25,7 @@ type userController struct {
 	servicesService services.ServicesService
 	reactionService services.ReactionService
 	actionService   services.ActionService
+	serviceToken    services.TokenService
 }
 
 func NewUserController(
@@ -32,6 +34,7 @@ func NewUserController(
 	servicesService services.ServicesService,
 	reactionService services.ReactionService,
 	actionService services.ActionService,
+	serviceToken services.TokenService,
 ) UserController {
 	return &userController{
 		userService:     userService,
@@ -39,6 +42,7 @@ func NewUserController(
 		servicesService: servicesService,
 		reactionService: reactionService,
 		actionService:   actionService,
+		serviceToken:    serviceToken,
 	}
 }
 
@@ -50,8 +54,8 @@ func (controller *userController) Login(ctx *gin.Context) (string, error) {
 
 	token, err := controller.userService.Login(schemas.User{
 		Username: credentials.Username,
-		Password: credentials.Password,
-	})
+		Password: &credentials.Password,
+	}, schemas.Service{})
 	if err != nil {
 		return "", err
 	}
@@ -76,8 +80,8 @@ func (controller *userController) Register(ctx *gin.Context) (string, error) {
 
 	token, err := controller.userService.Register(schemas.User{
 		Username: credentials.Username,
-		Email:    credentials.Email,
-		Password: credentials.Password,
+		Email:    &credentials.Email,
+		Password: &credentials.Password,
 	})
 	if err != nil {
 		return "", err
@@ -138,4 +142,41 @@ func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.W
 
 	}
 	return allWorkflows, nil
+}
+
+func (controller *userController) LogoutService(ctx *gin.Context) error {
+	var credentials schemas.LogoutFromService
+	err := ctx.ShouldBind(&credentials)
+	if err != nil {
+		return err
+	}
+	bearer, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		return err
+	}
+	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
+	if err != nil {
+		return err
+	}
+	actualService := controller.servicesService.FindByName(schemas.ServiceName(credentials.ServiceName))
+	if actualService.Id == 0 {
+		return fmt.Errorf("service not found")
+	}
+	tokens, err := controller.serviceToken.GetTokenByUserId(userId)
+	if err != nil {
+		return err
+	}
+	err = controller.userService.LogoutFromService(userId, actualService)
+	if err != nil {
+		return err
+	}
+	for _, token := range tokens {
+		if token.ServiceId == actualService.Id {
+			err = controller.serviceToken.Delete(token)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
