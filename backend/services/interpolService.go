@@ -16,7 +16,7 @@ import (
 type InterpolService interface {
 	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
-	GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos)
+	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type interpolService struct {
@@ -100,7 +100,6 @@ func (service *interpolService) NewNotices(channel chan string, option string, w
 		return
 	}
 	if options.IsOld {
-		fmt.Println("Is old")
 		if result.Total != options.Total {
 			options.Total = result.Total
 			workflow.ReactionTrigger = true
@@ -108,7 +107,6 @@ func (service *interpolService) NewNotices(channel chan string, option string, w
 			service.workflowRepository.Update(workflow)
 		}
 	} else {
-		fmt.Println("Is not old")
 		options.Total = result.Total
 		options.IsOld = true
 		workflow.ActionOptions = toolbox.MustMarshal(options)
@@ -118,6 +116,6 @@ func (service *interpolService) NewNotices(channel chan string, option string, w
 	time.Sleep(30 * time.Second)
 }
 
-func (service *interpolService) GetUserInfosByToken(accessToken string) func(*schemas.ServicesUserInfos) {
+func (service *interpolService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
 	return nil
 }
