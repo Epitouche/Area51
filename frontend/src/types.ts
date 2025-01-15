@@ -19,12 +19,14 @@ export type Action = {
   name: string;
   action_id: number;
   description: string;
+  options: string;
 };
 
 export type Reaction = {
   name: string;
   reaction_id: number;
   description: string;
+  options: string;
 };
 
 export type AboutResponse = {
@@ -36,6 +38,7 @@ export type AboutResponse = {
         actions: Action[];
         reactions: Reaction[];
         image: string;
+        is_oauth: boolean;
       }
     ]
   }

@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import type { Workflow } from "~/src/types";
+import ModalComponent from "./ModalComponent.vue";
 
 const props = defineProps<{
   columns: string[];
   rows: Workflow[];
   modelValue: Workflow[];
 }>();
+
+const modalOpen = ref(false);
+const workflowName = ref("");
 
 const filteredWorkflows = computed(() =>
   props.rows.map(
@@ -59,22 +63,58 @@ const handleClickOutside = (event: MouseEvent) => {
 
 const token = useCookie("access_token");
 
+const notificationStore = useNotificationStore();
+
+function triggerNotification(
+  type: "success" | "error" | "warning",
+  title: string,
+  message: string
+) {
+  notificationStore.addNotification({
+    type,
+    title,
+    message,
+  });
+}
+
+
 async function launchAction(option: string, workflow: Workflow) {
   switch (option) {
     case "Edit":
-      console.log("Edit");
-      activeDropdownIndex.value = null;
+    modalOpen.value = true;
+    activeDropdownIndex.value = null;
       break;
     case "Switch Activity":
       await switchState(workflow);
       activeDropdownIndex.value = null;
       break;
     case "Delete":
-      console.log("Delete");
+      await deleteWorkflow(workflow);
       activeDropdownIndex.value = null;
       break;
     default:
       break;
+  }
+}
+
+async function deleteWorkflow(workflow:Workflow) {
+  try {
+    await $fetch("/api/workflows/deleteWorkflow", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workflow_id: workflow.workflow_id,
+        name: workflow.name,
+        action_id: workflow.action_id,
+        reaction_id: workflow.reaction_id,
+      }),
+    });
+    triggerNotification("success", "Success", "Workflow deleted successfully");
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -193,18 +233,12 @@ onBeforeUnmount(() => {
                   class="text-center px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-fontBlack dark:text-fontWhite hover:bg-accent-100 dark:hover:bg-accent-800 transition duration-300 ease-in-out"
                   :class="
                     option.includes('Delete')
-                      ? 'hover:bg-error dark:hover:bg-error'
+                      ? 'hover:bg-error text-error hover:text-fontWhite dark:hover:bg-error'
                       : ''
                   "
                   @click="launchAction(option, row)"
                 >
-                  <p
-                    :class="
-                      option.includes('Delete')
-                        ? 'text-error hover:text-white'
-                        : ''
-                    "
-                  >
+                  <p>
                     {{ option }}
                   </p>
                 </button>
@@ -214,5 +248,19 @@ onBeforeUnmount(() => {
         </tr>
       </tbody>
     </table>
+    <ModalComponent
+      v-motion-pop
+      title="Edit Workflow"
+      :is-open="modalOpen"
+      @close="modalOpen = false"
+      @confirm="modalOpen = false"
+      >
+       <InputComponent
+         id="workflowName"
+         v-model="workflowName"
+         type="text"
+         label="Workflow Name"
+        />
+    </ModalComponent>
   </div>
 </template>

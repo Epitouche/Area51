@@ -49,7 +49,7 @@ const confirmAction = () => {
           text="Confirm"
           bg-color="bg-tertiary-500"
           hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
+          text-color="text-fontWhite"
           @click="confirmAction"
         />
       </footer>

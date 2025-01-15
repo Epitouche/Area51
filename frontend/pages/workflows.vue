@@ -10,6 +10,9 @@ import type {
 
 const notificationStore = useNotificationStore();
 
+const actionOption = ref("");
+const reactionOption = ref("");
+
 function triggerNotification(
   type: "success" | "error" | "warning",
   title: string,
@@ -77,11 +80,14 @@ const closeModalAction = () => {
 };
 
 const confirmModalAction = () => {
+  actionOption.value = services
+    .flatMap((service) => service.actions)
+    .find((action) => action.name === actionString.value)?.options || '';
   closeModalAction();
 };
 
 const openModalReaction = () => {
-  isModalReactionOpen.value = true;
+  isModalReactionOpen.value = true;  
 };
 
 const closeModalReaction = () => {
@@ -89,6 +95,9 @@ const closeModalReaction = () => {
 };
 
 const confirmModalReaction = () => {
+  reactionOption.value = services
+  .flatMap((service) => service.reactions)
+  .find((reaction) => reaction.name === reactionString.value)?.options || '';
   closeModalReaction();
 };
 
@@ -126,7 +135,6 @@ async function fetchServices() {
       services.push(service);
     });
 
-    // add actions and reactions to services in about.json fetch
     const responseAbout = await $fetch<AboutResponse>(
       "http://localhost:8080/about.json",
       {
@@ -192,12 +200,12 @@ async function addWorkflow() {
       .find((reaction) => reaction.name === reactionString.value);
 
     if (actionSelected && reactionSelected) {
-      const body: { action_id: number; reaction_id: number; name?: string } = {
+      const body: { action_id: number; reaction_id: number; name?: string, action_option?: string, reaction_option?: string } = {
         action_id: actionSelected.action_id,
         reaction_id: reactionSelected.reaction_id,
+        action_option: actionOption.value,
+        reaction_option: reactionOption.value,
       };
-
-      console.log("WorkflowName", WorkflowName.value);
 
       if (WorkflowName.value) {
         body.name = WorkflowName.value;
@@ -223,12 +231,8 @@ async function addWorkflow() {
       actionString.value = "";
       reactionString.value = "";
       WorkflowName.value = "";
-    } else {
-      triggerNotification(
-        "error",
-        "Workflow error",
-        "Action or reaction not found. Please check your selections."
-      );
+      actionOption.value = "";
+      reactionOption.value = "";
     }
   } catch (error) {
     console.error("Error adding workflow:", error);
@@ -258,6 +262,10 @@ async function getLastWorkflowResult() {
   }
 }
 
+const isConnected = computed(() => {
+  return token.value !== undefined;
+});
+
 onMounted(() => {
   fetchServices();
   fetchWorkflows();
@@ -270,148 +278,178 @@ onMounted(() => {
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
   >
     <NuxtLayout />
-    <div class="m-5 sm:m-10">
-      <h1
-        class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
-      >
-        Workflows
-      </h1>
-    </div>
-    <div class="flex justify-center">
-      <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
-      >
-    </div>
-    <div
-      class="flex flex-col justify-center m-5 sm:m-10 gap-5 sm:gap-10 items-center"
-    >
-      <InputComponent
-        v-model="WorkflowName"
-        type="text"
-        label="Workflow Name"
-      />
-      <div class="flex flex-wrap justify-center gap-3 sm:gap-5">
-        <ButtonComponent
-          :text="actionString ? actionString : 'Choose an action'"
-          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
-          :on-click="openModalAction"
-        />
-        <ModalComponent
-          title="Choose an action"
-          :is-open="isModalActionOpen"
-          @close="closeModalAction"
-          @confirm="confirmModalAction"
+    <div v-if = "isConnected">
+      <div class="m-5 sm:m-10">
+        <h1
+          class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
         >
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div
-              v-for="(service, index) in services"
-              :key="index"
-              class="flex justify-center"
-            >
-              <DropdownComponent
-                v-if="service.actions"
-                v-model="actionString"
-                :label="service.name"
-                :options="service.actions.map((action) => action.name)"
-              />
-            </div>
-          </div>
-        </ModalComponent>
-        <ButtonComponent
-          :text="reactionString ? reactionString : 'Choose a reaction'"
-          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
-          :on-click="openModalReaction"
-        />
-        <ModalComponent
-          title="Choose a reaction"
-          :is-open="isModalReactionOpen"
-          @close="closeModalReaction"
-          @confirm="confirmModalReaction"
-        >
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div
-              v-for="(service, index) in services"
-              :key="index"
-              class="flex justify-center"
-            >
-              <DropdownComponent
-                v-if="service.reactions"
-                v-model="reactionString"
-                :label="service.name"
-                :options="service.reactions.map((reaction) => reaction.name)"
-              />
-            </div>
-          </div>
-        </ModalComponent>
+          Workflows
+        </h1>
       </div>
       <div class="flex justify-center">
-        <ButtonComponent
-          :class="
-            actionString && reactionString
-              ? ''
-              : 'cursor-not-allowed opacity-50'
-          "
-          text="Add Workflow"
-          :bg-color="
-            actionString && reactionString
-              ? 'bg-tertiary-500'
-              : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'
-          "
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
-          :on-click="addWorkflow"
+        <hr
+          class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
+        >
+      </div>
+      <div
+        class="flex flex-col justify-center m-5 sm:m-10 gap-5 sm:gap-10 items-center"
+      >
+        <InputComponent
+          v-model="WorkflowName"
+          type="text"
+          label="Workflow Name"
+        />
+        <div class="flex flex-wrap justify-center gap-3 sm:gap-5">
+          <ButtonComponent
+            :text="actionString ? actionString : 'Choose an action'"
+            bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+            hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+            text-color="text-fontBlack dark:text-fontWhite"
+            :on-click="openModalAction"
+          />
+          <ModalComponent
+            v-motion-pop
+            title="Choose an action"
+            :is-open="isModalActionOpen"
+            @close="closeModalAction"
+            @confirm="confirmModalAction"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div
+                v-for="(service, index) in services"
+                :key="index"
+                class="flex justify-center"
+              >
+                <DropdownComponent
+                  v-if="service.actions"
+                  v-model="actionString"
+                  :label="service.name"
+                  :options="service.actions.map((action) => action.name)"
+                />
+              </div>
+            </div>
+          </ModalComponent>
+          <ButtonComponent
+            :text="reactionString ? reactionString : 'Choose a reaction'"
+            bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
+            hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+            text-color="text-fontBlack dark:text-fontWhite"
+            :on-click="openModalReaction"
+          />
+          <ModalComponent
+            v-motion-pop
+            title="Choose a reaction"
+            :is-open="isModalReactionOpen"
+            @close="closeModalReaction"
+            @confirm="confirmModalReaction"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div
+                v-for="(service, index) in services"
+                :key="index"
+                class="flex justify-center"
+              >
+                <DropdownComponent
+                  v-if="service.reactions"
+                  v-model="reactionString"
+                  :label="service.name"
+                  :options="service.reactions.map((reaction) => reaction.name)"
+                />
+              </div>
+            </div>
+          </ModalComponent>
+        </div>
+        <div class="flex justify-center">
+          <InputComponent
+            v-model="actionOption"
+            type="text"
+            label="Action options"
+          />
+          <InputComponent
+            v-model="reactionOption"
+            type="text"
+            label="Reaction options"
+          />
+        </div>
+        <div class="flex justify-center">
+          <ButtonComponent
+            :class="
+              actionString && reactionString
+                ? ''
+                : 'cursor-not-allowed opacity-50'
+            "
+            text="Add Workflow"
+            :bg-color="
+              actionString && reactionString
+                ? 'bg-tertiary-500'
+                : 'bg-primaryWhite-500 dark:bg-secondaryDark-500'
+            "
+            hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
+            text-color="text-fontBlack dark:text-fontWhite"
+            :on-click="addWorkflow"
+          />
+        </div>
+      </div>
+      <div class="flex justify-center">
+        <hr
+          class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
+        >
+      </div>
+      <div class="flex flex-wrap justify-start gap-3 sm:gap-5 m-5 sm:m-10">
+        <DropdownComponent
+          v-model="selectedFilter"
+          :label="selectedFilter"
+          :options="filters"
+        />
+        <DropdownComponent
+          v-model="selectedSort"
+          :label="selectedSort"
+          :options="sorts"
         />
       </div>
-    </div>
-    <div class="flex justify-center">
-      <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
-      >
-    </div>
-    <div class="flex flex-wrap justify-start gap-3 sm:gap-5 m-5 sm:m-10">
-      <DropdownComponent
-        v-model="selectedFilter"
-        :label="selectedFilter"
-        :options="filters"
+      <ListTableComponent
+        v-show="columns && filteredWorkflows"
+        v-model="workflowsInList"
+        :columns="columns"
+        :rows="filteredWorkflows"
       />
-      <DropdownComponent
-        v-model="selectedSort"
-        :label="selectedSort"
-        :options="sorts"
-      />
+      <div class="flex justify-center">
+        <hr
+          class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
+        >
+      </div>
+      <div class="flex justify-center m-5 sm:m-10">
+        <div
+          class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-full sm:w-10/12"
+        >
+          <button
+            class="absolute top-2 right-2 sm:top-4 sm:right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
+            aria-label="Copy JSON"
+            @click="
+              copyToClipboard(JSON.stringify(lastWorkflowResult, null, 2))
+            "
+          >
+            <Icon :name="copyIcon" />
+          </button>
+          <pre
+            class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
+          >
+    {{ JSON.stringify(lastWorkflowResult, null, 2) }}
+    </pre
+          >
+        </div>
+      </div>
     </div>
-    <ListTableComponent
-      v-show="columns && filteredWorkflows"
-      v-model="workflowsInList"
-      :columns="columns"
-      :rows="filteredWorkflows"
-    />
-    <div class="flex justify-center">
-      <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
-      >
-    </div>
-    <div class="flex justify-center m-5 sm:m-10">
-      <div
-        class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-full sm:w-10/12"
-      >
-        <button
-          class="absolute top-2 right-2 sm:top-4 sm:right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
-          aria-label="Copy JSON"
-          @click="copyToClipboard(JSON.stringify(lastWorkflowResult, null, 2))"
+    <div v-else>
+      <div class="flex flex-col gap-4 justify-center items-center h-full">
+        <h1
+          class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
         >
-          <Icon :name="copyIcon" />
-        </button>
-        <pre
-          class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
-        >
-        {{ JSON.stringify(lastWorkflowResult, null, 2) }}
-      </pre
-        >
+          ERROR 404 !
+        </h1>
+        <h2 class="text-2xl sm:text-3xl font-bold text-fontBlack dark:text-fontWhite">
+          You are not connected, please log in to access this page.
+        </h2>
       </div>
     </div>
   </div>
