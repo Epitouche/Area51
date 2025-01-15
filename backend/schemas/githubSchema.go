@@ -9,7 +9,7 @@ const (
 type GithubReaction string
 
 const (
-	GithubReactionListComments GithubReaction = "list_comments"
+	GithubReactionListComments GithubReaction = "list_review_comments"
 )
 
 type GitHubResponseToken struct {

@@ -33,7 +33,7 @@ func NewReactionService(
 		serviceService: serviceService,
 		allReactionsSchema: []schemas.Reaction{
 			{
-				Name:        "list_comments",
+				Name:        string(schemas.GithubReactionListComments),
 				Description: "List all comments of a repository",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
 				Options: toolbox.MustMarshal(schemas.GithubListAllReviewCommentsOptions{
@@ -42,12 +42,23 @@ func NewReactionService(
 				}),
 			},
 			{
-				Name:        "add_track_reaction",
+				Name:        string(schemas.SpotifyAddTrackReaction),
 				Description: "Add a track to a playlist",
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
 				Options: toolbox.MustMarshal(schemas.SpotifyReactionOptions{
 					PlaylistURL: "string",
 					TrackURL:    "string",
+				}),
+			},
+			{
+				Name:        string(schemas.WeatherCurrentReaction),
+				Description: "Get the current weather of a city",
+				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
+				Options: toolbox.MustMarshal(schemas.WeatherCurrentOptions{
+					CityName:     "string",
+					LanguageCode: "string",
+					Temperature:  0,
+					CompareSign:  "string",
 				}),
 			},
 		},

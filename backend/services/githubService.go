@@ -31,6 +31,7 @@ type githubService struct {
 	workflowRepository          repository.WorkflowRepository
 	reactionRepository          repository.ReactionRepository
 	reactionResponseDataService ReactionResponseDataService
+	serviceRepository           repository.ServiceRepository
 	mutex                       sync.Mutex
 }
 
@@ -41,6 +42,7 @@ func NewGithubService(
 	reactionRepository repository.ReactionRepository,
 	reactionResponseDataService ReactionResponseDataService,
 	userService UserService,
+	serviceRepository repository.ServiceRepository,
 ) GithubService {
 	return &githubService{
 		githubRepository:            githubRepository,
@@ -49,6 +51,7 @@ func NewGithubService(
 		reactionRepository:          reactionRepository,
 		reactionResponseDataService: reactionResponseDataService,
 		userService:                 userService,
+		serviceRepository:           serviceRepository,
 	}
 }
 
@@ -159,11 +162,16 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 		return
 	}
 	user := service.userService.GetUserById(workflow.UserId)
-	token := service.tokenRepository.FindByUserId(user)
-
-	client := github.NewClient(&http.Client{
-		Transport: &transportWithToken{token: token[len(token)-1].Token},
-	})
+	tokens := service.tokenRepository.FindByUserId(user)
+	var client *github.Client
+	for _, token := range tokens {
+		actualToken := service.tokenRepository.FindByUserIdAndServiceId(user.Id, token.ServiceId)
+		if token.Token == actualToken.Token {
+			client = github.NewClient(&http.Client{
+				Transport: &transportWithToken{token: token.Token},
+			})
+		}
+	}
 
 	var actionData schemas.GithubPullRequestOptions
 	err = json.Unmarshal([]byte(actionOption), &actionData)
@@ -232,9 +240,10 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	}
 
 	request.Header.Set("Accept", "application/vnd.github+json")
+	searchedService := service.serviceRepository.FindByName(schemas.Github)
+
 	for _, token := range accessToken {
-		actualUser := service.userService.GetUserById(token.UserId)
-		if token.UserId == actualUser.Id {
+		if token.ServiceId == searchedService.Id {
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
@@ -246,7 +255,7 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		return
 	}
 
-	defer response.Body.Close()
+	// defer response.Body.Close()
 
 	var result []schemas.GithubListCommentsResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
@@ -255,8 +264,10 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		return
 	}
 
+	worflow := service.workflowRepository.FindById(workflowId)
 	savedResult := schemas.ReactionResponseData{
 		WorkflowId:  workflowId,
+		Workflow:    worflow,
 		ApiResponse: json.RawMessage{},
 	}
 	jsonValue, err := json.Marshal(result)
@@ -273,6 +284,7 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	}
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
+	response.Body.Close()
 	time.Sleep(1 * time.Minute)
 }
 

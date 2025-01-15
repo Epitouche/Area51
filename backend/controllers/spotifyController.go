@@ -99,6 +99,7 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 				Token:     spotifyTokenResponse.AccessToken,
 				Service:   controller.servicesService.FindByName(schemas.Spotify),
 				UserId:    user.Id,
+				User:      user,
 				ServiceId: controller.servicesService.FindByName(schemas.Spotify).Id,
 			})
 			if err != nil {
@@ -169,6 +170,7 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 			Service:      spotifyService,
 			UserId:       actualUser.Id,
 			User:         actualUser,
+			ServiceId:    controller.servicesService.FindByName(schemas.Spotify).Id,
 		}
 		err = controller.userService.AddServiceToUser(actualUser, newSpotifyToken)
 		if err != nil {
