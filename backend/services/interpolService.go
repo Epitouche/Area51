@@ -10,7 +10,6 @@ import (
 
 	"area51/repository"
 	"area51/schemas"
-	"area51/toolbox"
 )
 
 type InterpolService interface {
@@ -20,22 +19,29 @@ type InterpolService interface {
 }
 
 type interpolService struct {
-	workflowRepository repository.WorkflowRepository
-	mutex          sync.Mutex
+	workflowRepository          repository.WorkflowRepository
+	reactionRepository          repository.ReactionRepository
+	userService                 UserService
+	reactionResponseDataService ReactionResponseDataService
+	mutex                       sync.Mutex
 }
 
 func NewInterpolService(
-	workflowRepository repository.WorkflowRepository,
-) InterpolService {
+	workflowRepository          repository.WorkflowRepository,
+	reactionRepository          repository.ReactionRepository,
+	userService                 UserService,
+	reactionResponseDataService ReactionResponseDataService,
+	) InterpolService {
 	return &interpolService{
-		workflowRepository: workflowRepository,
+		workflowRepository:          workflowRepository,
+		reactionRepository:          reactionRepository,
+		userService:                 userService,
+		reactionResponseDataService: reactionResponseDataService,
 	}
 }
 
 func (service *interpolService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
 	switch name {
-	case string(schemas.InterpolNewNotices):
-		return service.NewNotices
 	default:
 		return nil
 	}
@@ -43,16 +49,56 @@ func (service *interpolService) FindActionByName(name string) func(channel chan 
 
 func (service *interpolService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	switch name {
+	case string(schemas.InterpolGetRedNotices):
+		return service.GetNotices
+	case string(schemas.InterpolGetYellowNotices):
+		return service.GetNotices
+	case string(schemas.InterpolGetUNNotices):
+		return service.GetNotices
 	default:
 		return nil
 	}
 }
 
-func (service *interpolService) NewNotices(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *interpolService) GetNotices(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
-	request, err := http.NewRequest("GET", "https://ws-public.interpol.int/notices/v1/red", nil)
+	for _, token := range accessToken {
+		actualUser := service.userService.GetUserById(token.UserId)
+		if token.UserId == actualUser.Id {
+			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
+			for _, workflow := range actualWorkflow {
+				if workflow.Id == workflowId {
+					if !workflow.ReactionTrigger {
+						fmt.Println("Trigger is already false, skipping reaction.")
+						return
+					}
+				}
+			}
+		}
+	}
+
+	workflow := service.workflowRepository.FindById(workflowId)
+	reaction := service.reactionRepository.FindById(workflow.ReactionId)
+	noticeType := ""
+	switch reaction.Name {
+	case string(schemas.InterpolGetRedNotices):
+		noticeType = "red"
+	case string(schemas.InterpolGetYellowNotices):
+		noticeType = "yellow"
+	case string(schemas.InterpolGetUNNotices):
+		noticeType = "un"
+	}
+	options := schemas.InterpolReactionOption{}
+	err := json.NewDecoder(strings.NewReader(workflow.ReactionOptions)).Decode(&options)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+
+	request, err := http.NewRequest("GET", "https://ws-public.interpol.int/notices/v1/" + noticeType + "?forename=" + options.FirstName + "&name=" + options.LastName, nil)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
 		time.Sleep(30 * time.Second)
@@ -64,7 +110,7 @@ func (service *interpolService) NewNotices(channel chan string, option string, w
 	request.Header.Set("Connection", "keep-alive")
 	request.Header.Set("Cache-Control", "no-cache")
     client := &http.Client{}
-	
+
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println(err)
@@ -72,47 +118,26 @@ func (service *interpolService) NewNotices(channel chan string, option string, w
 		return
 	}
 
-	defer response.Body.Close()
-	result := schemas.InterpolRedNoticesInfos{}
+	result := schemas.InterpolNoticesList{}
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
-		fmt.Println("Reponse err")
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
 		return
 	}
-
-	options := schemas.InterpolActionOption{}
-	if actionOption != "" {
-		err = json.NewDecoder(strings.NewReader(actionOption)).Decode(&options)
-		if err != nil {
-			fmt.Println("Options err")
-			fmt.Println(err)
-			time.Sleep(30 * time.Second)
-			return
-		}
+	savedResult := schemas.ReactionResponseData{
+		WorkflowId: workflowId,
+		ApiResponse: json.RawMessage{},
 	}
-
-	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	jsonValue, err := json.Marshal(result.Embedded.Notices)
 	if err != nil {
-		fmt.Println(err)
-		time.Sleep(30 * time.Second)
+		fmt.Println("Error marshalling response:", err)
 		return
 	}
-	if options.IsOld {
-		if result.Total != options.Total {
-			options.Total = result.Total
-			workflow.ReactionTrigger = true
-			workflow.ActionOptions = toolbox.MustMarshal(options)
-			service.workflowRepository.Update(workflow)
-		}
-	} else {
-		options.Total = result.Total
-		options.IsOld = true
-		workflow.ActionOptions = toolbox.MustMarshal(options)
-		service.workflowRepository.Update(workflow)
-	}
-	channel <- "Action worlflow done"
+	savedResult.ApiResponse = jsonValue
+	service.reactionResponseDataService.Save(savedResult)
+	workflow.ReactionTrigger = false
+	service.workflowRepository.UpdateReactionTrigger(workflow)
 	time.Sleep(30 * time.Second)
 }
 
