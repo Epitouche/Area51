@@ -115,7 +115,7 @@ func (controller *userController) GetAllServices(ctx *gin.Context) ([]schemas.Se
 func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error) {
 	bearer, _ := toolbox.GetBearerToken(ctx)
 	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
-	if err != nil {
+	if err != nil || userId == 0 {
 		return nil, err
 	}
 	workflows, err := controller.userService.GetAllWorkflows(userId)

@@ -33,6 +33,7 @@ type workflowService struct {
 	servicesService             ServicesService
 	serviceToken                TokenService
 	reactionResponseDataService ReactionResponseDataService
+	googleRepository            repository.GoogleRepository
 }
 
 func NewWorkflowService(
@@ -43,6 +44,7 @@ func NewWorkflowService(
 	servicesService ServicesService,
 	serviceToken TokenService,
 	reactionResponseDataService ReactionResponseDataService,
+	googleRepository repository.GoogleRepository,
 ) WorkflowService {
 	return &workflowService{
 		repository:                  repository,
@@ -52,6 +54,7 @@ func NewWorkflowService(
 		servicesService:             servicesService,
 		serviceToken:                serviceToken,
 		reactionResponseDataService: reactionResponseDataService,
+		googleRepository:            googleRepository,
 	}
 }
 
@@ -62,7 +65,6 @@ func (service *workflowService) FindAll() []schemas.Workflow {
 func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error) {
 	result := schemas.WorkflowResult{}
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
-	fmt.Printf("result value: %+v\n", result)
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +75,6 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	}
 
 	user, err := service.userService.GetUserInfos(tokenString)
-	fmt.Printf("user value: %+v\n", user)
 	if err != nil {
 		return "", err
 	}
@@ -176,7 +177,7 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			}
 			action := service.servicesService.FindActionByName(workflow.Action.Name)
 			if action == nil {
-				fmt.Println("Action not found")
+				fmt.Println("Action not found", workflow.Action.Name)
 				return
 			}
 
@@ -275,6 +276,12 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 			actualReactionData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
 			for _, data := range actualReactionData {
 				service.reactionResponseDataService.Delete(data)
+			}
+			actualAction := service.actionService.FindById(wf.ActionId)
+			actualService := service.servicesService.FindById(actualAction.ServiceId)
+			if string(actualService.Name) == string(schemas.Google) {
+				actualGoogleAction := service.googleRepository.FindByWorkflowId(wf.Id)
+				service.googleRepository.Delete(actualGoogleAction)
 			}
 			err := service.repository.Delete(wf.Id)
 			if err != nil {

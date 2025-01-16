@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 
@@ -13,25 +14,25 @@ import (
 	"area51/toolbox"
 )
 
-type MicrosoftController interface {
-	RedirectionToMicrosoftService(ctx *gin.Context, path string) (string, error)
-	ServiceMicrosoftCallback(ctx *gin.Context, path string) (string, error)
+type GoogleController interface {
+	RedirectionToGoogleService(ctx *gin.Context, path string) (string, error)
+	ServiceGoogleCallback(ctx *gin.Context, path string) (string, error)
 }
 
-type microsoftController struct {
-	service         services.MicrosoftService
+type googleController struct {
+	service         services.GoogleService
 	userService     services.UserService
 	servicesService services.ServicesService
 	serviceToken    services.TokenService
 }
 
-func NewMicrosoftController(
-	service services.MicrosoftService,
+func NewGoogleController(
+	service services.GoogleService,
 	userService services.UserService,
 	servicesService services.ServicesService,
 	serviceToken services.TokenService,
-) MicrosoftController {
-	return &microsoftController{
+) GoogleController {
+	return &googleController{
 		service:         service,
 		userService:     userService,
 		servicesService: servicesService,
@@ -39,8 +40,8 @@ func NewMicrosoftController(
 	}
 }
 
-func (controller *microsoftController) RedirectionToMicrosoftService(ctx *gin.Context, path string) (string, error) {
-	clientId := toolbox.GetInEnv("MICROSOFT_CLIENT_ID")
+func (controller *googleController) RedirectionToGoogleService(ctx *gin.Context, path string) (string, error) {
+	clientId := toolbox.GetInEnv("GOOGLE_CLIENT_ID")
 	appPort := toolbox.GetInEnv("FRONTEND_PORT")
 	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
@@ -49,11 +50,20 @@ func (controller *microsoftController) RedirectionToMicrosoftService(ctx *gin.Co
 		return "", err
 	}
 	redirectUri := fmt.Sprintf("%s%s/callback", appAdressHost, appPort)
-	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type=code&scope=openid profile https://graph.microsoft.com/User.Read&redirect_uri=%s&state=%s", clientId, redirectUri, state)
+
+	scopes := "openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.metadata"
+
+	authUrl := fmt.Sprintf(
+		"https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&response_type=code&scope=%s&redirect_uri=%s&state=%s",
+		clientId,
+		url.QueryEscape(scopes),
+		url.QueryEscape(redirectUri),
+		state,
+	)
 	return authUrl, nil
 }
 
-func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context, path string) (string, error) {
+func (controller *googleController) ServiceGoogleCallback(ctx *gin.Context, path string) (string, error) {
 	var isAlreadyRegistered bool = false
 	var codeCredentials schemas.OAuth2CodeCredentials
 	err := json.NewDecoder(ctx.Request.Body).Decode(&codeCredentials)
@@ -66,7 +76,7 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 	if codeCredentials.State == "" {
 		return "", nil
 	}
-	microsoftTokenResponse, err := controller.service.AuthGetServiceAccessToken(codeCredentials.Code, path)
+	googleServiceToken, err := controller.service.AuthGetServiceAccessToken(codeCredentials.Code, path)
 	if err != nil {
 		return "", err
 	}
@@ -80,82 +90,84 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 		}
 		if user.Username != "" {
 			err := controller.userService.AddServiceToUser(user, schemas.ServiceToken{
-				Token:     microsoftTokenResponse.AccessToken,
-				Service:   controller.servicesService.FindByName(schemas.Microsoft),
+				Token:     googleServiceToken.AccessToken,
+				Service:   controller.servicesService.FindByName(schemas.Google),
 				UserId:    user.Id,
 				User:      user,
-				ServiceId: controller.servicesService.FindByName(schemas.Microsoft).Id,
+				ServiceId: controller.servicesService.FindByName(schemas.Google).Id,
 			})
 			if err != nil {
 				return "", err
 			}
-			newSessionToken, _ := controller.userService.Login(user, controller.servicesService.FindByName(schemas.Microsoft))
+			newSessionToken, _ := controller.userService.Login(user, controller.servicesService.FindByName(schemas.Google))
 			ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
 			return newSessionToken, nil
 		}
 	}
-	microsoftService := controller.servicesService.FindByName(schemas.Microsoft)
+	googleService := controller.servicesService.FindByName(schemas.Google)
 	// userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
-	actualUserInfos := schemas.ServicesUserInfos{
-		GithubUserInfos:    nil,
-		SpotifyUserInfos:   nil,
-		MicrosoftUserInfos: nil,
-	}
-	userInfos := controller.servicesService.GetUserInfosByToken(microsoftTokenResponse.AccessToken, schemas.Microsoft)
-	userInfos(&actualUserInfos)
-	userInfo := actualUserInfos.MicrosoftUserInfos
+	serviceUserInfos := schemas.ServicesUserInfos{}
+	userInfos := controller.servicesService.GetUserInfosByToken(googleServiceToken.AccessToken, schemas.Google)
+	userInfos(&serviceUserInfos)
+	userInfo := serviceUserInfos.GoogleUserInfos
+
 	var actualUser schemas.User
-	actualUser = controller.userService.GetUserByEmail(&userInfo.Mail)
+	actualUser = controller.userService.GetUserByEmail(&userInfo.Email)
 	if actualUser.Email != nil {
 		isAlreadyRegistered = true
 	}
 
-	var newSpotifyToken schemas.ServiceToken
+	var newGoogleToken schemas.ServiceToken
 	var newUser schemas.User
 	password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
 	if err != nil {
 		return "", fmt.Errorf("unable to hash password because %w", err)
 	}
-	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, microsoftService.Id)
+	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, googleService.Id)
 	if isAlreadyRegistered {
-		newSpotifyToken = schemas.ServiceToken{
+		newGoogleToken = schemas.ServiceToken{
 			Id:        serviceToken.Id,
-			Token:     microsoftTokenResponse.AccessToken,
-			Service:   microsoftService,
-			ServiceId: controller.servicesService.FindByName(schemas.Microsoft).Id,
+			Token:     googleServiceToken.AccessToken,
+			Service:   googleService,
 			UserId:    actualUser.Id,
 			User:      actualUser,
+			ServiceId: controller.servicesService.FindByName(schemas.Google).Id,
 		}
 	} else {
+		var email *string
+		if userInfo.Email == "" {
+			email = nil
+		} else {
+			email = &userInfo.Email
+		}
 		newUser = schemas.User{
-			Username: userInfo.DisplayName,
-			Email:    &userInfo.Mail,
+			Username: userInfo.Name,
+			Email:    email,
 			Password: &password,
 		}
 		err = controller.userService.CreateUser(newUser)
 		if err != nil {
 			return "", fmt.Errorf("unable to create user because %w", err)
 		}
-		actualUser = controller.userService.GetUserByEmail(&userInfo.Mail)
-
-		newSpotifyToken = schemas.ServiceToken{
-			Token:        microsoftTokenResponse.AccessToken,
-			RefreshToken: microsoftTokenResponse.RefreshToken,
-			Service:      microsoftService,
-			ServiceId:    controller.servicesService.FindByName(schemas.Microsoft).Id,
+		actualUser = controller.userService.GetUserByEmail(&userInfo.Email)
+		newGoogleToken = schemas.ServiceToken{
+			Token:        googleServiceToken.AccessToken,
+			RefreshToken: googleServiceToken.RefreshToken,
+			Service:      googleService,
 			UserId:       actualUser.Id,
 			User:         actualUser,
+			ServiceId:    controller.servicesService.FindByName(schemas.Google).Id,
 		}
-		err = controller.userService.AddServiceToUser(actualUser, newSpotifyToken)
+		err = controller.userService.AddServiceToUser(actualUser, newGoogleToken)
 		if err != nil {
 			return "", fmt.Errorf("unable to add service to user because %w", err)
 		}
 		isAlreadyRegistered = true
 	}
 	if serviceToken.Id != 0 {
-		actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, microsoftService.Id)
+		actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, googleService.Id)
 		if actualServiceToken.Token != "" {
-			err := controller.serviceToken.Update(newSpotifyToken)
+			err := controller.serviceToken.Update(newGoogleToken)
 			if err != nil {
 				return "", fmt.Errorf("unable to update token because %w", err)
 			}
@@ -163,23 +175,38 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 	}
 
 	if newUser.Username == "" {
-
+		var email *string
+		if userInfo.Email == "" {
+			email = nil
+		} else {
+			email = &userInfo.Email
+		}
+		password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
+		if err != nil {
+			return "", fmt.Errorf("unable to hash password because %w", err)
+		}
 		newUser = schemas.User{
-			Username: userInfo.DisplayName,
-			Email:    &userInfo.Mail,
+			Username: userInfo.Name,
+			Email:    email,
 			Password: &password,
 		}
 	} else {
 		tokens, _ := controller.serviceToken.GetTokenByUserId(actualUser.Id)
 		for _, token := range tokens {
 			if token.UserId == actualUser.Id {
+				var email *string
+				if userInfo.Email == "" {
+					email = nil
+				} else {
+					email = &userInfo.Email
+				}
 				newUser = schemas.User{
-					Username: userInfo.DisplayName,
-					Email:    &userInfo.Mail,
+					Username: userInfo.Name,
+					Email:    email,
 					Password: &password,
 				}
 				serviceToken.Id = token.Id
-				err := controller.userService.UpdateUserInfos(actualUser)
+				err = controller.userService.UpdateUserInfos(actualUser)
 				if err != nil {
 					return "", fmt.Errorf("unable to update user infos because %w", err)
 				}
@@ -187,19 +214,15 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 			}
 		}
 	}
-
 	if isAlreadyRegistered {
-		token, _ := controller.userService.Login(newUser, microsoftService)
-		fmt.Println("true", token)
+		token, _ := controller.userService.Login(newUser, googleService)
 		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
 		return token, nil
 	} else {
 		token, err := controller.userService.Register(newUser)
-		fmt.Println("false", token)
 		if err != nil {
 			return "", fmt.Errorf("unable to register user because %w", err)
 		}
 		return token, nil
 	}
-
 }
