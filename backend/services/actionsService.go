@@ -77,15 +77,6 @@ func NewActionService(
 					CompareSign:  "string",
 				}),
 			},
-			{
-				Name:        string(schemas.InterpolNewNotices),
-				Description: "Detect a new red notice",
-				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-				Options: toolbox.MustMarshal(schemas.InterpolActionOption{
-					Total: 0,
-					IsOld: false,
-				}),
-			},
 		},
 		allActions: []interface{}{serviceService},
 	}
