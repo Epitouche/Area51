@@ -111,11 +111,6 @@ func (service *googleService) GetUserInfosByToken(accessToken string, serviceNam
 		}
 		defer response.Body.Close()
 
-		// fmt.Printf("response: %++v\n", response)
-		// Read the response body
-		// bodyBytes, _ := io.ReadAll(response.Body)
-		// fmt.Println("response body: ", string(bodyBytes))
-
 		if response.StatusCode != http.StatusOK {
 			fmt.Printf("Error: received status code %d\n", response.StatusCode)
 			return
@@ -242,7 +237,6 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 		time.Sleep(30 * time.Second)
 		return
 	}
-	fmt.Printf("Value of options: %++v\n", options)
 
 	client := &http.Client{}
 	request.Header.Set("Accept", "application/json")
