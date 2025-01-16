@@ -54,3 +54,9 @@ export type Service = {
   actions: Action[];
   reactions: Reaction[];
 };
+
+export type OptionWorkflow = {
+  name: string;
+  input: string;
+  type: string;
+};

@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
         message: "Missing parameters: token, action_id or reaction_id",
       });
     }
+
     const response = await $fetch("http://server:8080/api/workflow", {
       method: "POST",
       headers: {
@@ -18,8 +19,8 @@ export default defineEventHandler(async (event) => {
         action_id: params.action_id,
         reaction_id: params.reaction_id,
         name: params.name,
-        action_options: params.action_options ? params.action_options : "",
-        reaction_options: params.reaction_options ? params.reaction_options : "",
+        action_option: params.action_option,
+        reaction_option: params.reaction_option,  
       },
     });
 
