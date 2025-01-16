@@ -78,20 +78,20 @@ func setupRouter() *gin.Engine {
 		microsoft := apiRoutes.Group("/microsoft")
 		{
 			microsoft.GET("/auth", func(ctx *gin.Context) {
-				microsoftApi.RedirectToMicrosoft(ctx, microsoft.BasePath()+"/callback")
+				microsoftApi.RedirectToMicrosoft(ctx, "/callback")
 			})
 			microsoft.POST("/callback", func(ctx *gin.Context) {
-				microsoftApi.HandleMicrosoftTokenCallback(ctx, microsoft.BasePath()+"/callback")
+				microsoftApi.HandleMicrosoftTokenCallback(ctx, "/callback")
 			})
 		}
 
 		google := apiRoutes.Group("/google")
 		{
 			google.GET("/auth", func(ctx *gin.Context) {
-				googleApi.RedirectToGoogle(ctx, google.BasePath()+"/callback")
+				googleApi.RedirectToGoogle(ctx, "/callback")
 			})
 			google.POST("/callback", func(ctx *gin.Context) {
-				googleApi.HandleGoogleTokenCallback(ctx, google.BasePath()+"/callback")
+				googleApi.HandleGoogleTokenCallback(ctx, "/callback")
 			})
 		}
 

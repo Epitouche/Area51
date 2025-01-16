@@ -172,7 +172,13 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		return
 	}
 	client := &http.Client{}
-	request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
+	searchedService := service.serviceRepository.FindByName(schemas.Spotify)
+	for _, token := range accessToken {
+		if token.ServiceId == searchedService.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+	// request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	response, err := client.Do(request)
 	if err != nil {
