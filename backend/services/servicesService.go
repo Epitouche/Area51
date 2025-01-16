@@ -74,7 +74,7 @@ func NewServicesService(
 			{
 				Name:        schemas.Interpol,
 				Description: "This is the Interpol Service",
-				Image:       "tmp",
+				Image:       "https://img.icons8.com/?size=100&id=vlYbYJMp9Ixb&format=png&color=000000",
 			},
 		},
 		allServices: []interface{}{

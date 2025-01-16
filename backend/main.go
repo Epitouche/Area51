@@ -118,6 +118,7 @@ var (
 	workflowsRepository            repository.WorkflowRepository             = repository.NewWorkflowRepository(databaseConnection)
 	reactionResponseDataRepository repository.ReactionResponseDataRepository = repository.NewReactionResponseDataRepository(databaseConnection)
 	spotifyRepository              repository.SpotifyRepository              = repository.NewSpotifyRepository(databaseConnection)
+	googleRepository               repository.GoogleRepository               = repository.NewGoogleRepository(databaseConnection)
 
 	// Services
 	jwtService                  services.JWTService                  = services.NewJWTService()
@@ -129,9 +130,9 @@ var (
 	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService, googleService, microsoftService, weatherService, interpolService)
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
-	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService)
+	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService, googleRepository)
 	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository, servicesRepository)
-	googleService               services.GoogleService               = services.NewGoogleService()
+	googleService               services.GoogleService               = services.NewGoogleService(serviceToken, userService, workflowsRepository, servicesRepository, googleRepository)
 	microsoftService            services.MicrosoftService            = services.NewMicrosoftService()
 	interpolService             services.InterpolService             = services.NewInterpolService(workflowsRepository)
 
