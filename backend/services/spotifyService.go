@@ -30,6 +30,7 @@ type spotifyService struct {
 	actionRepository   repository.ActionRepository
 	reactionRepository repository.ReactionRepository
 	tokenRepository    repository.TokenRepository
+	serviceRepository  repository.ServiceRepository
 	mutex              sync.Mutex
 }
 
@@ -40,6 +41,7 @@ func NewSpotifyService(
 	actionRepository repository.ActionRepository,
 	reactionRepository repository.ReactionRepository,
 	tokenRepository repository.TokenRepository,
+	serviceRepository repository.ServiceRepository,
 ) SpotifyService {
 	return &spotifyService{
 		userService:        userService,
@@ -48,6 +50,7 @@ func NewSpotifyService(
 		actionRepository:   actionRepository,
 		reactionRepository: reactionRepository,
 		tokenRepository:    tokenRepository,
+		serviceRepository:  serviceRepository,
 	}
 }
 
@@ -251,7 +254,14 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	}
 
 	client := &http.Client{}
-	request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
+	searchedService := service.serviceRepository.FindByName(schemas.Spotify)
+
+	for _, token := range accessToken {
+		if token.ServiceId == searchedService.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+	// request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	_, err = client.Do(request)
 	if err != nil {

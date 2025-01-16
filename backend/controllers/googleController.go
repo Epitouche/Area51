@@ -51,7 +51,7 @@ func (controller *googleController) RedirectionToGoogleService(ctx *gin.Context,
 	}
 	redirectUri := fmt.Sprintf("%s%s/callback", appAdressHost, appPort)
 
-	scopes := "openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
+	scopes := "openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.metadata"
 
 	authUrl := fmt.Sprintf(
 		"https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&response_type=code&scope=%s&redirect_uri=%s&state=%s",

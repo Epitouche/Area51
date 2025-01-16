@@ -97,6 +97,7 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 				Token:     result.Token,
 				Service:   controller.servicesService.FindByName(result.Service),
 				UserId:    user.Id,
+				User: 	user,
 				ServiceId: controller.servicesService.FindByName(result.Service).Id,
 			})
 			if err != nil {
@@ -143,6 +144,7 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 			Token:     result.Token,
 			Service:   githubService,
 			UserId:    actualUser.Id,
+			User:      actualUser,
 			ServiceId: controller.servicesService.FindByName(result.Service).Id,
 		}
 		err = controller.userService.AddServiceToUser(actualUser, newGithubToken)

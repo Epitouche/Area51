@@ -33,6 +33,7 @@ type workflowService struct {
 	servicesService             ServicesService
 	serviceToken                TokenService
 	reactionResponseDataService ReactionResponseDataService
+	googleRepository            repository.GoogleRepository
 }
 
 func NewWorkflowService(
@@ -43,6 +44,7 @@ func NewWorkflowService(
 	servicesService ServicesService,
 	serviceToken TokenService,
 	reactionResponseDataService ReactionResponseDataService,
+	googleRepository repository.GoogleRepository,
 ) WorkflowService {
 	return &workflowService{
 		repository:                  repository,
@@ -52,6 +54,7 @@ func NewWorkflowService(
 		servicesService:             servicesService,
 		serviceToken:                serviceToken,
 		reactionResponseDataService: reactionResponseDataService,
+		googleRepository:            googleRepository,
 	}
 }
 
@@ -272,6 +275,12 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 			actualReactionData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
 			for _, data := range actualReactionData {
 				service.reactionResponseDataService.Delete(data)
+			}
+			actualAction := service.actionService.FindById(wf.ActionId)
+			actualService := service.servicesService.FindById(actualAction.ServiceId)
+			if string(actualService.Name) == string(schemas.Google) {
+				actualGoogleAction := service.googleRepository.FindByWorkflowId(wf.Id)
+				service.googleRepository.Delete(actualGoogleAction)
 			}
 			err := service.repository.Delete(wf.Id)
 			if err != nil {

@@ -9,6 +9,7 @@ const (
 	Spotify  ServiceName = "spotify"
 	Google  ServiceName = "google"
 	Microsoft ServiceName = "microsoft"
+	Weather ServiceName = "weather"
 	Interpol ServiceName = "interpol"
 )
 
