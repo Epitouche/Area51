@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -217,7 +218,8 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
-	// Get the current calendars of the current user
+	workflow := service.workflowRepository.FindById(workflowId)
+
 	url := "https://www.googleapis.com/calendar/v3/users/me/calendarList"
 
 	request, err := http.NewRequest("GET", url, nil)
@@ -225,7 +227,6 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 		fmt.Println("Error creating request:", err)
 		return
 	}
-	fmt.Printf("Request created: %++v\n", request)
 
 	searchedService := service.serviceRepository.FindByName(schemas.Google)
 	for _, token := range accessToken {
@@ -234,6 +235,15 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 		}
 	}
 
+	options := schemas.GoogleCalendarOptions{}
+	err = json.NewDecoder(strings.NewReader(reactionOption)).Decode(&options)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+	fmt.Printf("Value of options: %++v\n", options)
+
 	client := &http.Client{}
 	request.Header.Set("Accept", "application/json")
 	response, err := client.Do(request)
@@ -241,134 +251,50 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 		fmt.Println("Error creating request:", err)
 		return
 	}
-	defer response.Body.Close()
 	time.Sleep(10 * time.Millisecond)
 	googleCalendarIds := schemas.GoogleCalendarResponse{}
 	bodyBytes, _ := io.ReadAll(response.Body)
-	fmt.Printf("Value of bodyBytes: %s\n", string(bodyBytes))
 	err = json.Unmarshal(bodyBytes, &googleCalendarIds)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		// 	channel <- err.Error()
 		return
 	}
-	fmt.Printf("Value of googleCalendarIds: %++v\n", googleCalendarIds)
-	panic("not implemented\n")
-	// err = json.Unmarshal(bodyBytes, &googleOption)
-	// if err != nil {
-	// 	fmt.Printf("Error: %s\n", err)
-	// 	channel <- err.Error()
-	// 	return
-	// }
+	var wantedCaledarId string
+	for _, calendar := range googleCalendarIds.Items {
+		if calendar.Id == options.CalendarId {
+			wantedCaledarId = calendar.Id
+		}
+	}
+	response.Body.Close()
+
+	urlToCreateEvent := "https://www.googleapis.com/calendar/v3/calendars/" + wantedCaledarId + "/events"
+
+	jsonData, err := json.Marshal(options.CalendarCorpus)
+	if err != nil {
+		return
+	}
+
+	request, err = http.NewRequest("POST", urlToCreateEvent, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return
+	}
+
+	for _, token := range accessToken {
+		if token.ServiceId == searchedService.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	client = &http.Client{}
+	response, err = client.Do(request)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	workflow.ReactionTrigger = false
+	service.workflowRepository.UpdateReactionTrigger(workflow)
 
 }
-
-// Value of bodyBytes: {
-// 	"kind": "calendar#calendarList",
-// 	"etag": "\"p32s8v0fbmejog0o\"",
-// 	"nextSyncToken": "CLiPgeuzp4gDEhVraWtpMjkzMy5rdEBnbWFpbC5jb20=",
-// 	"items": [
-// 	 {
-// 	  "kind": "calendar#calendarListEntry",
-// 	  "etag": "\"1667657290185000\"",
-// 	  "id": "kiki2933.kt@gmail.com",
-// 	  "summary": "kiki2933.kt@gmail.com",
-// 	  "timeZone": "UTC",
-// 	  "colorId": "14",
-// 	  "backgroundColor": "#9fe1e7",
-// 	  "foregroundColor": "#000000",
-// 	  "selected": true,
-// 	  "accessRole": "owner",
-// 	  "defaultReminders": [
-// 	   {
-// 		"method": "popup",
-// 		"minutes": 30
-// 	   }
-// 	  ],
-// 	  "notificationSettings": {
-// 	   "notifications": [
-// 		{
-// 		 "type": "eventCreation",
-// 		 "method": "email"
-// 		},
-// 		{
-// 		 "type": "eventChange",
-// 		 "method": "email"
-// 		},
-// 		{
-// 		 "type": "eventCancellation",
-// 		 "method": "email"
-// 		},
-// 		{
-// 		 "type": "eventResponse",
-// 		 "method": "email"
-// 		}
-// 	   ]
-// 	  },
-// 	  "primary": true,
-// 	  "conferenceProperties": {
-// 	   "allowedConferenceSolutionTypes": [
-// 		"hangoutsMeet"
-// 	   ]
-// 	  }
-// 	 },
-// 	 {
-// 	  "kind": "calendar#calendarListEntry",
-// 	  "etag": "\"1667657291887000\"",
-// 	  "id": "td3gu9qvbokpfpas267a4qt2j4@group.calendar.google.com",
-// 	  "summary": "TROUVE KILLIAN",
-// 	  "timeZone": "UTC",
-// 	  "colorId": "3",
-// 	  "backgroundColor": "#f83a22",
-// 	  "foregroundColor": "#000000",
-// 	  "selected": true,
-// 	  "accessRole": "owner",
-// 	  "defaultReminders": [],
-// 	  "conferenceProperties": {
-// 	   "allowedConferenceSolutionTypes": [
-// 		"hangoutsMeet"
-// 	   ]
-// 	  }
-// 	 },
-// 	 {
-// 	  "kind": "calendar#calendarListEntry",
-// 	  "etag": "\"1705357991846000\"",
-// 	  "id": "fr.french#holiday@group.v.calendar.google.com",
-// 	  "summary": "Jours fériés et autres fêtes en France",
-// 	  "description": "Jours fériés et fêtes légales en France",
-// 	  "timeZone": "UTC",
-// 	  "colorId": "8",
-// 	  "backgroundColor": "#16a765",
-// 	  "foregroundColor": "#000000",
-// 	  "selected": true,
-// 	  "accessRole": "reader",
-// 	  "defaultReminders": [],
-// 	  "conferenceProperties": {
-// 	   "allowedConferenceSolutionTypes": [
-// 		"hangoutsMeet"
-// 	   ]
-// 	  }
-// 	 },
-// 	 {
-// 	  "kind": "calendar#calendarListEntry",
-// 	  "etag": "\"1705357992518000\"",
-// 	  "id": "addressbook#contacts@group.v.calendar.google.com",
-// 	  "summary": "Anniversaires",
-// 	  "description": "Affiche dans Google Contacts les dates d'anniversaire et autres dates importantes de vos contacts.",
-// 	  "timeZone": "UTC",
-// 	  "colorId": "13",
-// 	  "backgroundColor": "#92e1c0",
-// 	  "foregroundColor": "#000000",
-// 	  "selected": true,
-// 	  "accessRole": "reader",
-// 	  "defaultReminders": [],
-// 	  "conferenceProperties": {
-// 	   "allowedConferenceSolutionTypes": [
-// 		"hangoutsMeet"
-// 	   ]
-// 	  }
-// 	 }
-// 	]
-//    }
-
-//    panic: not implemented
