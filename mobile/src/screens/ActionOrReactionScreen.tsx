@@ -5,11 +5,19 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
-import { Action, AppStackList, Reaction, ServicesParse } from '../types';
+import { AppStackList, ServicesParse, OptionValues } from '../types';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+
+interface Values {
+  id: number;
+  name: string;
+  description: string;
+  options: OptionValues[] | null;
+}
 
 type ActionOrReactionProps = RouteProp<AppStackList, 'Options'>;
 
@@ -34,21 +42,22 @@ function NoService() {
 
 function ActionOrReaction() {
   const navigation = useNavigation();
-  const defaultService = {
+  const defaultService: ServicesParse = {
     name: '',
     isConnected: false,
     actions: [],
     reactions: [],
     image: '',
+    description: '',
+    is_oauth: false,
   };
 
   const route = useRoute<ActionOrReactionProps>();
   const [selectedService, setSelectedService] =
     useState<ServicesParse>(defaultService);
-  const [selectedActionOrReactionId, setSelectedActionOrReactionId] = useState<
-    Action | Reaction
-  >();
-  const { isAction, setAction, setReaction } = route.params;
+  const [selectedActionOrReactionId, setSelectedActionOrReactionId] =
+    useState<Values>();
+  const { isAction, setValues } = route.params;
   const { servicesConnected, isBlackTheme } = useContext(AppContext);
 
   return (
@@ -56,23 +65,43 @@ function ActionOrReaction() {
       style={
         isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
       }>
-      <View style={styles.flexContainer}>
-        <View style={globalStyles.container}>
+      <ScrollView>
+        <View
+          style={[
+            styles.card,
+            isBlackTheme
+              ? globalStyles.secondaryLight
+              : globalStyles.secondaryDark,
+          ]}>
           <Text
-            style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
-            accessibilityLabel={isAction ? "Creating Action" : "Creating Reaction"}>
+            style={isBlackTheme ? globalStyles.title : globalStyles.titleBlack}
+            accessibilityLabel={
+              isAction ? 'Creating Action' : 'Creating Reaction'
+            }>
             {isAction ? 'Creating an Action' : 'Creating an Reaction'}
           </Text>
-          <Text
-            style={[
-              isBlackTheme
-                ? globalStyles.textColorBlack
-                : globalStyles.textColor,
-              globalStyles.textFormat,
-            ]}
-            accessibilityLabel="Select Service">
-            Select a service
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text
+              style={[
+                styles.bullet,
+                isBlackTheme
+                  ? globalStyles.textColor
+                  : globalStyles.textColorBlack,
+              ]}
+              accessibilityLabel="Bullet">
+              •
+            </Text>
+            <Text
+              style={[
+                isBlackTheme
+                  ? globalStyles.textColor
+                  : globalStyles.textColorBlack,
+                styles.subtitle,
+              ]}
+              accessibilityLabel="Select Service">
+              Select a service
+            </Text>
+          </View>
           <View style={styles.buttonContainer}>
             {servicesConnected.services.map((service, index) => {
               if (service.isConnected) {
@@ -82,8 +111,8 @@ function ActionOrReaction() {
                     style={[
                       globalStyles.buttonFormat,
                       isBlackTheme
-                        ? globalStyles.primaryLight
-                        : globalStyles.secondaryDark,
+                        ? globalStyles.primaryDark
+                        : globalStyles.secondaryLight,
                     ]}
                     onPress={() => {
                       setSelectedService(service);
@@ -91,8 +120,8 @@ function ActionOrReaction() {
                     <Text
                       style={[
                         isBlackTheme
-                          ? globalStyles.textColor
-                          : globalStyles.textColorBlack,
+                          ? globalStyles.textColorBlack
+                          : globalStyles.textColor,
                         globalStyles.textFormat,
                       ]}
                       accessibilityLabel={service.name}>
@@ -106,101 +135,192 @@ function ActionOrReaction() {
           </View>
           {selectedService && (
             <View style={styles.textContainer}>
-              <Text
-                style={[
-                  isBlackTheme
-                    ? globalStyles.textColorBlack
-                    : globalStyles.textColor,
-                  globalStyles.textFormat,
-                ]}
-                accessibilityLabel={isAction ? "Select Action" : "Select Reaction"}>
-                {isAction ? 'Select an Action for ' : 'Select an Reaction for '}
-                {selectedService.name}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text
+                  style={[
+                    styles.bullet,
+                    isBlackTheme
+                      ? globalStyles.textColor
+                      : globalStyles.textColorBlack,
+                  ]}
+                  accessibilityLabel="Bullet">
+                  •
+                </Text>
+                <Text
+                  style={[
+                    isBlackTheme
+                      ? globalStyles.textColor
+                      : globalStyles.textColorBlack,
+                    styles.subtitle,
+                  ]}
+                  accessibilityLabel={
+                    isAction ? 'Select Action' : 'Select Reaction'
+                  }>
+                  {isAction
+                    ? 'Select an Action for '
+                    : 'Select an Reaction for '}
+                  {selectedService.name}
+                </Text>
+              </View>
               {isAction
-                ? selectedService.actions.map((action, index) => {
-                    if (setAction) {
-                      return (
-                        <TouchableOpacity
-                          key={index}
+                ? selectedService.actions &&
+                  selectedService.actions.map((action, index) => {
+                    return (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          globalStyles.buttonFormat,
+                          isBlackTheme
+                            ? globalStyles.secondaryDark
+                            : globalStyles.primaryLight,
+                        ]}
+                        onPress={() => {
+                          setSelectedActionOrReactionId({
+                            id: action.action_id,
+                            name: action.name,
+                            description: action.description,
+                            options: action.options?.map(option => ({
+                              ...option,
+                              value: '',
+                            })) || null,
+                          });
+                        }}>
+                        <Text
                           style={[
-                            globalStyles.buttonFormat,
                             isBlackTheme
-                              ? globalStyles.primaryLight
-                              : globalStyles.secondaryDark,
+                              ? globalStyles.textColorBlack
+                              : globalStyles.textColor,
+                            globalStyles.textFormat,
                           ]}
-                          onPress={() => {
-                            setSelectedActionOrReactionId(action);
-                          }}>
-                          <Text
-                            style={[
-                              isBlackTheme
-                                ? globalStyles.textColor
-                                : globalStyles.textColorBlack,
-                              globalStyles.textFormat,
-                            ]}
-                            accessibilityLabel={action.name}>
-                            {action.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }
+                          accessibilityLabel={action.name}>
+                          {action.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
                   })
-                : selectedService.reactions.map((reaction, index) => {
-                    if (setReaction) {
-                      return (
-                        <TouchableOpacity
-                          key={index}
+                : selectedService.reactions &&
+                  selectedService.reactions.map((reaction, index) => {
+                    return (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          globalStyles.buttonFormat,
+                          isBlackTheme
+                            ? globalStyles.secondaryDark
+                            : globalStyles.primaryLight,
+                        ]}
+                        onPress={() => {
+                          setSelectedActionOrReactionId({
+                            id: reaction.reaction_id,
+                            name: reaction.name,
+                            description: reaction.description,
+                            options: reaction.options?.map(option => ({
+                              ...option,
+                              value: '',
+                            })) || null,
+                          });
+                        }}>
+                        <Text
                           style={[
-                            globalStyles.buttonFormat,
                             isBlackTheme
-                              ? globalStyles.primaryLight
-                              : globalStyles.secondaryDark,
+                              ? globalStyles.textColorBlack
+                              : globalStyles.textColor,
+                            globalStyles.textFormat,
                           ]}
-                          onPress={() => {
-                            setSelectedActionOrReactionId(reaction);
-                          }}>
-                          <Text
-                            style={[
-                              isBlackTheme
-                                ? globalStyles.textColor
-                                : globalStyles.textColorBlack,
-                              globalStyles.textFormat,
-                            ]}
-                            accessibilityLabel={reaction.name}>
-                            {reaction.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }
+                          accessibilityLabel={reaction.name}>
+                          {reaction.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
                   })}
+              {selectedActionOrReactionId?.options &&
+                selectedActionOrReactionId.options.length > 0 && (
+                  <>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text
+                        style={[
+                          styles.bullet,
+                          isBlackTheme
+                            ? globalStyles.textColor
+                            : globalStyles.textColorBlack,
+                        ]}
+                        accessibilityLabel="Bullet">
+                        •
+                      </Text>
+                      <Text
+                        style={[
+                          isBlackTheme
+                            ? globalStyles.textColor
+                            : globalStyles.textColorBlack,
+                          styles.subtitle,
+                        ]}
+                        accessibilityLabel={'Enter the Options'}>
+                        Enter the Options
+                      </Text>
+                    </View>
+                    {selectedActionOrReactionId.options.map((option, index) => {
+                      return (
+                        <TextInput
+                          key={index}
+                          placeholder={`Enter ${option.name}`}
+                          defaultValue={String(option.value)}
+                          accessibilityLabel={
+                            'Enter the Options for ' +
+                            option.name +
+                            ' de type ' +
+                            option.type
+                          }
+                          keyboardType={
+                            option.type === 'string' ? 'default' : 'numeric'
+                          }
+                          style={[
+                            isBlackTheme
+                              ? globalStyles.input
+                              : globalStyles.inputBlack,
+                          ]}
+                          onChangeText={(text) => {
+                            const updatedOptions = selectedActionOrReactionId.options?.map((opt, idx) => {
+                              if (idx === index) {
+                                return { ...opt, value: text };
+                              }
+                              return opt;
+                            }) || [];
+                            setSelectedActionOrReactionId({
+                              ...selectedActionOrReactionId,
+                              options: updatedOptions,
+                            });
+                          }}
+                        />
+                      );
+                    })}
+                  </>
+                )}
             </View>
           )}
-        </View>
-        <View style={styles.containerSaveButton}>
           <TouchableOpacity
             style={[
-              styles.saveButton,
+              globalStyles.buttonFormat,
               isBlackTheme
-                ? globalStyles.primaryLight
-                : globalStyles.secondaryDark,
+                ? globalStyles.secondaryDark
+                : globalStyles.primaryLight,
             ]}
             onPress={() => {
-              if (isAction) {
-                if (selectedActionOrReactionId)
-                  setAction && setAction(selectedActionOrReactionId as Action);
-              } else {
-                if (selectedActionOrReactionId)
-                  setReaction &&
-                    setReaction(selectedActionOrReactionId as Reaction);
+              if (selectedActionOrReactionId) {
+                setValues({
+                  id: selectedActionOrReactionId.id,
+                  name: selectedActionOrReactionId.name,
+                  description: selectedActionOrReactionId.description,
+                  options: selectedActionOrReactionId.options || [],
+                });
               }
               navigation.goBack();
             }}>
             <Text
               style={[
                 isBlackTheme
-                  ? globalStyles.textColor
-                  : globalStyles.textColorBlack,
+                  ? globalStyles.textColorBlack
+                  : globalStyles.textColor,
                 globalStyles.textFormat,
               ]}
               accessibilityLabel="Save">
@@ -208,7 +328,7 @@ function ActionOrReaction() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -227,49 +347,30 @@ export default function ActionOrReactionScreen() {
 }
 
 const styles = StyleSheet.create({
-  flexContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-    width: '90%',
-  },
-  container: {
-    width: '90%',
-    alignItems: 'center',
-    justifyContent: 'center',
+  card: {
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+    margin: 20,
     gap: 20,
-  },
-  header: {
-    fontSize: 32,
-    color: '#222831',
-    fontWeight: 'bold',
-    marginTop: '20%',
-  },
-  button: {
-    width: 'auto',
-    backgroundColor: '#F7FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonSelect: {
-    width: 'auto',
-    backgroundColor: 'red',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  textContainer: {
-    gap: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '90%',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 20,
-    width: '90%',
+    gap: 5,
+    flexWrap: 'wrap',
   },
-  containerSaveButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  textContainer: {
+    gap: 20,
+  },
+  bullet: {
+    fontSize: 20,
+    marginRight: 10,
   },
   saveButton: {
     width: '100%',
@@ -278,5 +379,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 40,
     padding: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

@@ -1,7 +1,16 @@
 import { deleteToken, saveToken } from '../token';
 import { authorize } from 'react-native-app-auth';
-import { githubLogin, microsoftLogin, spotifyLogin } from './index';
-import { AuthApiCall, RefreshServicesProps, SelectServicesParamsProps } from '../../types';
+import {
+  githubLogin,
+  microsoftLogin,
+  spotifyLogin,
+  googleLogin,
+} from './index';
+import {
+  AuthApiCall,
+  RefreshServicesProps,
+  SelectServicesParamsProps,
+} from '../../types';
 import { getAboutJson, parseServices } from '../aboutJs';
 
 export async function OauthLogin({ config, setToken }: AuthApiCall) {
@@ -23,11 +32,12 @@ export async function selectServicesParams({
       return await githubLogin(serverIp, sessionToken);
     case 'microsoft':
       return await microsoftLogin(serverIp, sessionToken);
+    case 'google':
+      return await googleLogin(serverIp, sessionToken);
     default:
       return false;
   }
 }
-
 
 export async function sendServiceToken(
   apiEndpoint: string,
@@ -49,7 +59,7 @@ export async function sendServiceToken(
       response = await fetch(`http://${apiEndpoint}:8080/api/mobile/token`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`,
+          Authorization: `Bearer ${sessionToken}`,
         },
         method: 'POST',
         body: JSON.stringify({ token: serviceToken, service: name }),
@@ -57,10 +67,8 @@ export async function sendServiceToken(
     }
 
     const data = await response.json();
-    if (!sessionToken) {
-      deleteToken('token');
-      saveToken('token', data.token);
-    }
+    deleteToken('token');
+    saveToken('token', data.token);
     return true;
   } catch (error) {
     console.error('Error service OAuth2:', error);
@@ -79,7 +87,7 @@ export async function logoutServices(
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`,
+          Authorization: `Bearer ${sessionToken}`,
         },
         method: 'PUT',
         body: JSON.stringify({ service_name: name }),
@@ -107,4 +115,3 @@ export async function refreshServices({
       await parseServices({ serverIp, aboutJson, setServicesConnected });
   }
 }
-

@@ -6,7 +6,7 @@ import {
   logoutServices,
 } from '../service';
 import { AboutJson, AboutJsonParse } from '../types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { refresh } from 'react-native-app-auth';
 
 interface ServiceCardProps {
@@ -17,6 +17,7 @@ interface ServiceCardProps {
   aboutJson: AboutJson;
   serverIp: string;
   token: string;
+  oauth: boolean;
   setNeedRefresh: (needRefresh: boolean) => void;
   setModalVisible: (modalvisible: boolean) => void;
   setSelectedService: (selectedServices: string) => void;
@@ -29,15 +30,25 @@ export function ServiceCard({
   isMobile,
   serverIp,
   token,
+  oauth,
   setNeedRefresh,
   setModalVisible,
   setSelectedService
 }: ServiceCardProps) {
 
+  const [isConnected, setIsConnected] = useState(status);
+
+  useEffect(() => {
+    if (!oauth)
+      setIsConnected(true);
+    else setIsConnected(status);
+  }, [status]);
+
   const handleOauthLogin = async (
     isConnected: boolean,
     serviceName: string,
   ) => {
+    if (!oauth) return;
     if (isConnected) {
       setModalVisible(true);
       setSelectedService(serviceName);
@@ -69,9 +80,10 @@ export function ServiceCard({
       </Text>
       <TouchableOpacity
         onPress={() => handleOauthLogin(status, title)}
+        disabled={!oauth}
         style={[
           styles.statusBar,
-          status ? styles.connectedBar : styles.disconnectedBar,
+          isConnected ? styles.connectedBar : styles.disconnectedBar,
         ]}>
         <Text style={styles.statusText}>
           {status ? 'Connected' : 'Disconnected'}

@@ -43,7 +43,7 @@ export default function ServiceScreen() {
           aboutJson,
         });
         setNeedRefresh(false);
-      }, 100);
+      }, 200);
     }
   }, [needRefresh]);
 
@@ -82,6 +82,7 @@ export default function ServiceScreen() {
                 token={token}
                 setModalVisible={setModalVisible}
                 setSelectedService={setSelectedService}
+                oauth={service.is_oauth}
               />
             ))}
         </View>

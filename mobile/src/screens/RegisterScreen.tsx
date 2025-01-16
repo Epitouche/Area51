@@ -5,16 +5,16 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Image,
 } from 'react-native';
-import { RegisterProps } from '../types';
+import { AuthParamList, RegisterProps } from '../types';
 import { registerApiCall } from '../service/auth';
 import { AppContext } from '../context/AppContext';
 import { OauthLoginButton, IpInput } from '../components';
-import { githubLogin } from '../service';
 import { globalStyles } from '../styles/global_style';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export default function RegisterScreen() {
+  const nav = useNavigation<NavigationProp<AuthParamList>>();
   const [message, setMessage] = useState('');
   const [forms, setForms] = useState<RegisterProps>({
     email: '',
@@ -23,7 +23,6 @@ export default function RegisterScreen() {
   });
   const { serverIp, setIsConnected, isBlackTheme, aboutJson } =
     useContext(AppContext);
-  const [token, setToken] = useState('');
 
   const handleRegister = async () => {
     setMessage('');
@@ -33,8 +32,10 @@ export default function RegisterScreen() {
         formsRegister: forms,
         setMessage,
       })
-    )
-      setIsConnected(true);
+    ) {
+      setForms({ email: '', password: '', username: '' });
+      nav.navigate('Login');
+    }
   };
 
   return (
@@ -114,16 +115,19 @@ export default function RegisterScreen() {
             <View style={styles.line} />
             <View style={styles.socialButtonBox}>
               {aboutJson &&
-                aboutJson.server.services.map((service, index) => (
-                  <OauthLoginButton
-                    key={index}
-                    serverIp={serverIp}
-                    setIsConnected={setIsConnected}
-                    name={service.name}
-                    img={service.image}
-                    isBlackTheme={isBlackTheme}
-                  />
-                ))}
+                aboutJson.server.services.map((service, index) => {
+                  if (!service.is_oauth) return null;
+                  return (
+                    <OauthLoginButton
+                      key={index}
+                      serverIp={serverIp}
+                      setIsConnected={setIsConnected}
+                      name={service.name}
+                      img={service.image}
+                      isBlackTheme={isBlackTheme}
+                    />
+                  );
+                })}
             </View>
             <View style={styles.forgotPasswordBox}>
               <TouchableOpacity>
@@ -154,29 +158,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: '20%',
   },
-  // checkboxContainer: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginBottom: 20,
-  // },
-  // checkbox: {
-  //   width: 24,
-  //   height: 24,
-  //   borderWidth: 2,
-  //   borderColor: '#fff',
-  //   borderRadius: 20,
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   marginRight: 10,
-  // },
-  // checkboxText: {
-  //   fontSize: 18,
-  //   color: '#fff',
-  // },
-  // rememberMeText: {
-  //   color: '#fff',
-  //   fontSize: 16,
-  // },
 
   // Input Section
   inputBox: {

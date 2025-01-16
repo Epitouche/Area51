@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { Action, AppStackList, Reaction, Workflow } from '../types';
+import { ActionOrReaction, AppStackList, Workflow } from '../types';
 import { getWorkflows, sendWorkflows } from '../service';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
@@ -27,27 +27,48 @@ export function WorkflowCard({
   const navigation = useNavigation<NavigationProp<AppStackList>>();
 
   const [workflowName, setWorkflowName] = useState('');
-  const [action, setAction] = useState<Action>({
-    action_id: 0,
+  const [action, setAction] = useState<ActionOrReaction>({
+    id: 0,
     name: '',
     description: '',
+    options: [],
   });
-  const [reaction, setReaction] = useState<Reaction>({
-    reaction_id: 0,
+  const [reaction, setReaction] = useState<ActionOrReaction>({
+    id: 0,
     name: '',
     description: '',
+    options: [],
   });
 
+  const transformOptions = (options: any[]) =>
+    JSON.stringify(
+      Object.fromEntries(options.map(option => [option.name, option.value])),
+    );
+
   const handleSendWorkflow = async () => {
+    console.log('action', transformOptions(action.options));
+    console.log('reaction', transformOptions(reaction.options));
     if (token !== 'Error: token not found' && action && reaction) {
       await sendWorkflows(token, serverIp, {
-        action_id: action.action_id,
-        reaction_id: reaction.reaction_id,
+        action_id: action.id,
+        reaction_id: reaction.id,
         name: workflowName,
+        action_option: transformOptions(action.options),
+        reaction_option: transformOptions(reaction.options),
       });
       await getWorkflows(serverIp, token, setWorkflows);
-      setAction({ action_id: 0, name: '', description: '' });
-      setReaction({ reaction_id: 0, name: '', description: '' });
+      setAction({
+        id: 0,
+        name: '',
+        description: '',
+        options: [],
+      });
+      setReaction({
+        id: 0,
+        name: '',
+        description: '',
+        options: [],
+      });
       setWorkflowName('');
     }
   };
@@ -93,7 +114,10 @@ export function WorkflowCard({
               : globalStyles.secondaryLight,
           ]}
           onPress={() => {
-            navigation.navigate('Options', { isAction: true, setAction });
+            navigation.navigate('Options', {
+              isAction: true,
+              setValues: setAction,
+            });
           }}>
           {action.name === '' ? (
             <Text
@@ -129,7 +153,10 @@ export function WorkflowCard({
               : globalStyles.secondaryLight,
           ]}
           onPress={() => {
-            navigation.navigate('Options', { isAction: false, setReaction });
+            navigation.navigate('Options', {
+              isAction: false,
+              setValues: setReaction,
+            });
           }}>
           {reaction.name === '' ? (
             <Text

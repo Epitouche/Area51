@@ -1,23 +1,40 @@
-import { ConnectedService } from "./servicesModals";
+import { ConnectedService } from './servicesModals';
 
 export type Action = {
   action_id: number;
   name: string;
   description: string;
+  options: string | null;
 };
 
 export type Reaction = {
   reaction_id: number;
   name: string;
   description: string;
+  options: string | null;
+};
+
+export type ActionParse = {
+  action_id: number;
+  name: string;
+  description: string;
+  options: Option[] | null;
+};
+
+export type ReactionParse = {
+  reaction_id: number;
+  name: string;
+  description: string;
+  options: Option[] | null;
 };
 
 export type Service = {
   name: string;
   description: string;
-  actions: Action[];
-  reactions: Reaction[];
+  actions: Action[] | null;
+  reactions: Reaction[] | null;
   image: string;
+  is_oauth: boolean;
 };
 
 export type Server = {
@@ -50,14 +67,15 @@ export type PullRequestComment = {
   pull_request_url: string;
 };
 
-
 export type ServicesParse = {
   name: string;
-  isConnected: boolean;
-  actions: Action[];
-  reactions: Reaction[];
+  description: string;
+  actions: ActionParse[] | null;
+  reactions: ReactionParse[] | null;
   image: string;
-}
+  is_oauth: boolean;
+  isConnected: boolean;
+};
 
 export type AboutJsonParse = {
   services: ServicesParse[];
@@ -67,7 +85,7 @@ export interface GetConnectedServiceProps {
   apiEndpoint: string;
   token: string;
   setConnectedService: (connectedService: ConnectedService[]) => void;
-};
+}
 
 export interface ParseConnectedServicesProps {
   aboutjson: AboutJson;
@@ -81,3 +99,8 @@ export interface ParseServicesProps {
   serverIp: string;
   setServicesConnected: (servicesConnected: AboutJsonParse) => void;
 }
+
+export type Option = {
+  name: string;
+  type: string;
+};

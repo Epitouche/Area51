@@ -9,7 +9,12 @@ import {
 import { globalStyles } from '../styles/global_style';
 import { AppStackList } from '../types';
 import { AppContext } from '../context/AppContext';
-import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {
   deleteToken,
   deleteWorkflow,
@@ -38,7 +43,6 @@ export default function WorkflowDetailsScreen() {
   useEffect(() => {
     const grabToken = async () => {
       await getToken('token', setToken);
-
     };
     grabToken();
   }, []);
@@ -136,7 +140,9 @@ export default function WorkflowDetailsScreen() {
                   globalStyles.textFormat,
                   styles.textFormat,
                 ]}
-                accessibilityLabel={workflow.action_name}>
+                accessibilityLabel={workflow.action_name}
+                numberOfLines={1}
+                ellipsizeMode="tail">
                 {workflow.action_name}
               </Text>
             </View>
@@ -155,7 +161,9 @@ export default function WorkflowDetailsScreen() {
                   globalStyles.textFormat,
                   styles.textFormat,
                 ]}
-                accessibilityLabel={workflow.reaction_name}>
+                accessibilityLabel={workflow.reaction_name}
+                numberOfLines={1}
+                ellipsizeMode="tail">
                 {workflow.reaction_name}
               </Text>
             </View>

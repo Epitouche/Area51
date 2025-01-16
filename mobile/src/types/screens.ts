@@ -1,4 +1,4 @@
-import { AboutJsonParse, Action, Reaction, Workflow } from "./aboutJson";
+import { ActionParse, ReactionParse, Workflow } from './aboutJson';
 
 export type AuthParamList = {
   Login: undefined;
@@ -8,9 +8,8 @@ export type AuthParamList = {
 
 type OptionsProps = {
   isAction: boolean;
-  setAction?: (isAction: Action) => void;
-  setReaction?: (isReaction: Reaction) => void;
-}
+  setValues: (values: ActionOrReaction) => void;
+};
 
 type WorkflowDetailsProps = {
   workflow: Workflow;
@@ -26,3 +25,16 @@ export type AppStackList = {
   Parameters: undefined;
   'Workflow Details': WorkflowDetailsProps;
 };
+
+// For Workflows Creation
+export interface OptionValues {
+  name: string;
+  value: string | number;
+  type: string;
+}
+export interface ActionOrReaction {
+  id: number;
+  name: string;
+  description: string;
+  options: OptionValues[];
+}

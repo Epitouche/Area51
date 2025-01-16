@@ -119,21 +119,24 @@ function Login({
         />
         <View style={styles.socialButtonBox}>
           {aboutJson &&
-            aboutJson.server.services.map((service, index) => (
-              <OauthLoginButton
-                key={index}
-                serverIp={serverIp}
-                setIsConnected={setIsConnected}
-                name={service.name}
-                img={service.image}
-                isBlackTheme={isBlackTheme}
-              />
-            ))}
+            aboutJson.server.services.map((service, index) => {
+              if (!service.is_oauth) return null;
+              return (
+                <OauthLoginButton
+                  key={index}
+                  serverIp={serverIp}
+                  setIsConnected={setIsConnected}
+                  name={service.name}
+                  img={service.image}
+                  isBlackTheme={isBlackTheme}
+                />
+              );
+            })}
         </View>
         <View style={styles.forgotPasswordBox}>
           <TouchableOpacity>
             <Text
-              style={styles.forgotPassword}
+              style={[styles.forgotPassword, isBlackTheme ? globalStyles.textColorBlack : globalStyles.textColor]}
               accessibilityLabel="Forgot Password">
               Forgot Password?
             </Text>
@@ -213,7 +216,6 @@ const styles = StyleSheet.create({
   },
   passwordText: { color: 'white' },
   forgotPassword: {
-    color: '#fff',
     textDecorationLine: 'underline',
     fontSize: 16,
   },

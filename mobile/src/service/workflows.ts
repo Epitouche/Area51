@@ -1,7 +1,7 @@
 export async function sendWorkflows(
   token: string,
   apiEndpoint: string,
-  formsRegister: { action_id: number; reaction_id: number; name?: string },
+  formsRegister: { action_id: number; reaction_id: number; name?: string, action_option: string, reaction_option: string },
 ) {
   try {
     const response = await fetch(`http://${apiEndpoint}:8080/api/workflow`, {
@@ -14,6 +14,8 @@ export async function sendWorkflows(
         action_id: formsRegister.action_id,
         reaction_id: formsRegister.reaction_id,
         name: formsRegister.name,
+        action_option: formsRegister.action_option,
+        reaction_option: formsRegister.reaction_option,
       }),
     });
     if (response.status !== 200) console.error('API send Workflows error');
@@ -29,7 +31,6 @@ export async function getReaction(
   token: string,
   sendReaction: (reaction: any) => void,
 ) {
-  console.log('apiEndpoint', apiEndpoint, token);
   try {
     const response = await fetch(
       `http://${apiEndpoint}:8080/api/workflow/reaction`,
