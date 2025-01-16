@@ -8,7 +8,9 @@ const (
 
 type GoogleReaction string
 
-const ()
+const (
+	GoogleCreateEventReaction GoogleReaction = "create_event_reaction"
+)
 
 type GoogleResponseToken struct {
 	AccessToken  string `json:"access_token"`
@@ -38,4 +40,10 @@ type GoogleActionResponse struct {
 
 type GoogleActionOptionsInfo struct {
 	ResultSizeEstimate int `json:"resultSizeEstimate"`
+}
+
+type GoogleCalendarResponse struct {
+	Items struct {
+		Id string `json:"id"`
+	} `json:"items"`
 }
