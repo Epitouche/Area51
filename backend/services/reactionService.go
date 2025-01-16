@@ -51,6 +51,11 @@ func NewReactionService(
 				}),
 			},
 			{
+				Name:        string(schemas.GoogleCreateEventReaction),
+				Description: "Create an event in Google Calendar",
+				ServiceId:   serviceService.FindByName(schemas.Google).Id,
+			},
+			{
 				Name:        string(schemas.WeatherCurrentReaction),
 				Description: "Get the current weather of a city",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
