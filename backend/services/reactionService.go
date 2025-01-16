@@ -51,6 +51,38 @@ func NewReactionService(
 				}),
 			},
 			{
+				Name:        string(schemas.GoogleCreateEventReaction),
+				Description: "Create an event in Google Calendar",
+				ServiceId:   serviceService.FindByName(schemas.Google).Id,
+			},
+			{
+				Name:        "get_red_notices",
+				Description: "Detect a change on a specific notice",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+					FirstName: "string",
+					LastName:  "string",
+				}),
+			},
+			{
+				Name:        "get_yellow_notices",
+				Description: "Detect a change on a specific notice",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+					FirstName: "string",
+					LastName:  "string",
+				}),
+			},
+			{
+				Name:        "get_un_notices",
+				Description: "Detect a change on a specific notice",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+					FirstName: "string",
+					LastName:  "string",
+				}),
+			},
+			{
 				Name:        string(schemas.WeatherCurrentReaction),
 				Description: "Get the current weather of a city",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,

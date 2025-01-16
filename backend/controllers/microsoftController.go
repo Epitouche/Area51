@@ -48,7 +48,7 @@ func (controller *microsoftController) RedirectionToMicrosoftService(ctx *gin.Co
 	if err != nil {
 		return "", err
 	}
-	redirectUri := fmt.Sprintf("%s%s/callback", appAdressHost, appPort)
+	redirectUri := appAdressHost + appPort + path
 	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type=code&scope=openid profile https://graph.microsoft.com/User.Read&redirect_uri=%s&state=%s", clientId, redirectUri, state)
 	return authUrl, nil
 }
@@ -95,7 +95,6 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 		}
 	}
 	microsoftService := controller.servicesService.FindByName(schemas.Microsoft)
-	// userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
 	actualUserInfos := schemas.ServicesUserInfos{
 		GithubUserInfos:    nil,
 		SpotifyUserInfos:   nil,
