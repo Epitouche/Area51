@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"area51/repository"
 	"area51/schemas"
 )
@@ -124,7 +122,6 @@ func (service *servicesService) GetAllServices() (allServicesJson []schemas.Serv
 
 func (service *servicesService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
 	for _, oneService := range service.allServices {
-		fmt.Println(oneService)
 		if oneService.(ServiceInterface).FindActionByName(name) != nil {
 			return oneService.(ServiceInterface).FindActionByName(name)
 		}

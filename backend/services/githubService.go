@@ -164,14 +164,24 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 	user := service.userService.GetUserById(workflow.UserId)
 	tokens := service.tokenRepository.FindByUserId(user)
 	var client *github.Client
+	searchedService := service.serviceRepository.FindByName(schemas.Github)
+
 	for _, token := range tokens {
-		actualToken := service.tokenRepository.FindByUserIdAndServiceId(user.Id, token.ServiceId)
-		if token.Token == actualToken.Token {
+		if token.ServiceId == searchedService.Id {
 			client = github.NewClient(&http.Client{
 				Transport: &transportWithToken{token: token.Token},
 			})
 		}
 	}
+	// }
+	// for _, token := range tokens {
+	// 	actualToken := service.tokenRepository.FindByUserIdAndServiceId(user.Id, token.ServiceId)
+	// 	if token.Token == actualToken.Token {
+	// 		client = github.NewClient(&http.Client{
+	// 			Transport: &transportWithToken{token: token.Token},
+	// 		})
+	// 	}
+	// }
 
 	var actionData schemas.GithubPullRequestOptions
 	err = json.Unmarshal([]byte(actionOption), &actionData)

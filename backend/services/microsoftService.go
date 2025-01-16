@@ -61,8 +61,8 @@ func (service *microsoftService) GetUserInfosByToken(accessToken string, service
 
 func (service *microsoftService) AuthGetServiceAccessToken(code string, path string) (schemas.MicrosoftResponseToken, error) {
 	clientId := toolbox.GetInEnv("MICROSOFT_CLIENT_ID")
-	appPort := toolbox.GetInEnv("FRONTEND_PORT")
 	tenantId := toolbox.GetInEnv("MICROSOFT_TENANT_ID")
+	appPort := toolbox.GetInEnv("FRONTEND_PORT")
 	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	redirectUri := appAdressHost + appPort + path
@@ -84,6 +84,7 @@ func (service *microsoftService) AuthGetServiceAccessToken(code string, path str
 		Timeout: time.Second * 45,
 	}
 	response, err := client.Do(req)
+	fmt.Printf("response: %++v\n", response)
 	if err != nil {
 		return schemas.MicrosoftResponseToken{}, err
 	}
