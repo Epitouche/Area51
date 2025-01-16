@@ -28,6 +28,7 @@ type googleService struct {
 	userService        UserService
 	workflowRepository repository.WorkflowRepository
 	serviceRepository  repository.ServiceRepository
+	googleRepository   repository.GoogleRepository
 	mutex              sync.Mutex
 }
 
@@ -36,12 +37,14 @@ func NewGoogleService(
 	userService UserService,
 	workflowRepository repository.WorkflowRepository,
 	serviceRepository repository.ServiceRepository,
+	googleRepository repository.GoogleRepository,
 ) GoogleService {
 	return &googleService{
 		serviceToken:       serviceToken,
 		userService:        userService,
 		workflowRepository: workflowRepository,
 		serviceRepository:  serviceRepository,
+		googleRepository:   googleRepository,
 	}
 }
 
@@ -154,8 +157,7 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 	options := schemas.GoogleActionOptions{}
 	err = json.NewDecoder(strings.NewReader(workflow.ActionOptions)).Decode(&options)
 	if err != nil {
-		fmt.Println(err)
-		time.Sleep(30 * time.Second)
+		fmt.Println("Error parsing actionOption:", err)
 		return
 	}
 
@@ -180,8 +182,34 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 		return
 	}
 	defer response.Body.Close()
+	time.Sleep(10 * time.Millisecond)
+	googleOption := schemas.GoogleActionOptionsInfo{}
 	bodyBytes, _ := io.ReadAll(response.Body)
-	// fmt.Printf("Value: %s\n", string(bodyBytes))
+	fmt.Printf("Value: %s\n", string(bodyBytes))
+	err = json.Unmarshal(bodyBytes, &googleOption)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		// 	channel <- err.Error()
+		return
+	}
+	fmt.Printf("ResultSizeEstimate: %d\n", googleOption.ResultSizeEstimate)
+	// panic("stop")
+	existingRecords := service.googleRepository.FindByWorkflowId(workflowId)
+	if existingRecords.UserId == 0 {
+		service.googleRepository.Save(schemas.GoogleActionResponse{
+			User:               user,
+			UserId:             user.Id,
+			Worflow:            workflow,
+			WorkflowId:         workflowId,
+			ResultSizeEstimate: 0,
+		})
+	}
+	if existingRecords.ResultSizeEstimate < googleOption.ResultSizeEstimate {
+		workflow.ReactionTrigger = true
+		service.workflowRepository.Update(workflow)
+	}
+	actualRecords := service.googleRepository.FindByWorkflowId(workflowId)
+	actualRecords.ResultSizeEstimate = googleOption.ResultSizeEstimate
+	service.googleRepository.UpdateNumEmails(actualRecords)
+	channel <- "Emails fetched"
 }
-
-// resultSizeEstimate
