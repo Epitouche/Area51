@@ -59,6 +59,11 @@ func NewActionService(
 				}),
 			},
 			{
+				Name:        string(schemas.GoogleGetEmailAction),
+				Description: "Get the email of the user",
+				ServiceId:   serviceService.FindByName(schemas.Google).Id,
+			},
+			{
 				Name:        string(schemas.WeatherCurrentAction),
 				Description: "Get the current weather",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
@@ -70,9 +75,12 @@ func NewActionService(
 				}),
 			},
 			{
-				Name:        "new_notices",
+				Name:        string(schemas.InterpolNewNotices),
 				Description: "Detect a new red notice",
 				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options: toolbox.MustMarshal(schemas.GoogleActionOptions{
+					Label: "string",
+				}),
 			},
 		},
 		allActions: []interface{}{serviceService},
