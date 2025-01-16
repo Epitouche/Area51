@@ -170,7 +170,6 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 	searchedService := service.serviceRepository.FindByName(schemas.Google)
 	for _, token := range allTokens {
 		if token.ServiceId == searchedService.Id {
-			fmt.Printf("TOKEN %s\n", token.Token)
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
@@ -185,15 +184,12 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 	time.Sleep(10 * time.Millisecond)
 	googleOption := schemas.GoogleActionOptionsInfo{}
 	bodyBytes, _ := io.ReadAll(response.Body)
-	fmt.Printf("Value: %s\n", string(bodyBytes))
 	err = json.Unmarshal(bodyBytes, &googleOption)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		// 	channel <- err.Error()
 		return
 	}
-	fmt.Printf("ResultSizeEstimate: %d\n", googleOption.ResultSizeEstimate)
-	// panic("stop")
 	existingRecords := service.googleRepository.FindByWorkflowId(workflowId)
 	if existingRecords.UserId == 0 {
 		service.googleRepository.Save(schemas.GoogleActionResponse{
