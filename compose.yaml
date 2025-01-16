@@ -39,37 +39,39 @@ services:
       timeout: 5s
       retries: 5
 
-  # web_app:
-  #   container_name: web_app
-  #   build:
-  #     context: ./frontend
-  #     target: run
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - PORT=8081
-  #   ports:
-  #     - "0.0.0.0:8081:8081"
-  #   networks:
-  #     - app-networks
-  #   depends_on:
-  #     mobile_app:
-  #       condition: service_started
-  #     server:
-  #       condition: service_healthy
-  #   volumes:
-  #     - apk:/app/public/apk
+  web_app:
+    container_name: web_app
+    build:
+      context: ./frontend
+      target: run
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8081
+    ports:
+      - "0.0.0.0:8081:8081"
+    networks:
+      - app-networks
+    depends_on:
+      mobile_app:
+        condition: service_started
+      server:
+        condition: service_healthy
+    volumes:
+      - apk:/app/public/apk
 
 
-  # mobile_app:
-  #   container_name: mobile_app
-  #   build:
-  #     context: ./mobile
-  #     dockerfile: Dockerfile
-  #     target: build-apk
-  #   volumes:
-  #     - apk:/app/public/apk
-  #   networks:
-  #     - app-networks
+  mobile_app:
+    container_name: mobile_app
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+      target: build-apk
+    volumes:
+      - apk:/app/public/apk
+    networks:
+      - app-networks
+    env_file:
+      - ./mobile/.env.local
 
 networks:
   app-networks:
