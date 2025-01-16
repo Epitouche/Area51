@@ -50,6 +50,33 @@ func NewReactionService(
 					TrackURL:    "string",
 				}),
 			},
+			{
+				Name:        "get_red_notices",
+				Description: "Detect a change on a specific notice",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+					FirstName: "string",
+					LastName:  "string",
+				}),
+			},
+			{
+				Name:        "get_yellow_notices",
+				Description: "Detect a change on a specific notice",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+					FirstName: "string",
+					LastName:  "string",
+				}),
+			},
+			{
+				Name:        "get_un_notices",
+				Description: "Detect a change on a specific notice",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+					FirstName: "string",
+					LastName:  "string",
+				}),
+			},
 		},
 		allReactions: []interface{}{serviceService},
 	}

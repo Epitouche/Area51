@@ -110,13 +110,15 @@ func (service *googleService) GetUserInfosByToken(accessToken string, serviceNam
 }
 
 func (service *googleService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
-	return func(channel chan string, option string, workflowId uint64, actionOption string) {
-		channel <- "google"
+	switch name {
+	default:
+		return nil
 	}
 }
 
 func (service *googleService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
-	return func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
-		channel <- "google"
+	switch name {
+	default:
+		return nil
 	}
 }

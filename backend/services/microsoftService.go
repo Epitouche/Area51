@@ -100,13 +100,15 @@ func (service *microsoftService) AuthGetServiceAccessToken(code string, path str
 }
 
 func (service *microsoftService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
-	return func(channel chan string, option string, workflowId uint64, actionOption string) {
-		fmt.Println("Microsoft action")
+	switch name {
+	default:
+		return nil
 	}
 }
 
 func (service *microsoftService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
-	return func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
-		fmt.Println("Microsoft reaction")
+	switch name {
+	default:
+		return nil
 	}
 }

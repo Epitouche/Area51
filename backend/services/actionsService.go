@@ -58,11 +58,6 @@ func NewActionService(
 					PlaylistURL: "string",
 				}),
 			},
-			{
-				Name:        "new_notices",
-				Description: "Detect a new red notice",
-				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-			},
 		},
 		allActions: []interface{}{serviceService},
 	}

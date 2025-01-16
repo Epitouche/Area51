@@ -177,7 +177,6 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 				fmt.Println("Action not found", workflow.Action.Name)
 				return
 			}
-
 			if workflow.IsActive {
 				action(channel, workflow.ActionOptions, workflow.Id, actionOption)
 			}
@@ -280,7 +279,7 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 			}
 			return nil
 		} else {
-			return fmt.Errorf("Workflow not found")
+			return fmt.Errorf("workflow not found")
 		}
 	}
 	return nil
