@@ -5,8 +5,12 @@ import "time"
 type ServiceName string
 
 const (
-	Github  ServiceName = "github"
-	Spotify ServiceName = "spotify"
+	Github   ServiceName = "github"
+	Spotify  ServiceName = "spotify"
+	Google  ServiceName = "google"
+	Microsoft ServiceName = "microsoft"
+	Weather ServiceName = "weather"
+	Interpol ServiceName = "interpol"
 )
 
 type ServiceJson struct {

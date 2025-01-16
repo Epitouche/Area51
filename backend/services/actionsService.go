@@ -42,7 +42,7 @@ func NewActionService(
 		userService:    userService,
 		allActionsSchema: []schemas.Action{
 			{
-				Name:        "pull_request",
+				Name:        string(schemas.GithubPullRequest),
 				Description: "Creation or deletion of a pull request",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
 				Options: toolbox.MustMarshal(schemas.GithubPullRequestOptions{
@@ -56,6 +56,34 @@ func NewActionService(
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
 				Options: toolbox.MustMarshal(schemas.SpotifyActionOptionsInfo{
 					PlaylistURL: "string",
+				}),
+			},
+			{
+				Name:        string(schemas.GoogleGetEmailAction),
+				Description: "Get the email of the user",
+				ServiceId:   serviceService.FindByName(schemas.Google).Id,
+				Options: toolbox.MustMarshal(schemas.GoogleActionOptions{
+					Label: "string",
+				}),
+			},
+			{
+				Name:        string(schemas.WeatherCurrentAction),
+				Description: "Get the current weather",
+				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
+				Options: toolbox.MustMarshal(schemas.WeatherCurrentOptions{
+					CityName:     "string",
+					LanguageCode: "string",
+					Temperature:  0,
+					CompareSign:  "string",
+				}),
+			},
+			{
+				Name:        string(schemas.InterpolNewNotices),
+				Description: "Detect a new red notice",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options: toolbox.MustMarshal(schemas.InterpolActionOption{
+					Total: 0,
+					IsOld: false,
 				}),
 			},
 		},

@@ -45,20 +45,30 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 	if githubService == (schemas.Service{}) {
 		return "", fmt.Errorf("service %s not found", result.Service)
 	}
-	var ServicesUserInfoss schemas.ServicesUserInfos
-	userInfos := controller.servicesService.GetUserInfosByToken(result.Token)
-	userInfos(&ServicesUserInfoss)
+	var servicesUserInfos schemas.ServicesUserInfos
+	userInfos := controller.servicesService.GetUserInfosByToken(result.Token, result.Service)
+	userInfos(&servicesUserInfos)
 	var infos schemas.MobileUsefulInfos
 	switch result.Service {
 	case schemas.Github:
 		infos = schemas.MobileUsefulInfos{
-			Login: ServicesUserInfoss.GithubUserInfos.Login,
-			Email: ServicesUserInfoss.GithubUserInfos.Email,
+			Login: servicesUserInfos.GithubUserInfos.Login,
+			Email: servicesUserInfos.GithubUserInfos.Email,
 		}
 	case schemas.Spotify:
 		infos = schemas.MobileUsefulInfos{
-			Login: ServicesUserInfoss.SpotifyUserInfos.DisplayName,
-			Email: ServicesUserInfoss.GithubUserInfos.Email,
+			Login: servicesUserInfos.SpotifyUserInfos.DisplayName,
+			Email: servicesUserInfos.SpotifyUserInfos.Email,
+		}
+	case schemas.Google:
+		infos = schemas.MobileUsefulInfos{
+			Login: servicesUserInfos.GoogleUserInfos.Name,
+			Email: servicesUserInfos.GoogleUserInfos.Email,
+		}
+	case schemas.Microsoft:
+		infos = schemas.MobileUsefulInfos{
+			Login: servicesUserInfos.MicrosoftUserInfos.DisplayName,
+			Email: servicesUserInfos.MicrosoftUserInfos.Mail,
 		}
 	}
 
@@ -87,6 +97,7 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 				Token:     result.Token,
 				Service:   controller.servicesService.FindByName(result.Service),
 				UserId:    user.Id,
+				User: 	user,
 				ServiceId: controller.servicesService.FindByName(result.Service).Id,
 			})
 			if err != nil {
@@ -133,6 +144,7 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 			Token:     result.Token,
 			Service:   githubService,
 			UserId:    actualUser.Id,
+			User:      actualUser,
 			ServiceId: controller.servicesService.FindByName(result.Service).Id,
 		}
 		err = controller.userService.AddServiceToUser(actualUser, newGithubToken)
