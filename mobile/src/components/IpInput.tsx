@@ -52,60 +52,78 @@ export function IpInput({
         isBlackTheme ? globalStyles.primaryLight : globalStyles.terciaryLight,
         styles.card,
       ]}>
-        <View style={styles.ipBox}>
-          <TextInput
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text
             style={[
-              isBlackTheme ? globalStyles.input : globalStyles.inputBlack,
-              { width: '48%' },
-            ]}
-            placeholder="Server IP"
-            keyboardType="numeric"
-            value={ipTmp}
-            onChangeText={setIpTmp}
-          />
-          <TouchableOpacity
-            onPress={handleSave}
-            style={[
-              globalStyles.buttonFormat,
+              styles.bullet,
               isBlackTheme
-                ? globalStyles.primaryDark
-                : globalStyles.primaryLight,
-            ]}>
-            <Text
-              style={[
-                isBlackTheme
-                  ? globalStyles.textColorBlack
-                  : globalStyles.textColor,
-                globalStyles.textFormat,
-                styles.button,
-              ]}>
-              Save
-            </Text>
-          </TouchableOpacity>
+                ? globalStyles.textColor
+                : globalStyles.textColorBlack,
+            ]}
+            accessibilityLabel="Bullet">
+            •
+          </Text>
+          <Text
+            style={[
+              isBlackTheme
+                ? globalStyles.textColor
+                : globalStyles.textColorBlack,
+              styles.subtitle,
+            ]}
+            accessibilityLabel="Set a server Ip">
+            Set a server Ip
+          </Text>
         </View>
+      <View style={styles.ipBox}>
+        <TextInput
+          style={[
+            isBlackTheme ? globalStyles.input : globalStyles.inputBlack,
+            { width: '48%' },
+          ]}
+          placeholder="Server IP"
+          keyboardType="numeric"
+          value={ipTmp}
+          onChangeText={setIpTmp}
+        />
         <TouchableOpacity
+          onPress={handleSave}
           style={[
             globalStyles.buttonFormat,
             isBlackTheme ? globalStyles.primaryDark : globalStyles.primaryLight,
-          ]}
-          onPress={() =>
-            refreshServices({
-              serverIp,
-              setAboutJson,
-              setServicesConnected,
-              aboutJson,
-            })
-          }>
+          ]}>
           <Text
             style={[
               isBlackTheme
                 ? globalStyles.textColorBlack
                 : globalStyles.textColor,
               globalStyles.textFormat,
+              styles.button,
             ]}>
-            Refresh
+            Save
           </Text>
         </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        style={[
+          globalStyles.buttonFormat,
+          isBlackTheme ? globalStyles.primaryDark : globalStyles.primaryLight,
+        ]}
+        onPress={() =>
+          refreshServices({
+            serverIp,
+            setAboutJson,
+            setServicesConnected,
+            aboutJson,
+          })
+        }>
+        <Text
+          style={[
+            isBlackTheme ? globalStyles.textColorBlack : globalStyles.textColor,
+            globalStyles.textFormat,
+          ]}>
+          Refresh
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -127,5 +145,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
+  },
+  bullet: {
+    fontSize: 20,
+    marginRight: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
