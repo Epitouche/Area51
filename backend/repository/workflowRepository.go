@@ -113,7 +113,13 @@ func (repo *workflowRepository) FindByIds(workflowId uint64) (schemas.Workflow, 
 }
 
 func (repo *workflowRepository) FindExistingWorkflow(workflow schemas.Workflow) schemas.Workflow {
-	err := repo.db.Connection.Where(&schemas.Workflow{UserId: workflow.UserId, ActionId: workflow.ActionId, ReactionId: workflow.ReactionId}).First(&workflow)
+	err := repo.db.Connection.Where(&schemas.Workflow{
+		UserId:          workflow.UserId,
+		ActionId:        workflow.ActionId,
+		ReactionId:      workflow.ReactionId,
+		ActionOptions:   workflow.ActionOptions,
+		ReactionOptions: workflow.ReactionOptions,
+	}).First(&workflow)
 	if err.Error != nil {
 		return schemas.Workflow{}
 	}

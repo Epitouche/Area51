@@ -134,7 +134,7 @@ var (
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService, googleRepository)
 	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository, servicesRepository)
 	googleService               services.GoogleService               = services.NewGoogleService(serviceToken, userService, workflowsRepository, servicesRepository, googleRepository)
-	microsoftService            services.MicrosoftService            = services.NewMicrosoftService()
+	microsoftService            services.MicrosoftService            = services.NewMicrosoftService(serviceToken, userService, workflowsRepository, servicesRepository)
 
 	// Controllers
 	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)
