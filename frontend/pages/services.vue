@@ -104,12 +104,18 @@ onMounted(async () => {
     }
   );
 
+  console.log(connectedServices);
+
   allServices.forEach((service) => {
     connectedServices.forEach((connectedService) => {
       if (service.name === connectedService.name || !service.is_oauth) {
         service.isConnected = true;
       }
     });
+
+    console.log(service.name, service.isConnected);
+    
+
   });
 
   const serviceUsedLogin = useCookie("serviceUsedLogin");
@@ -175,7 +181,7 @@ onMounted(async () => {
                     :checked="service.isConnected"
                     :disabled="!service.isAllowed"
                     class="sr-only peer"
-                    @click="changeConnection(service)"
+                    @change="changeConnection(service)"
                   >
                   <div
                     :class="{

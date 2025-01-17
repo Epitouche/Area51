@@ -226,8 +226,6 @@ async function transformOptions(options: OptionWorkflow[]): Promise<string> {
     return acc;
   }, {} as Record<string, string>);
 
-  console.log("transformed", transformed);
-
   return JSON.stringify(transformed);
 }
 

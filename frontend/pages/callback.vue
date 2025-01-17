@@ -34,7 +34,6 @@ async function fetchServiceToken(service: string) {
 
       if (access_token) {
         access_token.value = response.access_token;
-
       } else {
         console.error("Token not received in API response");
       }
@@ -58,23 +57,30 @@ const loginWithService = async () => {
 
 onMounted(() => {
   if (localStorage.getItem("serviceConnect")) {
-    fetchServiceToken(localStorage.getItem("serviceConnect") as string);
-    localStorage.removeItem("serviceConnect");
-    navigateTo("/services");
+    fetchServiceToken(localStorage.getItem("serviceConnect") as string).then(
+      () => {
+        localStorage.removeItem("serviceConnect");
+        navigateTo("/services");
+      }
+    );
   } else {
-  loginWithService();
+    loginWithService();
   }
 });
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-tertiary-600 to-tertiary-800">
+  <div
+    class="flex items-center justify-center min-h-screen bg-gradient-to-br from-tertiary-600 to-tertiary-800"
+  >
     <div class="text-center">
       <p class="text-fontWhite text-lg md:text-2xl font-semibold animate-pulse">
         Processing Service Login...
       </p>
       <div class="mt-4 flex justify-center">
-        <div class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        <div
+          class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"
+        />
       </div>
     </div>
   </div>

@@ -40,10 +40,12 @@ async function fetchOauthServices() {
     );
 
     responseAbout.server.services.forEach((service) => {
-      services.value.push({
-        name: service.name,
-        image: service.image || "IMG",
-      });
+      if (service.is_oauth) {
+        services.value.push({
+          name: service.name,
+          image: service.image || "IMG",
+        });
+      }
     });
 
     services.value.forEach((service) => {

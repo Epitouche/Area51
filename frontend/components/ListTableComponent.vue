@@ -112,7 +112,7 @@ async function deleteWorkflow(workflow:Workflow) {
         reaction_id: workflow.reaction_id,
       }),
     });
-    triggerNotification("success", "Success", "Workflow deleted successfully");
+    triggerNotification("success", "Success", "Workflow deleted successfully"); 
   } catch (error) {
     console.error(error);
   }

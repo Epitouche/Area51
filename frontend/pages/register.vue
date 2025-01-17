@@ -82,10 +82,12 @@ async function fetchOauthServices() {
     );
 
     responseAbout.server.services.forEach((service) => {
-      services.value.push({
-        name: service.name,
-        image: service.image || "IMG",
-      });
+      if (service.is_oauth) {
+        services.value.push({
+          name: service.name,
+          image: service.image || "IMG",
+        });
+      }
     });
 
     services.value.forEach((service) => {
@@ -96,7 +98,6 @@ async function fetchOauthServices() {
     console.error("Error fetching services:", error);
   }
 }
-
 
 interface RedirectResponse {
   service_authentication_url: string;
@@ -177,7 +178,7 @@ onMounted(fetchOauthServices);
           />
         </div>
       </form>
-      <hr class="border-primaryWhite-400" >
+      <hr class="border-primaryWhite-400">
       <div class="flex justify-around space-x-4">
         <ButtonComponent
           v-for="(service, index) in services"
