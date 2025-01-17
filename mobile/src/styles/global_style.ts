@@ -57,7 +57,7 @@ export const globalStyles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     fontSize: 16,
-    color: 'f5f5f5',
+    color: '#0a0a0a',
   },
   lineColor: {
     backgroundColor: '#1A1A1A',
@@ -88,7 +88,7 @@ export const globalStyles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     fontSize: 16,
-    color: 'f5f5f5',
+    color: '#f5f5f5',
   },
   lineColorBlack: {
     backgroundColor: '#F7FAFB',

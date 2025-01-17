@@ -16,7 +16,6 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {
-  deleteToken,
   deleteWorkflow,
   getReaction,
   getToken,
@@ -90,7 +89,7 @@ export default function WorkflowDetailsScreen() {
             styles.card,
             isBlackTheme
               ? globalStyles.secondaryLight
-              : globalStyles.terciaryDark,
+              : globalStyles.terciaryLight,
           ]}>
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <Text
@@ -245,6 +244,48 @@ export default function WorkflowDetailsScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text
+              style={[
+                styles.bullet,
+                isBlackTheme
+                  ? globalStyles.textColor
+                  : globalStyles.textColorBlack,
+              ]}
+              accessibilityLabel="Bullet">
+              •
+            </Text>
+            <Text
+              style={[
+                isBlackTheme
+                  ? globalStyles.textColor
+                  : globalStyles.textColorBlack,
+                styles.subtitle,
+              ]}
+              accessibilityLabel="Toggle Workflow">
+              Last reaction data
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.container,
+              isBlackTheme
+                ? globalStyles.secondaryLight
+                : globalStyles.terciaryLight,
+            ]}>
+            {reaction &&
+              reaction.map((item: any, index: number) => (
+                <View key={index} style={styles.cardCode}>
+                  <Text style={styles.bodyText}>{item.body}</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      console.log('URL clicked:', item.pull_request_url)
+                    }>
+                    <Text style={styles.urlText}>{item.pull_request_url}</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -312,5 +353,30 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 18,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f8f8',
+    padding: 16,
+  },
+  cardCode: {
+    backgroundColor: '#ffffff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  bodyText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 8,
+  },
+  urlText: {
+    fontSize: 14,
+    color: '#1e90ff',
+    textDecorationLine: 'underline',
   },
 });

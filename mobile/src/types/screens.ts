@@ -24,6 +24,7 @@ export type AppStackList = {
   Auth: undefined;
   Parameters: undefined;
   'Workflow Details': WorkflowDetailsProps;
+  Setting: undefined;
 };
 
 // For Workflows Creation

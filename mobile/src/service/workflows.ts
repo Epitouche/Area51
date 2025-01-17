@@ -49,6 +49,7 @@ export async function getReaction(
     }
     return true;
   } catch (error) {
+    console.log('bite');
     console.error('Error fetching Reaction data:', error);
     return false;
   }

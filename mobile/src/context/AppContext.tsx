@@ -43,7 +43,7 @@ export default function AppProvider({ children }: AppProviderProps) {
   const [serverIp, setServerIp] = useState<string>('');
   const [aboutJson, setAboutJson] = useState<AboutJson>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [isBlackTheme, setIsBlackTheme] = useState<boolean>(false);
+  const [isBlackTheme, setIsBlackTheme] = useState<boolean>(true);
   const [servicesConnected, setServicesConnected] = useState<AboutJsonParse>(
     {} as AboutJsonParse,
   );
