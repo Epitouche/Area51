@@ -1,24 +1,38 @@
 <script setup>
+import ButtonComponent from "./ButtonComponent.vue";
+
 const token = ref(useCookie("access_token"));
 const registered = computed(() => {
-  return token.value !== null && token.value !== '' && token.value !== undefined;
-})
+  return (
+    token.value !== null && token.value !== "" && token.value !== undefined
+  );
+});
 </script>
 <template>
   <div class="bg-secondaryWhite-500 dark:bg-primaryDark-500">
-    <nav class="p-4 border-b border-secondaryDark-100 dark:border-secondaryDark-500">
-      <div class="container mx-auto flex justify-between items-center text-fontBlack dark:text-fontWhite">
+    <nav
+      class="p-4 border-b border-secondaryDark-100 dark:border-secondaryDark-500"
+    >
+      <div
+        class="container mx-auto flex justify-between items-center text-fontBlack dark:text-fontWhite"
+      >
         <div class="text-lg font-bold">
-          <NuxtLink to="/"><img src="/logo_Area51.png" alt="Logo of the Website 'Area51'" class="h-10 w-auto"></NuxtLink>
+          <NuxtLink to="/">
+            <img
+              src="/logo_Area51.png"
+              alt="Logo of the Website 'Area51'"
+              class="h-10 w-auto"
+            />
+          </NuxtLink>
         </div>
         <div v-if="registered" class="space-x-9 flex items-center">
-          <ThemeSwitch/>
+          <ThemeSwitch />
           <NuxtLink to="/dashboard">Dashboard</NuxtLink>
           <NuxtLink to="/workflows">Workflow</NuxtLink>
           <NuxtLink to="/services">Services</NuxtLink>
         </div>
         <div v-else class="space-x-9 flex items-center">
-          <ThemeSwitch/>
+          <ThemeSwitch />
           <NuxtLink to="/login">Login</NuxtLink>
           <NuxtLink to="/register">
             <ButtonComponent
@@ -29,6 +43,24 @@ const registered = computed(() => {
             />
           </NuxtLink>
         </div>
+        <ButtonComponent
+          v-if="registered"
+          bg-color="bg-tertiary-500"
+          hover-color="hover:bg-accent-500"
+          text-color="text-fontWhite"
+          text="Logout"
+          @click="
+            () => {
+              const accessToken = useCookie('access_token');
+              const serviceUsedLogin = useCookie('serviceUsedLogin');
+
+              accessToken.value = null;
+              serviceUsedLogin.value = null;
+
+              navigateTo('/login');
+            }
+          "
+        />
       </div>
     </nav>
   </div>
