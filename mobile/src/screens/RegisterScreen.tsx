@@ -5,27 +5,26 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Image,
 } from 'react-native';
-import { Button } from 'react-native-paper';
-import { RegisterProps } from '../types';
+import { AuthParamList, RegisterProps } from '../types';
 import { registerApiCall } from '../service/auth';
 import { AppContext } from '../context/AppContext';
 import { OauthLoginButton, IpInput } from '../components';
-import { githubLogin } from '../service';
 import { globalStyles } from '../styles/global_style';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export default function RegisterScreen() {
+  const nav = useNavigation<NavigationProp<AuthParamList>>();
   const [message, setMessage] = useState('');
   const [forms, setForms] = useState<RegisterProps>({
     email: '',
     password: '',
     username: '',
   });
-  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
-  const [token, setToken] = useState('');
+  const { serverIp, setIsConnected, isBlackTheme, aboutJson } =
+    useContext(AppContext);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setMessage('');
     if (
       await registerApiCall({
@@ -33,12 +32,10 @@ export default function RegisterScreen() {
         formsRegister: forms,
         setMessage,
       })
-    )
-      setIsConnected(true);
-  };
-
-  const handleGithubLogin = async () => {
-    if (await githubLogin(serverIp)) setIsConnected(true);
+    ) {
+      setForms({ email: '', password: '', username: '' });
+      nav.navigate('Login');
+    }
   };
 
   return (
@@ -48,7 +45,8 @@ export default function RegisterScreen() {
       }>
       <View style={globalStyles.container}>
         <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+          accessibilityLabel="Register">
           REGISTER IN
         </Text>
         {serverIp === '' ? (
@@ -66,6 +64,7 @@ export default function RegisterScreen() {
                 autoCapitalize="none"
                 value={forms.username}
                 onChangeText={text => setForms({ ...forms, username: text })}
+                accessibilityLabel="Username"
               />
               <TextInput
                 style={[
@@ -77,6 +76,7 @@ export default function RegisterScreen() {
                 autoCapitalize="none"
                 value={forms.email}
                 onChangeText={text => setForms({ ...forms, email: text })}
+                accessibilityLabel="Email"
               />
               <TextInput
                 style={[
@@ -88,39 +88,56 @@ export default function RegisterScreen() {
                 value={forms.password}
                 onChangeText={text => setForms({ ...forms, password: text })}
                 autoCapitalize="none"
+                accessibilityLabel="Password"
               />
             </View>
-            {message !== '' && (
-              <Text style={styles.errorMessage}>{message}</Text>
-            )}
-            <Button
-              mode="contained"
-              style={globalStyles.terciaryDark}
-              onPress={handleLogin}>
-              <Text
-                style={[
-                  isBlackTheme ? globalStyles.textBlack : globalStyles.text,
-                  { fontSize: 14, fontWeight: 'bold' },
-                ]}>
-                Register
-              </Text>
-            </Button>
-            <View style={styles.line} />
+            <View style={{ width: '90%', marginTop: 20 }}>
+              <TouchableOpacity
+                style={[globalStyles.buttonFormat, globalStyles.terciaryLight]}
+                onPress={handleRegister}>
+                <Text
+                  style={[globalStyles.textColorBlack, globalStyles.textFormat]}
+                  accessibilityLabel="Register Button">
+                  Register
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={[
+                globalStyles.line,
+                isBlackTheme
+                  ? globalStyles.lineColorBlack
+                  : globalStyles.lineColor,
+              ]}
+            />
             <View style={styles.socialButtonBox}>
-              <OauthLoginButton
-                handleOauthLogin={handleGithubLogin}
-                name="Github"
-                img="https://img.icons8.com/?size=100&id=12599&format=png"
-              />
-              {/* <OauthLoginButton
-                handleOauthLogin={handleGithubLogin}
-                name="Google"
-                img="https://img.icons8.com/?size=100&id=12599&format=png"
-              /> */}
+              {aboutJson &&
+                aboutJson.server.services.map((service, index) => {
+                  if (!service.is_oauth) return null;
+                  return (
+                    <OauthLoginButton
+                      key={index}
+                      serverIp={serverIp}
+                      setIsConnected={setIsConnected}
+                      name={service.name}
+                      img={service.image}
+                      isBlackTheme={isBlackTheme}
+                    />
+                  );
+                })}
             </View>
             <View style={styles.forgotPasswordBox}>
               <TouchableOpacity>
-                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+                <Text
+                  style={[
+                    styles.forgotPassword,
+                    isBlackTheme
+                      ? globalStyles.textColorBlack
+                      : globalStyles.textColor,
+                  ]}
+                  accessibilityLabel="Forgot Password">
+                  Forgot Password?
+                </Text>
               </TouchableOpacity>
             </View>
           </>
@@ -143,29 +160,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: '20%',
   },
-  // checkboxContainer: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginBottom: 20,
-  // },
-  // checkbox: {
-  //   width: 24,
-  //   height: 24,
-  //   borderWidth: 2,
-  //   borderColor: '#fff',
-  //   borderRadius: 20,
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   marginRight: 10,
-  // },
-  // checkboxText: {
-  //   fontSize: 18,
-  //   color: '#fff',
-  // },
-  // rememberMeText: {
-  //   color: '#fff',
-  //   fontSize: 16,
-  // },
 
   // Input Section
   inputBox: {
@@ -215,7 +209,7 @@ const styles = StyleSheet.create({
 
   socialButtonBox: {
     flexDirection: 'row',
-    width: '80%',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
