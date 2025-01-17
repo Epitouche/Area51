@@ -7,13 +7,18 @@ export async function googleLogin(apiEndpoint: string, sessionToken?: string) {
       sendServiceToken(apiEndpoint, accessToken, 'google', sessionToken);
     else sendServiceToken(apiEndpoint, accessToken, 'google');
   };
-  console.log('googleLogin', GOOGLE_MOBILE_ID);
   const config = {
     issuer: 'https://accounts.google.com',
     clientId: `${GOOGLE_MOBILE_ID}.apps.googleusercontent.com`,
     redirectUrl: `com.googleusercontent.apps.${GOOGLE_MOBILE_ID}:/oauth2redirect/google`,
-    // redirectUrl: 'com.area51-epitech://oauthredirect',
-    scopes: ['https://mail.google.com/', 'profile', 'email'],
+    scopes: [
+      'openid https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/gmail.labels',
+      'https://www.googleapis.com/auth/gmail.modify',
+      'https://www.googleapis.com/auth/gmail.metadata',
+    ],
   };
 
   if (await OauthLogin({ config, setToken })) return true;

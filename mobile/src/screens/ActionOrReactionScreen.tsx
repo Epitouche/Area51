@@ -60,6 +60,10 @@ function ActionOrReaction() {
   const { isAction, setValues } = route.params;
   const { servicesConnected, isBlackTheme } = useContext(AppContext);
 
+  useEffect(() => {
+    setSelectedActionOrReactionId(undefined);
+  }, [selectedService]);
+
   return (
     <View
       style={
@@ -71,7 +75,7 @@ function ActionOrReaction() {
             styles.card,
             isBlackTheme
               ? globalStyles.secondaryLight
-              : globalStyles.secondaryDark,
+              : globalStyles.terciaryLight,
           ]}>
           <Text
             style={isBlackTheme ? globalStyles.title : globalStyles.titleBlack}
@@ -133,7 +137,7 @@ function ActionOrReaction() {
               return null;
             })}
           </View>
-          {selectedService && (
+          {selectedService && selectedService.name !== '' && (
             <View style={styles.textContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text
@@ -162,8 +166,9 @@ function ActionOrReaction() {
                   {selectedService.name}
                 </Text>
               </View>
-              {isAction
-                ? selectedService.actions &&
+              {isAction ? (
+                selectedService.actions &&
+                selectedService.actions.length > 0 ? (
                   selectedService.actions.map((action, index) => {
                     return (
                       <TouchableOpacity
@@ -179,10 +184,11 @@ function ActionOrReaction() {
                             id: action.action_id,
                             name: action.name,
                             description: action.description,
-                            options: action.options?.map(option => ({
-                              ...option,
-                              value: '',
-                            })) || null,
+                            options:
+                              action.options?.map(option => ({
+                                ...option,
+                                value: '',
+                              })) || null,
                           });
                         }}>
                         <Text
@@ -198,41 +204,65 @@ function ActionOrReaction() {
                       </TouchableOpacity>
                     );
                   })
-                : selectedService.reactions &&
-                  selectedService.reactions.map((reaction, index) => {
-                    return (
-                      <TouchableOpacity
-                        key={index}
-                        style={[
-                          globalStyles.buttonFormat,
-                          isBlackTheme
-                            ? globalStyles.secondaryDark
-                            : globalStyles.primaryLight,
-                        ]}
-                        onPress={() => {
-                          setSelectedActionOrReactionId({
-                            id: reaction.reaction_id,
-                            name: reaction.name,
-                            description: reaction.description,
-                            options: reaction.options?.map(option => ({
+                ) : (
+                  <Text
+                    style={[
+                      globalStyles.textColorBlack,
+                      globalStyles.textFormat,
+                      { justifyContent: 'center' },
+                    ]}
+                    accessibilityLabel={'No Action Available'}>
+                    No Action Available
+                  </Text>
+                )
+              ) : selectedService.reactions &&
+                selectedService.reactions.length > 0 ? (
+                selectedService.reactions.map((reaction, index) => {
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        globalStyles.buttonFormat,
+                        isBlackTheme
+                          ? globalStyles.secondaryDark
+                          : globalStyles.primaryLight,
+                      ]}
+                      onPress={() => {
+                        setSelectedActionOrReactionId({
+                          id: reaction.reaction_id,
+                          name: reaction.name,
+                          description: reaction.description,
+                          options:
+                            reaction.options?.map(option => ({
                               ...option,
                               value: '',
                             })) || null,
-                          });
-                        }}>
-                        <Text
-                          style={[
-                            isBlackTheme
-                              ? globalStyles.textColorBlack
-                              : globalStyles.textColor,
-                            globalStyles.textFormat,
-                          ]}
-                          accessibilityLabel={reaction.name}>
-                          {reaction.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                        });
+                      }}>
+                      <Text
+                        style={[
+                          isBlackTheme
+                            ? globalStyles.textColorBlack
+                            : globalStyles.textColor,
+                          globalStyles.textFormat,
+                        ]}
+                        accessibilityLabel={reaction.name}>
+                        {reaction.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })
+              ) : (
+                <Text
+                  style={[
+                    globalStyles.textColorBlack,
+                    globalStyles.textFormat,
+                    { justifyContent: 'center' },
+                  ]}
+                  accessibilityLabel={'No Reaction Available'}>
+                  No Reaction Available
+                </Text>
+              )}
               {selectedActionOrReactionId?.options &&
                 selectedActionOrReactionId.options.length > 0 && (
                   <>
@@ -279,13 +309,16 @@ function ActionOrReaction() {
                               ? globalStyles.input
                               : globalStyles.inputBlack,
                           ]}
-                          onChangeText={(text) => {
-                            const updatedOptions = selectedActionOrReactionId.options?.map((opt, idx) => {
-                              if (idx === index) {
-                                return { ...opt, value: text };
-                              }
-                              return opt;
-                            }) || [];
+                          onChangeText={text => {
+                            const updatedOptions =
+                              selectedActionOrReactionId.options?.map(
+                                (opt, idx) => {
+                                  if (idx === index) {
+                                    return { ...opt, value: text };
+                                  }
+                                  return opt;
+                                },
+                              ) || [];
                             setSelectedActionOrReactionId({
                               ...selectedActionOrReactionId,
                               options: updatedOptions,

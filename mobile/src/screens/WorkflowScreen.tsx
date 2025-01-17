@@ -74,11 +74,11 @@ export default function WorkflowScreen() {
       }>
       <ScrollView>
         <View style={globalStyles.container}>
-          <Text
+          {/* <Text
             style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
             accessibilityLabel="Dashboard">
             Dashboard
-          </Text>
+          </Text> */}
           <TouchableOpacity
             style={[
               globalStyles.buttonFormat,

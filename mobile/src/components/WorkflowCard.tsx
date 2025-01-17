@@ -79,7 +79,7 @@ export function WorkflowCard({
     <View
       style={[
         styles.card,
-        isBlackTheme ? globalStyles.secondaryLight : globalStyles.secondaryDark,
+        isBlackTheme ? globalStyles.secondaryLight : globalStyles.terciaryLight,
       ]}>
       <Text
         style={[

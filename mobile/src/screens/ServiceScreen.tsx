@@ -3,7 +3,7 @@ import { globalStyles } from '../styles/global_style';
 import { AppContext } from '../context/AppContext';
 import { useContext, useEffect, useState } from 'react';
 import { DeconnectionPopUp, ServiceCard } from '../components';
-import { getToken, parseServices, refreshServices } from '../service';
+import { getToken, refreshServices } from '../service';
 
 export default function ServiceScreen() {
   const {
@@ -43,7 +43,7 @@ export default function ServiceScreen() {
           aboutJson,
         });
         setNeedRefresh(false);
-      }, 200);
+      }, 300);
     }
   }, [needRefresh]);
 
@@ -55,8 +55,8 @@ export default function ServiceScreen() {
       <View style={globalStyles.container}>
         <Text
           style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
-          accessibilityLabel="Service Screen">
-          Service Screen
+          accessibilityLabel="Services">
+          Services
         </Text>
         <View
           style={{

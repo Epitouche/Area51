@@ -17,7 +17,6 @@ export function OauthLoginButton({
   setIsConnected,
   isBlackTheme,
 }: OauthLoginButtonProps) {
-
   const handleOauthLogin = async () => {
     if (await selectServicesParams({ serverIp, serviceName: name })) {
       setIsConnected(true);
@@ -29,11 +28,15 @@ export function OauthLoginButton({
       onPress={handleOauthLogin}
       style={[
         globalStyles.buttonFormat,
-        isBlackTheme ? globalStyles.secondaryLight : globalStyles.secondaryDark,
+        isBlackTheme ? globalStyles.secondaryLight : globalStyles.terciaryLight,
       ]}>
       <View style={styles.buttonContent}>
         <Image source={{ uri: img }} style={styles.icon} />
-        <Text style={styles.text}>
+        <Text
+          style={[
+            globalStyles.textFormat,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+          ]}>
           {name.charAt(0).toUpperCase() + name.slice(1)}
         </Text>
       </View>

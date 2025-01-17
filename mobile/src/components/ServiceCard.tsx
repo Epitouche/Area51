@@ -1,13 +1,10 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { globalStyles } from '../styles/global_style';
 import {
-  parseServices,
   selectServicesParams,
-  logoutServices,
 } from '../service';
-import { AboutJson, AboutJsonParse } from '../types';
+import { AboutJson } from '../types';
 import { useEffect, useState } from 'react';
-import { refresh } from 'react-native-app-auth';
 
 interface ServiceCardProps {
   title: string;
@@ -64,7 +61,7 @@ export function ServiceCard({
 
   return (
     <View
-      style={[styles.card, status ? styles.connected : styles.disconnected]}>
+      style={[isMobile ? globalStyles.primaryLight : globalStyles.terciaryDark, styles.card, status ? styles.connected : styles.disconnected]}>
       <Image
         source={{
           uri: image,
@@ -97,7 +94,6 @@ const styles = StyleSheet.create({
   card: {
     width: 110,
     borderRadius: 10,
-    backgroundColor: '#f0f0f0',
     alignItems: 'center',
     justifyContent: 'space-between',
   },

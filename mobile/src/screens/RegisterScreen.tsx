@@ -93,26 +93,23 @@ export default function RegisterScreen() {
             </View>
             <View style={{ width: '90%', marginTop: 20 }}>
               <TouchableOpacity
-                style={[
-                  globalStyles.buttonFormat,
-                  isBlackTheme
-                    ? globalStyles.terciaryDark
-                    : globalStyles.terciaryLight,
-                ]}
+                style={[globalStyles.buttonFormat, globalStyles.terciaryLight]}
                 onPress={handleRegister}>
                 <Text
-                  style={[
-                    isBlackTheme
-                      ? globalStyles.textColorBlack
-                      : globalStyles.textColor,
-                    globalStyles.textFormat,
-                  ]}
+                  style={[globalStyles.textColorBlack, globalStyles.textFormat]}
                   accessibilityLabel="Register Button">
                   Register
                 </Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.line} />
+            <View
+              style={[
+                globalStyles.line,
+                isBlackTheme
+                  ? globalStyles.lineColorBlack
+                  : globalStyles.lineColor,
+              ]}
+            />
             <View style={styles.socialButtonBox}>
               {aboutJson &&
                 aboutJson.server.services.map((service, index) => {
@@ -132,7 +129,12 @@ export default function RegisterScreen() {
             <View style={styles.forgotPasswordBox}>
               <TouchableOpacity>
                 <Text
-                  style={styles.forgotPassword}
+                  style={[
+                    styles.forgotPassword,
+                    isBlackTheme
+                      ? globalStyles.textColorBlack
+                      : globalStyles.textColor,
+                  ]}
                   accessibilityLabel="Forgot Password">
                   Forgot Password?
                 </Text>

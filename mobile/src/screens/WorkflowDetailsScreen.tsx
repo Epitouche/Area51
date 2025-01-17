@@ -90,7 +90,7 @@ export default function WorkflowDetailsScreen() {
             styles.card,
             isBlackTheme
               ? globalStyles.secondaryLight
-              : globalStyles.secondaryDark,
+              : globalStyles.terciaryDark,
           ]}>
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <Text
@@ -199,12 +199,7 @@ export default function WorkflowDetailsScreen() {
               ]}
               onPress={handleToggle}>
               <Text
-                style={[
-                  globalStyles.textFormat,
-                  isToggled
-                    ? globalStyles.textColorBlack
-                    : globalStyles.textColor,
-                ]}
+                style={[globalStyles.textFormat, globalStyles.textColorBlack]}
                 accessibilityLabel={isToggled ? 'ON' : 'OFF'}>
                 {isToggled ? 'ON' : 'OFF'}
               </Text>
@@ -214,13 +209,28 @@ export default function WorkflowDetailsScreen() {
             style={{
               justifyContent: 'center',
               alignItems: 'center',
-              gap: 5,
+              flexDirection: 'row',
+              gap: 20,
             }}>
             <TouchableOpacity
               style={[
                 globalStyles.buttonFormat,
-                globalStyles.secondaryDark,
-                { width: '100%' },
+                { width: '48%', backgroundColor: 'red' },
+              ]}
+              onPress={handleDelete}>
+              <Text
+                style={[globalStyles.textFormat, globalStyles.textColorBlack]}
+                accessibilityLabel={'Delete Workflows'}>
+                Delete
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                globalStyles.buttonFormat,
+                isBlackTheme
+                  ? globalStyles.secondaryDark
+                  : globalStyles.secondaryLight,
+                { width: '48%' },
               ]}
               onPress={handleSave}>
               <Text
@@ -232,23 +242,6 @@ export default function WorkflowDetailsScreen() {
                 ]}
                 accessibilityLabel={'Save Workflows modification'}>
                 Save
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                globalStyles.buttonFormat,
-                { width: '100%', backgroundColor: 'red' },
-              ]}
-              onPress={handleDelete}>
-              <Text
-                style={[
-                  globalStyles.textFormat,
-                  isBlackTheme
-                    ? globalStyles.textColorBlack
-                    : globalStyles.textColor,
-                ]}
-                accessibilityLabel={'Delete Workflows'}>
-                Delete
               </Text>
             </TouchableOpacity>
           </View>
@@ -312,10 +305,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   toggledOn: {
-    backgroundColor: 'green',
+    backgroundColor: '#4caf50',
   },
   toggledOff: {
-    backgroundColor: 'red',
+    backgroundColor: '#f44336',
   },
   toggleText: {
     fontSize: 18,

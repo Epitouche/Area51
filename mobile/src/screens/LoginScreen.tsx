@@ -94,16 +94,12 @@ function Login({
           <TouchableOpacity
             style={[
               globalStyles.buttonFormat,
-              isBlackTheme
-                ? globalStyles.terciaryDark
-                : globalStyles.terciaryLight,
+              globalStyles.terciaryLight,
             ]}
             onPress={handleLogin}>
             <Text
               style={[
-                isBlackTheme
-                  ? globalStyles.textColorBlack
-                  : globalStyles.textColor,
+                globalStyles.textColorBlack,
                 globalStyles.textFormat,
               ]}
               accessibilityLabel="Login Button">
@@ -136,7 +132,12 @@ function Login({
         <View style={styles.forgotPasswordBox}>
           <TouchableOpacity>
             <Text
-              style={[styles.forgotPassword, isBlackTheme ? globalStyles.textColorBlack : globalStyles.textColor]}
+              style={[
+                styles.forgotPassword,
+                isBlackTheme
+                  ? globalStyles.textColorBlack
+                  : globalStyles.textColor,
+              ]}
               accessibilityLabel="Forgot Password">
               Forgot Password?
             </Text>
