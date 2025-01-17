@@ -19,7 +19,7 @@ import { globalStyles } from '../styles/global_style';
 import { AppStackList } from '../types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-export default function WorkflowScreen() {
+export default function SettingScreen() {
   const [token, setToken] = useState('');
 
   const navigation = useNavigation<NavigationProp<AppStackList>>();
@@ -73,40 +73,7 @@ export default function WorkflowScreen() {
         isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
       }>
       <ScrollView>
-        <View style={globalStyles.container}>
-          <TouchableOpacity
-            style={[
-              globalStyles.buttonFormat,
-              isBlackTheme
-                ? globalStyles.primaryLight
-                : globalStyles.secondaryDark,
-            ]}
-            onPress={handleLogout}>
-            <Text
-              style={[
-                isBlackTheme
-                  ? globalStyles.textColor
-                  : globalStyles.textColorBlack,
-                globalStyles.textFormat,
-              ]}
-              accessibilityLabel="Logout">
-              Logout
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <WorkflowCard
-          serverIp={serverIp}
-          isBlackTheme={isBlackTheme}
-          token={token}
-          setWorkflows={setWorkflows}
-        />
-        <View style={styles.tabContainer}>
-          <WorkflowTab
-            workflows={workflows}
-            isBlackTheme={isBlackTheme}
-            navigation={navigation}
-          />
-        </View>
+        <View style={globalStyles.container}></View>
       </ScrollView>
     </View>
   );

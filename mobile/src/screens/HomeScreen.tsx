@@ -1,11 +1,18 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useContext } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
 import { IpInput } from '../components';
+import { refreshServices } from '../service';
 
 export default function HomeScreen() {
-  const { isBlackTheme } = useContext(AppContext);
+  const {
+    isBlackTheme,
+    serverIp,
+    aboutJson,
+    setAboutJson,
+    setServicesConnected,
+  } = useContext(AppContext);
 
   return (
     <View
@@ -14,7 +21,8 @@ export default function HomeScreen() {
       }>
       <View style={globalStyles.container}>
         <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
+          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+          accessibilityLabel="Area51">
           Area51
         </Text>
         <View style={styles.textAlign}>
@@ -24,7 +32,8 @@ export default function HomeScreen() {
                 isBlackTheme
                   ? globalStyles.subtitleBlack
                   : globalStyles.subtitle
-              }>
+              }
+              accessibilityLabel="Automate">
               Automate
             </Text>
           </View>
@@ -34,12 +43,36 @@ export default function HomeScreen() {
                 isBlackTheme
                   ? globalStyles.subtitleBlack
                   : globalStyles.subtitle
-              }>
+              }
+              accessibilityLabel="Without Limits">
               without limits
             </Text>
           </View>
         </View>
         <IpInput />
+        <TouchableOpacity
+          style={[
+            globalStyles.buttonFormat,
+            isBlackTheme ? globalStyles.primaryLight : globalStyles.primaryDark,
+          ]}
+          onPress={() =>
+            refreshServices({
+              serverIp,
+              setAboutJson,
+              setServicesConnected,
+              aboutJson,
+            })
+          }>
+          <Text
+            style={[
+              isBlackTheme
+                ? globalStyles.textColor
+                : globalStyles.textColorBlack,
+              globalStyles.textFormat,
+            ]}>
+            Refresh
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

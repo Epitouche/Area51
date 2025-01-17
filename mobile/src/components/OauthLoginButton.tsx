@@ -1,35 +1,48 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { selectServicesParams } from '../service';
+import { globalStyles } from '../styles/global_style';
 
 export interface OauthLoginButtonProps {
-  handleOauthLogin: () => void;
-  color?: string;
-  img: string;
+  img?: string;
   name: string;
+  serverIp: string;
+  setIsConnected: (isConnected: boolean) => void;
+  isBlackTheme?: boolean;
 }
 
-// https://img.icons8.com/?size=100&id=12599&format=png
+export function OauthLoginButton({
+  name,
+  img,
+  serverIp,
+  setIsConnected,
+  isBlackTheme,
+}: OauthLoginButtonProps) {
+  const handleOauthLogin = async () => {
+    if (await selectServicesParams({ serverIp, serviceName: name })) {
+      setIsConnected(true);
+    }
+  };
 
- export function OauthLoginButton({
-   handleOauthLogin,
-   color,
-   name,
-   img,
- }: OauthLoginButtonProps) {
-   if (!color) {
-     color = '#FFFFFF';
-   }
-   return (
-     <Button
-       onPress={handleOauthLogin}
-       style={[styles.button, { backgroundColor: color }]}>
-       <View style={styles.buttonContent}>
-         <Image source={{ uri: img }} style={styles.icon} />
-         <Text style={styles.text}>{name}</Text>
-       </View>
-     </Button>
-   );
- }
+  return (
+    <TouchableOpacity
+      onPress={handleOauthLogin}
+      style={[
+        globalStyles.buttonFormat,
+        isBlackTheme ? globalStyles.secondaryLight : globalStyles.terciaryLight,
+      ]}>
+      <View style={styles.buttonContent}>
+        <Image source={{ uri: img }} style={styles.icon} />
+        <Text
+          style={[
+            globalStyles.textFormat,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+          ]}>
+          {name.charAt(0).toUpperCase() + name.slice(1)}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 const styles = StyleSheet.create({
   button: {
