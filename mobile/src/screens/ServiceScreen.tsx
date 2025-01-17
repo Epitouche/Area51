@@ -75,7 +75,7 @@ export default function ServiceScreen() {
                 title={service.name}
                 image={service.image}
                 status={service.isConnected}
-                isMobile={isBlackTheme}
+                isBlackTheme={isBlackTheme}
                 aboutJson={aboutJson}
                 serverIp={serverIp}
                 setNeedRefresh={setNeedRefresh}

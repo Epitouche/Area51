@@ -44,12 +44,10 @@ export async function getReaction(
     );
     const data = await response.json();
     if (response.status === 200) {
-      console.log('data', data);
       if (data !== null) sendReaction(data);
     }
     return true;
   } catch (error) {
-    console.log('bite');
     console.error('Error fetching Reaction data:', error);
     return false;
   }
@@ -90,7 +88,6 @@ export async function modifyWorkflows(
   workflowStatus: boolean,
   workflowId: number,
 ) {
-  console.log('workflowStatus', workflowStatus);
   try {
     const response = await fetch(
       `http://${apiEndpoint}:8080/api/workflow/activation`,

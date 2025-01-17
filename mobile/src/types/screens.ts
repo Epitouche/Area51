@@ -1,4 +1,4 @@
-import { ActionParse, ReactionParse, Workflow } from './aboutJson';
+import { AboutJson, AboutJsonParse, ActionParse, ReactionParse, Workflow } from './aboutJson';
 
 export type AuthParamList = {
   Login: undefined;
@@ -38,4 +38,14 @@ export interface ActionOrReaction {
   name: string;
   description: string;
   options: OptionValues[];
+}
+
+
+export interface NoIpProps {
+  isBlackTheme?: boolean;
+  setAboutJson: (aboutJson: AboutJson) => void;
+  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
+  aboutJson: AboutJson | undefined;
+  setServerIp: (serverIp: string) => void;
+  serverIp: string;
 }

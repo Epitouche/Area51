@@ -9,7 +9,7 @@ export interface SelectServicesParamsProps {
 
 export type AuthApiCall = {
   config: AuthConfiguration;
-  setToken: (accessToken: string) => void;
+  setToken: (accessToken: string) => Promise<void>;
 };
 
 export interface RefreshServicesProps {
