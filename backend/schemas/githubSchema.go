@@ -1,9 +1,12 @@
 package schemas
 
+import "time"
+
 type GithubAction string
 
 const (
 	GithubPullRequest GithubAction = "pull_request"
+	GithubPushOnRepo  GithubAction = "push_on_repo"
 )
 
 type GithubReaction string
@@ -52,4 +55,19 @@ type GithubPullRequestOptions struct {
 type GithubListAllReviewCommentsOptions struct {
 	Repo  string `json:"repo"`
 	Owner string `json:"owner"`
+}
+
+type GithubPushOnRepoOptions struct {
+	Repo   string `json:"repo"`
+	Owner  string `json:"owner"`
+	Branch string `json:"branch"`
+}
+
+type GithubPushOnRepoOptionsTable struct {
+	Id             uint64    `json:"id,omitempty" gorm:"primary_key;auto_increment"`
+	User           User      `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id"`
+	UserId         uint64    `json:"-"`
+	Workflow       Workflow  `json:"workflow,omitempty" gorm:"foreignkey:WorkflowId;references:Id"`
+	WorkflowId     uint64    `json:"-"`
+	LastCommitDate time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_commit_date"`
 }

@@ -54,12 +54,31 @@ func NewReactionService(
 				Name:        string(schemas.GoogleCreateEventReaction),
 				Description: "Create an event in Google Calendar",
 				ServiceId:   serviceService.FindByName(schemas.Google).Id,
+				Options: toolbox.MustMarshal(schemas.GoogleCalendarOptions{
+					CalendarId: "string",
+					CalendarCorpus: schemas.GoogleCalendarCorpusOptions{
+						Summary:     "string",
+						Description: "string",
+						Location:    "string",
+						Start: schemas.GoogleCalendarCorpusOptionsTime{
+							DateTime: "string",
+							TimeZone: "string",
+						},
+						End: schemas.GoogleCalendarCorpusOptionsTime{
+							DateTime: "string",
+							TimeZone: "string",
+						},
+						Attendees: schemas.GoogleCalendarCorpusOptionsAttendees{
+							Email: "string",
+						},
+					},
+				}),
 			},
 			{
 				Name:        "get_red_notices",
 				Description: "Detect a change on a specific notice",
 				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+				Options: toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
 					FirstName: "string",
 					LastName:  "string",
 				}),
@@ -68,7 +87,7 @@ func NewReactionService(
 				Name:        "get_yellow_notices",
 				Description: "Detect a change on a specific notice",
 				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+				Options: toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
 					FirstName: "string",
 					LastName:  "string",
 				}),
@@ -77,7 +96,7 @@ func NewReactionService(
 				Name:        "get_un_notices",
 				Description: "Detect a change on a specific notice",
 				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-				Options:     toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
+				Options: toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
 					FirstName: "string",
 					LastName:  "string",
 				}),
