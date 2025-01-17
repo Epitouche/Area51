@@ -99,6 +99,7 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 				Token:     spotifyTokenResponse.AccessToken,
 				Service:   controller.servicesService.FindByName(schemas.Spotify),
 				UserId:    user.Id,
+				User:      user,
 				ServiceId: controller.servicesService.FindByName(schemas.Spotify).Id,
 			})
 			if err != nil {
@@ -112,9 +113,8 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 
 	fmt.Println("spotify: ", spotifyTokenResponse)
 	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
-	// userInfo, err := controller.service.GetUserInfo(spotifyTokenResponse.AccessToken)
 	var ServicesUserInfos schemas.ServicesUserInfos
-	userInfos := controller.servicesService.GetUserInfosByToken(spotifyTokenResponse.AccessToken)
+	userInfos := controller.servicesService.GetUserInfosByToken(spotifyTokenResponse.AccessToken, schemas.Spotify)
 	userInfos(&ServicesUserInfos)
 	userInfo := ServicesUserInfos.SpotifyUserInfos
 	var actualUser schemas.User
@@ -125,7 +125,6 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 
 	var newSpotifyToken schemas.ServiceToken
 	var newUser schemas.User
-	var tokenId *uint64
 	password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
 	if err != nil {
 		return "", fmt.Errorf("unable to hash password because %w", err)
@@ -133,23 +132,12 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, spotifyService.Id)
 	if isAlreadyRegistered {
 		newSpotifyToken = schemas.ServiceToken{
-			Id:      serviceToken.Id,
-			Token:   spotifyTokenResponse.AccessToken,
-			Service: spotifyService,
-			UserId:  actualUser.Id,
-			User:    actualUser,
-		}
-		if serviceToken.Id != 0 {
-			actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, spotifyService.Id)
-			if actualServiceToken.Token != "" {
-				err := controller.serviceToken.Update(newSpotifyToken)
-				if err != nil {
-					return "", fmt.Errorf("unable to update token because %w", err)
-				}
-				tokenId = &actualServiceToken.Id
-			} else {
-				tokenId = nil
-			}
+			Id:        serviceToken.Id,
+			Token:     spotifyTokenResponse.AccessToken,
+			Service:   spotifyService,
+			UserId:    actualUser.Id,
+			User:      actualUser,
+			ServiceId: controller.servicesService.FindByName(schemas.Spotify).Id,
 		}
 	} else {
 		newUser = schemas.User{
@@ -169,6 +157,7 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 			Service:      spotifyService,
 			UserId:       actualUser.Id,
 			User:         actualUser,
+			ServiceId:    controller.servicesService.FindByName(schemas.Spotify).Id,
 		}
 		err = controller.userService.AddServiceToUser(actualUser, newSpotifyToken)
 		if err != nil {
@@ -176,11 +165,13 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 		}
 		isAlreadyRegistered = true
 	}
-
-	if tokenId == nil {
-		_, err := controller.serviceToken.SaveToken(newSpotifyToken)
-		if err != nil {
-			return "", fmt.Errorf("unable to save token because %w", err)
+	if serviceToken.Id != 0 {
+		actualServiceToken, _ := controller.serviceToken.GetTokenByUserIdAndServiceId(actualUser.Id, spotifyService.Id)
+		if actualServiceToken.Token != "" {
+			err := controller.serviceToken.Update(newSpotifyToken)
+			if err != nil {
+				return "", fmt.Errorf("unable to update token because %w", err)
+			}
 		}
 	}
 

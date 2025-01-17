@@ -31,7 +31,7 @@ func (api *MicrosoftApi) RedirectToMicrosoft(ctx *gin.Context, path string) {
 
 func (api *MicrosoftApi) HandleMicrosoftTokenCallback(ctx *gin.Context, path string) {
 	if microsoft_token, err := api.controller.ServiceMicrosoftCallback(ctx, path); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		ctx.JSON(http.StatusOK, gin.H{"access_token": microsoft_token})
 	}
