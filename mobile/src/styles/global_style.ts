@@ -20,26 +20,35 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 2,
     marginBottom: 16,
   },
+  textFormat: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonFormat: {
+    width: 'auto',
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   // White Theme
   wallpaper: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#E8E9E9',
+    backgroundColor: '#F7FAFB',
   },
-  text: {
-    color: '#1A1A1A',
-    fontSize: 16,
-    fontWeight: 'bold',
+  textColor: {
+    color: '#0a0a0a',
   },
   title: {
     fontSize: 30,
-    color: '#1A1A1A',
+    color: '#0a0a0a',
     fontWeight: 'bold',
   },
   subtitle: {
     fontSize: 20,
-    color: '#1A1A1A',
+    color: '#0a0a0a',
     fontWeight: 'semibold',
   },
   input: {
@@ -48,7 +57,7 @@ export const globalStyles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     fontSize: 16,
-    color: 'black',
+    color: '#0a0a0a',
   },
   lineColor: {
     backgroundColor: '#1A1A1A',
@@ -58,21 +67,19 @@ export const globalStyles = StyleSheet.create({
   wallpaperBlack: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#222831',
   },
-  textBlack: {
-    color: '#F7FAFB',
-    fontSize: 16,
-    fontWeight: 'bold',
+  textColorBlack: {
+    color: '#f5f5f5',
   },
   titleBlack: {
     fontSize: 30,
-    color: '#F7FAFB',
+    color: '#f5f5f5',
     fontWeight: 'bold',
   },
   subtitleBlack: {
     fontSize: 20,
-    color: '#F7FAFB',
+    color: '#f5f5f5',
     fontWeight: 'semibold',
   },
   inputBlack: {
@@ -81,7 +88,7 @@ export const globalStyles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     fontSize: 16,
-    color: 'white',
+    color: '#f5f5f5',
   },
   lineColorBlack: {
     backgroundColor: '#F7FAFB',
@@ -94,8 +101,11 @@ export const globalStyles = StyleSheet.create({
   secondaryDark: {
     backgroundColor: '#222831',
   },
+  secondaryDark400: {
+    backgroundColor: '#4e535a',
+  },
   terciaryDark: {
-    backgroundColor: '#B454FD',
+    backgroundColor: '#550195',
   },
 
   primaryLight: {
@@ -105,6 +115,6 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: '#F7FAFB',
   },
   terciaryLight: {
-    backgroundColor: '#B454FD',
+    backgroundColor: '#8d01f9',
   },
 });

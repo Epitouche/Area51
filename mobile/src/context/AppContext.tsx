@@ -1,6 +1,6 @@
 // src/context/AppContext.tsx
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
-import { AboutJson, AboutJsonParse } from '../types';
+import { AboutJson, AboutJsonParse, Workflow } from '../types';
 import { getAboutJson, checkToken, getToken, saveToken } from '../service';
 
 interface AppContextProps {
@@ -14,6 +14,8 @@ interface AppContextProps {
   setIsBlackTheme: (isBlackTheme: boolean) => void;
   servicesConnected: AboutJsonParse;
   setServicesConnected: (servicesConnected: AboutJsonParse) => void;
+  workflows: Workflow[];
+  setWorkflows: (workflows: Workflow[]) => void;
 }
 
 const AppContext = createContext<AppContextProps>({
@@ -28,7 +30,9 @@ const AppContext = createContext<AppContextProps>({
   servicesConnected: {
     services: [],
   },
-  setServicesConnected: () => {},
+  setServicesConnected: () => { },
+  workflows: [],
+  setWorkflows: () => { },
 });
 
 interface AppProviderProps {
@@ -43,6 +47,7 @@ export default function AppProvider({ children }: AppProviderProps) {
   const [servicesConnected, setServicesConnected] = useState<AboutJsonParse>(
     {} as AboutJsonParse,
   );
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -77,6 +82,8 @@ export default function AppProvider({ children }: AppProviderProps) {
         setIsBlackTheme,
         servicesConnected,
         setServicesConnected,
+        workflows,
+        setWorkflows,
       }}>
       {children}
     </AppContext.Provider>

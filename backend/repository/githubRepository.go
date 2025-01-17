@@ -14,6 +14,7 @@ type GithubRepository interface {
 
 	FindAll() []schemas.GithubPullRequestOptionsTable
 	FindByOwnerAndRepo(owner string, repository string) schemas.GithubPullRequestOptionsTable
+	// FindByWorkflowId(workflowId uint64)
 }
 
 type githubRepository struct {

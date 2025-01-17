@@ -1,4 +1,4 @@
-import { saveToken } from './token';
+import { deleteToken, saveToken } from './token';
 import { LoginProps, RegisterProps } from '../types';
 import { useEffect, useState } from 'react';
 
@@ -74,6 +74,7 @@ export async function registerApiCall({
       console.error('Token not found');
       return false;
     }
+    await deleteToken('token');
     await saveToken('token', data.access_token);
     return true;
   } catch (error) {

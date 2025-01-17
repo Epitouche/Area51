@@ -3,6 +3,7 @@ import {
   AboutJsonParse,
   ConnectedService,
   GetConnectedServiceProps,
+  Option,
   ParseConnectedServicesProps,
   ParseServicesProps,
 } from '../types';
@@ -18,10 +19,7 @@ export async function getAboutJson(
       body: null,
     });
     const data = await response.json();
-    if (response.status === 200) {
-      console.log('API get AboutJson success');
-      setAboutJson(data);
-    }
+    if (response.status === 200) setAboutJson(data);
     return data;
   } catch (error) {
     console.error('Error fetching AboutJson data:', error);
@@ -45,6 +43,27 @@ export async function parseServices({
       apiEndpoint: serverIp,
       setServicesConnected,
     });
+  }
+}
+
+function parseAndTransformOptions(optionsString: string | null): Option[] {
+  try {
+    if (!optionsString) {
+      return [];
+    }
+    const parsedOptions: Record<string, string> = JSON.parse(optionsString);
+
+    const transformedOptions: Option[] = Object.entries(parsedOptions).map(
+      ([name, type]) => ({
+        name,
+        type,
+      }),
+    );
+
+    return transformedOptions;
+  } catch (error) {
+    console.error('Erreur lors du parsing des options:', error);
+    return [];
   }
 }
 
@@ -74,14 +93,29 @@ export async function parseConnectedServices({
 
   aboutJsonParse = {
     services: aboutjson.server.services.map(service => {
-      const connected = connectedServices.some(
-        connectedService => connectedService.name === service.name,
-      );
+      const connected = service.is_oauth
+        ? connectedServices.some(
+            connectedService => connectedService.name === service.name,
+          )
+        : true;
       return {
         name: service.name,
         isConnected: connected,
-        actions: service.actions,
-        reactions: service.reactions,
+        actions: service.actions
+          ? service.actions.map(action => ({
+              ...action,
+              options: parseAndTransformOptions(action.options),
+            }))
+          : null,
+        reactions: service.reactions
+          ? service.reactions.map(reaction => ({
+              ...reaction,
+              options: parseAndTransformOptions(reaction.options),
+            }))
+          : null,
+        image: service.image,
+        description: service.description,
+        is_oauth: service.is_oauth,
       };
     }),
   };
