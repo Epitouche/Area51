@@ -85,6 +85,15 @@ func NewActionService(
 					CompareSign:  "string",
 				}),
 			},
+			{
+				Name:        string(schemas.WeatherTimeAction),
+				Description: "Wait for a specific time",
+				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
+				Options: toolbox.MustMarshal(schemas.WeatherSpecificTimeOption{
+					DateTime: "string",
+					CityName: "string",
+				}),
+			},
 		},
 		allActions: []interface{}{serviceService},
 	}
