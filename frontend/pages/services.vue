@@ -104,18 +104,12 @@ onMounted(async () => {
     }
   );
 
-  console.log(connectedServices);
-
   allServices.forEach((service) => {
     connectedServices.forEach((connectedService) => {
       if (service.name === connectedService.name || !service.is_oauth) {
         service.isConnected = true;
       }
     });
-
-    console.log(service.name, service.isConnected);
-    
-
   });
 
   const serviceUsedLogin = useCookie("serviceUsedLogin");
