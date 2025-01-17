@@ -63,7 +63,6 @@ export default function WorkflowDetailsScreen() {
   };
 
   const handleDelete = async () => {
-    console.log(token);
     if (token !== 'Error: token not found' && token !== '') {
       await deleteWorkflow(
         serverIp,

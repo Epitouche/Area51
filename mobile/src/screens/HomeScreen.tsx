@@ -11,6 +11,7 @@ export default function HomeScreen() {
     serverIp,
     aboutJson,
     setAboutJson,
+    setServerIp,
     setServicesConnected,
   } = useContext(AppContext);
 
@@ -49,30 +50,16 @@ export default function HomeScreen() {
             </Text>
           </View>
         </View>
-        <IpInput />
-        <TouchableOpacity
-          style={[
-            globalStyles.buttonFormat,
-            isBlackTheme ? globalStyles.primaryLight : globalStyles.primaryDark,
-          ]}
-          onPress={() =>
-            refreshServices({
-              serverIp,
-              setAboutJson,
-              setServicesConnected,
-              aboutJson,
-            })
-          }>
-          <Text
-            style={[
-              isBlackTheme
-                ? globalStyles.textColor
-                : globalStyles.textColorBlack,
-              globalStyles.textFormat,
-            ]}>
-            Refresh
-          </Text>
-        </TouchableOpacity>
+        <View style={{ width: '90%' }}>
+          <IpInput
+            setAboutJson={setAboutJson}
+            aboutJson={aboutJson}
+            setServicesConnected={setServicesConnected}
+            isBlackTheme={isBlackTheme}
+            serverIp={serverIp}
+            setServerIp={setServerIp}
+          />
+        </View>
       </View>
     </View>
   );
