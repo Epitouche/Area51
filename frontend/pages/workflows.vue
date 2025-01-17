@@ -6,12 +6,14 @@ import type {
   WorkflowResponse,
   Workflow,
   AboutResponse,
+  OptionWorkflow,
 } from "~/src/types";
 
 const notificationStore = useNotificationStore();
 
-const actionOption = ref("");
-const reactionOption = ref("");
+// it has to be a table
+const actionOption = ref<OptionWorkflow[]>([]);
+const reactionOption = ref<OptionWorkflow[]>([]);
 
 function triggerNotification(
   type: "success" | "error" | "warning",
@@ -44,7 +46,7 @@ const isModalActionOpen = ref(false);
 const isModalReactionOpen = ref(false);
 const token = useCookie("access_token");
 
-const WorkflowName = ref("");
+const workflowName = ref("");
 
 const filteredWorkflows = computed(() => {
   sortWorkflows();
@@ -80,14 +82,29 @@ const closeModalAction = () => {
 };
 
 const confirmModalAction = () => {
-  actionOption.value = services
-    .flatMap((service) => service.actions)
-    .find((action) => action.name === actionString.value)?.options || '';
   closeModalAction();
+
+  const actions =
+    services
+      .flatMap((service) => service.actions)
+      .find((action) => action.name === actionString.value)?.options || "";
+
+  const parsedOptions: Record<string, string> = JSON.parse(actions);
+
+  const transformedOptions: OptionWorkflow[] = Object.entries(
+    parsedOptions
+  ).map(([name, type]) => ({
+    name,
+    type,
+    input: "",
+  }));
+
+  actionOption.value = transformedOptions;
+  
 };
 
 const openModalReaction = () => {
-  isModalReactionOpen.value = true;  
+  isModalReactionOpen.value = true;
 };
 
 const closeModalReaction = () => {
@@ -95,10 +112,24 @@ const closeModalReaction = () => {
 };
 
 const confirmModalReaction = () => {
-  reactionOption.value = services
-  .flatMap((service) => service.reactions)
-  .find((reaction) => reaction.name === reactionString.value)?.options || '';
   closeModalReaction();
+  const reactions =
+    services
+      .flatMap((service) => service.reactions)
+      .find((reaction) => reaction.name === reactionString.value)?.options || "";
+
+  const parsedOptions: Record<string, string> = JSON.parse(reactions);
+
+  const transformedOptions: OptionWorkflow[] = Object.entries(
+    parsedOptions
+  ).map(([name, type]) => ({
+    name,
+    type,
+    input: "",
+  }));
+
+  reactionOption.value = transformedOptions;
+
 };
 
 const sortWorkflows = () => {
@@ -189,6 +220,17 @@ async function fetchWorkflows() {
   }
 }
 
+async function transformOptions(options: OptionWorkflow[]): Promise<string> {
+  const transformed = options.reduce((acc, option) => {
+    acc[option.name] = option.input;
+    return acc;
+  }, {} as Record<string, string>);
+
+  console.log("transformed", transformed);
+
+  return JSON.stringify(transformed);
+}
+
 async function addWorkflow() {
   try {
     const actionSelected = services
@@ -199,17 +241,23 @@ async function addWorkflow() {
       .flatMap((service) => service.reactions)
       .find((reaction) => reaction.name === reactionString.value);
 
+    const actionOptions = await transformOptions(actionOption.value);
+    const reactionOptions = await transformOptions(reactionOption.value);
+
     if (actionSelected && reactionSelected) {
-      const body: { action_id: number; reaction_id: number; name?: string, action_option?: string, reaction_option?: string } = {
+      const body: {
+        action_id: number;
+        reaction_id: number;
+        name?: string;
+        action_option?: string;
+        reaction_option?: string;
+      } = {
         action_id: actionSelected.action_id,
         reaction_id: reactionSelected.reaction_id,
-        action_option: actionOption.value,
-        reaction_option: reactionOption.value,
+        action_option: actionOptions,
+        reaction_option: reactionOptions,
+        name: workflowName.value,
       };
-
-      if (WorkflowName.value) {
-        body.name = WorkflowName.value;
-      }
 
       await $fetch("/api/workflows/addWorkflows", {
         method: "POST",
@@ -230,9 +278,9 @@ async function addWorkflow() {
 
       actionString.value = "";
       reactionString.value = "";
-      WorkflowName.value = "";
-      actionOption.value = "";
-      reactionOption.value = "";
+      workflowName.value = "";
+      actionOption.value = [];
+      reactionOption.value = [];
     }
   } catch (error) {
     console.error("Error adding workflow:", error);
@@ -277,7 +325,7 @@ onMounted(() => {
   <div
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
   >
-    <div v-if = "isConnected">
+    <div v-if="isConnected">
       <div class="m-5 sm:m-10">
         <h1
           class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
@@ -294,7 +342,7 @@ onMounted(() => {
         class="flex flex-col justify-center m-5 sm:m-10 gap-5 sm:gap-10 items-center"
       >
         <InputComponent
-          v-model="WorkflowName"
+          v-model="workflowName"
           type="text"
           label="Workflow Name"
         />
@@ -358,17 +406,33 @@ onMounted(() => {
             </div>
           </ModalComponent>
         </div>
-        <div class="flex justify-center">
-          <InputComponent
-            v-model="actionOption"
-            type="text"
-            label="Action options"
-          />
-          <InputComponent
-            v-model="reactionOption"
-            type="text"
-            label="Reaction options"
-          />
+        <div class="flex justify-center gap-3 sm:gap-5">
+          <div
+            v-if="actionOption.length !== 0"
+            class="border-2 rounded-lg border-primaryWhite-500 dark:border-secondaryDark-500 p-2 w-full sm:w-10/12"
+          >
+            <InputComponent
+              v-for="(option, index) in actionOption"
+              :key="`action-option-${index}`"
+              v-model="option.input"
+              :type="option.type"
+              :label="option.name"
+              class="mb-4"
+            />
+          </div>
+          <div
+            v-if="reactionOption.length !== 0"
+            class="border-2 rounded-lg border-primaryWhite-500 dark:border-secondaryDark-500 p-2 w-full sm:w-10/12"
+          >
+            <InputComponent
+              v-for="(option, index) in reactionOption"
+              :key="`action-option-${index}`"
+              v-model="option.input"
+              :type="option.type"
+              :label="option.name"
+              class="mb-4"
+            />
+          </div>
         </div>
         <div class="flex justify-center">
           <ButtonComponent
@@ -446,7 +510,9 @@ onMounted(() => {
         >
           ERROR 404 !
         </h1>
-        <h2 class="text-2xl sm:text-3xl font-bold text-fontBlack dark:text-fontWhite">
+        <h2
+          class="text-2xl sm:text-3xl font-bold text-fontBlack dark:text-fontWhite"
+        >
           You are not connected, please log in to access this page.
         </h2>
       </div>
