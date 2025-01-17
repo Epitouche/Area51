@@ -42,8 +42,31 @@ type GoogleActionOptionsInfo struct {
 	ResultSizeEstimate int `json:"resultSizeEstimate"`
 }
 
+type GoogleCalendarCorpusOptionsTime struct {
+	DateTime string `json:"dateTime"`
+	TimeZone string `json:"timeZone"`
+}
+
+type GoogleCalendarCorpusOptionsAttendees struct {
+	Email string `json:"email"`
+}
+
+type GoogleCalendarCorpusOptions struct {
+	Summary     string                               `json:"summary"`
+	Description string                               `json:"description"`
+	Location    string                               `json:"location"`
+	Start       GoogleCalendarCorpusOptionsTime      `json:"start"`
+	End         GoogleCalendarCorpusOptionsTime      `json:"end"`
+	Attendees   GoogleCalendarCorpusOptionsAttendees `json:"attendees"`
+}
+
+type GoogleCalendarOptions struct {
+	CalendarId     string                      `json:"calendar_id"`
+	CalendarCorpus GoogleCalendarCorpusOptions `json:"calendar_corpus"`
+}
+
 type GoogleCalendarResponse struct {
-	Items struct {
+	Items []struct {
 		Id string `json:"id"`
 	} `json:"items"`
 }

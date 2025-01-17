@@ -11,6 +11,7 @@ type ServiceCard = {
   image: string;
   isConnected: boolean;
   isAllowed: boolean;
+  is_oauth: boolean;
 };
 
 const notificationStore = useNotificationStore();
@@ -89,6 +90,7 @@ onMounted(async () => {
       image: service.image || "IMG",
       isConnected: false,
       isAllowed: true,
+      is_oauth: service.is_oauth,
     });
   });
 
@@ -104,7 +106,7 @@ onMounted(async () => {
 
   allServices.forEach((service) => {
     connectedServices.forEach((connectedService) => {
-      if (service.name === connectedService.name) {
+      if (service.name === connectedService.name || !service.is_oauth) {
         service.isConnected = true;
       }
     });

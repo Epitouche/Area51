@@ -167,12 +167,12 @@ onMounted(() => {
         </div>
       </form>
       <hr class="border-primaryWhite-400">
-      <div class="flex justify-around space-x-4">
+      <div class="flex justify-around flex-wrap gap-5">
         <ButtonComponent
           v-for="(service, index) in services"
           :key="index"
           :text="service.name"
-          class="w-full"
+          class="w-1/4"
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"

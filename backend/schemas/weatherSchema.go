@@ -4,6 +4,7 @@ type WeatherAction string
 
 const (
 	WeatherCurrentAction WeatherAction = "current_feeling_temperature"
+	WeatherTimeAction    WeatherAction = "sunrise_events"
 )
 
 type WeatherReaction string
@@ -43,4 +44,17 @@ type WeatherCurrentOptions struct {
 type WeatherCurrentReactionOptions struct {
 	CityName     string `json:"city_name"`
 	LanguageCode string `json:"language_code"`
+}
+
+type WeatherSpecificTimeOption struct {
+	CityName string `json:"city_name"`
+	DateTime string `json:"dt"`
+}
+
+type WeatherSpecificTimeInfos struct {
+	Astronomy struct {
+		Astro struct {
+			Sunrise string `json:"sunrise"`
+		} `json:"astro"`
+	} `json:"astronomy"`
 }

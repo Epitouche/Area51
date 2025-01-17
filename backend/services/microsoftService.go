@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
+	"area51/repository"
 	"area51/schemas"
 	"area51/toolbox"
 )
@@ -22,10 +24,25 @@ type MicrosoftService interface {
 }
 
 type microsoftService struct {
+	serviceToken       TokenService
+	userService        UserService
+	workflowRepository repository.WorkflowRepository
+	serviceRepository  repository.ServiceRepository
+	mutex              sync.Mutex
 }
 
-func NewMicrosoftService() MicrosoftService {
-	return &microsoftService{}
+func NewMicrosoftService(
+	serviceToken TokenService,
+	userService UserService,
+	workflowRepository repository.WorkflowRepository,
+	serviceRepository repository.ServiceRepository,
+) MicrosoftService {
+	return &microsoftService{
+		serviceToken:       serviceToken,
+		userService:        userService,
+		workflowRepository: workflowRepository,
+		serviceRepository:  serviceRepository,
+	}
 }
 
 func (service *microsoftService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
@@ -101,9 +118,80 @@ func (service *microsoftService) AuthGetServiceAccessToken(code string, path str
 }
 
 func (service *microsoftService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
-	return nil
+	switch name {
+	case string(schemas.MicrosoftOutlookEventsAction):
+		return service.GetOutlookEvents
+	default:
+		return nil
+	}
 }
 
 func (service *microsoftService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	return nil
+}
+
+func (service *microsoftService) GetOutlookEvents(channel chan string, option string, workflowId uint64, actionOption string) {
+	service.mutex.Lock()
+	defer service.mutex.Unlock()
+
+	workflow := service.workflowRepository.FindById(workflowId)
+	user := service.userService.GetUserById(workflow.UserId)
+	allTokens, err := service.serviceToken.GetTokenByUserId(user.Id)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+
+	url := "https://graph.microsoft.com/v1.0/me/events"
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+	searchedService := service.serviceRepository.FindByName(schemas.Microsoft)
+	for _, token := range allTokens {
+		if token.ServiceId == searchedService.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+
+	options := schemas.MicrosoftOutlookEventsOptions{}
+	err = json.NewDecoder(strings.NewReader(actionOption)).Decode(&options)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+
+	client := &http.Client{}
+	request.Header.Set("Accept", "application/json")
+	response, err := client.Do(request)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+	defer response.Body.Close()
+
+	microsoftEventsSubjects := schemas.MicrosoftOutlookEventsResponse{}
+	bodyBytes, _ := io.ReadAll(response.Body)
+	err = json.Unmarshal(bodyBytes, &microsoftEventsSubjects)
+	if err != nil {
+		fmt.Printf("Error %s\n", err)
+		return
+	}
+
+	// fmt.Printf("VALUES : %s\n", string(bodyBytes))
+
+	var chosenSubject *string
+	for _, subject := range microsoftEventsSubjects.Value {
+		if subject.Subject == options.Subject {
+			chosenSubject = &subject.Subject
+		}
+	}
+
+	if chosenSubject != nil {
+		workflow.ReactionTrigger = true
+		service.workflowRepository.Update(workflow)
+	}
+	channel <- "Finishing outlook action workflow"
 }

@@ -58,6 +58,7 @@ const loginWithService = async () => {
 
 onMounted(() => {
   if (localStorage.getItem("serviceConnect")) {
+    fetchServiceToken(localStorage.getItem("serviceConnect") as string);
     localStorage.removeItem("serviceConnect");
     navigateTo("/services");
   } else {

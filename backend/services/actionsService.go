@@ -67,6 +67,14 @@ func NewActionService(
 				}),
 			},
 			{
+				Name:        string(schemas.MicrosoftOutlookEventsAction),
+				Description: "Detect an event in the oulook calendar of the user",
+				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
+				Options: toolbox.MustMarshal(schemas.MicrosoftOutlookEventsOptions{
+					Subject: "string",
+				}),
+			},
+			{
 				Name:        string(schemas.WeatherCurrentAction),
 				Description: "Get the current weather",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
@@ -75,6 +83,15 @@ func NewActionService(
 					LanguageCode: "string",
 					Temperature:  0,
 					CompareSign:  "string",
+				}),
+			},
+			{
+				Name:        string(schemas.WeatherTimeAction),
+				Description: "Wait for a specific time",
+				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
+				Options: toolbox.MustMarshal(schemas.WeatherSpecificTimeOption{
+					DateTime: "string",
+					CityName: "string",
 				}),
 			},
 		},
