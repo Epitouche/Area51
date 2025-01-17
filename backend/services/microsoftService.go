@@ -121,6 +121,8 @@ func (service *microsoftService) FindActionByName(name string) func(channel chan
 	switch name {
 	case string(schemas.MicrosoftOutlookEventsAction):
 		return service.GetOutlookEvents
+	case string(schemas.MicrosoftTeamGroup):
+		return service.ModifyTeamGroup
 	default:
 		return nil
 	}
@@ -128,6 +130,70 @@ func (service *microsoftService) FindActionByName(name string) func(channel chan
 
 func (service *microsoftService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
 	return nil
+}
+
+func (service *microsoftService) ModifyTeamGroup(channel chan string, option string, workflowId uint64, actionOption string) {
+	service.mutex.Lock()
+	defer service.mutex.Unlock()
+
+	workflow := service.workflowRepository.FindById(workflowId)
+	user := service.userService.GetUserById(workflow.UserId)
+	allTokens, err := service.serviceToken.GetTokenByUserId(user.Id)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+
+	options := schemas.MicrosoftTeamsChatResponse{}
+	err = json.NewDecoder(strings.NewReader(actionOption)).Decode(&options)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+
+	url := "https://graph.microsoft.com/v1.0/me/chats/" + options.Id
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+	searchedService := service.serviceRepository.FindByName(schemas.Microsoft)
+	for _, token := range allTokens {
+		if token.ServiceId == searchedService.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+	client := &http.Client{}
+	request.Header.Set("Accept", "application/json")
+	response, err := client.Do(request)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+
+	result := schemas.MicrosoftTeamsChatResponse{}
+	err = json.NewDecoder(response.Body).Decode(&result)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+
+	if options.IsOld {
+		if options.LastUpdatedDateTime != result.LastUpdatedDateTime {
+			workflow.ReactionTrigger = true
+			service.workflowRepository.UpdateReactionTrigger(workflow)
+			options.LastUpdatedDateTime = result.LastUpdatedDateTime
+			workflow.ActionOptions = toolbox.MustMarshal(options)
+			service.workflowRepository.Update(workflow)
+		}
+	} else {
+		options.IsOld = true
+		options.LastUpdatedDateTime = result.LastUpdatedDateTime
+		workflow.ActionOptions = toolbox.MustMarshal(options)
+		service.workflowRepository.Update(workflow)
+	}
+	channel <- "Action of modifying teams finished"
 }
 
 func (service *microsoftService) GetOutlookEvents(channel chan string, option string, workflowId uint64, actionOption string) {
