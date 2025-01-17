@@ -83,6 +83,7 @@ const closeModalAction = () => {
 
 const confirmModalAction = () => {
   closeModalAction();
+
   const actions =
     services
       .flatMap((service) => service.actions)
@@ -99,6 +100,7 @@ const confirmModalAction = () => {
   }));
 
   actionOption.value = transformedOptions;
+  
 };
 
 const openModalReaction = () => {
@@ -224,6 +226,8 @@ async function transformOptions(options: OptionWorkflow[]): Promise<string> {
     return acc;
   }, {} as Record<string, string>);
 
+  console.log("transformed", transformed);
+
   return JSON.stringify(transformed);
 }
 
@@ -245,8 +249,8 @@ async function addWorkflow() {
         action_id: number;
         reaction_id: number;
         name?: string;
-        action_option?: string; // Chaîne JSON
-        reaction_option?: string; // Chaîne JSON
+        action_option?: string;
+        reaction_option?: string;
       } = {
         action_id: actionSelected.action_id,
         reaction_id: reactionSelected.reaction_id,
