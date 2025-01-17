@@ -42,6 +42,8 @@ func (service *weatherService) FindActionByName(name string) func(channel chan s
 	switch name {
 	case string(schemas.WeatherCurrentAction):
 		return service.VerifyFeelingTemperature
+	case string(schemas.WeatherTimeAction):
+		return service.SunriseEvents
 	default:
 		return nil
 	}
@@ -196,13 +198,81 @@ func (service *weatherService) GetCurrentWeather(channel chan string, workflowId
 	service.reactionResponseDataService.Save(savedResult)
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
-	time.Sleep(1 * time.Minute)
+	time.Sleep(30 * time.Second)
 }
 
 func (service *weatherService) UpdateWorkflowForAction(workflow schemas.Workflow, actionData schemas.WeatherCurrentOptions) {
 	workflow.ReactionTrigger = true
 	workflow.ActionOptions = toolbox.MustMarshal(actionData)
 	service.workflowRepository.Update(workflow)
+}
+
+func (service *weatherService) SunriseEvents(channel chan string, option string, workflowId uint64, actionOption string) {
+	service.mutex.Lock()
+	defer service.mutex.Unlock()
+
+	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+
+	apiKey := toolbox.GetInEnv("WEATHER_API_KEY")
+
+	var actionData schemas.WeatherSpecificTimeOption
+	err = json.Unmarshal([]byte(actionOption), &actionData)
+	if err != nil {
+		fmt.Println("Error parsing actionOption:", err)
+		return
+	}
+	requestedUrl := "https://api.weatherapi.com/v1/astronomy.json?key=" + apiKey + "&q=" + actionData.CityName + "&dt=" + actionData.DateTime
+	request, err := http.NewRequest("GET", requestedUrl, nil)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+	client := &http.Client{}
+	request.Header.Set("Accept", "application/json")
+	response, err := client.Do(request)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+	defer response.Body.Close()
+
+	var weatherResponse schemas.WeatherSpecificTimeInfos
+	bodyBytes, _ := io.ReadAll(response.Body)
+	fmt.Printf("Body: %s\n", string(bodyBytes))
+
+	err = json.Unmarshal(bodyBytes, &weatherResponse)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		channel <- err.Error()
+		return
+	}
+	actualTime := time.Now().Format("15:04")
+
+	realTimeValue := strToTime(actualTime)
+	realTimeOption := strToTime(weatherResponse.Astronomy.Astro.Sunrise[0:5])
+	if realTimeOption == realTimeValue {
+		workflow.ReactionTrigger = true
+		workflow.ActionOptions = toolbox.MustMarshal(actionData)
+		service.workflowRepository.Update(workflow)
+	} else {
+		workflow.ReactionTrigger = false
+		workflow.ActionOptions = toolbox.MustMarshal(actionData)
+		service.workflowRepository.UpdateReactionTrigger(workflow)
+		fmt.Println("Time is not equal")
+		return
+	}
+
+	channel <- "Specific Time action done"
+}
+
+func strToTime(s string) time.Time {
+	t, _ := time.Parse("15:04", s)
+	return t
 }
 
 func (service *weatherService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {

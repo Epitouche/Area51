@@ -126,6 +126,8 @@ func (service *githubService) FindActionByName(name string) func(channel chan st
 	switch name {
 	case string(schemas.GithubPullRequest):
 		return service.LookAtPullRequest
+	case string(schemas.GithubPushOnRepo):
+		return service.LookAtPush
 	default:
 		return nil
 	}
@@ -173,15 +175,6 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 			})
 		}
 	}
-	// }
-	// for _, token := range tokens {
-	// 	actualToken := service.tokenRepository.FindByUserIdAndServiceId(user.Id, token.ServiceId)
-	// 	if token.Token == actualToken.Token {
-	// 		client = github.NewClient(&http.Client{
-	// 			Transport: &transportWithToken{token: token.Token},
-	// 		})
-	// 	}
-	// }
 
 	var actionData schemas.GithubPullRequestOptions
 	err = json.Unmarshal([]byte(actionOption), &actionData)
@@ -296,6 +289,57 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	service.workflowRepository.UpdateReactionTrigger(workflow)
 	response.Body.Close()
 	time.Sleep(1 * time.Minute)
+}
+
+func (service *githubService) LookAtPush(channel chan string, option string, workflowId uint64, actionOption string) {
+	service.mutex.Lock()
+	defer service.mutex.Unlock()
+	ctx := context.Background()
+
+	workflow, err := service.workflowRepository.FindByIds(workflowId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	user := service.userService.GetUserById(workflow.UserId)
+	tokens := service.tokenRepository.FindByUserId(user)
+	var client *github.Client
+	searchedService := service.serviceRepository.FindByName(schemas.Github)
+
+	for _, token := range tokens {
+		if token.ServiceId == searchedService.Id {
+			client = github.NewClient(&http.Client{
+				Transport: &transportWithToken{token: token.Token},
+			})
+		}
+	}
+
+	var actionData schemas.GithubPushOnRepoOptions
+	err = json.Unmarshal([]byte(actionOption), &actionData)
+	if err != nil {
+		fmt.Println("Error parsing actionOption:", err)
+		return
+	}
+	branch, _, err := client.Repositories.GetBranch(ctx, actionData.Owner, actionData.Repo, actionData.Branch, 5)
+
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+	fmt.Printf("Branch %s has %s\n", *branch.Name, branch.Commit.Commit.Author.Date)
+	panic("Not implemented")
+	// existingRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
+	// if existingRecords.UserId == 0 {
+	// 	service.githubRepository.Save(schemas.GithubPullRequestOptionsTable{
+	// 		UserId: user.Id,
+	// 		Repo:   actionData.Repo,
+	// 		Owner:  actionData.Owner,
+	// 		NumPR:  0,
+	// 	})
+	// }
+	// rlu
+
 }
 
 func (service *githubService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
