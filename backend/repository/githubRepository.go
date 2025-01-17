@@ -14,7 +14,12 @@ type GithubRepository interface {
 
 	FindAll() []schemas.GithubPullRequestOptionsTable
 	FindByOwnerAndRepo(owner string, repository string) schemas.GithubPullRequestOptionsTable
-	// FindByWorkflowId(workflowId uint64)
+
+	SavePush(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable)
+	UpdatePush(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable)
+	UpdatePushDate(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable)
+	DeletePush(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable)
+	FindByWorkflowId(workflowId uint64) schemas.GithubPushOnRepoOptionsTable
 }
 
 type githubRepository struct {
@@ -23,10 +28,14 @@ type githubRepository struct {
 
 func NewGithubRepository(db *gorm.DB) GithubRepository {
 	err := db.AutoMigrate(&schemas.GithubPullRequestOptionsTable{})
-
 	if err != nil {
 		panic("failed to migrate database")
 	}
+	err = db.AutoMigrate(&schemas.GithubPushOnRepoOptionsTable{})
+	if err != nil {
+		panic("failed to migrate database")
+	}
+
 	return &githubRepository{
 		db: &schemas.Database{
 			Connection: db,
@@ -88,4 +97,50 @@ func (repo *githubRepository) UpdateNumPRs(githubPullRequestOptions schemas.Gith
 	if err.Error != nil {
 		return
 	}
+}
+
+func (repo *githubRepository) SavePush(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable) {
+	err := repo.db.Connection.Create(&githubPushOnRepoOptions)
+
+	if err.Error != nil {
+		return
+	}
+}
+
+func (repo *githubRepository) UpdatePush(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable) {
+	err := repo.db.Connection.Where(&schemas.GithubPushOnRepoOptionsTable{
+		Id: githubPushOnRepoOptions.Id,
+	}).Updates(&githubPushOnRepoOptions)
+
+	if err.Error != nil {
+		return
+	}
+}
+
+func (repo *githubRepository) UpdatePushDate(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable) {
+	err := repo.db.Connection.Model(&schemas.GithubPushOnRepoOptionsTable{}).Where(&schemas.GithubPushOnRepoOptionsTable{Id: githubPushOnRepoOptions.Id}).Updates(map[string]interface{}{
+		"last_commit_date": githubPushOnRepoOptions.LastCommitDate,
+	})
+	if err.Error != nil {
+		return
+	}
+}
+
+func (repo *githubRepository) DeletePush(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable) {
+	err := repo.db.Connection.Delete(&githubPushOnRepoOptions)
+
+	if err.Error != nil {
+		return
+	}
+}
+
+func (repo *githubRepository) FindByWorkflowId(workflowId uint64) (githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable) {
+	err := repo.db.Connection.Where(&schemas.GithubPushOnRepoOptionsTable{
+		WorkflowId: workflowId,
+	}).First(&githubPushOnRepoOptions)
+
+	if err.Error != nil {
+		return schemas.GithubPushOnRepoOptionsTable{}
+	}
+	return githubPushOnRepoOptions
 }
