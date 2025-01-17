@@ -78,20 +78,20 @@ func setupRouter() *gin.Engine {
 		microsoft := apiRoutes.Group("/microsoft")
 		{
 			microsoft.GET("/auth", func(ctx *gin.Context) {
-				microsoftApi.RedirectToMicrosoft(ctx, microsoft.BasePath()+"/callback")
+				microsoftApi.RedirectToMicrosoft(ctx, "/callback")
 			})
 			microsoft.POST("/callback", func(ctx *gin.Context) {
-				microsoftApi.HandleMicrosoftTokenCallback(ctx, microsoft.BasePath()+"/callback")
+				microsoftApi.HandleMicrosoftTokenCallback(ctx, "/callback")
 			})
 		}
 
 		google := apiRoutes.Group("/google")
 		{
 			google.GET("/auth", func(ctx *gin.Context) {
-				googleApi.RedirectToGoogle(ctx, google.BasePath()+"/callback")
+				googleApi.RedirectToGoogle(ctx, "/callback")
 			})
 			google.POST("/callback", func(ctx *gin.Context) {
-				googleApi.HandleGoogleTokenCallback(ctx, google.BasePath()+"/callback")
+				googleApi.HandleGoogleTokenCallback(ctx, "/callback")
 			})
 		}
 
@@ -130,11 +130,11 @@ var (
 	servicesService             services.ServicesService             = services.NewServicesService(servicesRepository, githubService, spotifyService, googleService, microsoftService, weatherService, interpolService)
 	actionService               services.ActionService               = services.NewActionService(actionRepository, servicesService, userService)
 	reactionService             services.ReactionService             = services.NewReactionService(reactionRepository, servicesService)
+	interpolService             services.InterpolService             = services.NewInterpolService(workflowsRepository, reactionRepository, userService, reactionResponseDataRepository)
 	workflowsService            services.WorkflowService             = services.NewWorkflowService(workflowsRepository, userService, actionService, reactionService, servicesService, serviceToken, reactionResponseDataService, googleRepository)
 	spotifyService              services.SpotifyService              = services.NewSpotifyService(userService, spotifyRepository, workflowsRepository, actionRepository, reactionRepository, tokenRepository, servicesRepository)
 	googleService               services.GoogleService               = services.NewGoogleService(serviceToken, userService, workflowsRepository, servicesRepository, googleRepository)
 	microsoftService            services.MicrosoftService            = services.NewMicrosoftService()
-	interpolService             services.InterpolService             = services.NewInterpolService(workflowsRepository)
 
 	// Controllers
 	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)

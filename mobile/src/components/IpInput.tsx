@@ -1,6 +1,5 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { Button } from 'react-native-paper';
 import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { getToken, saveToken } from '../service';
@@ -44,20 +43,25 @@ export function IpInput() {
         value={ipTmp}
         onChangeText={setIpTmp}
       />
-      <Button
+      <TouchableOpacity
         onPress={handleSave}
-        style={[globalStyles.terciaryDark, styles.button]}>
-        <Text style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
+        style={[globalStyles.buttonFormat, isBlackTheme ? globalStyles.primaryLight : globalStyles.primaryDark]}>
+        <Text
+          style={[
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.textFormat,
+            styles.button,
+          ]}>
           Save
         </Text>
-      </Button>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    width: '40%',
+    width: '100%',
   },
   ipBox: {
     flexDirection: 'row',
