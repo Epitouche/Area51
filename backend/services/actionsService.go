@@ -51,6 +51,16 @@ func NewActionService(
 				}),
 			},
 			{
+				Name:        string(schemas.GithubPushOnRepo),
+				Description: "Detect a push on a repository",
+				ServiceId:   serviceService.FindByName(schemas.Github).Id,
+				Options: toolbox.MustMarshal(schemas.GithubPushOnRepoOptions{
+					Owner:  "string",
+					Repo:   "string",
+					Branch: "string",
+				}),
+			},
+			{
 				Name:        string(schemas.SpotifyAddTrackAction),
 				Description: "Add a track to a playlist",
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
