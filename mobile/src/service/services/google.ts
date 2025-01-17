@@ -2,10 +2,10 @@ import { GOOGLE_CLIENT_ID, GOOGLE_MOBILE_ID, GOOGLE_SECRET } from '@env';
 import { sendServiceToken, OauthLogin } from './services';
 
 export async function googleLogin(apiEndpoint: string, sessionToken?: string) {
-  const setToken = (accessToken: string) => {
+  const setToken = async (accessToken: string) => {
     if (sessionToken)
-      sendServiceToken(apiEndpoint, accessToken, 'google', sessionToken);
-    else sendServiceToken(apiEndpoint, accessToken, 'google');
+      await sendServiceToken(apiEndpoint, accessToken, 'google', sessionToken);
+    else await sendServiceToken(apiEndpoint, accessToken, 'google');
   };
   const config = {
     issuer: 'https://accounts.google.com',
