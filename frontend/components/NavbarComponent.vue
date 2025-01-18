@@ -1,8 +1,12 @@
 <script setup>
+import ButtonComponent from "./ButtonComponent.vue";
+
 const token = ref(useCookie("access_token"));
 const registered = computed(() => {
-  return token.value !== null && token.value !== '' && token.value !== undefined;
-})
+  return (
+    token.value !== null && token.value !== "" && token.value !== undefined
+  );
+});
 </script>
 <template>
   <div class="bg-secondaryWhite-500 dark:bg-primaryDark-500" aria-label="Header section">
@@ -30,6 +34,24 @@ const registered = computed(() => {
             />
           </NuxtLink>
         </div>
+        <ButtonComponent
+          v-if="registered"
+          bg-color="bg-tertiary-500"
+          hover-color="hover:bg-accent-500"
+          text-color="text-fontWhite"
+          text="Logout"
+          @click="
+            () => {
+              const accessToken = useCookie('access_token');
+              const serviceUsedLogin = useCookie('serviceUsedLogin');
+
+              accessToken.value = null;
+              serviceUsedLogin.value = null;
+
+              navigateTo('/login');
+            }
+          "
+        />
       </div>
     </nav>
   </div>

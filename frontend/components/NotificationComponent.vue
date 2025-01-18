@@ -2,6 +2,7 @@
 import { useNotificationStore } from '@/stores/notification';
 
 const notificationStore = useNotificationStore();
+
 </script>
 
 <template>

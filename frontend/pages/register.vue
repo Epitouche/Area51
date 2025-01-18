@@ -82,10 +82,12 @@ async function fetchOauthServices() {
     );
 
     responseAbout.server.services.forEach((service) => {
-      services.value.push({
-        name: service.name,
-        image: service.image || "IMG",
-      });
+      if (service.is_oauth) {
+        services.value.push({
+          name: service.name,
+          image: service.image || "IMG",
+        });
+      }
     });
 
     services.value.forEach((service) => {
@@ -96,7 +98,6 @@ async function fetchOauthServices() {
     console.error("Error fetching services:", error);
   }
 }
-
 
 interface RedirectResponse {
   service_authentication_url: string;
@@ -142,8 +143,8 @@ onMounted(fetchOauthServices);
       </h2>
       <form 
         class="space-y-6"
-        @submit.prevent="onSubmit"
         aria-label="Registration form"
+        @submit.prevent="onSubmit"
       >
         <div>
           <InputComponent
@@ -202,8 +203,8 @@ onMounted(fetchOauthServices);
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
-          @click="redirectToService(index)"
           aria-label="Register with {{ service.name }}"
+          @click="redirectToService(index)"
         />
       </div>
       <div class="flex justify-around">

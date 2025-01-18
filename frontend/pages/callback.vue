@@ -34,7 +34,6 @@ async function fetchServiceToken(service: string) {
 
       if (access_token) {
         access_token.value = response.access_token;
-
       } else {
         console.error("Token not received in API response");
       }
@@ -58,11 +57,14 @@ const loginWithService = async () => {
 
 onMounted(() => {
   if (localStorage.getItem("serviceConnect")) {
-    fetchServiceToken(localStorage.getItem("serviceConnect") as string);
-    localStorage.removeItem("serviceConnect");
-    navigateTo("/services");
+    fetchServiceToken(localStorage.getItem("serviceConnect") as string).then(
+      () => {
+        localStorage.removeItem("serviceConnect");
+        navigateTo("/services");
+      }
+    );
   } else {
-  loginWithService();
+    loginWithService();
   }
 });
 </script>

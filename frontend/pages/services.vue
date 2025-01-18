@@ -183,8 +183,8 @@ onMounted(async () => {
                     :checked="service.isConnected"
                     :disabled="!service.isAllowed"
                     class="sr-only peer"
-                    @click="changeConnection(service)"
                     aria-label="Toggle connection for {{ service.name }}"
+                    @click="changeConnection(service)"
                   >
                   <div
                     :class="{
