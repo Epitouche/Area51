@@ -21,8 +21,10 @@ type WorkflowService interface {
 	ExistWorkflow(workflowId uint64) bool
 	GetWorkflowByName(name string) schemas.Workflow
 	GetWorkflowById(workflowId uint64) schemas.Workflow
+	GetWorkflowsByUserId(userId uint64) []schemas.Workflow
 	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
 	DeleteWorkflow(ctx *gin.Context) error
+	Delete(workflowId uint64) error
 }
 
 type workflowService struct {
@@ -231,6 +233,14 @@ func (service *workflowService) GetWorkflowById(workflowId uint64) schemas.Workf
 	return service.repository.FindById(workflowId)
 }
 
+func (service *workflowService) GetWorkflowsByUserId(userId uint64) []schemas.Workflow {
+	return service.repository.FindByUserId(userId)
+}
+
+func (service *workflowService) Delete(workflowId uint64) error {
+	return service.repository.Delete(workflowId)
+}
+
 func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
 	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
@@ -278,20 +288,6 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 			actualReactionData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
 			for _, data := range actualReactionData {
 				service.reactionResponseDataService.Delete(data)
-			}
-			actualAction := service.actionService.FindById(wf.ActionId)
-			actualService := service.servicesService.FindById(actualAction.ServiceId)
-			switch string(actualService.Name) {
-			case string(schemas.Google):
-				actualGoogleAction := service.googleRepository.FindByWorkflowId(wf.Id)
-				service.googleRepository.Delete(actualGoogleAction)
-			case string(schemas.Github):
-				actualGithubAction := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
-				for _, data := range actualGithubAction {
-					service.reactionResponseDataService.Delete(data)
-				}
-				actualPushOnRepo := service.githubRepository.FindByWorkflowId(wf.Id)
-				service.githubRepository.DeletePush(actualPushOnRepo)
 			}
 			err := service.repository.Delete(wf.Id)
 			if err != nil {
