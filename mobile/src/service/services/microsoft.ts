@@ -5,10 +5,10 @@ export async function microsoftLogin(
   apiEndpoint: string,
   sessionToken?: string,
 ) {
-  const setToken = (accessToken: string) => {
+  const setToken = async (accessToken: string) => {
     if (sessionToken)
-      sendServiceToken(apiEndpoint, accessToken, 'microsoft', sessionToken);
-    else sendServiceToken(apiEndpoint, accessToken, 'microsoft');
+      await sendServiceToken(apiEndpoint, accessToken, 'microsoft', sessionToken);
+    else await sendServiceToken(apiEndpoint, accessToken, 'microsoft');
   };
   const config = {
     clientId: MICROSOFT_CLIENT_ID,

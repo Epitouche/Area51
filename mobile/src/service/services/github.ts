@@ -2,10 +2,10 @@ import { GITHUB_CLIENT_ID, GITHUB_SECRET } from '@env';
 import { sendServiceToken, OauthLogin } from './services';
 
 export async function githubLogin(apiEndpoint: string, sessionToken?: string) {
-  const setToken = (accessToken: string) => {
+  const setToken = async (accessToken: string) => {
     if (sessionToken)
-      sendServiceToken(apiEndpoint, accessToken, 'github', sessionToken);
-    else sendServiceToken(apiEndpoint, accessToken, 'github');
+      await sendServiceToken(apiEndpoint, accessToken, 'github', sessionToken);
+    else await sendServiceToken(apiEndpoint, accessToken, 'github');
   };
   const config = {
     clientId: GITHUB_CLIENT_ID,
