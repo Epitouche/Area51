@@ -20,8 +20,8 @@ import (
 type GoogleService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GoogleResponseToken, error)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 }
 
 type googleService struct {
@@ -123,7 +123,7 @@ func (service *googleService) GetUserInfosByToken(accessToken string, serviceNam
 	}
 }
 
-func (service *googleService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *googleService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GoogleGetEmailAction):
 		return service.GetEmailAction
@@ -132,7 +132,7 @@ func (service *googleService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *googleService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *googleService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GoogleCreateEventReaction):
 		return service.CreateEventReaction
@@ -141,7 +141,7 @@ func (service *googleService) FindReactionByName(name string) func(channel chan 
 	}
 }
 
-func (service *googleService) GetEmailAction(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *googleService) GetEmailAction(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -154,7 +154,7 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 	}
 
 	options := schemas.GoogleActionOptions{}
-	err = json.NewDecoder(strings.NewReader(workflow.ActionOptions)).Decode(&options)
+	err = json.Unmarshal([](byte)(actionOption), &options)
 	if err != nil {
 		fmt.Println("Error parsing actionOption:", err)
 		return
@@ -209,7 +209,7 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 	channel <- "Emails fetched"
 }
 
-func (service *googleService) CreateEventReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *googleService) CreateEventReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -231,7 +231,7 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 	}
 
 	options := schemas.GoogleCalendarOptions{}
-	err = json.NewDecoder(strings.NewReader(reactionOption)).Decode(&options)
+	err = json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)

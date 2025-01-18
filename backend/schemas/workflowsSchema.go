@@ -1,14 +1,17 @@
 package schemas
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type WorkflowResult struct {
-	UserId         uint64 `json:"user_id"`
-	ActionOption   string `json:"action_option"   binding:"required"`
-	ActionId       uint64 `json:"action_id"`
-	ReactionOption string `json:"reaction_option" binding:"required"`
-	Name           string `json:"name"`
-	ReactionId     uint64 `json:"reaction_id"`
+	UserId         uint64          `json:"user_id"`
+	ActionOption   json.RawMessage `gorm:"type:jsonb" json:"action_option"   binding:"required"`
+	ActionId       uint64          `json:"action_id"`
+	ReactionOption json.RawMessage `gorm:"type:jsonb" json:"reaction_option" binding:"required"`
+	Name           string          `json:"name"`
+	ReactionId     uint64          `json:"reaction_id"`
 }
 
 type WorkflowActivate struct {
@@ -28,18 +31,18 @@ type WorkflowJson struct {
 }
 
 type Workflow struct {
-	Id              uint64    `json:"id,omitempty" gorm:"primary_key;auto_increment"`
-	UserId          uint64    `json:"-"`
-	User            User      `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id"`
-	ActionId        uint64    `json:"-"`
-	Action          Action    `json:"action,omitempty" gorm:"foreignkey:ActionId;references:Id"`
-	ActionOptions   string    `json:"action_options"`
-	ReactionId      uint64    `json:"-"`
-	Reaction        Reaction  `json:"reaction,omitempty" gorm:"foreignkey:ReactionId;references:Id"`
-	ReactionOptions string    `json:"reaction_options"`
-	CreatedAt       time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt       time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	IsActive        bool      `json:"is_active" default:"false" gorm:"column:is_active"`
-	ReactionTrigger bool      `json:"reaction_trigger" default:"false" gorm:"column:reaction_trigger"`
-	Name            string    `json:"name" gorm:"type:varchar(100)"`
+	Id              uint64          `json:"id,omitempty" gorm:"primary_key;auto_increment"`
+	UserId          uint64          `json:"-"`
+	User            User            `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id"`
+	ActionId        uint64          `json:"-"`
+	Action          Action          `json:"action,omitempty" gorm:"foreignkey:ActionId;references:Id"`
+	ActionOptions   json.RawMessage `gorm:"type:jsonb" json:"action_options"`
+	ReactionId      uint64          `json:"-"`
+	Reaction        Reaction        `json:"reaction,omitempty" gorm:"foreignkey:ReactionId;references:Id"`
+	ReactionOptions json.RawMessage `gorm:"type:jsonb" json:"reaction_options"`
+	CreatedAt       time.Time       `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt       time.Time       `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
+	IsActive        bool            `json:"is_active" default:"false" gorm:"column:is_active"`
+	ReactionTrigger bool            `json:"reaction_trigger" default:"false" gorm:"column:reaction_trigger"`
+	Name            string          `json:"name" gorm:"type:varchar(100)"`
 }
