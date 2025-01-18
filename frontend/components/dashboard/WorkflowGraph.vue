@@ -75,18 +75,36 @@ export default {
 };
 </script>
 <template>
-    <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-lg font-semibold text-fontBlack dark:text-fontWhite">Workflow Executions</h2>
-            <div class="flex space-x-2">
+    <div 
+        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6" 
+        aria-label="Workflow Executions Section">
+        <div 
+            class="flex items-center justify-between mb-6" 
+            aria-label="Workflow Executions Header">
+            <h2 
+                class="text-lg font-semibold text-fontBlack dark:text-fontWhite" 
+                aria-label="Section Title: Workflow Executions">
+                Workflow Executions
+            </h2>
+            <div 
+                class="flex space-x-2" 
+                aria-label="Time Range Buttons">
                 <button 
-                v-for="time in timeRanges" :key="time" :class="[
-                    'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
-                    selectedRange === time ? 'bg-tertiary-500 text-white' : 'text-gray-600 dark:text-fontWhite hover:bg-gray-100',
-                ]" @click="setData(time)"> {{ time }}
+                    v-for="time in timeRanges" 
+                    :key="time" 
+                    :class="[
+                        'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+                        selectedRange === time ? 'bg-tertiary-500 text-white' : 'text-gray-600 dark:text-fontWhite hover:bg-gray-100',
+                    ]" 
+                    @click="setData(time)" 
+                    :aria-label="`Select Time Range: ${time}`">
+                    {{ time }}
                 </button>
             </div>
         </div>
-        <canvas id="myChart"/>
+        <canvas 
+            id="myChart" 
+            aria-label="Workflow Executions Chart">
+        </canvas>
     </div>
 </template>
