@@ -19,8 +19,8 @@ import (
 type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	// GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
@@ -122,7 +122,7 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 // 	return result, nil
 // }
 
-func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *githubService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GithubPullRequest):
 		return service.LookAtPullRequest
@@ -133,7 +133,7 @@ func (service *githubService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GithubReactionListComments):
 		return service.ListAllReviewComments
@@ -153,7 +153,7 @@ func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *githubService) LookAtPullRequest(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 	ctx := context.Background()
@@ -209,7 +209,7 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 	channel <- "Action workflow done"
 }
 
-func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -289,7 +289,7 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	response.Body.Close()
 }
 
-func (service *githubService) LookAtPush(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *githubService) LookAtPush(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 	ctx := context.Background()

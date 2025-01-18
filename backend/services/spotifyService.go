@@ -18,8 +18,8 @@ import (
 type SpotifyService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.SpotifyResponseToken, error)
 	// GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
@@ -118,7 +118,7 @@ func (service *spotifyService) AuthGetServiceAccessToken(code string, path strin
 // 	return result, nil
 // }
 
-func (service *spotifyService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *spotifyService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.SpotifyAddTrackAction):
 		return service.AddTrackAction
@@ -127,7 +127,7 @@ func (service *spotifyService) FindActionByName(name string) func(channel chan s
 	}
 }
 
-func (service *spotifyService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *spotifyService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.SpotifyAddTrackReaction):
 		return service.AddTrackReaction
@@ -136,7 +136,7 @@ func (service *spotifyService) FindReactionByName(name string) func(channel chan
 	}
 }
 
-func (service *spotifyService) AddTrackAction(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *spotifyService) AddTrackAction(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -150,7 +150,7 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 	accessToken := service.tokenRepository.FindByUserId(user)
 
 	options := schemas.SpotifyActionOptions{}
-	err = json.NewDecoder(strings.NewReader(option)).Decode(&options)
+	err = json.Unmarshal([]byte(actionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -195,18 +195,18 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		if options.NbSongs < result.Tracks.Total {
 			workflow.ReactionTrigger = true
 		}
-		workflow.ActionOptions = toolbox.MustMarshal(options)
+		workflow.ActionOptions = toolbox.RealObject(options)
 		service.workflowRepository.Update(workflow)
 	} else {
 		options.NbSongs = result.Tracks.Total
 		options.IsOld = true
-		workflow.ActionOptions = toolbox.MustMarshal(options)
+		workflow.ActionOptions = toolbox.RealObject(options)
 		service.workflowRepository.Update(workflow)
 	}
 	channel <- "Action workflow done"
 }
 
-func (service *spotifyService) AddTrackReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *spotifyService) AddTrackReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -220,7 +220,7 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	}
 
 	options := schemas.SpotifyReactionOptions{}
-	err = json.NewDecoder(strings.NewReader(workflow.ReactionOptions)).Decode(&options)
+	err = json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		return
