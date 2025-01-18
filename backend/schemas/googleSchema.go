@@ -47,6 +47,30 @@ type GoogleCalendarCorpusOptionsTime struct {
 	TimeZone string `json:"timeZone"`
 }
 
+type GoogleCalendarCorpusOptionsTimeStartSchema struct {
+	StartDateTime string `json:"startDateTime"`
+	StartTimeZone string `json:"startTimeZone"`
+}
+
+type GoogleCalendarCorpusOptionsTimeEndSchema struct {
+	EndDateTime string `json:"endDateTime"`
+	EndTimeZone string `json:"endTimeZone"`
+}
+
+type GoogleCalendarCorpusOptionsSchema struct {
+	Summary     string                                     `json:"summary"`
+	Description string                                     `json:"description"`
+	Location    string                                     `json:"location"`
+	Start       GoogleCalendarCorpusOptionsTimeStartSchema `json:"start"`
+	End         GoogleCalendarCorpusOptionsTimeEndSchema   `json:"end"`
+	Attendees   GoogleCalendarCorpusOptionsAttendees       `json:"attendees"`
+}
+
+type GoogleCalendarOptionsSchema struct {
+	CalendarId     string                            `json:"calendar_id"`
+	CalendarCorpus GoogleCalendarCorpusOptionsSchema `json:"calendar_corpus"`
+}
+
 type GoogleCalendarCorpusOptionsAttendees struct {
 	Email string `json:"email"`
 }
