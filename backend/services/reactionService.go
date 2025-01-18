@@ -110,6 +110,28 @@ func NewReactionService(
 					LanguageCode: "string",
 				}),
 			},
+			{
+				Name:        string(schemas.MicrosoftMailReaction),
+				Description: "Send an email",
+				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
+				Options: toolbox.MustMarshal(schemas.MicrosoftSendMailOptions{
+					Message: schemas.MicrosoftSendMailMainMessageOptions{
+						Subject: "string",
+						Body: schemas.MicrosoftSendMailBodyOptions{
+							ContentType: "string",
+							Content:     "string",
+						},
+						ToRecipients: []schemas.MicrosoftSendMailRecipientsOptions{
+							{
+								EmailAdress: schemas.MicrosoftSendMailAdressOptions{
+									Address: "string",
+								},
+							},
+						},
+					},
+					SaveToSentItems: "string",
+				}),
+			},
 		},
 		allReactions: []interface{}{serviceService},
 	}

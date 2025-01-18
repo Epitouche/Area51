@@ -4,7 +4,13 @@ type MicrosoftAction string
 
 const (
 	MicrosoftOutlookEventsAction MicrosoftAction = "get_outlook_events"
-	MicrosoftTeamGroup MicrosoftAction = "modify_team_group"
+	MicrosoftTeamGroup           MicrosoftAction = "modify_team_group"
+)
+
+type MicrosoftReaction string
+
+const (
+	MicrosoftMailReaction MicrosoftReaction = "send_mail"
 )
 
 type MicrosoftUserInfo struct {
@@ -37,4 +43,28 @@ type MicrosoftOutlookEventsResponse struct {
 	Value []struct {
 		Subject string `json:"subject"`
 	} `json:"value"`
+}
+
+type MicrosoftSendMailBodyOptions struct {
+	ContentType string `json:"contentType"`
+	Content     string `json:"content"`
+}
+
+type MicrosoftSendMailAdressOptions struct {
+	Address string `json:"address"`
+}
+
+type MicrosoftSendMailRecipientsOptions struct {
+	EmailAdress MicrosoftSendMailAdressOptions `json:"emailAddress"`
+}
+
+type MicrosoftSendMailMainMessageOptions struct {
+	Subject      string                               `json:"subject"`
+	Body         MicrosoftSendMailBodyOptions         `json:"body"`
+	ToRecipients []MicrosoftSendMailRecipientsOptions `json:"toRecipients"`
+}
+
+type MicrosoftSendMailOptions struct {
+	Message         MicrosoftSendMailMainMessageOptions `json:"message"`
+	SaveToSentItems string                              `json:"saveToSentItems"`
 }

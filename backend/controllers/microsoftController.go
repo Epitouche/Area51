@@ -49,7 +49,7 @@ func (controller *microsoftController) RedirectionToMicrosoftService(ctx *gin.Co
 		return "", err
 	}
 	redirectUri := appAdressHost + appPort + path
-	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type=code&scope=openid profile Calendars.Read Calendars.ReadWrite Calendars.ReadWrite.Shared Calendars.Read.Shared Chat.Read https://graph.microsoft.com/User.Read&redirect_uri=%s&state=%s", clientId, redirectUri, state)
+	authUrl := fmt.Sprintf("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=%s&response_type=code&scope=openid profile Calendars.Read Calendars.ReadWrite Calendars.ReadWrite.Shared Calendars.Read.Shared Chat.Read Mail.Send https://graph.microsoft.com/User.Read&redirect_uri=%s&state=%s", clientId, redirectUri, state)
 	return authUrl, nil
 }
 
