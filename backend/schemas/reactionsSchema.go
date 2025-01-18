@@ -15,7 +15,7 @@ type ReactionJson struct {
 type ReactionResponseData struct {
 	Id          uint64          `json:"id,omitempty" gorm:"primary_key;auto_increment"`
 	WorkflowId  uint64          `json:"workflow_id"`
-	Workflow    Workflow        `json:"workflow,omitempty" gorm:"foreignkey:WorkflowId;references:Id"`
+	Workflow    Workflow        `json:"workflow,omitempty" gorm:"foreignkey:WorkflowId;references:Id;constraint:OnDelete:CASCADE;"`
 	ApiResponse json.RawMessage `gorm:"type:jsonb" json:"apiResponse"`
 	CreatedAt   time.Time       `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 }
@@ -23,7 +23,7 @@ type ReactionResponseData struct {
 type Reaction struct {
 	Id          uint64          `json:"id,omitempty" gorm:"primary_key;auto_increment"`
 	ServiceId   uint64          `json:"-"`
-	Service     Service         `json:"service,omitempty" gorm:"foreignkey:ServiceId;references:Id"`
+	Service     Service         `json:"service,omitempty" gorm:"foreignkey:ServiceId;references:Id;constraint:OnDelete:CASCADE;"`
 	Name        string          `json:"name" gorm:"type:varchar(100)"`
 	Description string          `json:"description" gorm:"type:varchar(100)"`
 	CreatedAt   time.Time       `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
