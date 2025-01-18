@@ -19,6 +19,7 @@ type UserService interface {
 	GetUserByUsername(username string) schemas.User
 	GetUserByEmail(email *string) schemas.User
 	CreateUser(newUser schemas.User) error
+	DeleteUser(userId uint64) error
 	AddServiceToUser(user schemas.User, serviceToAdd schemas.ServiceToken) error
 	GetAllServicesForUser(userId uint64) ([]schemas.ServiceToken, error)
 	GetServiceByIdForUser(user schemas.User, serviceId uint64) (schemas.ServiceToken, error)
@@ -148,4 +149,10 @@ func (service *userService) GetServiceByIdForUser(user schemas.User, serviceId u
 func (service *userService) LogoutFromService(userId uint64, serviceToDelete schemas.Service) error {
 	user := service.GetUserById(userId)
 	return service.repository.LogoutFromService(user, serviceToDelete)
+}
+
+func (service *userService) DeleteUser(userId uint64) error {
+	user := service.GetUserById(userId)
+	service.repository.Delete(user)
+	return nil
 }

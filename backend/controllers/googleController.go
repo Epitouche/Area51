@@ -105,7 +105,6 @@ func (controller *googleController) ServiceGoogleCallback(ctx *gin.Context, path
 		}
 	}
 	googleService := controller.servicesService.FindByName(schemas.Google)
-	// userInfo, err := controller.service.GetUserInfo(githubTokenResponse.AccessToken)
 	serviceUserInfos := schemas.ServicesUserInfos{}
 	userInfos := controller.servicesService.GetUserInfosByToken(googleServiceToken.AccessToken, schemas.Google)
 	userInfos(&serviceUserInfos)

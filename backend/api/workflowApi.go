@@ -56,7 +56,6 @@ func (api *WorkflowApi) GetMostRecentReaction(ctx *gin.Context) {
 	}
 }
 
-
 func (api *WorkflowApi) DeleteWorkflow(ctx *gin.Context) {
 	err := api.workflowController.DeleteWorkflow(ctx)
 	if err != nil && err.Error() == "no authorization header found" {

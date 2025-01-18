@@ -64,7 +64,6 @@ func (service *microsoftService) GetUserInfosByToken(accessToken string, service
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			// READ THE BODY
 			bodyBytes, _ := io.ReadAll(resp.Body)
 			fmt.Println("response body: ", string(bodyBytes))
 			return
@@ -249,8 +248,6 @@ func (service *microsoftService) GetOutlookEvents(channel chan string, workflowI
 		fmt.Printf("Error %s\n", err)
 		return
 	}
-
-	// fmt.Printf("VALUES : %s\n", string(bodyBytes))
 
 	var chosenSubject *string
 	for _, subject := range microsoftEventsSubjects.Value {
