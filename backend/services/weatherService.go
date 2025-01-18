@@ -65,7 +65,6 @@ func (service *weatherService) VerifyFeelingTemperature(channel chan string, wor
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -149,7 +148,6 @@ func (service *weatherService) GetCurrentWeather(channel chan string, workflowId
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -198,7 +196,6 @@ func (service *weatherService) GetCurrentWeather(channel chan string, workflowId
 	service.reactionResponseDataService.Save(savedResult)
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
-	time.Sleep(30 * time.Second)
 }
 
 func (service *weatherService) UpdateWorkflowForAction(workflow schemas.Workflow, actionData schemas.WeatherCurrentOptions) {

@@ -186,7 +186,6 @@ func (service *githubService) LookAtPullRequest(channel chan string, workflowId 
 	pullRequests, _, err := client.PullRequests.List(ctx, actionData.Owner, actionData.Repo, nil)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -288,7 +287,6 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
 	response.Body.Close()
-	time.Sleep(1 * time.Minute)
 }
 
 func (service *githubService) LookAtPush(channel chan string, workflowId uint64, actionOption json.RawMessage) {
@@ -324,7 +322,6 @@ func (service *githubService) LookAtPush(channel chan string, workflowId uint64,
 
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	existingRecords := service.githubRepository.FindByWorkflowId(workflow.Id)

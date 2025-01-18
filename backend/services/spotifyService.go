@@ -143,7 +143,6 @@ func (service *spotifyService) AddTrackAction(channel chan string, workflowId ui
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -154,7 +153,6 @@ func (service *spotifyService) AddTrackAction(channel chan string, workflowId ui
 	err = json.Unmarshal([]byte(actionOption), &options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	playlistId := ""
@@ -162,14 +160,12 @@ func (service *spotifyService) AddTrackAction(channel chan string, workflowId ui
 	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/playlist/%s", &playlistId)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+playlistId, nil)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	client := &http.Client{}
@@ -184,7 +180,6 @@ func (service *spotifyService) AddTrackAction(channel chan string, workflowId ui
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -192,26 +187,23 @@ func (service *spotifyService) AddTrackAction(channel chan string, workflowId ui
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	defer response.Body.Close()
 	if options.IsOld {
+		options.NbSongs = result.Tracks.Total
 		if options.NbSongs < result.Tracks.Total {
-			options.NbSongs = result.Tracks.Total
 			workflow.ReactionTrigger = true
-			workflow.ActionOptions = toolbox.RealObject(options)
-			service.workflowRepository.Update(workflow)
 		}
+		workflow.ActionOptions = toolbox.RealObject(options)
+		service.workflowRepository.Update(workflow)
 	} else {
-		fmt.Println("total: ", result.Tracks.Total)
 		options.NbSongs = result.Tracks.Total
 		options.IsOld = true
 		workflow.ActionOptions = toolbox.RealObject(options)
 		service.workflowRepository.Update(workflow)
 	}
 	channel <- "Action workflow done"
-	time.Sleep(30 * time.Second)
 }
 
 func (service *spotifyService) AddTrackReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
@@ -221,11 +213,9 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	if !workflow.ReactionTrigger {
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -233,7 +223,6 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	err = json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -241,16 +230,14 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	parts := strings.Split(options.TrackURL, "?")
 	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/track/%s", &trackId)
 	if err != nil {
-		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
+		fmt.Printf("unable to create request 1 because: %s", err)
 		return
 	}
 	playlistId := ""
 	parts = strings.Split(options.PlaylistURL, "?")
 	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/playlist/%s", &playlistId)
 	if err != nil {
-		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
+		fmt.Printf("unable to create request 2 because: %s", err)
 		return
 	}
 
@@ -258,7 +245,6 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	request, err := http.NewRequest("POST", "https://api.spotify.com/v1/playlists/"+playlistId+"/tracks", strings.NewReader(reqBody))
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -275,9 +261,9 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	_, err = client.Do(request)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
+
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
 }
