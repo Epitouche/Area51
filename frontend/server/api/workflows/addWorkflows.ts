@@ -15,13 +15,13 @@ export default defineEventHandler(async (event) => {
         Authorization: access_token ? `${access_token}` : "",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+      body: {
         action_id: params.action_id,
         reaction_id: params.reaction_id,
         name: params.name,
         action_option: params.action_option,
         reaction_option: params.reaction_option,
-      }),
+      },
     });
 
     return response;
