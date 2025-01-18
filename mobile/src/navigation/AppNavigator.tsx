@@ -82,6 +82,15 @@ function OptionsStackScreen() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
       <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <HomeIcon width={24} height={24} fill={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Workflows"
         component={WorkflowScreen}
         options={{

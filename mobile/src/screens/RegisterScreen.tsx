@@ -97,6 +97,13 @@ export function Register({
             accessibilityLabel="Password"
           />
         </View>
+        <View>
+          {message != '' && (
+            <Text style={{ color: 'red' }} accessibilityLabel="Error Message">
+              {message}
+            </Text>
+          )}
+        </View>
         <View style={{ width: '90%', marginTop: 20 }}>
           <TouchableOpacity
             style={[globalStyles.buttonFormat, globalStyles.terciaryLight]}

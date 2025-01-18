@@ -1,20 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { WorkflowCard, WorkflowTab } from '../components';
 import { AppContext } from '../context/AppContext';
-import {
-  parseServices,
-  deleteToken,
-  checkToken,
-  getToken,
-  getWorkflows,
-} from '../service';
+import { parseServices, checkToken, getToken, getWorkflows } from '../service';
 import { globalStyles } from '../styles/global_style';
 import { AppStackList } from '../types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -33,11 +21,6 @@ export default function WorkflowScreen() {
     workflows,
     setWorkflows,
   } = useContext(AppContext);
-
-  const handleLogout = () => {
-    setIsConnected(false);
-    deleteToken('token');
-  };
 
   const grabWorkflows = async () => {
     if (token !== 'Error: token not found' && token !== '') {
@@ -76,38 +59,24 @@ export default function WorkflowScreen() {
       }>
       <ScrollView>
         <View style={globalStyles.container}>
-          <TouchableOpacity
-            style={[
-              globalStyles.buttonFormat,
-              isBlackTheme
-                ? globalStyles.primaryLight
-                : globalStyles.secondaryDark,
-            ]}
-            onPress={handleLogout}>
-            <Text
-              style={[
-                isBlackTheme
-                  ? globalStyles.textColor
-                  : globalStyles.textColorBlack,
-                globalStyles.textFormat,
-              ]}
-              accessibilityLabel="Logout">
-              Logout
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <WorkflowCard
-          serverIp={serverIp}
-          isBlackTheme={isBlackTheme}
-          token={token}
-          setWorkflows={setWorkflows}
-        />
-        <View style={styles.tabContainer}>
-          <WorkflowTab
-            workflows={workflows}
+          <Text
+            style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
+            accessibilityLabel="Dashboard">
+            Dashboard
+          </Text>
+          <WorkflowCard
+            serverIp={serverIp}
             isBlackTheme={isBlackTheme}
-            navigation={navigation}
+            token={token}
+            setWorkflows={setWorkflows}
           />
+          <View style={styles.tabContainer}>
+            <WorkflowTab
+              workflows={workflows}
+              isBlackTheme={isBlackTheme}
+              navigation={navigation}
+            />
+          </View>
         </View>
       </ScrollView>
     </View>

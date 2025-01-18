@@ -58,7 +58,7 @@ export function ServiceCard({
   return (
     <View
       style={[
-        isBlackTheme ? globalStyles.primaryLight : globalStyles.terciaryDark,
+        isBlackTheme ? globalStyles.primaryLight : globalStyles.terciaryLight,
         styles.card,
         status ? styles.connected : styles.disconnected,
       ]}>

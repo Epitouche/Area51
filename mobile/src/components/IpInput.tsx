@@ -6,8 +6,7 @@ import {
   View,
 } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../context/AppContext';
+import { useEffect, useState } from 'react';
 import { getToken, refreshServices, saveToken } from '../service';
 import { AboutJson, AboutJsonParse } from '../types';
 interface IpInputProps {
@@ -52,33 +51,29 @@ export function IpInput({
         isBlackTheme ? globalStyles.primaryLight : globalStyles.terciaryLight,
         styles.card,
       ]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text
-            style={[
-              styles.bullet,
-              isBlackTheme
-                ? globalStyles.textColor
-                : globalStyles.textColorBlack,
-            ]}
-            accessibilityLabel="Bullet">
-            •
-          </Text>
-          <Text
-            style={[
-              isBlackTheme
-                ? globalStyles.textColor
-                : globalStyles.textColorBlack,
-              styles.subtitle,
-            ]}
-            accessibilityLabel="Set a server Ip">
-            Set a server Ip
-          </Text>
-        </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text
+          style={[
+            styles.bullet,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+          ]}
+          accessibilityLabel="Bullet">
+          •
+        </Text>
+        <Text
+          style={[
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            styles.subtitle,
+          ]}
+          accessibilityLabel="Set a server Ip">
+          Set a server Ip
+        </Text>
+      </View>
       <View style={styles.ipBox}>
         <TextInput
           style={[
             isBlackTheme ? globalStyles.input : globalStyles.inputBlack,
-            { width: '48%' },
+            { width: '50%' },
           ]}
           placeholder="Server IP"
           keyboardType="numeric"
@@ -89,7 +84,9 @@ export function IpInput({
           onPress={handleSave}
           style={[
             globalStyles.buttonFormat,
-            isBlackTheme ? globalStyles.primaryDark : globalStyles.primaryLight,
+            isBlackTheme
+              ? globalStyles.secondaryDark
+              : globalStyles.primaryLight,
           ]}>
           <Text
             style={[
@@ -106,7 +103,7 @@ export function IpInput({
       <TouchableOpacity
         style={[
           globalStyles.buttonFormat,
-          isBlackTheme ? globalStyles.primaryDark : globalStyles.primaryLight,
+          isBlackTheme ? globalStyles.secondaryDark : globalStyles.primaryLight,
         ]}
         onPress={() =>
           refreshServices({
@@ -130,12 +127,14 @@ export function IpInput({
 
 const styles = StyleSheet.create({
   card: {
-    width: '100%',
+    padding: 20,
     borderRadius: 10,
-    alignItems: 'center',
-    gap: 10,
-    paddingBottom: 20,
-    paddingTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+    margin: 20,
   },
   button: {
     width: '100%',
@@ -145,6 +144,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
+    width: '100%',
+    marginBottom: 20,
   },
   bullet: {
     fontSize: 20,
