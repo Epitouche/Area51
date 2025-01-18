@@ -1,8 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import {
-  selectServicesParams,
-} from '../service';
+import { selectServicesParams } from '../service';
 import { AboutJson } from '../types';
 import { useEffect, useState } from 'react';
 
@@ -10,7 +8,7 @@ interface ServiceCardProps {
   title: string;
   image: string;
   status: boolean;
-  isMobile?: boolean;
+  isBlackTheme?: boolean;
   aboutJson: AboutJson;
   serverIp: string;
   token: string;
@@ -24,20 +22,18 @@ export function ServiceCard({
   image,
   status,
   title,
-  isMobile,
+  isBlackTheme,
   serverIp,
   token,
   oauth,
   setNeedRefresh,
   setModalVisible,
-  setSelectedService
+  setSelectedService,
 }: ServiceCardProps) {
-
   const [isConnected, setIsConnected] = useState(status);
 
   useEffect(() => {
-    if (!oauth)
-      setIsConnected(true);
+    if (!oauth) setIsConnected(true);
     else setIsConnected(status);
   }, [status]);
 
@@ -61,7 +57,11 @@ export function ServiceCard({
 
   return (
     <View
-      style={[isMobile ? globalStyles.primaryLight : globalStyles.terciaryDark, styles.card, status ? styles.connected : styles.disconnected]}>
+      style={[
+        isBlackTheme ? globalStyles.primaryLight : globalStyles.terciaryDark,
+        styles.card,
+        status ? styles.connected : styles.disconnected,
+      ]}>
       <Image
         source={{
           uri: image,
@@ -70,7 +70,7 @@ export function ServiceCard({
       />
       <Text
         style={[
-          isMobile ? globalStyles.textColor : globalStyles.textColorBlack,
+          isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
           styles.title,
         ]}>
         {title[0].toLocaleUpperCase() + title.slice(1)}

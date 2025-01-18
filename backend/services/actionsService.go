@@ -104,6 +104,14 @@ func NewActionService(
 					CityName: "string",
 				}),
 			},
+			{
+				Name:        string(schemas.MicrosoftTeamGroup),
+				Description: "Modify a Teams group",
+				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
+				Options: toolbox.MustMarshal(schemas.MicrosoftTeamsGroupOptionsInfos{
+					Id: "string",
+				}),
+			},
 		},
 		allActions: []interface{}{serviceService},
 	}

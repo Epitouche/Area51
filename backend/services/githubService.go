@@ -327,19 +327,25 @@ func (service *githubService) LookAtPush(channel chan string, option string, wor
 		time.Sleep(30 * time.Second)
 		return
 	}
-	fmt.Printf("Branch %s has %s\n", *branch.Name, branch.Commit.Commit.Author.Date)
-	panic("Not implemented")
-	// existingRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
-	// if existingRecords.UserId == 0 {
-	// 	service.githubRepository.Save(schemas.GithubPullRequestOptionsTable{
-	// 		UserId: user.Id,
-	// 		Repo:   actionData.Repo,
-	// 		Owner:  actionData.Owner,
-	// 		NumPR:  0,
-	// 	})
-	// }
-	// rlu
+	existingRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
+	if existingRecords.UserId == 0 {
+		service.githubRepository.SavePush(schemas.GithubPushOnRepoOptionsTable{
+			UserId:         user.Id,
+			User:           user,
+			Workflow:       workflow,
+			WorkflowId:     workflow.Id,
+			LastCommitDate: branch.Commit.Commit.Author.Date.Time,
+		})
+	}
 
+	if !(existingRecords.LastCommitDate).Equal(branch.Commit.Commit.Author.Date.Time) {
+		actualRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
+		actualRecords.LastCommitDate = branch.Commit.Commit.Author.Date.Time
+		service.githubRepository.UpdatePushDate(actualRecords)
+		workflow.ReactionTrigger = true
+		service.workflowRepository.Update(workflow)
+	}
+	channel <- "Action workflow done"
 }
 
 func (service *githubService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
