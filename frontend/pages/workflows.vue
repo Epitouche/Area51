@@ -87,7 +87,7 @@ const confirmModalAction = () => {
   const actions =
     services
       .flatMap((service) => service.actions)
-      .find((action) => action.name === actionString.value)?.options || "";
+      .find((action) => action?.name === actionString.value)?.options || "";
 
   const parsedOptions: Record<string, string> = JSON.parse(actions);
 
@@ -100,7 +100,6 @@ const confirmModalAction = () => {
   }));
 
   actionOption.value = transformedOptions;
-  
 };
 
 const openModalReaction = () => {
@@ -116,7 +115,8 @@ const confirmModalReaction = () => {
   const reactions =
     services
       .flatMap((service) => service.reactions)
-      .find((reaction) => reaction.name === reactionString.value)?.options || "";
+      .find((reaction) => reaction?.name === reactionString.value)?.options ||
+    "";
 
   const parsedOptions: Record<string, string> = JSON.parse(reactions);
 
@@ -129,7 +129,6 @@ const confirmModalReaction = () => {
   }));
 
   reactionOption.value = transformedOptions;
-
 };
 
 const sortWorkflows = () => {
@@ -183,6 +182,31 @@ async function fetchServices() {
       if (serviceFound) {
         serviceFound.actions = service.actions;
         serviceFound.reactions = service.reactions;
+      } else if (!service.is_oauth) {
+        services.push({
+          name: service.name,
+          actions: Array.isArray(service.actions)
+            ? service.actions.map((action) => ({
+                name: action.name,
+                action_id: action.action_id || 0,
+                description: action.description || "",
+                options: action.options || "",
+              }))
+            : null,
+          reactions: Array.isArray(service.reactions)
+            ? service.reactions.map((reaction) => ({
+                name: reaction.name,
+                reaction_id: reaction.reaction_id || 0,
+                description: reaction.description || "",
+                options: reaction.options || "",
+              }))
+            : null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          id: Math.random(),
+          image: service.image || "",
+          description: service.description || "",
+        });
       }
     });
   } catch (error) {
@@ -233,11 +257,11 @@ async function addWorkflow() {
   try {
     const actionSelected = services
       .flatMap((service) => service.actions)
-      .find((action) => action.name === actionString.value);
+      .find((action) => action && action.name === actionString.value);
 
     const reactionSelected = services
       .flatMap((service) => service.reactions)
-      .find((reaction) => reaction.name === reactionString.value);
+      .find((reaction) => reaction && reaction.name === reactionString.value);
 
     const actionOptions = await transformOptions(actionOption.value);
     const reactionOptions = await transformOptions(reactionOption.value);
@@ -374,7 +398,7 @@ onMounted(() => {
                 aria-label="Service action options"
               >
                 <DropdownComponent
-                  v-if="service.actions"
+                  v-if="service.actions || service.actions !== null"
                   v-model="actionString"
                   :label="service.name"
                   :options="service.actions.map((action) => action.name)"
@@ -407,7 +431,7 @@ onMounted(() => {
                 aria-label="Service reaction options"
               >
                 <DropdownComponent
-                  v-if="service.reactions"
+                  v-if="service.reactions || service.reactions !== null"
                   v-model="reactionString"
                   :label="service.name"
                   :options="service.reactions.map((reaction) => reaction.name)"

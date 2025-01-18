@@ -51,8 +51,8 @@ export type Service = {
   id: number;
   image: string;
   updated_at: string;
-  actions: Action[];
-  reactions: Reaction[];
+  actions: Action[] | null;
+  reactions: Reaction[] | null;
 };
 
 export type OptionWorkflow = {
