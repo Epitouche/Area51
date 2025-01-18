@@ -93,14 +93,15 @@ const confirmModalAction = () => {
 
   if (actionSelected?.options) {
     traverseObject(actionSelected.options, (key, value, path) => {
-      transformedOptions.push({
-        name: path,
-        type: typeof value === "object" ? "object" : String(typeof value),
-        input: typeof value !== "object" ? String(value) : "",
-      });
+      if (typeof value !== "object" || Array.isArray(value)) {
+        transformedOptions.push({
+          name: path,
+          type: typeof value === "object" ? "object" : String(typeof value),
+          input: typeof value !== "object" ? String(value) : "",
+        });
+      }
     });
   }
-
   actionOption.value = transformedOptions;
 };
 
@@ -123,11 +124,13 @@ const confirmModalReaction = () => {
 
   if (reactionSelected?.options) {
     traverseObject(reactionSelected.options, (key, value, path) => {
-      transformedOptions.push({
-        name: path,
-        type: typeof value === "object" ? "object" : String(typeof value),
-        input: typeof value !== "object" ? String(value) : "",
-      });
+      if (typeof value !== "object" || Array.isArray(value)) {
+        transformedOptions.push({
+          name: path,
+          type: typeof value === "object" ? "object" : String(typeof value),
+          input: typeof value !== "object" ? String(value) : "",
+        });
+      }
     });
   }
 
