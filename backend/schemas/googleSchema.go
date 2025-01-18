@@ -31,9 +31,9 @@ type GoogleActionOptions struct {
 
 type GoogleActionResponse struct {
 	Id                 uint64   `json:"id,omitempty" gorm:"primary_key;auto_increment"`
-	User               User     `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
+	User               User     `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
 	UserId             uint64   `json:"-"`
-	Worflow            Workflow `json:"workflow,omitempty" gorm:"foreignkey:WorkflowId;references:Id;constraint:OnDelete:CASCADE;"`
+	Worflow            Workflow `json:"workflow,omitempty" gorm:"foreignkey:WorkflowId;references:Id;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
 	WorkflowId         uint64   `json:"-"`
 	ResultSizeEstimate int      `json:"result_size_estimate"`
 }

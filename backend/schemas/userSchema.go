@@ -9,5 +9,5 @@ type User struct {
 	Password *string        `json:"password" gorm:"type:varchar(100)"`
 	Image    string         `json:"image" gorm:"type:BYTEA"`
 	IsAdmin  bool           `json:"is_admin" gorm:"type:boolean"`
-	Services []ServiceToken `gorm:"many2many:user_service_tokens;constraint:OnDelete:CASCADE;"`
+	Services []ServiceToken `gorm:"many2many:user_service_tokens;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
 }

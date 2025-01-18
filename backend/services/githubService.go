@@ -17,6 +17,7 @@ import (
 )
 
 type GithubService interface {
+	DeleteByUserId(userId uint64)
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
 	// GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
 	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
@@ -52,6 +53,18 @@ func NewGithubService(
 		reactionResponseDataService: reactionResponseDataService,
 		userService:                 userService,
 		serviceRepository:           serviceRepository,
+	}
+}
+
+func (service *githubService) DeleteByUserId(userId uint64) {
+	pulls := service.githubRepository.FindPullByUserId(userId)
+	pushes := service.githubRepository.FindPushByUserId(userId)
+
+	for _, pull := range(pulls) {
+		service.githubRepository.Delete(pull)
+	}
+	for _, push := range(pushes) {
+		service.githubRepository.DeletePush(push)
 	}
 }
 
