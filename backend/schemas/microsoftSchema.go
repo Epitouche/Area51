@@ -4,11 +4,8 @@ type MicrosoftAction string
 
 const (
 	MicrosoftOutlookEventsAction MicrosoftAction = "get_outlook_events"
+	MicrosoftTeamGroup MicrosoftAction = "modify_team_group"
 )
-
-type MicrosoftReaction string
-
-const ()
 
 type MicrosoftUserInfo struct {
 	Mail        string `json:"mail"`
@@ -24,6 +21,16 @@ type MicrosoftResponseToken struct {
 
 type MicrosoftOutlookEventsOptions struct {
 	Subject string `json:"subject"`
+}
+
+type MicrosoftTeamsGroupOptionsInfos struct {
+	Id string `json:"id"`
+}
+
+type MicrosoftTeamsChatResponse struct {
+	IsOld               bool   `json:"is_old"`
+	Id                  string `json:"id"`
+	LastUpdatedDateTime string `json:"lastUpdatedDateTime"`
 }
 
 type MicrosoftOutlookEventsResponse struct {
