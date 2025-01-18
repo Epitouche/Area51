@@ -54,19 +54,19 @@ func NewReactionService(
 				Name:        string(schemas.GoogleCreateEventReaction),
 				Description: "Create an event in Google Calendar",
 				ServiceId:   serviceService.FindByName(schemas.Google).Id,
-				Options: toolbox.RealObject(schemas.GoogleCalendarOptions{
+				Options: toolbox.RealObject(schemas.GoogleCalendarOptionsSchema{
 					CalendarId: "your address email",
-					CalendarCorpus: schemas.GoogleCalendarCorpusOptions{
+					CalendarCorpus: schemas.GoogleCalendarCorpusOptionsSchema{
 						Summary:     "Réunion",
 						Description: "on va parler de l'avenir",
 						Location:    "Osaka",
-						Start: schemas.GoogleCalendarCorpusOptionsTime{
-							DateTime: "2025-01-15T10:00:00.0000000",
-							TimeZone: "Europe/Paris",
+						Start: schemas.GoogleCalendarCorpusOptionsTimeStartSchema{
+							StartDateTime: "2025-01-15T10:00:00.0000000",
+							StartTimeZone: "Europe/Paris",
 						},
-						End: schemas.GoogleCalendarCorpusOptionsTime{
-							DateTime: "2025-01-15T10:00:00.0000000",
-							TimeZone: "Europe/Paris",
+						End: schemas.GoogleCalendarCorpusOptionsTimeEndSchema{
+							EndDateTime: "2025-01-15T10:00:00.0000000",
+							EndTimeZone: "Europe/Paris",
 						},
 						Attendees: schemas.GoogleCalendarCorpusOptionsAttendees{
 							Email: "my.email@gmail.com",

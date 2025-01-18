@@ -213,6 +213,22 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
+	// Iterate over all tokens
+	for _, token := range accessToken {
+		actualUser := service.userService.GetUserById(token.UserId)
+		if token.UserId == actualUser.Id {
+			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
+			for _, workflow := range actualWorkflow {
+				if workflow.Id == workflowId {
+					if !workflow.ReactionTrigger {
+						fmt.Println("Trigger is already false, skipping reaction.")
+						return
+					}
+				}
+			}
+		}
+	}
+
 	workflow := service.workflowRepository.FindById(workflowId)
 
 	url := "https://www.googleapis.com/calendar/v3/users/me/calendarList"
@@ -230,12 +246,29 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 		}
 	}
 
-	options := schemas.GoogleCalendarOptions{}
+	options := schemas.GoogleCalendarOptionsSchema{}
 	err = json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
 		return
+	}
+	trueOptions := schemas.GoogleCalendarOptions{
+		CalendarId: options.CalendarId,
+		CalendarCorpus: schemas.GoogleCalendarCorpusOptions{
+			Summary:     options.CalendarCorpus.Summary,
+			Description: options.CalendarCorpus.Description,
+			Location:    options.CalendarCorpus.Location,
+			Start: schemas.GoogleCalendarCorpusOptionsTime{
+				DateTime: options.CalendarCorpus.Start.StartDateTime,
+				TimeZone: options.CalendarCorpus.Start.StartTimeZone,
+			},
+			End: schemas.GoogleCalendarCorpusOptionsTime{
+				DateTime: options.CalendarCorpus.End.EndDateTime,
+				TimeZone: options.CalendarCorpus.End.EndTimeZone,
+			},
+			Attendees: options.CalendarCorpus.Attendees,
+		},
 	}
 
 	client := &http.Client{}
@@ -256,7 +289,7 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 	}
 	var wantedCaledarId string
 	for _, calendar := range googleCalendarIds.Items {
-		if calendar.Id == options.CalendarId {
+		if calendar.Id == trueOptions.CalendarId {
 			wantedCaledarId = calendar.Id
 		}
 	}
@@ -264,7 +297,7 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 
 	urlToCreateEvent := "https://www.googleapis.com/calendar/v3/calendars/" + wantedCaledarId + "/events"
 
-	jsonData, err := json.Marshal(options.CalendarCorpus)
+	jsonData, err := json.Marshal(trueOptions.CalendarCorpus)
 	if err != nil {
 		return
 	}
