@@ -64,6 +64,66 @@ function ActionOrReaction() {
     setSelectedActionOrReactionId(undefined);
   }, [selectedService]);
 
+  const renderOptionFields = (
+    options: OptionValues[],
+    isBlackTheme: boolean,
+  ) => {
+    return options.map((option: OptionValues, index: number) => {
+      if (
+        typeof option.var === 'object' &&
+        !Array.isArray(option.var) &&
+        option.value !== null
+      ) {
+        return (
+          <View key={index}>
+            <Text style={[globalStyles.textColor, globalStyles.textFormat]}>
+              {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
+            </Text>
+            <View style={{ marginLeft: 20 }}>
+              {renderOptionFields(
+                Object.entries(option.var).map(([name, value]) => ({
+                  name,
+                  value: '',
+                  var: value,
+                })),
+                isBlackTheme,
+              )}
+            </View>
+          </View>
+        );
+      }
+      return (
+        <>
+          <Text style={[globalStyles.textColor, globalStyles.textFormat]}>
+            {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
+          </Text>
+          <TextInput
+            key={index}
+            placeholder={`Ex: ${option.var}`}
+            defaultValue={String(option.value)}
+            accessibilityLabel={`Enter the Options for ${option.name} de type ${option.var}`}
+            style={[
+              isBlackTheme ? globalStyles.input : globalStyles.inputBlack,
+            ]}
+            onChangeText={text => {
+              const updatedOptions =
+                options.map((opt: OptionValues, idx: number) => {
+                  if (idx === index) {
+                    return { ...opt, value: text };
+                  }
+                  return opt;
+                }) || [];
+              setSelectedActionOrReactionId({
+                ...selectedActionOrReactionId,
+                options: updatedOptions,
+              } as Values);
+            }}
+          />
+        </>
+      );
+    });
+  };
+
   return (
     <View
       style={
@@ -289,44 +349,47 @@ function ActionOrReaction() {
                         Enter the Options
                       </Text>
                     </View>
-                    {selectedActionOrReactionId.options.map((option, index) => {
-                      return (
-                        <TextInput
-                          key={index}
-                          placeholder={`Enter ${option.name}`}
-                          defaultValue={String(option.value)}
-                          accessibilityLabel={
-                            'Enter the Options for ' +
-                            option.name +
-                            ' de type ' +
-                            option.type
-                          }
-                          keyboardType={
-                            option.type === 'string' ? 'default' : 'numeric'
-                          }
-                          style={[
-                            isBlackTheme
-                              ? globalStyles.input
-                              : globalStyles.inputBlack,
-                          ]}
-                          onChangeText={text => {
-                            const updatedOptions =
-                              selectedActionOrReactionId.options?.map(
-                                (opt, idx) => {
-                                  if (idx === index) {
-                                    return { ...opt, value: text };
-                                  }
-                                  return opt;
-                                },
-                              ) || [];
-                            setSelectedActionOrReactionId({
-                              ...selectedActionOrReactionId,
-                              options: updatedOptions,
-                            });
-                          }}
-                        />
-                      );
-                    })}
+                    {renderOptionFields(
+                      selectedActionOrReactionId.options,
+                      isBlackTheme,
+                    )}
+                    {/* // return (
+                      //   <TextInput
+                      //     key={index}
+                      //     placeholder={`Enter ${option.name}`}
+                      //     defaultValue={String(option.value)}
+                      //     accessibilityLabel={
+                      //       'Enter the Options for ' +
+                      //       option.name +
+                      //       ' de type ' +
+                      //       option.type
+                      //     }
+                      //     keyboardType={
+                      //       option.type === 'string' ? 'default' : 'numeric'
+                      //     }
+                      //     style={[
+                      //       isBlackTheme
+                      //         ? globalStyles.input
+                      //         : globalStyles.inputBlack,
+                      //     ]}
+                      //     onChangeText={text => {
+                      //       const updatedOptions =
+                      //         selectedActionOrReactionId.options?.map(
+                      //           (opt, idx) => {
+                      //             if (idx === index) {
+                      //               return { ...opt, value: text };
+                      //             }
+                      //             return opt;
+                      //           },
+                      //         ) || [];
+                      //       setSelectedActionOrReactionId({
+                      //         ...selectedActionOrReactionId,
+                      //         options: updatedOptions,
+                      //       });
+                      //     }}
+                      //   />
+                      // ); */}
+                    {/* })} */}
                   </>
                 )}
             </View>

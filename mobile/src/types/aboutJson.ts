@@ -1,17 +1,37 @@
 import { ConnectedService } from './servicesModals';
 
-export type Action = {
-  action_id: number;
+export type ServiceAction = {
   name: string;
   description: string;
-  options: string | null;
+  options: any;
+  action_id: number;
+};
+export type ServiceReaction = {
+  name: string;
+  description: string;
+  options: any;
+  reaction_id: number;
 };
 
-export type Reaction = {
-  reaction_id: number;
+export type Service = {
   name: string;
   description: string;
-  options: string | null;
+  actions: ServiceAction[] | null;
+  reactions: ServiceReaction[] | null;
+  image: string;
+  is_oauth: boolean;
+};
+export type Server = {
+  current_time: string;
+  services: Service[];
+};
+export type Client = {
+  host: string;
+};
+
+export type AboutJson = {
+  client: Client;
+  server: Server;
 };
 
 export type ActionParse = {
@@ -26,29 +46,6 @@ export type ReactionParse = {
   name: string;
   description: string;
   options: Option[] | null;
-};
-
-export type Service = {
-  name: string;
-  description: string;
-  actions: Action[] | null;
-  reactions: Reaction[] | null;
-  image: string;
-  is_oauth: boolean;
-};
-
-export type Server = {
-  current_time: string;
-  services: Service[];
-};
-
-export type Client = {
-  host: string;
-};
-
-export type AboutJson = {
-  client: Client;
-  server: Server;
 };
 
 export type Workflow = {
@@ -102,5 +99,5 @@ export interface ParseServicesProps {
 
 export type Option = {
   name: string;
-  type: string;
+  var: any;
 };

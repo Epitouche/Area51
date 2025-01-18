@@ -30,8 +30,8 @@ export type AppStackList = {
 // For Workflows Creation
 export interface OptionValues {
   name: string;
-  value: string | number;
-  type: string;
+  value: string;
+  var: any;
 }
 export interface ActionOrReaction {
   id: number;

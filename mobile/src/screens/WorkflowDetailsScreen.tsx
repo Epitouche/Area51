@@ -276,10 +276,7 @@ export default function WorkflowDetailsScreen() {
               reaction.map((item: any, index: number) => (
                 <View key={index} style={styles.cardCode}>
                   <Text style={styles.bodyText}>{item.body}</Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      console.log('URL clicked:', item.pull_request_url)
-                    }>
+                  <TouchableOpacity>
                     <Text style={styles.urlText}>{item.pull_request_url}</Text>
                   </TouchableOpacity>
                 </View>

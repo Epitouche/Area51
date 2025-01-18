@@ -101,7 +101,7 @@ export function WorkflowCard({
           styles.title,
           { marginBottom: 20 },
         ]}>
-        Select a Action and a Reaction
+        Select Action and Reaction
       </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity

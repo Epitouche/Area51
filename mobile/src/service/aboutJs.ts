@@ -46,17 +46,20 @@ export async function parseServices({
   }
 }
 
-function parseAndTransformOptions(optionsString: string | null): Option[] {
+function parseAndTransformOptions(optionsString: any | null): Option[] {
   try {
     if (!optionsString) {
       return [];
     }
-    const parsedOptions: Record<string, string> = JSON.parse(optionsString);
+    const parsedOptions: Record<string, any> =
+      typeof optionsString === 'string'
+        ? JSON.parse(optionsString)
+        : optionsString;
 
     const transformedOptions: Option[] = Object.entries(parsedOptions).map(
-      ([name, type]) => ({
+      ([name, value]) => ({
         name,
-        type,
+        var: value,
       }),
     );
 
