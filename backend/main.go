@@ -40,6 +40,7 @@ func setupRouter() *gin.Engine {
 			user.GET("services", userApi.GetServices)
 			user.GET("workflows", userApi.GetWorkflows)
 			user.PUT("service/logout", userApi.LogoutService)
+			user.DELETE("account", userApi.DeleteAccount)
 		}
 
 		auth := apiRoutes.Group("/auth")
@@ -137,7 +138,7 @@ var (
 	microsoftService            services.MicrosoftService            = services.NewMicrosoftService(serviceToken, userService, workflowsRepository, servicesRepository)
 
 	// Controllers
-	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken)
+	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken, workflowsService, googleService, githubService)
 	githubController    controllers.GithubController    = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
 	actionController    controllers.ActionController    = controllers.NewActionController(actionService)
 	servicesController  controllers.ServicesController  = controllers.NewServiceController(servicesService, actionService, reactionService)

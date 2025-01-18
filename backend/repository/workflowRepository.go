@@ -11,6 +11,7 @@ import (
 type WorkflowRepository interface {
 	Save(workflow schemas.Workflow)
 	Update(workflow schemas.Workflow)
+	UpdateUtils(workflow schemas.Workflow)
 	UpdateActiveStatus(workflow schemas.Workflow)
 	UpdateReactionTrigger(workflow schemas.Workflow)
 	Delete(workflowId uint64) error
@@ -188,6 +189,15 @@ func (repo *workflowRepository) SaveWorkflow(workflow schemas.Workflow) (workflo
 func (repo *workflowRepository) UpdateReactionTrigger(workflow schemas.Workflow) {
 	err := repo.db.Connection.Model(&schemas.Workflow{}).Where(&schemas.Workflow{Id: workflow.Id}).Updates(map[string]interface{}{
 		"reaction_trigger": workflow.ReactionTrigger,
+	})
+	if err.Error != nil {
+		return
+	}
+}
+
+func (repo *workflowRepository) UpdateUtils(workflow schemas.Workflow) {
+	err := repo.db.Connection.Model(&schemas.Workflow{}).Where(&schemas.Workflow{Id: workflow.Id}).Updates(map[string]interface{}{
+		"utils": workflow.Utils,
 	})
 	if err.Error != nil {
 		return
