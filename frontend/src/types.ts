@@ -15,18 +15,21 @@ export type Workflow = {
   workflow_id: number;
 };
 
+export type NestedObject = {
+  [key: string]: string | number | boolean | NestedObject;
+};
+
 export type Action = {
   name: string;
   action_id: number;
   description: string;
-  options: string;
+  options: NestedObject;
 };
-
 export type Reaction = {
   name: string;
   reaction_id: number;
   description: string;
-  options: string;
+  options: NestedObject;
 };
 
 export type AboutResponse = {
