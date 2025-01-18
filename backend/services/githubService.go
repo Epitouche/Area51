@@ -57,15 +57,15 @@ func NewGithubService(
 }
 
 func (service *githubService) DeleteByUserId(userId uint64) {
-	pulls := service.githubRepository.FindPullByUserId(userId)
-	pushes := service.githubRepository.FindPushByUserId(userId)
+	// pulls := service.githubRepository.FindPullByUserId(userId)
+	// pushes := service.githubRepository.FindPushByUserId(userId)
 
-	for _, pull := range(pulls) {
-		service.githubRepository.Delete(pull)
-	}
-	for _, push := range(pushes) {
-		service.githubRepository.DeletePush(push)
-	}
+	// for _, pull := range pulls {
+	// 	service.githubRepository.Delete(pull)
+	// }
+	// for _, push := range pushes {
+	// 	service.githubRepository.DeletePush(push)
+	// }
 }
 
 func (service *githubService) AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error) {
@@ -202,22 +202,51 @@ func (service *githubService) LookAtPullRequest(channel chan string, workflowId 
 		return
 	}
 
-	existingRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
-	if existingRecords.UserId == 0 {
-		service.githubRepository.Save(schemas.GithubPullRequestOptionsTable{
-			UserId: user.Id,
-			Repo:   actionData.Repo,
-			Owner:  actionData.Owner,
-			NumPR:  0,
-		})
+	existingRecords := map[string]interface{}{
+		"NumPR": 0,
+		"Repo":  "",
+		"Owner": "",
+	}
+	if string(workflow.Utils) != "" {
+		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
+		if err != nil {
+			fmt.Println("Error unmarshalling existingRecords:", err)
+			return
+		}
+	}
+	if existingRecords["NumPR"] == nil {
+		existingRecords["NumPR"] = 0
+		existingRecords["Repo"] = actionData.Repo
+		existingRecords["Owner"] = actionData.Owner
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
+		service.workflowRepository.Update(workflow)
 	}
 
-	if existingRecords.NumPR != len(pullRequests) {
-		actualRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
-		actualRecords.NumPR = len(pullRequests)
+	var numPR int
+	switch v := existingRecords["NumPR"].(type) {
+	case float64:
+		numPR = int(v)
+	case int:
+		numPR = v
+	default:
+		fmt.Println("Error asserting NumPR to int or float64")
+		return
+	}
+	if numPR != len(pullRequests) {
+		existingRecords["NumPR"] = len(pullRequests)
+		updatedUtils, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling updatedUtils:", err)
+			return
+		}
+		workflow.Utils = updatedUtils
 		workflow.ReactionTrigger = true
 		service.workflowRepository.Update(workflow)
-		service.githubRepository.UpdateNumPRs(actualRecords)
 	}
 	channel <- "Action workflow done"
 }
@@ -337,23 +366,46 @@ func (service *githubService) LookAtPush(channel chan string, workflowId uint64,
 		fmt.Println(err)
 		return
 	}
-	existingRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
-	if existingRecords.UserId == 0 {
-		service.githubRepository.SavePush(schemas.GithubPushOnRepoOptionsTable{
-			UserId:         user.Id,
-			User:           user,
-			Workflow:       workflow,
-			WorkflowId:     workflow.Id,
-			LastCommitDate: branch.Commit.Commit.Author.Date.Time,
-		})
+	existingRecords := map[string]interface{}{
+		"LastCommitDate": time.Time{},
+	}
+	if string(workflow.Utils) != "" {
+		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
+		if err != nil {
+			fmt.Println("Error unmarshalling existingRecords:", err)
+			return
+		}
+	}
+	if lastCommitDateStr, ok := existingRecords["LastCommitDate"].(string); ok {
+		lastCommitDate, err := time.Parse(time.RFC3339, lastCommitDateStr)
+		if err != nil {
+			fmt.Println("Error parsing LastCommitDate:", err)
+			return
+		}
+		existingRecords["LastCommitDate"] = lastCommitDate
+	}
+	if existingRecords["LastCommitDate"].(time.Time).IsZero() {
+		existingRecords["LastCommitDate"] = time.Time{}
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
+		service.workflowRepository.Update(workflow)
 	}
 
-	if !(existingRecords.LastCommitDate).Equal(branch.Commit.Commit.Author.Date.Time) {
-		actualRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
-		actualRecords.LastCommitDate = branch.Commit.Commit.Author.Date.Time
-		service.githubRepository.UpdatePushDate(actualRecords)
+	if !existingRecords["LastCommitDate"].(time.Time).Equal(branch.Commit.Commit.Author.Date.Time) {
+		existingRecords["LastCommitDate"] = branch.Commit.Commit.Author.Date.Time
+		updatedUtils, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling updatedUtils:", err)
+			return
+		}
+		workflow.Utils = updatedUtils
 		workflow.ReactionTrigger = true
-		service.workflowRepository.Update(workflow)
+		service.workflowRepository.UpdateUtils(workflow)
+		service.workflowRepository.UpdateReactionTrigger(workflow)
 	}
 	channel <- "Action workflow done"
 }

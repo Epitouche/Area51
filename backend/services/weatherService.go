@@ -130,6 +130,7 @@ func (service *weatherService) GetCurrentWeather(channel chan string, workflowId
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
+	// Iterate over all tokens
 	for _, token := range accessToken {
 		actualUser := service.userService.GetUserById(token.UserId)
 		if token.UserId == actualUser.Id {
