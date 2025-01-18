@@ -158,7 +158,8 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 		return
 	}
 	playlistId := ""
-	_, err = fmt.Sscanf(options.PlaylistURL, "https://open.spotify.com/playlist/%s", &playlistId)
+	parts := strings.Split(options.PlaylistURL, "?")
+	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/playlist/%s", &playlistId)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
 		time.Sleep(30 * time.Second)
@@ -237,14 +238,16 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	}
 
 	trackId := ""
-	_, err = fmt.Sscanf(options.TrackURL, "https://open.spotify.com/track/%s", &trackId)
+	parts := strings.Split(options.TrackURL, "?")
+	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/track/%s", &trackId)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
 		time.Sleep(30 * time.Second)
 		return
 	}
 	playlistId := ""
-	_, err = fmt.Sscanf(options.PlaylistURL, "https://open.spotify.com/playlist/%s", &playlistId)
+	parts = strings.Split(options.PlaylistURL, "?")
+	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/playlist/%s", &playlistId)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
 		time.Sleep(30 * time.Second)
