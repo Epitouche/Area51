@@ -362,9 +362,9 @@ onMounted(() => {
             v-motion-pop
             title="Choose an action"
             :is-open="isModalActionOpen"
+            aria-label="Action selection modal"
             @close="closeModalAction"
             @confirm="confirmModalAction"
-            aria-label="Action selection modal"
           >
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div
@@ -395,9 +395,9 @@ onMounted(() => {
             v-motion-pop
             title="Choose a reaction"
             :is-open="isModalReactionOpen"
+            aria-label="Reaction selection modal"
             @close="closeModalReaction"
             @confirm="confirmModalReaction"
-            aria-label="Reaction selection modal"
           >
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div

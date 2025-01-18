@@ -143,8 +143,8 @@ onMounted(fetchOauthServices);
       </h2>
       <form 
         class="space-y-6"
-        @submit.prevent="onSubmit"
         aria-label="Registration form"
+        @submit.prevent="onSubmit"
       >
         <div>
           <InputComponent
