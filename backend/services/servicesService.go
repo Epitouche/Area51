@@ -1,6 +1,8 @@
 package services
 
 import (
+	"encoding/json"
+
 	"area51/repository"
 	"area51/schemas"
 )
@@ -9,16 +11,16 @@ type ServicesService interface {
 	FindAll() (allService []schemas.Service)
 	FindByName(serviceName schemas.ServiceName) schemas.Service
 	FindById(serviceId uint64) schemas.Service
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetServices() []interface{}
 	GetAllServices() (allServicesJson []schemas.ServiceJson, err error)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
 type ServiceInterface interface {
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
@@ -120,7 +122,7 @@ func (service *servicesService) GetAllServices() (allServicesJson []schemas.Serv
 	return allServicesJson, nil
 }
 
-func (service *servicesService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *servicesService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	for _, oneService := range service.allServices {
 		if oneService.(ServiceInterface).FindActionByName(name) != nil {
 			return oneService.(ServiceInterface).FindActionByName(name)
@@ -129,7 +131,7 @@ func (service *servicesService) FindActionByName(name string) func(channel chan 
 	return nil
 }
 
-func (service *servicesService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *servicesService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	for _, oneService := range service.allServices {
 		if oneService.(ServiceInterface).FindReactionByName(name) != nil {
 			return oneService.(ServiceInterface).FindReactionByName(name)

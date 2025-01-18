@@ -47,12 +47,12 @@ type InterpolNoticesList struct {
 }
 
 type InterpolReactionOption struct {
+	IsOld    bool           `json:"is_old"`
 	FirstName string `json:"firstname"`
 	LastName string `json:"lastname"`
 }
 
 type InterpolReactionOptionInfos struct {
-	IsOld    bool           `json:"is_old"`
 	FirstName string `json:"firstname"`
 	LastName string `json:"lastname"`
 }

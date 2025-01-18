@@ -14,8 +14,8 @@ import (
 )
 
 type WeatherService interface {
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
@@ -38,7 +38,7 @@ func NewWeatherService(
 	}
 }
 
-func (service *weatherService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *weatherService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.WeatherCurrentAction):
 		return service.VerifyFeelingTemperature
@@ -49,7 +49,7 @@ func (service *weatherService) FindActionByName(name string) func(channel chan s
 	}
 }
 
-func (service *weatherService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *weatherService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.WeatherCurrentReaction):
 		return service.GetCurrentWeather
@@ -58,14 +58,13 @@ func (service *weatherService) FindReactionByName(name string) func(channel chan
 	}
 }
 
-func (service *weatherService) VerifyFeelingTemperature(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *weatherService) VerifyFeelingTemperature(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -127,7 +126,7 @@ func (service *weatherService) VerifyFeelingTemperature(channel chan string, opt
 	// time.Sleep(30 * time.Second)
 }
 
-func (service *weatherService) GetCurrentWeather(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *weatherService) GetCurrentWeather(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -149,7 +148,6 @@ func (service *weatherService) GetCurrentWeather(channel chan string, workflowId
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -198,16 +196,15 @@ func (service *weatherService) GetCurrentWeather(channel chan string, workflowId
 	service.reactionResponseDataService.Save(savedResult)
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
-	time.Sleep(30 * time.Second)
 }
 
 func (service *weatherService) UpdateWorkflowForAction(workflow schemas.Workflow, actionData schemas.WeatherCurrentOptions) {
 	workflow.ReactionTrigger = true
-	workflow.ActionOptions = toolbox.MustMarshal(actionData)
+	workflow.ActionOptions = toolbox.RealObject(actionData)
 	service.workflowRepository.Update(workflow)
 }
 
-func (service *weatherService) SunriseEvents(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *weatherService) SunriseEvents(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -257,11 +254,11 @@ func (service *weatherService) SunriseEvents(channel chan string, option string,
 	realTimeOption := strToTime(weatherResponse.Astronomy.Astro.Sunrise[0:5])
 	if realTimeOption == realTimeValue {
 		workflow.ReactionTrigger = true
-		workflow.ActionOptions = toolbox.MustMarshal(actionData)
+		workflow.ActionOptions = toolbox.RealObject(actionData)
 		service.workflowRepository.Update(workflow)
 	} else {
 		workflow.ReactionTrigger = false
-		workflow.ActionOptions = toolbox.MustMarshal(actionData)
+		workflow.ActionOptions = toolbox.RealObject(actionData)
 		service.workflowRepository.UpdateReactionTrigger(workflow)
 		fmt.Println("Time is not equal")
 		return
