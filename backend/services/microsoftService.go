@@ -129,7 +129,12 @@ func (service *microsoftService) FindActionByName(name string) func(channel chan
 }
 
 func (service *microsoftService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
-	return nil
+	switch name {
+	case string(schemas.MicrosoftMailReaction):
+		return service.SendMail
+	default:
+		return nil
+	}
 }
 
 func (service *microsoftService) ModifyTeamGroup(channel chan string, option string, workflowId uint64, actionOption string) {
@@ -260,4 +265,65 @@ func (service *microsoftService) GetOutlookEvents(channel chan string, option st
 		service.workflowRepository.Update(workflow)
 	}
 	channel <- "Finishing outlook action workflow"
+}
+
+func (service *microsoftService) SendMail(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+	service.mutex.Lock()
+	defer service.mutex.Unlock()
+
+	// Iterate over all tokens
+	for _, token := range accessToken {
+		actualUser := service.userService.GetUserById(token.UserId)
+		if token.UserId == actualUser.Id {
+			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
+			for _, workflow := range actualWorkflow {
+				if workflow.Id == workflowId {
+					if !workflow.ReactionTrigger {
+						fmt.Println("Trigger is already false, skipping reaction.")
+						return
+					}
+				}
+			}
+		}
+	}
+
+	workflow := service.workflowRepository.FindById(workflowId)
+
+	options := schemas.MicrosoftSendMailOptions{}
+	err := json.NewDecoder(strings.NewReader(reactionOption)).Decode(&options)
+	if err != nil {
+		fmt.Println(err)
+		time.Sleep(30 * time.Second)
+		return
+	}
+	url := "https://graph.microsoft.com/v1.0/me/sendMail"
+
+	jsonData, err := json.Marshal(options)
+	if err != nil {
+		return
+	}
+
+	request, err := http.NewRequest("POST", url, strings.NewReader(string(jsonData)))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+
+	searchedService := service.serviceRepository.FindByName(schemas.Microsoft)
+	for _, token := range accessToken {
+		if token.ServiceId == searchedService.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+	request.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+	fmt.Printf("response: %++v\n", response)
+	defer response.Body.Close()
+	workflow.ReactionTrigger = false
+	service.workflowRepository.UpdateReactionTrigger(workflow)
 }
