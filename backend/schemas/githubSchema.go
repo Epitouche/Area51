@@ -38,15 +38,6 @@ type GithubListCommentsResponse struct {
 	//! Needs more fields in the future
 }
 
-// type GithubPullRequestOptionsTable struct {
-// 	Id     uint64 `json:"id,omitempty" gorm:"primary_key;auto_increment"`
-// 	User   User   `json:"user,omitempty" gorm:"foreignkey:UserId;references:Id;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
-// 	UserId uint64 `json:"-"`
-// 	Repo   string `json:"repo"`
-// 	Owner  string `json:"owner"`
-// 	NumPR  int    `json:"num_pr" gorm:"column:num_pr"`
-// }
-
 type GithubPullRequestOptions struct {
 	Repo  string `json:"repo"`
 	Owner string `json:"owner"`

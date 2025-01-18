@@ -289,20 +289,6 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 			for _, data := range actualReactionData {
 				service.reactionResponseDataService.Delete(data)
 			}
-			actualAction := service.actionService.FindById(wf.ActionId)
-			actualService := service.servicesService.FindById(actualAction.ServiceId)
-			switch string(actualService.Name) {
-			case string(schemas.Google):
-				actualGoogleAction := service.googleRepository.FindByWorkflowId(wf.Id)
-				service.googleRepository.Delete(actualGoogleAction)
-			case string(schemas.Github):
-				actualGithubAction := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
-				for _, data := range actualGithubAction {
-					service.reactionResponseDataService.Delete(data)
-				}
-				actualPushOnRepo := service.githubRepository.FindByWorkflowId(wf.Id)
-				service.githubRepository.DeletePush(actualPushOnRepo)
-			}
 			err := service.repository.Delete(wf.Id)
 			if err != nil {
 				return err

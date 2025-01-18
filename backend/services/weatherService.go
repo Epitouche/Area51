@@ -105,25 +105,20 @@ func (service *weatherService) VerifyFeelingTemperature(channel chan string, wor
 		if actionData.Temperature < weatherResponse.Current.Feelslike_c {
 			service.UpdateWorkflowForAction(workflow, actionData)
 			channel <- "Current weather"
-			// time.Sleep(30 * time.Second)
 		}
 	case "<":
 		if actionData.Temperature > weatherResponse.Current.Feelslike_c {
 			service.UpdateWorkflowForAction(workflow, actionData)
 			channel <- "Current weather"
-			// time.Sleep(30 * time.Second)
 		}
 	case "=":
 		{
 			if actionData.Temperature == weatherResponse.Current.Feelslike_c {
 				service.UpdateWorkflowForAction(workflow, actionData)
 				channel <- "Current weather"
-				// time.Sleep(30 * time.Second)
 			}
 		}
 	}
-	// channel <- "Current weather"
-	// time.Sleep(30 * time.Second)
 }
 
 func (service *weatherService) GetCurrentWeather(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {

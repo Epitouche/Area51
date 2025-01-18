@@ -17,7 +17,6 @@ import (
 
 type SpotifyService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.SpotifyResponseToken, error)
-	// GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error)
 	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
 	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
@@ -95,29 +94,6 @@ func (service *spotifyService) AuthGetServiceAccessToken(code string, path strin
 	return resultToken, nil
 }
 
-// func (service *spotifyService) GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error) {
-// 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
-// 	if err != nil {
-// 		return schemas.SpotifyUserInfo{}, err
-// 	}
-
-// 	request.Header.Set("Authorization", "Bearer "+accessToken)
-// 	client := &http.Client{}
-
-// 	response, err := client.Do(request)
-// 	if err != nil {
-// 		return schemas.SpotifyUserInfo{}, err
-// 	}
-
-// 	result := schemas.SpotifyUserInfo{}
-// 	err = json.NewDecoder(response.Body).Decode(&result)
-// 	if err != nil {
-// 		return schemas.SpotifyUserInfo{}, err
-// 	}
-// 	response.Body.Close()
-// 	return result, nil
-// }
-
 func (service *spotifyService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.SpotifyAddTrackAction):
@@ -175,7 +151,6 @@ func (service *spotifyService) AddTrackAction(channel chan string, workflowId ui
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
-	// request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -256,7 +231,6 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
-	// request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	_, err = client.Do(request)
 	if err != nil {
