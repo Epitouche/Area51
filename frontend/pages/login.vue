@@ -125,12 +125,23 @@ onMounted(() => {
 <template>
   <div
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-primaryDark-500"
+    aria-label="Login screen"
   >
     <div
       class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
+      aria-label="Login form container"
     >
-      <h2 class="text-2xl font-bold text-center">LOG IN</h2>
-      <form class="space-y-6" @submit.prevent="onSubmit">
+      <h2 
+        class="text-2xl font-bold text-center"
+        aria-label="Login heading"
+      >
+        LOG IN
+      </h2>
+      <form 
+        class="space-y-6"
+        @submit.prevent="onSubmit"
+        aria-label="Login form"
+      >
         <div>
           <InputComponent
             id="username"
@@ -138,6 +149,7 @@ onMounted(() => {
             type="text"
             label="Username"
             icon="fas fa-user"
+            aria-label="Username input field"
           />
         </div>
         <div>
@@ -147,6 +159,7 @@ onMounted(() => {
             type="password"
             label="Password"
             icon="fas fa-lock"
+            aria-label="Password input field"
           />
         </div>
         <!-- <div class="flex items-center gap-2">
@@ -165,11 +178,12 @@ onMounted(() => {
             bg-color="bg-primaryWhite-500"
             hover-color="hover:bg-secondaryWhite-500"
             text-color="text-fontBlack"
+            aria-label="Submit login form"
           />
         </div>
       </form>
-      <hr class="border-primaryWhite-400">
-      <div class="flex justify-around flex-wrap gap-5">
+      <hr class="border-primaryWhite-400" aria-hidden="true">
+      <div class="flex justify-around flex-wrap gap-5" aria-label="Third-party login buttons">
         <ButtonComponent
           v-for="(service, index) in services"
           :key="index"
@@ -179,16 +193,23 @@ onMounted(() => {
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
           @click="redirectToService(index)"
+          aria-label="Login with {{ service.name }}"
         />
       </div>
       <div class="flex justify-around">
         <p class="text-center text-sm">
-          <NuxtLink to="/register" class="text-fontWhite underline">
+          <NuxtLink 
+            to="/register" 
+            class="text-fontWhite underline"
+            aria-label="Navigate to registration page"
+          >
             Create an account
           </NuxtLink>
         </p>
         <p class="text-center text-sm">
-          <a href="#" class="text-fontWhite underline">Forgot password?</a>
+          <a href="#" class="text-fontWhite underline" aria-label="Navigate to forgot password page">
+            Forgot password?
+          </a>
         </p>
       </div>
     </div>

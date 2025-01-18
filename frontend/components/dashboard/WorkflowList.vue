@@ -30,34 +30,51 @@ onMounted(async () => {
 })
 </script>
 <template>
-    <div class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 h-96">
-        <h2 class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6">Your Workflow</h2>
+    <div 
+        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 h-96"
+        aria-label="Workflow Section">
+        <h2 
+            class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6"
+            aria-label="Your Workflow">Your Workflow</h2>
         <div v-if="workflows.values.length === 0" class="space-y-4">
             <div
                 v-for="workflow in workflows"
                 :key="workflow.name"
-                class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-900 hover:border-purple-200 dark:hover:border-tertiary-800 transition-colors">
-                <div className="flex items-center space-x-4">
+                class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-900 hover:border-purple-200 dark:hover:border-tertiary-800 transition-colors"
+                aria-label="Workflow item: {{ workflow.name }}">
+                <div class="flex items-center space-x-4">
                     <div>
-                        <h3 className="font-medium text-fontBlack dark:text-fontWhite">{{ workflow.name }}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-200">
+                        <h3 
+                            class="font-medium text-fontBlack dark:text-fontWhite"
+                            aria-label="Workflow name: {{ workflow.name }}">
+                            {{ workflow.name }}
+                        </h3>
+                        <p 
+                            class="text-sm text-gray-500 dark:text-gray-200"
+                            aria-label="Action: {{ workflow.action_name }}">
                             Action: {{ workflow.action_name }}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-200">
+                        <p 
+                            class="text-sm text-gray-500 dark:text-gray-200"
+                            aria-label="Reaction: {{ workflow.reaction_name }}">
                             Reaction: {{ workflow.reaction_name }}
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                <div class="flex items-center space-x-4">
+                    <span 
+                        class="text-sm text-gray-500 dark:text-gray-400"
+                        aria-label="Workflow executions count: {{ workflow.executions }}">
                         {{ workflow.executions }} runs
                     </span>
                 </div>
             </div>
         </div>
-        <div v-else class="flex flex-col items-center justify-between text-gray-500 dark:text-gray-400">
+        <div v-else class="flex flex-col items-center justify-between text-gray-500 dark:text-gray-400" aria-label="No workflows created">
             <p>No Workflow created<br></p>
-            <p>Checkout the workflow page <NuxtLink to="/workflows" class="text-tertiary-500">here</NuxtLink> to create one</p>
+            <p>Checkout the workflow page 
+                <NuxtLink to="/workflows" class="text-tertiary-500" aria-label="Go to workflow page">here</NuxtLink> to create one
+            </p>
         </div>
     </div>
 </template>

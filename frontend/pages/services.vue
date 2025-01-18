@@ -127,11 +127,13 @@ onMounted(async () => {
 <template>
   <div
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
+    aria-label="Services management screen"
   >
-    <div v-if="isConnected">
+    <div v-if="isConnected" aria-label="Connected services">
       <div class="m-5 sm:m-10">
         <h1
           class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
+          aria-label="Services heading"
         >
           Services
         </h1>
@@ -139,31 +141,37 @@ onMounted(async () => {
       <div class="flex justify-center">
         <hr
           class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
+          aria-hidden="true"
         >
       </div>
       <div
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 m-5 sm:m-10"
+        aria-label="List of available services"
       >
         <div
           v-for="(service, index) in allServices"
           :key="index"
           class="flex justify-center"
+          aria-label="Service item"
         >
           <div
             class="flex flex-col w-full p-5 sm:p-7 bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-lg shadow-lg gap-4 sm:gap-5"
+            aria-label="Service card for {{ service.name }}"
           >
             <div class="flex items-center justify-between w-full">
               <div
                 class="w-10 h-10 sm:w-12 sm:h-12 bg-primaryWhite-400 dark:bg-secondaryDark-400 rounded-full flex items-center justify-center"
+                aria-label="Service image or initial"
               >
                 <img
                   v-if="service.image !== 'IMG'"
                   :src="service.image"
-                  alt="service image"
+                  :alt="`${service.name} image`"
                 >
                 <p
                   v-else
                   class="text-lg sm:text-xl text-fontBlack dark:text-fontWhite"
+                  aria-label="Service initial"
                 >
                   {{ service.name.charAt(0) }}
                 </p>
@@ -175,7 +183,8 @@ onMounted(async () => {
                     :checked="service.isConnected"
                     :disabled="!service.isAllowed"
                     class="sr-only peer"
-                    @change="changeConnection(service)"
+                    aria-label="Toggle connection for {{ service.name }}"
+                    @click="changeConnection(service)"
                   >
                   <div
                     :class="{
@@ -192,11 +201,13 @@ onMounted(async () => {
             <div class="flex flex-col gap-1 sm:gap-2">
               <h3
                 class="text-lg sm:text-xl md:text-2xl font-semibold text-fontBlack dark:text-fontWhite"
+                aria-label="Service name: {{ service.name }}"
               >
                 {{ service.name }}
               </h3>
               <p
                 class="text-sm sm:text-base text-fontBlack dark:text-fontWhite"
+                aria-label="Service description: {{ service.description }}"
               >
                 {{ service.description }}
               </p>
@@ -205,15 +216,17 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <div v-else>
+    <div v-else aria-label="Error screen">
       <div class="flex flex-col gap-4 justify-center items-center h-full">
         <h1
           class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
+          aria-label="Error 404 heading"
         >
           ERROR 404 !
         </h1>
         <h2
           class="text-2xl sm:text-3xl font-bold text-fontBlack dark:text-fontWhite"
+          aria-label="Not connected message"
         >
           You are not connected, please log in to access this page.
         </h2>

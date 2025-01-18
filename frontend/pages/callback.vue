@@ -70,16 +70,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
+  <div 
     class="flex items-center justify-center min-h-screen bg-gradient-to-br from-tertiary-600 to-tertiary-800"
+    aria-label="Service login processing screen"
   >
     <div class="text-center">
-      <p class="text-fontWhite text-lg md:text-2xl font-semibold animate-pulse">
+      <p 
+        class="text-fontWhite text-lg md:text-2xl font-semibold animate-pulse"
+        aria-label="Processing service login message"
+      >
         Processing Service Login...
       </p>
-      <div class="mt-4 flex justify-center">
-        <div
+      <div class="mt-4 flex justify-center" aria-label="Loading spinner">
+        <div 
           class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"
+          role="status"
         />
       </div>
     </div>
