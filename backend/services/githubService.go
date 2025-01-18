@@ -337,9 +337,9 @@ func (service *githubService) LookAtPush(channel chan string, option string, wor
 			LastCommitDate: branch.Commit.Commit.Author.Date.Time,
 		})
 	}
-	actualRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
 
 	if !(existingRecords.LastCommitDate).Equal(branch.Commit.Commit.Author.Date.Time) {
+		actualRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
 		actualRecords.LastCommitDate = branch.Commit.Commit.Author.Date.Time
 		service.githubRepository.UpdatePushDate(actualRecords)
 		workflow.ReactionTrigger = true
