@@ -45,4 +45,5 @@ type Workflow struct {
 	IsActive        bool            `json:"is_active" default:"false" gorm:"column:is_active"`
 	ReactionTrigger bool            `json:"reaction_trigger" default:"false" gorm:"column:reaction_trigger"`
 	Name            string          `json:"name" gorm:"type:varchar(100)"`
+	Utils           json.RawMessage `gorm:"type:jsonb" json:"utils"`
 }

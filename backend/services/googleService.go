@@ -18,7 +18,6 @@ import (
 )
 
 type GoogleService interface {
-	DeleteByUserId(userId uint64)
 	AuthGetServiceAccessToken(code string, path string) (schemas.GoogleResponseToken, error)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
@@ -47,14 +46,6 @@ func NewGoogleService(
 		workflowRepository: workflowRepository,
 		serviceRepository:  serviceRepository,
 		googleRepository:   googleRepository,
-	}
-}
-
-func (service *googleService) DeleteByUserId(userId uint64) {
-	result := service.googleRepository.FindByUserId(userId)
-
-	for _, field := range(result) {
-		service.googleRepository.Delete(field)
 	}
 }
 
@@ -198,23 +189,48 @@ func (service *googleService) GetEmailAction(channel chan string, workflowId uin
 		// 	channel <- err.Error()
 		return
 	}
-	existingRecords := service.googleRepository.FindByWorkflowId(workflowId)
-	if existingRecords.UserId == 0 {
-		service.googleRepository.Save(schemas.GoogleActionResponse{
-			User:               user,
-			UserId:             user.Id,
-			Worflow:            workflow,
-			WorkflowId:         workflowId,
-			ResultSizeEstimate: 0,
-		})
+	existingRecords := map[string]interface{}{}
+
+	if string(workflow.Utils) != "" {
+		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
+		if err != nil {
+			fmt.Println("Error unmarshalling existingRecords:", err)
+			return
+		}
 	}
-	if existingRecords.ResultSizeEstimate < googleOption.ResultSizeEstimate {
+
+	if existingRecords["ResultSizeEstimate"] == nil {
+		existingRecords["ResultSizeEstimate"] = 0
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
+		service.workflowRepository.Update(workflow)
+	}
+	var ResultSizeEstimate int
+	switch v := existingRecords["ResultSizeEstimate"].(type) {
+	case float64:
+		ResultSizeEstimate = int(v)
+	case int:
+		ResultSizeEstimate = v
+	default:
+		fmt.Println("Error asserting NumPR to int or float64")
+		return
+	}
+
+	if ResultSizeEstimate < googleOption.ResultSizeEstimate {
+		existingRecords["ResultSizeEstimate"] = googleOption.ResultSizeEstimate
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
 		workflow.ReactionTrigger = true
 		service.workflowRepository.Update(workflow)
 	}
-	actualRecords := service.googleRepository.FindByWorkflowId(workflowId)
-	actualRecords.ResultSizeEstimate = googleOption.ResultSizeEstimate
-	service.googleRepository.UpdateNumEmails(actualRecords)
 	channel <- "Emails fetched"
 }
 
