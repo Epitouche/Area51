@@ -18,8 +18,8 @@ import (
 
 type MicrosoftService interface {
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	AuthGetServiceAccessToken(code string, path string) (schemas.MicrosoftResponseToken, error)
 }
 
@@ -64,7 +64,6 @@ func (service *microsoftService) GetUserInfosByToken(accessToken string, service
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			// READ THE BODY
 			bodyBytes, _ := io.ReadAll(resp.Body)
 			fmt.Println("response body: ", string(bodyBytes))
 			return
@@ -117,7 +116,7 @@ func (service *microsoftService) AuthGetServiceAccessToken(code string, path str
 	return result, nil
 }
 
-func (service *microsoftService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *microsoftService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.MicrosoftOutlookEventsAction):
 		return service.GetOutlookEvents
@@ -128,7 +127,7 @@ func (service *microsoftService) FindActionByName(name string) func(channel chan
 	}
 }
 
-func (service *microsoftService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *microsoftService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.MicrosoftMailReaction):
 		return service.SendMail
@@ -137,7 +136,7 @@ func (service *microsoftService) FindReactionByName(name string) func(channel ch
 	}
 }
 
-func (service *microsoftService) ModifyTeamGroup(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *microsoftService) ModifyTeamGroup(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -150,10 +149,9 @@ func (service *microsoftService) ModifyTeamGroup(channel chan string, option str
 	}
 
 	options := schemas.MicrosoftTeamsChatResponse{}
-	err = json.NewDecoder(strings.NewReader(actionOption)).Decode(&options)
+	err = json.Unmarshal([]byte(actionOption), &options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -189,19 +187,19 @@ func (service *microsoftService) ModifyTeamGroup(channel chan string, option str
 			workflow.ReactionTrigger = true
 			service.workflowRepository.UpdateReactionTrigger(workflow)
 			options.LastUpdatedDateTime = result.LastUpdatedDateTime
-			workflow.ActionOptions = toolbox.MustMarshal(options)
+			workflow.ActionOptions = toolbox.RealObject(options)
 			service.workflowRepository.Update(workflow)
 		}
 	} else {
 		options.IsOld = true
 		options.LastUpdatedDateTime = result.LastUpdatedDateTime
-		workflow.ActionOptions = toolbox.MustMarshal(options)
+		workflow.ActionOptions = toolbox.RealObject(options)
 		service.workflowRepository.Update(workflow)
 	}
 	channel <- "Action of modifying teams finished"
 }
 
-func (service *microsoftService) GetOutlookEvents(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *microsoftService) GetOutlookEvents(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -227,7 +225,7 @@ func (service *microsoftService) GetOutlookEvents(channel chan string, option st
 	}
 
 	options := schemas.MicrosoftOutlookEventsOptions{}
-	err = json.NewDecoder(strings.NewReader(actionOption)).Decode(&options)
+	err = json.Unmarshal([]byte(actionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
@@ -251,8 +249,6 @@ func (service *microsoftService) GetOutlookEvents(channel chan string, option st
 		return
 	}
 
-	// fmt.Printf("VALUES : %s\n", string(bodyBytes))
-
 	var chosenSubject *string
 	for _, subject := range microsoftEventsSubjects.Value {
 		if subject.Subject == options.Subject {
@@ -267,7 +263,7 @@ func (service *microsoftService) GetOutlookEvents(channel chan string, option st
 	channel <- "Finishing outlook action workflow"
 }
 
-func (service *microsoftService) SendMail(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *microsoftService) SendMail(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -290,10 +286,9 @@ func (service *microsoftService) SendMail(channel chan string, workflowId uint64
 	workflow := service.workflowRepository.FindById(workflowId)
 
 	options := schemas.MicrosoftSendMailOptions{}
-	err := json.NewDecoder(strings.NewReader(reactionOption)).Decode(&options)
+	err := json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	url := "https://graph.microsoft.com/v1.0/me/sendMail"

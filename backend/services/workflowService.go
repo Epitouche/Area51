@@ -17,12 +17,14 @@ type WorkflowService interface {
 	FindAll() []schemas.Workflow
 	CreateWorkflow(ctx *gin.Context) (string, error)
 	ActivateWorkflow(ctx *gin.Context) error
-	InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken, actionOption string, reactionOption string)
+	InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken, actionOption json.RawMessage, reactionOption json.RawMessage)
 	ExistWorkflow(workflowId uint64) bool
 	GetWorkflowByName(name string) schemas.Workflow
 	GetWorkflowById(workflowId uint64) schemas.Workflow
+	GetWorkflowsByUserId(userId uint64) []schemas.Workflow
 	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
 	DeleteWorkflow(ctx *gin.Context) error
+	Delete(workflowId uint64) error
 }
 
 type workflowService struct {
@@ -163,13 +165,13 @@ func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 	return nil
 }
 
-func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken, actionOption string, reactionOption string) {
+func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workflow, githubServiceToken []schemas.ServiceToken, actionOption json.RawMessage, reactionOption json.RawMessage) {
 	workflowChannel := make(chan string)
 	go service.WorkflowActionChannel(workflowStartingPoint, workflowChannel, actionOption)
 	go service.WorkflowReactionChannel(workflowStartingPoint, workflowChannel, githubServiceToken, reactionOption)
 }
 
-func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string, actionOption string) {
+func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string, actionOption json.RawMessage) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		fmt.Println("Start of WorkflowActionChannel")
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
@@ -184,7 +186,7 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 				return
 			}
 			if workflow.IsActive {
-				action(channel, workflow.ActionOptions, workflow.Id, actionOption)
+				action(channel, workflow.Id, actionOption)
 			}
 			time.Sleep(30 * time.Second)
 		}
@@ -193,7 +195,7 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 	}(workflowStartingPoint, channel)
 }
 
-func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken, reactionOption string) {
+func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint schemas.Workflow, channel chan string, githubServiceToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
@@ -229,6 +231,14 @@ func (service *workflowService) GetWorkflowByName(name string) schemas.Workflow 
 
 func (service *workflowService) GetWorkflowById(workflowId uint64) schemas.Workflow {
 	return service.repository.FindById(workflowId)
+}
+
+func (service *workflowService) GetWorkflowsByUserId(userId uint64) []schemas.Workflow {
+	return service.repository.FindByUserId(userId)
+}
+
+func (service *workflowService) Delete(workflowId uint64) error {
+	return service.repository.Delete(workflowId)
 }
 
 func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
@@ -278,20 +288,6 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 			actualReactionData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
 			for _, data := range actualReactionData {
 				service.reactionResponseDataService.Delete(data)
-			}
-			actualAction := service.actionService.FindById(wf.ActionId)
-			actualService := service.servicesService.FindById(actualAction.ServiceId)
-			switch string(actualService.Name) {
-			case string(schemas.Google):
-				actualGoogleAction := service.googleRepository.FindByWorkflowId(wf.Id)
-				service.googleRepository.Delete(actualGoogleAction)
-			case string(schemas.Github):
-				actualGithubAction := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
-				for _, data := range actualGithubAction {
-					service.reactionResponseDataService.Delete(data)
-				}
-				actualPushOnRepo := service.githubRepository.FindByWorkflowId(wf.Id)
-				service.githubRepository.DeletePush(actualPushOnRepo)
 			}
 			err := service.repository.Delete(wf.Id)
 			if err != nil {

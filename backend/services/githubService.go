@@ -18,9 +18,8 @@ import (
 
 type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
-	// GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
@@ -97,32 +96,7 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	return resultToken, nil
 }
 
-// func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUserInfo, error) {
-// 	request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
-// 	if err != nil {
-// 		return schemas.GithubUserInfo{}, err
-// 	}
-
-// 	request.Header.Set("Authorization", "Bearer "+accessToken)
-// 	client := &http.Client{}
-
-// 	response, err := client.Do(request)
-// 	if err != nil {
-// 		return schemas.GithubUserInfo{}, err
-// 	}
-
-// 	result := schemas.GithubUserInfo{}
-
-// 	err = json.NewDecoder(response.Body).Decode(&result)
-// 	if err != nil {
-// 		return schemas.GithubUserInfo{}, err
-// 	}
-
-// 	response.Body.Close()
-// 	return result, nil
-// }
-
-func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *githubService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GithubPullRequest):
 		return service.LookAtPullRequest
@@ -133,7 +107,7 @@ func (service *githubService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GithubReactionListComments):
 		return service.ListAllReviewComments
@@ -153,7 +127,7 @@ func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *githubService) LookAtPullRequest(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 	ctx := context.Background()
@@ -186,31 +160,59 @@ func (service *githubService) LookAtPullRequest(channel chan string, option stri
 	pullRequests, _, err := client.PullRequests.List(ctx, actionData.Owner, actionData.Repo, nil)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
-	existingRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
-	if existingRecords.UserId == 0 {
-		service.githubRepository.Save(schemas.GithubPullRequestOptionsTable{
-			UserId: user.Id,
-			Repo:   actionData.Repo,
-			Owner:  actionData.Owner,
-			NumPR:  0,
-		})
+	existingRecords := map[string]interface{}{
+		"NumPR": 0,
+		"Repo":  "",
+		"Owner": "",
+	}
+	if string(workflow.Utils) != "" {
+		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
+		if err != nil {
+			fmt.Println("Error unmarshalling existingRecords:", err)
+			return
+		}
+	}
+	if existingRecords["NumPR"] == nil {
+		existingRecords["NumPR"] = 0
+		existingRecords["Repo"] = actionData.Repo
+		existingRecords["Owner"] = actionData.Owner
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
+		service.workflowRepository.Update(workflow)
 	}
 
-	if existingRecords.NumPR != len(pullRequests) {
-		actualRecords := service.githubRepository.FindByOwnerAndRepo(actionData.Owner, actionData.Repo)
-		actualRecords.NumPR = len(pullRequests)
+	var numPR int
+	switch v := existingRecords["NumPR"].(type) {
+	case float64:
+		numPR = int(v)
+	case int:
+		numPR = v
+	default:
+		fmt.Println("Error asserting NumPR to int or float64")
+		return
+	}
+	if numPR != len(pullRequests) {
+		existingRecords["NumPR"] = len(pullRequests)
+		updatedUtils, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling updatedUtils:", err)
+			return
+		}
+		workflow.Utils = updatedUtils
 		workflow.ReactionTrigger = true
 		service.workflowRepository.Update(workflow)
-		service.githubRepository.UpdateNumPRs(actualRecords)
 	}
 	channel <- "Action workflow done"
 }
 
-func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -288,10 +290,9 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
 	response.Body.Close()
-	time.Sleep(1 * time.Minute)
 }
 
-func (service *githubService) LookAtPush(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *githubService) LookAtPush(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 	ctx := context.Background()
@@ -324,26 +325,48 @@ func (service *githubService) LookAtPush(channel chan string, option string, wor
 
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
-	existingRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
-	if existingRecords.UserId == 0 {
-		service.githubRepository.SavePush(schemas.GithubPushOnRepoOptionsTable{
-			UserId:         user.Id,
-			User:           user,
-			Workflow:       workflow,
-			WorkflowId:     workflow.Id,
-			LastCommitDate: branch.Commit.Commit.Author.Date.Time,
-		})
+	existingRecords := map[string]interface{}{
+		"LastCommitDate": time.Time{},
+	}
+	if string(workflow.Utils) != "" {
+		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
+		if err != nil {
+			fmt.Println("Error unmarshalling existingRecords:", err)
+			return
+		}
+	}
+	if lastCommitDateStr, ok := existingRecords["LastCommitDate"].(string); ok {
+		lastCommitDate, err := time.Parse(time.RFC3339, lastCommitDateStr)
+		if err != nil {
+			fmt.Println("Error parsing LastCommitDate:", err)
+			return
+		}
+		existingRecords["LastCommitDate"] = lastCommitDate
+	}
+	if existingRecords["LastCommitDate"].(time.Time).IsZero() {
+		existingRecords["LastCommitDate"] = time.Time{}
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
+		service.workflowRepository.Update(workflow)
 	}
 
-	if !(existingRecords.LastCommitDate).Equal(branch.Commit.Commit.Author.Date.Time) {
-		actualRecords := service.githubRepository.FindByWorkflowId(workflow.Id)
-		actualRecords.LastCommitDate = branch.Commit.Commit.Author.Date.Time
-		service.githubRepository.UpdatePushDate(actualRecords)
+	if !existingRecords["LastCommitDate"].(time.Time).Equal(branch.Commit.Commit.Author.Date.Time) {
+		existingRecords["LastCommitDate"] = branch.Commit.Commit.Author.Date.Time
+		updatedUtils, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling updatedUtils:", err)
+			return
+		}
+		workflow.Utils = updatedUtils
 		workflow.ReactionTrigger = true
-		service.workflowRepository.Update(workflow)
+		service.workflowRepository.UpdateUtils(workflow)
+		service.workflowRepository.UpdateReactionTrigger(workflow)
 	}
 	channel <- "Action workflow done"
 }

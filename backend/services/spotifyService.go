@@ -17,9 +17,8 @@ import (
 
 type SpotifyService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.SpotifyResponseToken, error)
-	// GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 }
 
@@ -95,30 +94,7 @@ func (service *spotifyService) AuthGetServiceAccessToken(code string, path strin
 	return resultToken, nil
 }
 
-// func (service *spotifyService) GetUserInfo(accessToken string) (schemas.SpotifyUserInfo, error) {
-// 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me", nil)
-// 	if err != nil {
-// 		return schemas.SpotifyUserInfo{}, err
-// 	}
-
-// 	request.Header.Set("Authorization", "Bearer "+accessToken)
-// 	client := &http.Client{}
-
-// 	response, err := client.Do(request)
-// 	if err != nil {
-// 		return schemas.SpotifyUserInfo{}, err
-// 	}
-
-// 	result := schemas.SpotifyUserInfo{}
-// 	err = json.NewDecoder(response.Body).Decode(&result)
-// 	if err != nil {
-// 		return schemas.SpotifyUserInfo{}, err
-// 	}
-// 	response.Body.Close()
-// 	return result, nil
-// }
-
-func (service *spotifyService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *spotifyService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.SpotifyAddTrackAction):
 		return service.AddTrackAction
@@ -127,7 +103,7 @@ func (service *spotifyService) FindActionByName(name string) func(channel chan s
 	}
 }
 
-func (service *spotifyService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *spotifyService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.SpotifyAddTrackReaction):
 		return service.AddTrackReaction
@@ -136,14 +112,13 @@ func (service *spotifyService) FindReactionByName(name string) func(channel chan
 	}
 }
 
-func (service *spotifyService) AddTrackAction(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *spotifyService) AddTrackAction(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -151,10 +126,9 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 	accessToken := service.tokenRepository.FindByUserId(user)
 
 	options := schemas.SpotifyActionOptions{}
-	err = json.NewDecoder(strings.NewReader(option)).Decode(&options)
+	err = json.Unmarshal([]byte(actionOption), &options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	playlistId := ""
@@ -162,14 +136,12 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/playlist/%s", &playlistId)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+playlistId, nil)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	client := &http.Client{}
@@ -179,12 +151,10 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
-	// request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -192,48 +162,42 @@ func (service *spotifyService) AddTrackAction(channel chan string, option string
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	defer response.Body.Close()
 	if options.IsOld {
+		options.NbSongs = result.Tracks.Total
 		if options.NbSongs < result.Tracks.Total {
-			options.NbSongs = result.Tracks.Total
 			workflow.ReactionTrigger = true
-			workflow.ActionOptions = toolbox.MustMarshal(options)
-			service.workflowRepository.Update(workflow)
 		}
+		workflow.ActionOptions = toolbox.RealObject(options)
+		service.workflowRepository.Update(workflow)
 	} else {
-		fmt.Println("total: ", result.Tracks.Total)
 		options.NbSongs = result.Tracks.Total
 		options.IsOld = true
-		workflow.ActionOptions = toolbox.MustMarshal(options)
+		workflow.ActionOptions = toolbox.RealObject(options)
 		service.workflowRepository.Update(workflow)
 	}
 	channel <- "Action workflow done"
-	time.Sleep(30 * time.Second)
 }
 
-func (service *spotifyService) AddTrackReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *spotifyService) AddTrackReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	if !workflow.ReactionTrigger {
-		time.Sleep(30 * time.Second)
 		return
 	}
 
 	options := schemas.SpotifyReactionOptions{}
-	err = json.NewDecoder(strings.NewReader(workflow.ReactionOptions)).Decode(&options)
+	err = json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -241,16 +205,14 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	parts := strings.Split(options.TrackURL, "?")
 	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/track/%s", &trackId)
 	if err != nil {
-		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
+		fmt.Printf("unable to create request 1 because: %s", err)
 		return
 	}
 	playlistId := ""
 	parts = strings.Split(options.PlaylistURL, "?")
 	_, err = fmt.Sscanf(parts[0], "https://open.spotify.com/playlist/%s", &playlistId)
 	if err != nil {
-		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
+		fmt.Printf("unable to create request 2 because: %s", err)
 		return
 	}
 
@@ -258,7 +220,6 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 	request, err := http.NewRequest("POST", "https://api.spotify.com/v1/playlists/"+playlistId+"/tracks", strings.NewReader(reqBody))
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -270,14 +231,13 @@ func (service *spotifyService) AddTrackReaction(channel chan string, workflowId 
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
-	// request.Header.Set("Authorization", "Bearer "+accessToken[len(accessToken)-1].Token)
 
 	_, err = client.Do(request)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
+
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
 }

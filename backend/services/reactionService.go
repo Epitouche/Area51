@@ -36,40 +36,40 @@ func NewReactionService(
 				Name:        string(schemas.GithubReactionListComments),
 				Description: "List all comments of a repository",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
-				Options: toolbox.MustMarshal(schemas.GithubListAllReviewCommentsOptions{
-					Owner: "string",
-					Repo:  "string",
+				Options: toolbox.RealObject(schemas.GithubListAllReviewCommentsOptions{
+					Owner: "my github username",
+					Repo:  "name of the repository",
 				}),
 			},
 			{
 				Name:        string(schemas.SpotifyAddTrackReaction),
 				Description: "Add a track to a playlist",
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
-				Options: toolbox.MustMarshal(schemas.SpotifyReactionOptions{
-					PlaylistURL: "string",
-					TrackURL:    "string",
+				Options: toolbox.RealObject(schemas.SpotifyReactionOptions{
+					PlaylistURL: "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
+					TrackURL:    "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8",
 				}),
 			},
 			{
 				Name:        string(schemas.GoogleCreateEventReaction),
 				Description: "Create an event in Google Calendar",
 				ServiceId:   serviceService.FindByName(schemas.Google).Id,
-				Options: toolbox.MustMarshal(schemas.GoogleCalendarOptions{
-					CalendarId: "string",
-					CalendarCorpus: schemas.GoogleCalendarCorpusOptions{
-						Summary:     "string",
-						Description: "string",
-						Location:    "string",
-						Start: schemas.GoogleCalendarCorpusOptionsTime{
-							DateTime: "string",
-							TimeZone: "string",
+				Options: toolbox.RealObject(schemas.GoogleCalendarOptionsSchema{
+					CalendarId: "your address email",
+					CalendarCorpus: schemas.GoogleCalendarCorpusOptionsSchema{
+						Summary:     "Réunion",
+						Description: "on va parler de l'avenir",
+						Location:    "Osaka",
+						Start: schemas.GoogleCalendarCorpusOptionsTimeStartSchema{
+							StartDateTime: "2025-01-15T10:00:00.0000000",
+							StartTimeZone: "Europe/Paris",
 						},
-						End: schemas.GoogleCalendarCorpusOptionsTime{
-							DateTime: "string",
-							TimeZone: "string",
+						End: schemas.GoogleCalendarCorpusOptionsTimeEndSchema{
+							EndDateTime: "2025-01-15T10:00:00.0000000",
+							EndTimeZone: "Europe/Paris",
 						},
 						Attendees: schemas.GoogleCalendarCorpusOptionsAttendees{
-							Email: "string",
+							Email: "my.email@gmail.com",
 						},
 					},
 				}),
@@ -78,58 +78,58 @@ func NewReactionService(
 				Name:        "get_red_notices",
 				Description: "Detect a change on a specific notice",
 				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-				Options: toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
-					FirstName: "string",
-					LastName:  "string",
+				Options: toolbox.RealObject(schemas.InterpolReactionOptionInfos{
+					FirstName: "Sylvain",
+					LastName:  "téun",
 				}),
 			},
 			{
 				Name:        "get_yellow_notices",
 				Description: "Detect a change on a specific notice",
 				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-				Options: toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
-					FirstName: "string",
-					LastName:  "string",
+				Options: toolbox.RealObject(schemas.InterpolReactionOptionInfos{
+					FirstName: "Michel",
+					LastName:  "Levoisin",
 				}),
 			},
 			{
 				Name:        "get_un_notices",
 				Description: "Detect a change on a specific notice",
 				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
-				Options: toolbox.MustMarshal(schemas.InterpolReactionOptionInfos{
-					FirstName: "string",
-					LastName:  "string",
+				Options: toolbox.RealObject(schemas.InterpolReactionOptionInfos{
+					FirstName: "Gérard",
+					LastName:  "Auplacard",
 				}),
 			},
 			{
 				Name:        string(schemas.WeatherCurrentReaction),
 				Description: "Get the current weather of a city",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
-				Options: toolbox.MustMarshal(schemas.WeatherCurrentReactionOptions{
-					CityName:     "string",
-					LanguageCode: "string",
+				Options: toolbox.RealObject(schemas.WeatherCurrentReactionOptions{
+					CityName:     "Bordeaux",
+					LanguageCode: "FR",
 				}),
 			},
 			{
 				Name:        string(schemas.MicrosoftMailReaction),
 				Description: "Send an email",
 				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
-				Options: toolbox.MustMarshal(schemas.MicrosoftSendMailOptions{
+				Options: toolbox.RealObject(schemas.MicrosoftSendMailOptions{
 					Message: schemas.MicrosoftSendMailMainMessageOptions{
-						Subject: "string",
+						Subject: "We are going to Chicoutimi ?",
 						Body: schemas.MicrosoftSendMailBodyOptions{
-							ContentType: "string",
-							Content:     "string",
+							ContentType: "Text",
+							Content:     "This email is to confirm our trip to Chicoutimi",
 						},
 						ToRecipients: []schemas.MicrosoftSendMailRecipientsOptions{
 							{
 								EmailAdress: schemas.MicrosoftSendMailAdressOptions{
-									Address: "string",
+									Address: "other.email@gmail.com",
 								},
 							},
 						},
 					},
-					SaveToSentItems: "string",
+					SaveToSentItems: "true / false",
 				}),
 			},
 		},

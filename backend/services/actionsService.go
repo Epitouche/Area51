@@ -45,70 +45,70 @@ func NewActionService(
 				Name:        string(schemas.GithubPullRequest),
 				Description: "Creation or deletion of a pull request",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
-				Options: toolbox.MustMarshal(schemas.GithubPullRequestOptions{
-					Owner: "string",
-					Repo:  "string",
+				Options: toolbox.RealObject(schemas.GithubPullRequestOptions{
+					Owner: "my github username",
+					Repo:  "name of the repository",
 				}),
 			},
 			{
 				Name:        string(schemas.GithubPushOnRepo),
 				Description: "Detect a push on a repository",
 				ServiceId:   serviceService.FindByName(schemas.Github).Id,
-				Options: toolbox.MustMarshal(schemas.GithubPushOnRepoOptions{
-					Owner:  "string",
-					Repo:   "string",
-					Branch: "string",
+				Options: toolbox.RealObject(schemas.GithubPushOnRepoOptions{
+					Owner:  "my github username",
+					Repo:   "name of the repository",
+					Branch: "main",
 				}),
 			},
 			{
 				Name:        string(schemas.SpotifyAddTrackAction),
 				Description: "Add a track to a playlist",
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
-				Options: toolbox.MustMarshal(schemas.SpotifyActionOptionsInfo{
-					PlaylistURL: "string",
+				Options: toolbox.RealObject(schemas.SpotifyActionOptionsInfo{
+					PlaylistURL: "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
 				}),
 			},
 			{
 				Name:        string(schemas.GoogleGetEmailAction),
 				Description: "Get the email of the user",
 				ServiceId:   serviceService.FindByName(schemas.Google).Id,
-				Options: toolbox.MustMarshal(schemas.GoogleActionOptions{
-					Label: "string",
+				Options: toolbox.RealObject(schemas.GoogleActionOptions{
+					Label: "name of the box (INBOX, SPAM, ...)",
 				}),
 			},
 			{
 				Name:        string(schemas.MicrosoftOutlookEventsAction),
 				Description: "Detect an event in the oulook calendar of the user",
 				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
-				Options: toolbox.MustMarshal(schemas.MicrosoftOutlookEventsOptions{
-					Subject: "string",
+				Options: toolbox.RealObject(schemas.MicrosoftOutlookEventsOptions{
+					Subject: "Réunion de travail",
 				}),
 			},
 			{
 				Name:        string(schemas.WeatherCurrentAction),
 				Description: "Get the current weather",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
-				Options: toolbox.MustMarshal(schemas.WeatherCurrentOptions{
-					CityName:     "string",
-					LanguageCode: "string",
+				Options: toolbox.RealObject(schemas.WeatherCurrentOptions{
+					CityName:     "Bordeaux",
+					LanguageCode: "FR",
 					Temperature:  0,
-					CompareSign:  "string",
+					CompareSign:  "> or < or =",
 				}),
 			},
 			{
 				Name:        string(schemas.WeatherTimeAction),
 				Description: "Wait for a specific time",
 				ServiceId:   serviceService.FindByName(schemas.Weather).Id,
-				Options: toolbox.MustMarshal(schemas.WeatherSpecificTimeOption{
-					DateTime: "string",
-					CityName: "string",
+				Options: toolbox.RealObject(schemas.WeatherSpecificTimeOption{
+					DateTime: "2025-01-18",
+					CityName: "Bordeaux",
 				}),
 			},
 			{
 				Name:        string(schemas.MicrosoftTeamGroup),
 				Description: "Modify a Teams group",
 				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
-				Options: toolbox.MustMarshal(schemas.MicrosoftTeamsGroupOptionsInfos{
+				Options: toolbox.RealObject(schemas.MicrosoftTeamsGroupOptionsInfos{
 					Id: "string",
 				}),
 			},
@@ -137,6 +137,8 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 		return "", err
 	}
 
+	optionValue := toolbox.RealObject(result.Options)
+
 	serviceInfo := service.serviceService.FindByName(schemas.Github)
 	newAction := schemas.Action{
 		Name:        result.Name,
@@ -144,7 +146,7 @@ func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
 		UpdatedAt:   time.Now(),
 		Description: result.Description,
 		ServiceId:   serviceInfo.Id,
-		Options:     result.Options,
+		Options:     optionValue,
 	}
 
 	service.repository.Save(newAction)

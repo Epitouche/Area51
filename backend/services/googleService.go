@@ -20,8 +20,8 @@ import (
 type GoogleService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GoogleResponseToken, error)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
-	FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string)
+	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
+	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
 }
 
 type googleService struct {
@@ -123,7 +123,7 @@ func (service *googleService) GetUserInfosByToken(accessToken string, serviceNam
 	}
 }
 
-func (service *googleService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *googleService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GoogleGetEmailAction):
 		return service.GetEmailAction
@@ -132,7 +132,7 @@ func (service *googleService) FindActionByName(name string) func(channel chan st
 	}
 }
 
-func (service *googleService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *googleService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	switch name {
 	case string(schemas.GoogleCreateEventReaction):
 		return service.CreateEventReaction
@@ -141,7 +141,7 @@ func (service *googleService) FindReactionByName(name string) func(channel chan 
 	}
 }
 
-func (service *googleService) GetEmailAction(channel chan string, option string, workflowId uint64, actionOption string) {
+func (service *googleService) GetEmailAction(channel chan string, workflowId uint64, actionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -154,7 +154,7 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 	}
 
 	options := schemas.GoogleActionOptions{}
-	err = json.NewDecoder(strings.NewReader(workflow.ActionOptions)).Decode(&options)
+	err = json.Unmarshal([](byte)(actionOption), &options)
 	if err != nil {
 		fmt.Println("Error parsing actionOption:", err)
 		return
@@ -189,29 +189,70 @@ func (service *googleService) GetEmailAction(channel chan string, option string,
 		// 	channel <- err.Error()
 		return
 	}
-	existingRecords := service.googleRepository.FindByWorkflowId(workflowId)
-	if existingRecords.UserId == 0 {
-		service.googleRepository.Save(schemas.GoogleActionResponse{
-			User:               user,
-			UserId:             user.Id,
-			Worflow:            workflow,
-			WorkflowId:         workflowId,
-			ResultSizeEstimate: 0,
-		})
+	existingRecords := map[string]interface{}{}
+
+	if string(workflow.Utils) != "" {
+		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
+		if err != nil {
+			fmt.Println("Error unmarshalling existingRecords:", err)
+			return
+		}
 	}
-	if existingRecords.ResultSizeEstimate < googleOption.ResultSizeEstimate {
+
+	if existingRecords["ResultSizeEstimate"] == nil {
+		existingRecords["ResultSizeEstimate"] = 0
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
+		service.workflowRepository.Update(workflow)
+	}
+	var ResultSizeEstimate int
+	switch v := existingRecords["ResultSizeEstimate"].(type) {
+	case float64:
+		ResultSizeEstimate = int(v)
+	case int:
+		ResultSizeEstimate = v
+	default:
+		fmt.Println("Error asserting NumPR to int or float64")
+		return
+	}
+
+	if ResultSizeEstimate < googleOption.ResultSizeEstimate {
+		existingRecords["ResultSizeEstimate"] = googleOption.ResultSizeEstimate
+		jsonData, err := json.Marshal(existingRecords)
+		if err != nil {
+			fmt.Println("Error marshalling existingRecords:", err)
+			return
+		}
+		workflow.Utils = jsonData
 		workflow.ReactionTrigger = true
 		service.workflowRepository.Update(workflow)
 	}
-	actualRecords := service.googleRepository.FindByWorkflowId(workflowId)
-	actualRecords.ResultSizeEstimate = googleOption.ResultSizeEstimate
-	service.googleRepository.UpdateNumEmails(actualRecords)
 	channel <- "Emails fetched"
 }
 
-func (service *googleService) CreateEventReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
+func (service *googleService) CreateEventReaction(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
+
+	// Iterate over all tokens
+	for _, token := range accessToken {
+		actualUser := service.userService.GetUserById(token.UserId)
+		if token.UserId == actualUser.Id {
+			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
+			for _, workflow := range actualWorkflow {
+				if workflow.Id == workflowId {
+					if !workflow.ReactionTrigger {
+						fmt.Println("Trigger is already false, skipping reaction.")
+						return
+					}
+				}
+			}
+		}
+	}
 
 	workflow := service.workflowRepository.FindById(workflowId)
 
@@ -230,12 +271,29 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 		}
 	}
 
-	options := schemas.GoogleCalendarOptions{}
-	err = json.NewDecoder(strings.NewReader(reactionOption)).Decode(&options)
+	options := schemas.GoogleCalendarOptionsSchema{}
+	err = json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		time.Sleep(30 * time.Second)
 		return
+	}
+	trueOptions := schemas.GoogleCalendarOptions{
+		CalendarId: options.CalendarId,
+		CalendarCorpus: schemas.GoogleCalendarCorpusOptions{
+			Summary:     options.CalendarCorpus.Summary,
+			Description: options.CalendarCorpus.Description,
+			Location:    options.CalendarCorpus.Location,
+			Start: schemas.GoogleCalendarCorpusOptionsTime{
+				DateTime: options.CalendarCorpus.Start.StartDateTime,
+				TimeZone: options.CalendarCorpus.Start.StartTimeZone,
+			},
+			End: schemas.GoogleCalendarCorpusOptionsTime{
+				DateTime: options.CalendarCorpus.End.EndDateTime,
+				TimeZone: options.CalendarCorpus.End.EndTimeZone,
+			},
+			Attendees: options.CalendarCorpus.Attendees,
+		},
 	}
 
 	client := &http.Client{}
@@ -256,7 +314,7 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 	}
 	var wantedCaledarId string
 	for _, calendar := range googleCalendarIds.Items {
-		if calendar.Id == options.CalendarId {
+		if calendar.Id == trueOptions.CalendarId {
 			wantedCaledarId = calendar.Id
 		}
 	}
@@ -264,7 +322,7 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 
 	urlToCreateEvent := "https://www.googleapis.com/calendar/v3/calendars/" + wantedCaledarId + "/events"
 
-	jsonData, err := json.Marshal(options.CalendarCorpus)
+	jsonData, err := json.Marshal(trueOptions.CalendarCorpus)
 	if err != nil {
 		return
 	}
