@@ -18,6 +18,7 @@ import (
 )
 
 type GoogleService interface {
+	DeleteByUserId(userId uint64)
 	AuthGetServiceAccessToken(code string, path string) (schemas.GoogleResponseToken, error)
 	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
 	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
@@ -46,6 +47,14 @@ func NewGoogleService(
 		workflowRepository: workflowRepository,
 		serviceRepository:  serviceRepository,
 		googleRepository:   googleRepository,
+	}
+}
+
+func (service *googleService) DeleteByUserId(userId uint64) {
+	result := service.googleRepository.FindByUserId(userId)
+
+	for _, field := range(result) {
+		service.googleRepository.Delete(field)
 	}
 }
 

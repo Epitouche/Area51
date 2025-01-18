@@ -20,6 +20,8 @@ type GithubRepository interface {
 	UpdatePushDate(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable)
 	DeletePush(githubPushOnRepoOptions schemas.GithubPushOnRepoOptionsTable)
 	FindByWorkflowId(workflowId uint64) schemas.GithubPushOnRepoOptionsTable
+	FindPushByUserId(userId uint64) (githubPushOnRepoOptions []schemas.GithubPushOnRepoOptionsTable)
+	FindPullByUserId(userId uint64) (githubPullOnRepoOptions []schemas.GithubPullRequestOptionsTable)
 }
 
 type githubRepository struct {
@@ -143,4 +145,26 @@ func (repo *githubRepository) FindByWorkflowId(workflowId uint64) (githubPushOnR
 		return schemas.GithubPushOnRepoOptionsTable{}
 	}
 	return githubPushOnRepoOptions
+}
+
+func (repo *githubRepository) FindPushByUserId(userId uint64) (githubPushOnRepoOptions []schemas.GithubPushOnRepoOptionsTable) {
+	err := repo.db.Connection.Where(&schemas.GithubPushOnRepoOptionsTable{
+		UserId: userId,
+	}).Find(&githubPushOnRepoOptions)
+
+	if err.Error != nil {
+		return []schemas.GithubPushOnRepoOptionsTable{}
+	}
+	return githubPushOnRepoOptions
+}
+
+func (repo *githubRepository) FindPullByUserId(userId uint64) (githubPullOnRepoOptions []schemas.GithubPullRequestOptionsTable) {
+	err := repo.db.Connection.Where(&schemas.GithubPullRequestOptionsTable{
+		UserId: userId,
+	}).Find(&githubPullOnRepoOptions)
+
+	if err.Error != nil {
+		return []schemas.GithubPullRequestOptionsTable{}
+	}
+	return githubPullOnRepoOptions
 }

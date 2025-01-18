@@ -21,8 +21,10 @@ type WorkflowService interface {
 	ExistWorkflow(workflowId uint64) bool
 	GetWorkflowByName(name string) schemas.Workflow
 	GetWorkflowById(workflowId uint64) schemas.Workflow
+	GetWorkflowsByUserId(userId uint64) []schemas.Workflow
 	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
 	DeleteWorkflow(ctx *gin.Context) error
+	Delete(workflowId uint64) error
 }
 
 type workflowService struct {
@@ -229,6 +231,14 @@ func (service *workflowService) GetWorkflowByName(name string) schemas.Workflow 
 
 func (service *workflowService) GetWorkflowById(workflowId uint64) schemas.Workflow {
 	return service.repository.FindById(workflowId)
+}
+
+func (service *workflowService) GetWorkflowsByUserId(userId uint64) []schemas.Workflow {
+	return service.repository.FindByUserId(userId)
+}
+
+func (service *workflowService) Delete(workflowId uint64) error {
+	return service.repository.Delete(workflowId)
 }
 
 func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {

@@ -14,6 +14,7 @@ type GoogleRepository interface {
 
 	FindAll() []schemas.GoogleActionResponse
 	FindByWorkflowId(workflowId uint64) schemas.GoogleActionResponse
+	FindByUserId(userId uint64) ([]schemas.GoogleActionResponse)
 }
 
 type googleRepository struct {
@@ -82,6 +83,15 @@ func (repo *googleRepository) FindByWorkflowId(workflowId uint64) (googleMailOpt
 
 	if err.Error != nil {
 		return schemas.GoogleActionResponse{}
+	}
+	return googleMailOptions
+}
+
+func (repo *googleRepository) FindByUserId(userId uint64) (googleMailOptions []schemas.GoogleActionResponse) {
+	err := repo.db.Connection.Find(&googleMailOptions).Where(&schemas.GoogleActionResponse{UserId: userId})
+
+	if err.Error != nil {
+		return []schemas.GoogleActionResponse{}
 	}
 	return googleMailOptions
 }

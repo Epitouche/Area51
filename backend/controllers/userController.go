@@ -17,6 +17,7 @@ type UserController interface {
 	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
 	GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error)
 	LogoutService(ctx *gin.Context) error
+	DeleteAccount(ctx *gin.Context) error
 }
 
 type userController struct {
@@ -26,6 +27,9 @@ type userController struct {
 	reactionService services.ReactionService
 	actionService   services.ActionService
 	serviceToken    services.TokenService
+	workflowService services.WorkflowService
+	googleService   services.GoogleService
+	githubService   services.GithubService
 }
 
 func NewUserController(
@@ -35,6 +39,9 @@ func NewUserController(
 	reactionService services.ReactionService,
 	actionService services.ActionService,
 	serviceToken services.TokenService,
+	workflowService services.WorkflowService,
+	googleService services.GoogleService,
+	githubService services.GithubService,
 ) UserController {
 	return &userController{
 		userService:     userService,
@@ -43,6 +50,9 @@ func NewUserController(
 		reactionService: reactionService,
 		actionService:   actionService,
 		serviceToken:    serviceToken,
+		workflowService: workflowService,
+		googleService: googleService,
+		githubService: githubService,
 	}
 }
 
@@ -178,5 +188,34 @@ func (controller *userController) LogoutService(ctx *gin.Context) error {
 			}
 		}
 	}
+	return nil
+}
+
+func (controller *userController) DeleteAccount(ctx *gin.Context) error {
+	// Verify all infos
+	bearer, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		return err
+	}
+	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
+	if err != nil {
+		return err
+	}
+	// tokens, err := controller.serviceToken.GetTokenByUserId(userId)
+	// if err != nil {
+	// 	return err
+	// }
+	// workflows := controller.workflowService.GetWorkflowsByUserId(userId)
+	
+	// Delete all infos
+	// for _, token := range(tokens) {
+	// 	controller.serviceToken.Delete(token)
+	// }
+	controller.userService.DeleteUser(userId)
+	// for _, workflow := range(workflows) {
+	// 	controller.workflowService.Delete(workflow.Id)
+	// }
+	// controller.googleService.DeleteByUserId(userId)
+	// controller.githubService.DeleteByUserId(userId)
 	return nil
 }
