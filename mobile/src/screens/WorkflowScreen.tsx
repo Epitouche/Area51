@@ -64,7 +64,9 @@ export default function WorkflowScreen() {
   }, [token]);
 
   useEffect(() => {
-    checkIsToken();
+    setTimeout(() => {
+      checkIsToken();
+    }, 300);
   }, []);
 
   return (

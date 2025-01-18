@@ -67,8 +67,8 @@ export async function sendServiceToken(
     }
 
     const data = await response.json();
-    deleteToken('token');
-    saveToken('token', data.token);
+    await deleteToken('token');
+    await saveToken('token', data.token);
     return true;
   } catch (error) {
     console.error('Error service OAuth2:', error);

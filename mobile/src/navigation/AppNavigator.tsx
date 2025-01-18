@@ -51,7 +51,7 @@ function AuthStackScreen() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <HomeIcon width={24} height={24} fill={color} />
           ),
         }}
@@ -60,7 +60,7 @@ function AuthStackScreen() {
         name="Login"
         component={LoginScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <LoginIcon width={24} height={24} fill={color} />
           ),
         }}
@@ -69,7 +69,7 @@ function AuthStackScreen() {
         name="Register"
         component={RegisterScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <RegisterIcon width={24} height={24} fill={color} />
           ),
         }}
@@ -85,7 +85,7 @@ function OptionsStackScreen() {
         name="Workflows"
         component={WorkflowScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <WorkflowIcon width={24} height={24} fill={color} />
           ),
         }}
@@ -94,7 +94,7 @@ function OptionsStackScreen() {
         name="Service"
         component={ServiceScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <ServiceIcon width={24} height={24} fill={color} />
           ),
         }}
@@ -103,7 +103,7 @@ function OptionsStackScreen() {
         name="Setting"
         component={SettingScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <SettingIcon width={24} height={24} fill={color} />
           ),
         }}

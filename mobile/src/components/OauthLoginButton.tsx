@@ -17,8 +17,9 @@ export function OauthLoginButton({
   setIsConnected,
   isBlackTheme,
 }: OauthLoginButtonProps) {
+
   const handleOauthLogin = async () => {
-    if (await selectServicesParams({ serverIp, serviceName: name })) {
+    if (await selectServicesParams({ serverIp, serviceName: name }) === true) {
       setIsConnected(true);
     }
   };

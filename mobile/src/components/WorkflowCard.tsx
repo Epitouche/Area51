@@ -46,8 +46,6 @@ export function WorkflowCard({
     );
 
   const handleSendWorkflow = async () => {
-    console.log('action', transformOptions(action.options));
-    console.log('reaction', transformOptions(reaction.options));
     if (token !== 'Error: token not found' && action && reaction) {
       await sendWorkflows(token, serverIp, {
         action_id: action.id,

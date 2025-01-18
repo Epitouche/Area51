@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { loginApiCall } from '../service';
-import { AboutJson, LoginProps } from '../types';
+import { AboutJson, AboutJsonParse, LoginProps } from '../types';
 import { OauthLoginButton, IpInput } from '../components';
 import { globalStyles } from '../styles/global_style';
 
@@ -21,7 +21,12 @@ interface LoginFunctionProps {
 }
 
 interface NoIpProps {
-  isBlackTheme: boolean;
+  isBlackTheme?: boolean;
+  setAboutJson: (aboutJson: AboutJson) => void;
+  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
+  aboutJson: AboutJson | undefined;
+  setServerIp: (serverIp: string) => void;
+  serverIp: string;
 }
 
 function Login({
@@ -92,16 +97,10 @@ function Login({
         </View>
         <View style={{ width: '90%' }}>
           <TouchableOpacity
-            style={[
-              globalStyles.buttonFormat,
-              globalStyles.terciaryLight,
-            ]}
+            style={[globalStyles.buttonFormat, globalStyles.terciaryLight]}
             onPress={handleLogin}>
             <Text
-              style={[
-                globalStyles.textColorBlack,
-                globalStyles.textFormat,
-              ]}
+              style={[globalStyles.textColorBlack, globalStyles.textFormat]}
               accessibilityLabel="Login Button">
               Login
             </Text>
@@ -148,7 +147,14 @@ function Login({
   );
 }
 
-function NoIp({ isBlackTheme }: NoIpProps) {
+function NoIp({
+  isBlackTheme,
+  serverIp,
+  setServerIp,
+  aboutJson,
+  setAboutJson,
+  setServicesConnected,
+}: NoIpProps) {
   return (
     <View
       style={
@@ -159,15 +165,29 @@ function NoIp({ isBlackTheme }: NoIpProps) {
           style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
           LOG IN
         </Text>
-        <IpInput />
+        <IpInput
+          aboutJson={aboutJson}
+          serverIp={serverIp}
+          setServerIp={setServerIp}
+          setAboutJson={setAboutJson}
+          setServicesConnected={setServicesConnected}
+          isBlackTheme={isBlackTheme}
+        />
       </View>
     </View>
   );
 }
 
 export default function LoginScreen() {
-  const { serverIp, setIsConnected, isBlackTheme, aboutJson } =
-    useContext(AppContext);
+  const {
+    serverIp,
+    setIsConnected,
+    isBlackTheme,
+    aboutJson,
+    setAboutJson,
+    setServerIp,
+    setServicesConnected,
+  } = useContext(AppContext);
 
   return serverIp ? (
     <Login
@@ -177,7 +197,14 @@ export default function LoginScreen() {
       aboutJson={aboutJson}
     />
   ) : (
-    <NoIp isBlackTheme={isBlackTheme} />
+    <NoIp
+      isBlackTheme={isBlackTheme}
+      aboutJson={aboutJson}
+      serverIp={serverIp}
+      setAboutJson={setAboutJson}
+      setServerIp={setServerIp}
+      setServicesConnected={setServicesConnected}
+    />
   );
 }
 
