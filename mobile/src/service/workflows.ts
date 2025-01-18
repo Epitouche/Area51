@@ -3,7 +3,6 @@ export async function sendWorkflows(
   apiEndpoint: string,
   formsRegister: { action_id: number; reaction_id: number; name?: string, action_option: string, reaction_option: string },
 ) {
-  console.log('formsRegister', formsRegister);
   try {
     const response = await fetch(`http://${apiEndpoint}:8080/api/workflow`, {
       headers: {
@@ -45,7 +44,6 @@ export async function getReaction(
     );
     const data = await response.json();
     if (response.status === 200) {
-      console.log('data', data);
       if (data !== null) sendReaction(data);
     }
     return true;
