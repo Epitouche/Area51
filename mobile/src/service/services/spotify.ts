@@ -1,11 +1,11 @@
-import { deleteToken, saveToken } from "../token";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_SECRET } from '@env';
-import { OauthLogin } from '../oauth/oauthCall';
+import { sendServiceToken, OauthLogin } from './services';
 
-export async function spotifyLogin(apiEndpoint: string, email?: string) {
-  const setToken = (accessToken: string) => {
-    console.log('Spotify token');
-    // sendSpotifyToken(apiEndpoint, accessToken);
+export async function spotifyLogin(apiEndpoint: string, sessionToken?: string) {
+  const setToken = async (accessToken: string) => {
+    if (sessionToken)
+      await sendServiceToken(apiEndpoint, accessToken, 'spotify', sessionToken);
+    else await sendServiceToken(apiEndpoint, accessToken, 'spotify');
   };
   const config = {
     clientId: SPOTIFY_CLIENT_ID,
@@ -20,41 +20,4 @@ export async function spotifyLogin(apiEndpoint: string, email?: string) {
 
   if (await OauthLogin({ config, setToken })) return true;
   return false;
-}
-
-export async function sendSpotifyToken(
-  apiEndpoint: string,
-  token: string,
-  email?: string,
-) {
-  try {
-    let response;
-    if (email) {
-      response = await fetch(
-        `http://${apiEndpoint}:8080/api/github/mobile/token`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ token: token, email: email }),
-        },
-      );
-    } else {
-      response = await fetch(
-        `http://${apiEndpoint}:8080/api/github/mobile/token`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ token: token }),
-        },
-      );
-    }
-    const data = await response.json();
-    if (response.status === 200) {
-      console.log('API send Spotify Token success');
-    }
-    deleteToken('token');
-    saveToken('token', data.token);
-    return true;
-  } catch (error) {
-    console.error('Error:', error);
-    return false;
-  }
 }
