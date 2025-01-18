@@ -63,21 +63,6 @@ const handleClickOutside = (event: MouseEvent) => {
 
 const token = useCookie("access_token");
 
-const notificationStore = useNotificationStore();
-
-function triggerNotification(
-  type: "success" | "error" | "warning",
-  title: string,
-  message: string
-) {
-  notificationStore.addNotification({
-    type,
-    title,
-    message,
-  });
-}
-
-
 async function launchAction(option: string, workflow: Workflow) {
   switch (option) {
     case "Edit":
