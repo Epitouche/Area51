@@ -269,12 +269,6 @@ async function fetchWorkflows() {
 }
 
 async function transformOptions(options: OptionWorkflow[]) {
-  const transformed = options.reduce((acc, option) => {
-    acc[option.name] = option.input;
-    return acc;
-  }, {} as Record<string, string>);
-
-  // reassemble the object
   const result: NestedObject = {};
 
   options.forEach((option) => {
