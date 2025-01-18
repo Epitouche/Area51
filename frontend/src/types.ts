@@ -1,8 +1,3 @@
-export type WorkflowResponse = {
-  body: string;
-  pull_request_url: string;
-};
-
 export type Workflow = {
   name: string;
   action_id: number;

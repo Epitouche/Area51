@@ -3,7 +3,6 @@ import { useNotificationStore } from "@/stores/notification";
 
 import type {
   Service,
-  WorkflowResponse,
   Workflow,
   AboutResponse,
   OptionWorkflow,
@@ -35,7 +34,7 @@ const sorts = ["Name", "Creation Date", "Action ID", "Reaction ID"];
 
 const services = reactive<Service[]>([]);
 const workflowsInList = reactive<Workflow[]>([]);
-const lastWorkflowResult = reactive<WorkflowResponse[]>([]);
+const lastWorkflowResult = reactive<unknown[]>([]);
 
 const actionString = ref("");
 const reactionString = ref("");
@@ -354,7 +353,7 @@ async function addWorkflow() {
 
 async function getLastWorkflowResult() {
   try {
-    const response = await $fetch<WorkflowResponse[]>(
+    const response = await $fetch<unknown[]>(
       "/api/workflows/getLastWorkflow",
       {
         method: "GET",
@@ -364,6 +363,7 @@ async function getLastWorkflowResult() {
         },
       }
     );
+
     lastWorkflowResult.push(...response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
