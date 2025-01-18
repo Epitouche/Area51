@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"time"
 
 	"area51/repository"
 	"area51/schemas"
@@ -41,10 +40,7 @@ func NewInterpolService(
 }
 
 func (service *interpolService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64, actionOption string) {
-	switch name {
-	default:
-		return nil
-	}
+	return nil
 }
 
 func (service *interpolService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption string) {
@@ -93,15 +89,13 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 	options := schemas.InterpolReactionOption{}
 	err := json.NewDecoder(strings.NewReader(workflow.ReactionOptions)).Decode(&options)
 	if err != nil {
-		fmt.Println(err)
-		time.Sleep(30 * time.Second)
+		fmt.Println("Error ->", err)
 		return
 	}
 
 	request, err := http.NewRequest("GET", "https://ws-public.interpol.int/notices/v1/" + noticeType + "?forename=" + options.FirstName + "&name=" + options.LastName, nil)
 	if err != nil {
 		fmt.Printf("unable to create request because: %s", err)
-		time.Sleep(30 * time.Second)
 		return
 	}
     request.Header.Set("Accept", "application/json")
@@ -114,7 +108,6 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -122,7 +115,6 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	savedResult := schemas.ReactionResponseData{
@@ -138,7 +130,6 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 	service.reactionResponseDataService.Save(savedResult)
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)
-	time.Sleep(30 * time.Second)
 }
 
 func (service *interpolService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {

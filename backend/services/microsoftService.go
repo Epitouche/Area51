@@ -153,7 +153,6 @@ func (service *microsoftService) ModifyTeamGroup(channel chan string, option str
 	err = json.NewDecoder(strings.NewReader(actionOption)).Decode(&options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 
@@ -293,7 +292,6 @@ func (service *microsoftService) SendMail(channel chan string, workflowId uint64
 	err := json.NewDecoder(strings.NewReader(reactionOption)).Decode(&options)
 	if err != nil {
 		fmt.Println(err)
-		time.Sleep(30 * time.Second)
 		return
 	}
 	url := "https://graph.microsoft.com/v1.0/me/sendMail"
