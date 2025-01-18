@@ -96,7 +96,7 @@ const confirmModalAction = () => {
       transformedOptions.push({
         name: path,
         type: typeof value === "object" ? "object" : String(typeof value),
-        input: "",
+        input: typeof value !== "object" ? String(value) : "",
       });
     });
   }
@@ -126,7 +126,7 @@ const confirmModalReaction = () => {
       transformedOptions.push({
         name: path,
         type: typeof value === "object" ? "object" : String(typeof value),
-        input: "",
+        input: typeof value !== "object" ? String(value) : "",
       });
     });
   }
