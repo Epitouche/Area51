@@ -22,7 +22,8 @@ type WorkflowService interface {
 	GetWorkflowByName(name string) schemas.Workflow
 	GetWorkflowById(workflowId uint64) schemas.Workflow
 	GetWorkflowsByUserId(userId uint64) []schemas.Workflow
-	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
+	GetMostRecentReaction(ctx *gin.Context) ([]json.RawMessage, error)
+	GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error)
 	DeleteWorkflow(ctx *gin.Context) error
 	Delete(workflowId uint64) error
 }
@@ -241,28 +242,31 @@ func (service *workflowService) Delete(workflowId uint64) error {
 	return service.repository.Delete(workflowId)
 }
 
-func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
-	tokenString, err := toolbox.GetBearerToken(ctx)
+func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]json.RawMessage, error) {
+	var result schemas.ReactionOutputJson
+	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := service.userService.GetUserInfos(tokenString)
+	_, err = toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	workflows := service.repository.FindByUserId(user.Id)
-	reactionResponse := []schemas.GithubListCommentsResponse{}
-	for _, workflow := range workflows {
-		reactionResponseData := service.reactionResponseDataService.FindByWorkflowId(workflow.Id)
-		for _, data := range reactionResponseData {
-			err := json.Unmarshal(data.ApiResponse, &reactionResponse)
-			if err != nil {
-				return nil, err
-			}
+	workflow := service.repository.FindById(result.WorkflowId)
+	if workflow.Id == 0 {
+		return nil, fmt.Errorf("workflow not found")
+	}
+	reactionResponse := []json.RawMessage{}
+	reactionResponseData := service.reactionResponseDataService.FindByWorkflowId(workflow.Id)
+	tmp := schemas.ReactionResponseData{}
+	for _, data := range reactionResponseData {
+		if !data.CreatedAt.Before(tmp.CreatedAt) {
+			tmp = data
 		}
 	}
+	reactionResponse = append(reactionResponse, tmp.ApiResponse)
 	return reactionResponse, nil
 }
 
@@ -294,9 +298,31 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 				return err
 			}
 			return nil
-		} else {
-			return fmt.Errorf("workflow not found")
 		}
 	}
 	return nil
+}
+
+func (service *workflowService) GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error) {
+	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) <= len("Bearer ") {
+		return nil, fmt.Errorf("no authorization header found")
+	}
+	tokenString := authHeader[len("Bearer "):]
+
+	user, err := service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	workflow := service.repository.FindByUserId(user.Id)
+	var reactionResponse []json.RawMessage
+	for _, wf := range workflow {
+		if wf.UserId == user.Id {
+			reactionResponseData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
+			for _, data := range reactionResponseData {
+				reactionResponse = append(reactionResponse, data.ApiResponse)
+			}
+		}
+	}
+	return reactionResponse, nil
 }
