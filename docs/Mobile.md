@@ -249,4 +249,4 @@ GOOGLE_MOBILE_ID=''
 
 ## Area51 app view
 
-<iframe src="https://drive.google.com/file/d/17N3K4B_Jb8drptCRV3bVdeZ-DuNixStj/view?usp=drivesdk" width="640" height="480" allow="autoplay"></iframe>
+https://drive.google.com/file/d/17N3K4B_Jb8drptCRV3bVdeZ-DuNixStj/view?usp=drivesdk
