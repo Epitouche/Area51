@@ -8,6 +8,8 @@ export type Workflow = {
   created_at: string;
   checked?: boolean;
   workflow_id: number;
+  action_option: NestedObject;
+  reaction_option: NestedObject;
 };
 
 export type NestedObject = {

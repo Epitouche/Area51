@@ -100,20 +100,25 @@ func (service *weatherService) VerifyFeelingTemperature(channel chan string, wor
 		channel <- err.Error()
 		return
 	}
+
+	realTemperature, err := toolbox.StringToFloat64(actionData.Temperature)
+	if err != nil {
+		return
+	}
 	switch actionData.CompareSign {
 	case ">":
-		if actionData.Temperature < weatherResponse.Current.Feelslike_c {
+		if realTemperature < weatherResponse.Current.Feelslike_c {
 			service.UpdateWorkflowForAction(workflow, actionData)
 			channel <- "Current weather"
 		}
 	case "<":
-		if actionData.Temperature > weatherResponse.Current.Feelslike_c {
+		if realTemperature > weatherResponse.Current.Feelslike_c {
 			service.UpdateWorkflowForAction(workflow, actionData)
 			channel <- "Current weather"
 		}
 	case "=":
 		{
-			if actionData.Temperature == weatherResponse.Current.Feelslike_c {
+			if realTemperature == weatherResponse.Current.Feelslike_c {
 				service.UpdateWorkflowForAction(workflow, actionData)
 				channel <- "Current weather"
 			}
