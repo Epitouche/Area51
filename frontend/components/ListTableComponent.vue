@@ -13,7 +13,7 @@ const modalOpen = ref(false);
 
 const copyIcon = ref("material-symbols:content-copy-outline-rounded");
 
-const workflowReaction = reactive<unknown[]>([]);
+const workflowReaction = ref("");
 
 const copyToClipboard = async (text: string) => {
   try {
@@ -26,7 +26,7 @@ const copyToClipboard = async (text: string) => {
 
 const filteredWorkflows = computed(() =>
   props.rows.map(
-    ({ checked, action_id, reaction_id, workflow_id, ...rest }) => rest
+    ({ checked, action_id, reaction_id, workflow_id, action_option, reaction_option, ...rest }) => rest
   )
 );
 
@@ -130,7 +130,7 @@ async function fetchWorkflowReaction(workflow: Workflow) {
     });
 
     if (response !== undefined) {
-      workflowReaction.push(response);
+      workflowReaction.value = JSON.stringify(response, null, 2);
     }
   } catch (error) {
     console.error(error);
@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex justify-center overflow-x-auto p-16">
+  <div class="flex justify-center overflow-x-auto p-16" v-bind="$attrs"> 
     <table
       class="w-full sm:w-11/12 border-collapse bg-primaryWhite-500 dark:bg-secondaryDark-500 text-sm sm:text-base"
     >
@@ -282,7 +282,7 @@ onBeforeUnmount(() => {
           <button
             class="absolute top-2 right-2 sm:top-4 sm:right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
             aria-label="Copy workflow result JSON"
-            @click="copyToClipboard(JSON.stringify(workflowReaction, null, 2))"
+            @click="copyToClipboard(workflowReaction)"
           >
             <Icon :name="copyIcon" />
           </button>
@@ -292,7 +292,7 @@ onBeforeUnmount(() => {
           >
             <pre
               class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200"
-              >{{ JSON.stringify(workflowReaction, null, 2) }}
+              >{{ workflowReaction }}
         </pre
             >
           </div>

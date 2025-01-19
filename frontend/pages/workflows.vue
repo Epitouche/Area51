@@ -552,7 +552,7 @@ onMounted(() => {
         />
       </div>
       <ListTableComponent
-        v-show="columns && filteredWorkflows"
+        v-if="columns && filteredWorkflows"
         v-model="workflowsInList"
         :columns="columns"
         :rows="filteredWorkflows"
