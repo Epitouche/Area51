@@ -31,7 +31,7 @@ onMounted(async () => {
 </script>
 <template>
     <div 
-        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 h-96"
+        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6"
         aria-label="Workflow Section">
         <h2 
             class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6"
