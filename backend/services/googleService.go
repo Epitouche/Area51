@@ -229,8 +229,9 @@ func (service *googleService) GetEmailAction(channel chan string, workflowId uin
 	workflow.Utils = jsonData
 	if ResultSizeEstimate < googleOption.ResultSizeEstimate {
 		workflow.ReactionTrigger = true
+		service.workflowRepository.UpdateReactionTrigger(workflow)
 	}
-	service.workflowRepository.Update(workflow)
+	service.workflowRepository.UpdateUtils(workflow)
 	channel <- "Emails fetched"
 }
 
