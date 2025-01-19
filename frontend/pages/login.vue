@@ -1,65 +1,12 @@
-<script setup lang="ts">
+<script setup>
 import { ref } from "vue";
-import { useNotificationStore } from "@/stores/notification";
-import type { AboutResponse } from "~/src/types";
 
-type ServiceCard = {
-  name: string;
-  image: string;
-};
-
-const username = ref<string>("");
-const password = ref<string>("");
-
-const notificationStore = useNotificationStore();
-
-type NotificationType = "success" | "error" | "warning";
-
-function triggerNotification(
-  type: NotificationType,
-  title: string,
-  message: string
-) {
-  notificationStore.addNotification({
-    type,
-    title,
-    message,
-  });
-}
-
-interface LoginResponse {
-  access_token: string;
-}
-
-const services = ref<ServiceCard[]>([]);
-
-async function fetchOauthServices() {
-  try {
-    const responseAbout = await $fetch<AboutResponse>(
-      "http://localhost:8080/about.json"
-    );
-
-    responseAbout.server.services.forEach((service) => {
-      if (service.is_oauth) {
-        services.value.push({
-          name: service.name,
-          image: service.image || "IMG",
-        });
-      }
-    });
-
-    services.value.forEach((service) => {
-      service.name =
-        service.name.charAt(0).toUpperCase() + service.name.slice(1);
-    });
-  } catch (error) {
-    console.error("Error fetching services:", error);
-  }
-}
+const username = ref("");
+const password = ref("");
 
 async function onSubmit() {
   try {
-    const { access_token }: LoginResponse = await $fetch(
+    const { access_token } = await $fetch(
       "http://localhost:8080/api/auth/login",
       {
         method: "POST",
@@ -69,79 +16,43 @@ async function onSubmit() {
         },
       }
     );
-
     if (access_token) {
-      const tokenCookie = useCookie("access_token");
-      tokenCookie.value = access_token;
-
-      navigateTo("/dashboard");
-    } else {
-      triggerNotification(
-        "error",
-        "Login failed",
-        "Please check your credentials"
-      );
+      localStorage.setItem("access_token", access_token);
+      navigateTo("/services");
     }
   } catch (error) {
-    console.error("Error logging in:", error);
-    triggerNotification(
-      "error",
-      "Login failed",
-      "Please check your credentials"
-    );
+    console.error("API response:", error.response?.data || error.message);
   }
 }
 
-interface RedirectResponse {
-  service_authentication_url: string;
-}
-
-async function redirectToService(index: number) {
+async function redirectToGitHubOAuth() {
   try {
-    const selectedService = services.value[index];
-
-    const { service_authentication_url }: RedirectResponse = await $fetch(
-      `http://localhost:8080/api/${selectedService.name.toLowerCase()}/auth`,
+    const { github_authentication_url } = await $fetch(
+      "http://localhost:8080/api/github/auth",
       {
         method: "GET",
       }
     );
-    if (service_authentication_url) {
-      useCookie("serviceUsedLogin").value = selectedService.name.toLowerCase();
-      window.location.href = service_authentication_url;
+    if (github_authentication_url) {
+      window.location.href = github_authentication_url;
     } else {
-      console.error("${selectedService} authentication URL not found");
+      console.error("GitHub authentication URL not found");
     }
   } catch (error) {
-    console.error("Error fetching ${selectedService} OAuth URL:", error);
+    console.error("Error fetching GitHub OAuth URL:", error);
   }
 }
-
-onMounted(() => {
-  fetchOauthServices();
-});
 </script>
 
 <template>
   <div
     class="flex items-center justify-center min-h-screen bg-primaryWhite-500 dark:bg-primaryDark-500"
-    aria-label="Login screen"
   >
     <div
-      class="w-full transform max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
-      aria-label="Login form container"
+      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
     >
-      <h2
-        class="text-2xl font-bold text-center"
-        aria-label="Login heading"
-      >
-        LOG IN
-      </h2>
-      <form
-        class="space-y-6"
-        @submit.prevent="onSubmit"
-        aria-label="Login form"
-      >
+      <h2 class="text-2xl font-bold text-center">LOG IN</h2>
+      <form class="space-y-6" @submit.prevent="onSubmit">
         <div>
           <InputComponent
             id="username"
@@ -149,7 +60,6 @@ onMounted(() => {
             type="text"
             label="Username"
             icon="fas fa-user"
-            aria-label="Username input field"
           />
         </div>
         <div>
@@ -159,7 +69,6 @@ onMounted(() => {
             type="password"
             label="Password"
             icon="fas fa-lock"
-            aria-label="Password input field"
           />
         </div>
         <!-- <div class="flex items-center gap-2">
@@ -178,38 +87,35 @@ onMounted(() => {
             bg-color="bg-primaryWhite-500"
             hover-color="hover:bg-secondaryWhite-500"
             text-color="text-fontBlack"
-            aria-label="Submit login form"
           />
         </div>
       </form>
-      <hr class="border-primaryWhite-400" aria-hidden="true">
-      <div class="flex justify-around flex-wrap gap-5" aria-label="Third-party login buttons">
+      <hr class="border-primaryWhite-400">
+      <div class="flex justify-around space-x-4">
         <ButtonComponent
-          v-for="(service, index) in services"
-          :key="index"
-          :text="service.name"
-          class="w-1/4"
+          text="Github"
+          class="w-full"
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
-          @click="redirectToService(index)"
-          aria-label="Login with {{ service.name }}"
+          :on-click="redirectToGitHubOAuth"
+        />
+        <ButtonComponent
+          text="Google"
+          class="w-full"
+          bg-color="bg-primaryWhite-500"
+          hover-color="hover:bg-secondaryWhite-500"
+          text-color="text-fontBlack"
         />
       </div>
       <div class="flex justify-around">
         <p class="text-center text-sm">
-          <NuxtLink
-            to="/register"
-            class="text-fontWhite underline"
-            aria-label="Navigate to registration page"
-          >
+          <NuxtLink to="/register" class="text-fontWhite underline">
             Create an account
           </NuxtLink>
         </p>
         <p class="text-center text-sm">
-          <a href="#" class="text-fontWhite underline" aria-label="Navigate to forgot password page">
-            Forgot password?
-          </a>
+          <a href="#" class="text-fontWhite underline">Forgot password?</a>
         </p>
       </div>
     </div>
