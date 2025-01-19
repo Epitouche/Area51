@@ -285,15 +285,32 @@ func (service *microsoftService) SendMail(channel chan string, workflowId uint64
 
 	workflow := service.workflowRepository.FindById(workflowId)
 
-	options := schemas.MicrosoftSendMailOptions{}
+	options := schemas.MicrosoftSendMailOptionsSchema{}
 	err := json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	trueOptions := schemas.MicrosoftSendMailOptions{
+		Message: schemas.MicrosoftSendMailMainMessageOptions{
+			Subject: options.Message.Subject,
+			Body: schemas.MicrosoftSendMailBodyOptions{
+				ContentType: options.Message.Body.ContentType,
+				Content:     options.Message.Body.Content,
+			},
+			ToRecipients: []schemas.MicrosoftSendMailRecipientsOptions{
+				{
+					EmailAdress: schemas.MicrosoftSendMailAdressOptions{
+						Address: options.Message.Address,
+					},
+				},
+			},
+		},
+		SaveToSentItems: options.SaveToSentItems,
+	}
 	url := "https://graph.microsoft.com/v1.0/me/sendMail"
 
-	jsonData, err := json.Marshal(options)
+	jsonData, err := json.Marshal(trueOptions)
 	if err != nil {
 		return
 	}
