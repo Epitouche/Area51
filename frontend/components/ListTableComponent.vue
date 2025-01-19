@@ -124,9 +124,9 @@ async function fetchWorkflowReaction(workflow: Workflow) {
         Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+      params: {
         workflow_id: workflow.workflow_id,
-      }),
+      },
     });
     
     if (response !== undefined) {

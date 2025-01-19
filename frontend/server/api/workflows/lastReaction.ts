@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   try {
-    const params = await readBody(event);
     const access_token = event.headers.get("Authorization");
+    const params = getQuery(event);
     if (!access_token || !params.workflow_id) {
       throw createError({
         statusCode: 400,
@@ -14,6 +14,9 @@ export default defineEventHandler(async (event) => {
       headers: {
         Authorization: access_token ? `${access_token}` : "",
         "Content-Type": "application/json",
+      },
+      params: {
+        workflow_id: params.workflow_id,
       },
     });
 
