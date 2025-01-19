@@ -74,12 +74,21 @@ git clone git@github.com:Epitouche/Area51.git
 
 ### Usage
 
+#### Frontend / Backend
+
 You can easily launch the project with the Dev Container extension direclty in VSCode.
 Before everything make sure to create a '.env' file. All the mandatory field are listed in the [*.env.example*](./.env.example), you just have to fill it.
 
 When the extension is installed you can hit: CRTL + MAJ + P. It will open the command palette where you can search for: "Dev Containers: Rebuild and Reopen in Container", select it and you will have two choices. Either "Backend" or "Frontend". That's it ! If you want to launch both the backend and the frontend, you just have to open a second vscode window with the same repo and launch the other one.
 
 To watch the website and the changes you've made go the localhost adress that the frontend terminal gives you normally it should be: localhost:8081. The backend is on localhost:8080 but I don't think you will see anything on your browser with this adress.
+
+#### Mobile
+
+To launch the mobile version you have to install Android Studio (this is ONE of the possibilities) to be able to launch the Android and IOS version.
+You have two options:
+- 1: The first one is easy, you just have to launch the mobile version with: 'npm start' while in the mobile directory and connect a cable to your mobile and choose the right model of your phone and the app will be available.
+- 2: The second one is a little bit more hard. You can do the same thing as the first one but instead using your phone, you can launch an emulator directly on the app Android Studio. This option is really easy once you have everything installed to be able to launch it. You have to install JDK, an env variable of ANDROID_HOME, Gradlew and the right version of Android SDK. Once you have everything you can relaunch the app and it will be available on the emulator.
 
 ## Project Organization
 We use the following tools for project management and documentation (Learn more by clicking on Github Projects or Google Drive):
