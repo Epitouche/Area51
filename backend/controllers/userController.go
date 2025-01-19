@@ -17,6 +17,7 @@ type UserController interface {
 	GetAllServices(ctx *gin.Context) ([]schemas.Service, error)
 	GetAllWorkflows(ctx *gin.Context) ([]schemas.WorkflowJson, error)
 	LogoutService(ctx *gin.Context) error
+	DeleteAccount(ctx *gin.Context) error
 }
 
 type userController struct {
@@ -26,6 +27,9 @@ type userController struct {
 	reactionService services.ReactionService
 	actionService   services.ActionService
 	serviceToken    services.TokenService
+	workflowService services.WorkflowService
+	googleService   services.GoogleService
+	githubService   services.GithubService
 }
 
 func NewUserController(
@@ -35,6 +39,9 @@ func NewUserController(
 	reactionService services.ReactionService,
 	actionService services.ActionService,
 	serviceToken services.TokenService,
+	workflowService services.WorkflowService,
+	googleService services.GoogleService,
+	githubService services.GithubService,
 ) UserController {
 	return &userController{
 		userService:     userService,
@@ -43,6 +50,9 @@ func NewUserController(
 		reactionService: reactionService,
 		actionService:   actionService,
 		serviceToken:    serviceToken,
+		workflowService: workflowService,
+		googleService:   googleService,
+		githubService:   githubService,
 	}
 }
 
@@ -130,14 +140,16 @@ func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.W
 		action := controller.actionService.FindById(workflow.ActionId)
 		reaction := controller.reactionService.FindById(workflow.ReactionId)
 		allWorkflows = append(allWorkflows, schemas.WorkflowJson{
-			Name:         workflow.Name,
-			WorkflowId:   workflow.Id,
-			ActionId:     workflow.ActionId,
-			ReactionId:   workflow.ReactionId,
-			ActionName:   action.Name,
-			ReactionName: reaction.Name,
-			IsActive:     workflow.IsActive,
-			CreatedAt:    workflow.CreatedAt,
+			Name:           workflow.Name,
+			WorkflowId:     workflow.Id,
+			ActionId:       workflow.ActionId,
+			ReactionId:     workflow.ReactionId,
+			ActionName:     action.Name,
+			ReactionName:   reaction.Name,
+			ActionOption:   toolbox.RealObject(workflow.ActionOptions),
+			ReactionOption: toolbox.RealObject(workflow.ReactionOptions),
+			IsActive:       workflow.IsActive,
+			CreatedAt:      workflow.CreatedAt,
 		})
 
 	}
@@ -179,4 +191,16 @@ func (controller *userController) LogoutService(ctx *gin.Context) error {
 		}
 	}
 	return nil
+}
+
+func (controller *userController) DeleteAccount(ctx *gin.Context) error {
+	bearer, err := toolbox.GetBearerToken(ctx)
+	if err != nil {
+		return err
+	}
+	userId, err := controller.jWtService.GetUserIdFromToken(bearer)
+	if err != nil {
+		return err
+	}
+	return controller.userService.DeleteUser(userId)
 }

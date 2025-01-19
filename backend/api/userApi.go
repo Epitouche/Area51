@@ -79,3 +79,15 @@ func (api *UserApi) LogoutService(ctx *gin.Context) {
 		})
 	}
 }
+
+func (api *UserApi) DeleteAccount(ctx *gin.Context) {
+	if err := api.userController.DeleteAccount(ctx); err != nil {
+		ctx.JSON(http.StatusBadRequest, &schemas.BasicResponse{
+			Message: err.Error(),
+		})
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.BasicResponse{
+			Message: "Account successfully deleted",
+		})
+	}
+}

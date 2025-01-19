@@ -3,14 +3,15 @@ package schemas
 type InterpolAction string
 
 const (
+	InterpolNewRedNotice InterpolAction = "new_red_notice"
 )
 
 type InterpolReaction string
 
 const (
-	InterpolGetRedNotices      InterpolAction = "get_red_notices"
-	InterpolGetYellowNotices   InterpolAction = "get_yellow_notices"
-	InterpolGetUNNotices       InterpolAction = "get_un_notices"
+	InterpolGetRedNotices    InterpolAction = "get_red_notices"
+	InterpolGetYellowNotices InterpolAction = "get_yellow_notices"
+	InterpolGetUNNotices     InterpolAction = "get_un_notices"
 )
 
 type Warrants struct {
@@ -42,21 +43,29 @@ type InterpolEmbedded struct {
 }
 
 type InterpolNoticesList struct {
-	Total uint64 `json:"total"`
+	Total    uint64           `json:"total"`
 	Embedded InterpolEmbedded `json:"_embedded"`
 }
 
 type InterpolReactionOption struct {
-	IsOld    bool           `json:"is_old"`
+	IsOld     bool   `json:"is_old"`
 	FirstName string `json:"firstname"`
-	LastName string `json:"lastname"`
+	LastName  string `json:"lastname"`
 }
 
 type InterpolReactionOptionInfos struct {
 	FirstName string `json:"firstname"`
-	LastName string `json:"lastname"`
+	LastName  string `json:"lastname"`
 }
 
 type InterpolRedNoticesInfos struct {
+	Total uint64 `json:"total"`
+}
+
+type InterpolActionOptions struct {
+	SexId string `json:"sexId"`
+}
+
+type InterpolActionOptionsInfo struct {
 	Total uint64 `json:"total"`
 }

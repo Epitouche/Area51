@@ -64,7 +64,6 @@ func (service *microsoftService) GetUserInfosByToken(accessToken string, service
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			// READ THE BODY
 			bodyBytes, _ := io.ReadAll(resp.Body)
 			fmt.Println("response body: ", string(bodyBytes))
 			return
@@ -250,8 +249,6 @@ func (service *microsoftService) GetOutlookEvents(channel chan string, workflowI
 		return
 	}
 
-	// fmt.Printf("VALUES : %s\n", string(bodyBytes))
-
 	var chosenSubject *string
 	for _, subject := range microsoftEventsSubjects.Value {
 		if subject.Subject == options.Subject {
@@ -288,15 +285,32 @@ func (service *microsoftService) SendMail(channel chan string, workflowId uint64
 
 	workflow := service.workflowRepository.FindById(workflowId)
 
-	options := schemas.MicrosoftSendMailOptions{}
+	options := schemas.MicrosoftSendMailOptionsSchema{}
 	err := json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	trueOptions := schemas.MicrosoftSendMailOptions{
+		Message: schemas.MicrosoftSendMailMainMessageOptions{
+			Subject: options.Message.Subject,
+			Body: schemas.MicrosoftSendMailBodyOptions{
+				ContentType: options.Message.Body.ContentType,
+				Content:     options.Message.Body.Content,
+			},
+			ToRecipients: []schemas.MicrosoftSendMailRecipientsOptions{
+				{
+					EmailAdress: schemas.MicrosoftSendMailAdressOptions{
+						Address: options.Message.Address,
+					},
+				},
+			},
+		},
+		SaveToSentItems: options.SaveToSentItems,
+	}
 	url := "https://graph.microsoft.com/v1.0/me/sendMail"
 
-	jsonData, err := json.Marshal(options)
+	jsonData, err := json.Marshal(trueOptions)
 	if err != nil {
 		return
 	}

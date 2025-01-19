@@ -100,36 +100,37 @@ func (service *weatherService) VerifyFeelingTemperature(channel chan string, wor
 		channel <- err.Error()
 		return
 	}
+
+	realTemperature, err := toolbox.StringToFloat64(actionData.Temperature)
+	if err != nil {
+		return
+	}
 	switch actionData.CompareSign {
 	case ">":
-		if actionData.Temperature < weatherResponse.Current.Feelslike_c {
+		if realTemperature < weatherResponse.Current.Feelslike_c {
 			service.UpdateWorkflowForAction(workflow, actionData)
 			channel <- "Current weather"
-			// time.Sleep(30 * time.Second)
 		}
 	case "<":
-		if actionData.Temperature > weatherResponse.Current.Feelslike_c {
+		if realTemperature > weatherResponse.Current.Feelslike_c {
 			service.UpdateWorkflowForAction(workflow, actionData)
 			channel <- "Current weather"
-			// time.Sleep(30 * time.Second)
 		}
 	case "=":
 		{
-			if actionData.Temperature == weatherResponse.Current.Feelslike_c {
+			if realTemperature == weatherResponse.Current.Feelslike_c {
 				service.UpdateWorkflowForAction(workflow, actionData)
 				channel <- "Current weather"
-				// time.Sleep(30 * time.Second)
 			}
 		}
 	}
-	// channel <- "Current weather"
-	// time.Sleep(30 * time.Second)
 }
 
 func (service *weatherService) GetCurrentWeather(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
+	// Iterate over all tokens
 	for _, token := range accessToken {
 		actualUser := service.userService.GetUserById(token.UserId)
 		if token.UserId == actualUser.Id {

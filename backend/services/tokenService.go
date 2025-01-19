@@ -18,16 +18,16 @@ type TokenService interface {
 }
 
 type tokenService struct {
-	repository repository.TokenRepository
+	repository  repository.TokenRepository
 	userService UserService
 }
 
 func NewTokenService(
 	repository repository.TokenRepository,
 	userService UserService,
-	) TokenService {
+) TokenService {
 	newService := tokenService{
-		repository: repository,
+		repository:  repository,
 		userService: userService,
 	}
 	return &newService
@@ -74,6 +74,9 @@ func (service *tokenService) GetTokenById(tokenId uint64) (schemas.ServiceToken,
 
 func (service *tokenService) GetTokenByUserId(userId uint64) ([]schemas.ServiceToken, error) {
 	user := service.userService.GetUserById(userId)
+	if user.Id == 0 {
+		return nil, schemas.ErrUserNotFound
+	}
 	return service.repository.FindByUserId(user), nil
 }
 
