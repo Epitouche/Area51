@@ -210,8 +210,9 @@ func (service *spotifyService) AddTrackAction(channel chan string, workflowId ui
 	workflow.Utils = jsonData
 	if result.Tracks.Total > nbTracks {
 		workflow.ReactionTrigger = true
+		service.workflowRepository.UpdateReactionTrigger(workflow)
 	}
-	service.workflowRepository.Update(workflow)
+	service.workflowRepository.UpdateUtils(workflow)
 	channel <- "Action workflow done"
 }
 
@@ -291,11 +292,11 @@ func (service *spotifyService) CreatePlaylist(channel chan string, workflowId ui
 		fmt.Println(err)
 		return
 	}
-    optionsJSON, err := json.Marshal(options)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	optionsJSON, err := json.Marshal(options)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	request, err := http.NewRequest("POST", "https://api.spotify.com/v1/me/playlists", bytes.NewBuffer(optionsJSON))
 	if err != nil {
