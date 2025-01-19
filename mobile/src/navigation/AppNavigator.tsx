@@ -13,7 +13,6 @@ import {
   RegisterIcon,
 } from '../icons/Icons';
 
-// Screens
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import WorkflowScreen from '../screens/WorkflowScreen';
@@ -82,6 +81,15 @@ function OptionsStackScreen() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
       <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <HomeIcon width={24} height={24} fill={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Workflows"
         component={WorkflowScreen}
         options={{
@@ -112,7 +120,6 @@ function OptionsStackScreen() {
   );
 }
 
-// Main App
 export default function App() {
   const { isConnected } = useContext(AppContext);
 

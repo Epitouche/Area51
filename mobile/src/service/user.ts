@@ -1,12 +1,16 @@
 import { deleteToken, saveToken } from './token';
 import { LoginProps, RegisterProps } from '../types';
-import { useEffect, useState } from 'react';
 
 interface AuthApiCall {
   apiEndpoint: string;
   formsLogin?: LoginProps;
   formsRegister?: RegisterProps;
   setMessage: (message: string) => void;
+}
+
+interface DeleteUser {
+  apiEndpoint: string;
+  token: string;
 }
 
 export async function loginApiCall({
@@ -79,6 +83,29 @@ export async function registerApiCall({
     return true;
   } catch (error) {
     setMessage('Error: Internal Server Error');
+    console.error('API call failed:', error);
+    return false;
+  }
+}
+
+export async function deleteUser({ apiEndpoint, token }: DeleteUser) {
+  try {
+    const response = await fetch(
+      `http://${apiEndpoint}:8080/api/user/account`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        method: 'DELETE',
+      },
+    );
+    if (response.status !== 200) {
+      console.error('Error fetching user data');
+      return false;
+    }
+    return true;
+  } catch (error) {
     console.error('API call failed:', error);
     return false;
   }

@@ -1,38 +1,24 @@
 import { ConnectedService } from './servicesModals';
 
-export type Action = {
+export type ServiceAction = {
+  name: string;
+  description: string;
+  options: { [key: string]: any };
   action_id: number;
-  name: string;
-  description: string;
-  options: string | null;
 };
 
-export type Reaction = {
+export type ServiceReaction = {
+  name: string;
+  description: string;
+  options: { [key: string]: any };
   reaction_id: number;
-  name: string;
-  description: string;
-  options: string | null;
-};
-
-export type ActionParse = {
-  action_id: number;
-  name: string;
-  description: string;
-  options: Option[] | null;
-};
-
-export type ReactionParse = {
-  reaction_id: number;
-  name: string;
-  description: string;
-  options: Option[] | null;
 };
 
 export type Service = {
   name: string;
   description: string;
-  actions: Action[] | null;
-  reactions: Reaction[] | null;
+  actions: ServiceAction[] | null;
+  reactions: ServiceReaction[] | null;
   image: string;
   is_oauth: boolean;
 };
@@ -51,14 +37,30 @@ export type AboutJson = {
   server: Server;
 };
 
+export type ActionParse = {
+  action_id: number;
+  name: string;
+  description: string;
+  options: { [key: string]: any };
+};
+
+export type ReactionParse = {
+  reaction_id: number;
+  name: string;
+  description: string;
+  options: { [key: string]: any };
+};
+
 export type Workflow = {
   action_id: number;
   action_name: string;
+  action_option: { [key: string]: any };
   created_at: string;
   is_active: boolean;
   name: string;
   reaction_id: number;
   reaction_name: string;
+  reaction_option: { [key: string]: any };
   workflow_id: number;
 };
 
@@ -99,8 +101,3 @@ export interface ParseServicesProps {
   serverIp: string;
   setServicesConnected: (servicesConnected: AboutJsonParse) => void;
 }
-
-export type Option = {
-  name: string;
-  type: string;
-};

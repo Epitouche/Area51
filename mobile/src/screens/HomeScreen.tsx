@@ -65,6 +65,7 @@ const HomeScreen = () => {
     setServicesConnected,
     serverIp,
     setServerIp,
+    isConnected,
   } = useContext(AppContext);
   return (
     <View
@@ -94,11 +95,13 @@ const HomeScreen = () => {
             Make your favorite apps connect with each other and let us
             automatize tasks for you!
           </Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.buttonText}>Start now!</Text>
-          </TouchableOpacity>
+          {!isConnected && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.buttonText}>Start now!</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Workflows */}

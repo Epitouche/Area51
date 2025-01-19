@@ -1,4 +1,4 @@
-export * from './auth';
+export * from './user';
 export * from './callTest';
 export * from './token';
 export * from './aboutJs';
