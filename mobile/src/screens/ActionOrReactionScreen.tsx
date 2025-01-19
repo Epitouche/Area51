@@ -391,7 +391,6 @@ function ActionOrReaction() {
             ]}
             onPress={() => {
               if (selectedActionOrReactionId) {
-                console.log(options);
                 setValues({
                   id: selectedActionOrReactionId.id,
                   name: selectedActionOrReactionId.name,
