@@ -244,20 +244,20 @@ func (service *workflowService) Delete(workflowId uint64) error {
 }
 
 func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]json.RawMessage, error) {
-	var result schemas.ReactionOutputJson
-	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	result := ctx.Query("workflow_id")
+
+	_, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = toolbox.GetBearerToken(ctx)
+	workflowId, err := strconv.ParseUint(result, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, schemas.ErrorBadParameter
 	}
-
-	workflow := service.repository.FindById(result.WorkflowId)
+	workflow := service.repository.FindById(workflowId)
 	if workflow.Id == 0 {
-		return nil, fmt.Errorf("workflow not found")
+		return nil, schemas.ErrorNoWorkflowFound
 	}
 	reactionResponse := []json.RawMessage{}
 	reactionResponseData := service.reactionResponseDataService.FindByWorkflowId(workflow.Id)

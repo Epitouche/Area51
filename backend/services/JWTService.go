@@ -1,11 +1,12 @@
 package services
 
 import (
-	"area51/toolbox"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+
+	"area51/toolbox"
 )
 
 type JWTService interface {

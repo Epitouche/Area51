@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 )
 
@@ -49,3 +50,8 @@ type Workflow struct {
 	Name            string          `json:"name" gorm:"type:varchar(100)"`
 	Utils           json.RawMessage `gorm:"type:jsonb" json:"utils"`
 }
+
+var (
+	ErrorBadParameter    = errors.New("invalid JSON format or structure")
+	ErrorNoWorkflowFound = errors.New("no workflow found")
+)

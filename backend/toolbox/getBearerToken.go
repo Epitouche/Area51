@@ -1,6 +1,7 @@
 package toolbox
 
 import (
+	"area51/schemas"
 	"errors"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func GetBearerToken(ctx *gin.Context) (string, error) {
 	authHeader := ctx.GetHeader("Authorization")
 
 	if authHeader == "" {
-		return "", errors.New("authorization header not found")
+		return "", schemas.ErrNoAuthorizationHeaderFound
 	}
 	if len("Bearer ") >= len(authHeader) {
 		return "", errors.New("invalid authorization")
