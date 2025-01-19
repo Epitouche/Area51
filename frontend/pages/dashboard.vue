@@ -22,18 +22,18 @@ import WorkflowList from "~/components/dashboard/WorkflowList.vue";
         </h1>
 
         <div 
-          class="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8"
+          class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8"
           aria-label="Dashboard statistics section"
         >
           <DashboardStats />
         </div>
 
         <div 
-          class="grid gap-6 lg:grid-cols-3 mb-8"
+          class="grid gap-6 lg:grid-cols-2 mb-8"
           aria-label="Dashboard main content layout"
         >
-          <div class="lg:col-span-2" aria-label="Workflow graph section">
-            <DashboardWorkflowGraph />
+          <div aria-label="Workflow graph section">
+            <WorkflowList aria-label="Workflow list" />
           </div>
           <div aria-label="Services and integrations section">
             <DashboardServicesIntegrations />
@@ -41,10 +41,9 @@ import WorkflowList from "~/components/dashboard/WorkflowList.vue";
         </div>
 
         <div 
-          class="grid gap-6 lg:grid-cols-2"
+          class="grid gap-6"
           aria-label="Additional sections with workflows and recent activities"
         >
-          <WorkflowList aria-label="Workflow list" />
           <RecentActivity aria-label="Recent activity section" />
         </div>
       </div>

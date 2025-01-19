@@ -31,12 +31,12 @@ onMounted(async () => {
 </script>
 <template>
     <div 
-        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6 h-96"
+        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6"
         aria-label="Workflow Section">
         <h2 
             class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6"
             aria-label="Your Workflow">Your Workflow</h2>
-        <div v-if="workflows.values.length === 0" class="space-y-4">
+        <div v-if="workflows.values.length === 0" class="space-y-4 max-h-96 overflow-auto">
             <div
                 v-for="workflow in workflows"
                 :key="workflow.name"
@@ -60,13 +60,6 @@ onMounted(async () => {
                             Reaction: {{ workflow.reaction_name }}
                         </p>
                     </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span 
-                        class="text-sm text-gray-500 dark:text-gray-400"
-                        aria-label="Workflow executions count: {{ workflow.executions }}">
-                        {{ workflow.executions }} runs
-                    </span>
                 </div>
             </div>
         </div>
