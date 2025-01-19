@@ -52,19 +52,19 @@ export function WorkflowCard({
         reaction_option: reaction.options,
       });
       await getWorkflows(serverIp, token, setWorkflows);
-      // setAction({
-      //   id: 0,
-      //   name: '',
-      //   description: '',
-      //   options: [],
-      // });
-      // setReaction({
-      //   id: 0,
-      //   name: '',
-      //   description: '',
-      //   options: [],
-      // });
-      // setWorkflowName('');
+      setAction({
+        id: 0,
+        name: '',
+        description: '',
+        options: {},
+      });
+      setReaction({
+        id: 0,
+        name: '',
+        description: '',
+        options: {},
+      });
+      setWorkflowName('');
     }
   };
 
@@ -121,7 +121,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -133,7 +133,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -160,7 +160,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -172,7 +172,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -232,9 +232,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-  },
-  textFormat: {
-    fontSize: 15,
   },
   disabledButton: {
     opacity: 0.5,

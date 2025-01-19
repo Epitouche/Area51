@@ -8,11 +8,10 @@ import {
 } from 'react-native';
 import { ApplicationCard, IpInput } from '../components';
 import { AppContext } from '../context/AppContext';
-import { deleteToken, checkToken, getToken } from '../service';
+import { checkToken } from '../service';
 import { globalStyles } from '../styles/global_style';
 
 export default function SettingScreen() {
-  const [token, setToken] = useState('');
 
   const {
     serverIp,
@@ -28,8 +27,6 @@ export default function SettingScreen() {
   const checkIsToken = async () => {
     if ((await checkToken('token')) !== true) {
       setIsConnected(false);
-    } else {
-      await getToken('token', setToken);
     }
   };
 
@@ -65,5 +62,3 @@ export default function SettingScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({});

@@ -1,4 +1,3 @@
-// src/context/AppContext.tsx
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { AboutJson, AboutJsonParse, Workflow } from '../types';
 import { getAboutJson, checkToken, getToken, saveToken } from '../service';

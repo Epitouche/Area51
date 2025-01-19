@@ -13,7 +13,6 @@ import {
   RegisterIcon,
 } from '../icons/Icons';
 
-// Screens
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import WorkflowScreen from '../screens/WorkflowScreen';
@@ -121,7 +120,6 @@ function OptionsStackScreen() {
   );
 }
 
-// Main App
 export default function App() {
   const { isConnected } = useContext(AppContext);
 

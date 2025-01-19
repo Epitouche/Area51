@@ -1,10 +1,4 @@
-import {
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { globalStyles } from '../styles/global_style';
 import { AppStackList, Workflow } from '../types';
 import { NavigationProp } from '@react-navigation/native';

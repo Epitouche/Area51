@@ -221,45 +221,11 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: '3%',
-    gap: 30,
-  },
-  header: {
-    fontSize: 32,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginTop: '20%',
-  },
-
-  // Input Section
   inputBox: {
     width: '100%',
     alignItems: 'center',
     gap: 30,
     marginTop: '10%',
-  },
-  input: {
-    width: '100%',
-    borderBottomWidth: 1,
-    borderColor: '#F7FAFB',
-    padding: 5,
-    marginVertical: 10,
-    fontSize: 16,
-    color: 'white',
-  },
-
-  // Button Section
-  registerButton: {
-    width: '35%',
-    backgroundColor: '#F7FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  passwordText: {
-    color: 'white',
   },
   forgotPassword: {
     color: '#fff',
@@ -272,13 +238,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  line: {
-    width: '90%',
-    height: 2,
-    backgroundColor: '#F7FAFB',
-    borderRadius: 2,
-    marginBottom: 16,
-  },
 
   socialButtonBox: {
     flexDirection: 'row',
@@ -286,34 +245,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
-  },
-  button: {
-    width: '50%',
-    marginTop: 10,
-    marginBottom: 10,
-    backgroundColor: '#F7FAFB',
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  text: {
-    color: '#5C5C5C',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  icon: {
-    marginRight: 15,
-    width: 25,
-    height: 25,
-  },
-  errorMessage: {
-    color: 'red',
-    fontSize: 16,
-    marginTop: 10,
   },
 });

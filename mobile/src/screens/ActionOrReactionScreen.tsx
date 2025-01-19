@@ -457,14 +457,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: 10,
   },
-  saveButton: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    marginBottom: 40,
-    padding: 10,
-  },
   subtitle: {
     fontSize: 16,
     fontWeight: '600',

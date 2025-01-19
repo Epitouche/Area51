@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import { deleteToken, logoutServices } from '../service';
 import { globalStyles } from '../styles/global_style';
@@ -20,7 +19,7 @@ export function DeconnectionPopUp({
   serverIp,
   setNeedRefresh
 }: DeconnectionPopUpProps) {
-  
+
   const handleDeconnection = async () => {
     await logoutServices(serverIp, service, token);
     deleteToken(service);
@@ -104,9 +103,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9E9',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
   },
 });

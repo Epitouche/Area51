@@ -63,7 +63,7 @@ export function IpInput({
         <Text
           style={[
             isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
-            styles.subtitle,
+            globalStyles.subtitle,
           ]}
           accessibilityLabel="Set a server Ip">
           Set a server Ip
@@ -152,8 +152,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: 10,
   },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
+
 });

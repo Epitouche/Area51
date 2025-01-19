@@ -30,16 +30,18 @@ export async function getReaction(
   apiEndpoint: string,
   token: string,
   sendReaction: (reaction: any) => void,
+  workflowId: number,
 ) {
   try {
     const response = await fetch(
-      `http://${apiEndpoint}:8080/api/workflow/reaction`,
+      `http://${apiEndpoint}:8080/api/workflow/reaction/lastest`,
       {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         method: 'GET',
+        body: JSON.stringify({ workflow_id: workflowId }),
       },
     );
     const data = await response.json();

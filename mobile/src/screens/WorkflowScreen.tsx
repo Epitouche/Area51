@@ -84,32 +84,6 @@ export default function WorkflowScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    fontSize: 32,
-    color: '#222831',
-    fontWeight: 'bold',
-    marginTop: '20%',
-  },
-  textContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonContainer: {
-    marginTop: '10%',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: '2%',
-  },
-  Actionbutton: {
-    width: '48%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    color: '#222831',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   tabContainer: {
     width: '100%',
     marginTop: '1%',

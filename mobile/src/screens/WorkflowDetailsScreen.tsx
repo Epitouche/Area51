@@ -49,7 +49,7 @@ export default function WorkflowDetailsScreen() {
   useEffect(() => {
     const grabReaction = async () => {
       if (token !== 'Error: token not found' && token !== '')
-        await getReaction(serverIp, token, setReaction);
+        await getReaction(serverIp, token, setReaction, workflow.workflow_id);
     };
     grabReaction();
   }, [token]);
@@ -136,7 +136,6 @@ export default function WorkflowDetailsScreen() {
                     ? globalStyles.textColorBlack
                     : globalStyles.textColor,
                   globalStyles.textFormat,
-                  styles.textFormat,
                 ]}
                 accessibilityLabel={workflow.action_name}
                 numberOfLines={1}
@@ -157,7 +156,6 @@ export default function WorkflowDetailsScreen() {
                     ? globalStyles.textColorBlack
                     : globalStyles.textColor,
                   globalStyles.textFormat,
-                  styles.textFormat,
                 ]}
                 accessibilityLabel={workflow.reaction_name}
                 numberOfLines={1}
@@ -305,9 +303,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  input: {
-    marginBottom: 20,
-  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -318,12 +313,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  textFormat: {
-    fontSize: 15,
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
   bullet: {
     fontSize: 20,
@@ -346,9 +335,6 @@ const styles = StyleSheet.create({
   },
   toggledOff: {
     backgroundColor: '#f44336',
-  },
-  toggleText: {
-    fontSize: 18,
   },
   container: {
     flex: 1,
