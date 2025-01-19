@@ -353,16 +353,13 @@ async function addWorkflow() {
 
 async function getLastWorkflowResult() {
   try {
-    const response = await $fetch<unknown[]>(
-      "/api/workflows/getLastWorkflow",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await $fetch<unknown[]>("/api/workflows/getLastWorkflow", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (response !== undefined) {
       lastWorkflowResult.push(...response);
@@ -581,12 +578,16 @@ onMounted(() => {
           >
             <Icon :name="copyIcon" />
           </button>
-          <pre
-            class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
+          <div
+            class="max-h-96 overflow-auto w-full p-4"
+            aria-label="Scrollable content"
           >
-    {{ JSON.stringify(lastWorkflowResult, null, 2) }}
-    </pre
-          >
+            <pre
+              class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200"
+              >{{ JSON.stringify(lastWorkflowResult, null, 2) }}
+      </pre
+            >
+          </div>
         </div>
       </div>
     </div>

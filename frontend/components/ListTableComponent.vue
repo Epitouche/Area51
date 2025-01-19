@@ -80,7 +80,7 @@ async function launchAction(option: string, workflow: Workflow) {
     case "Last Reaction":
       await fetchWorkflowReaction(workflow);
       modalOpen.value = true;
-    activeDropdownIndex.value = null;
+      activeDropdownIndex.value = null;
       break;
     case "Switch Activity":
       await switchState(workflow);
@@ -95,7 +95,7 @@ async function launchAction(option: string, workflow: Workflow) {
   }
 }
 
-async function deleteWorkflow(workflow:Workflow) {
+async function deleteWorkflow(workflow: Workflow) {
   try {
     await $fetch("/api/workflows/deleteWorkflow", {
       method: "DELETE",
@@ -128,11 +128,10 @@ async function fetchWorkflowReaction(workflow: Workflow) {
         workflow_id: workflow.workflow_id,
       },
     });
-    
+
     if (response !== undefined) {
       workflowReaction.push(response);
     }
-
   } catch (error) {
     console.error(error);
   }
@@ -177,7 +176,7 @@ onBeforeUnmount(() => {
           <th
             class="px-3 py-2 sm:px-6 sm:py-3 text-center text-xs sm:text-sm text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
-            <input type="checkbox" :checked="headCheckbox" @click="checkAll" >
+            <input type="checkbox" :checked="headCheckbox" @click="checkAll">
           </th>
           <th
             v-for="column in columns"
@@ -274,7 +273,7 @@ onBeforeUnmount(() => {
       :is-open="modalOpen"
       @close="modalOpen = false"
       @confirm="modalOpen = false"
-      >
+    >
       <div class="flex justify-center m-5 sm:m-10">
         <div
           class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-full sm:w-10/12"
@@ -283,21 +282,22 @@ onBeforeUnmount(() => {
           <button
             class="absolute top-2 right-2 sm:top-4 sm:right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
             aria-label="Copy workflow result JSON"
-            @click="
-              copyToClipboard(JSON.stringify(workflowReaction, null, 2))
-            "
+            @click="copyToClipboard(JSON.stringify(workflowReaction, null, 2))"
           >
             <Icon :name="copyIcon" />
           </button>
-          <pre
-            class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
+          <div
+            class="max-h-96 overflow-auto w-full p-4"
+            aria-label="Scrollable content"
           >
-    {{ JSON.stringify(workflowReaction, null, 2) }}
-    </pre
-          >
+            <pre
+              class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200"
+              >{{ JSON.stringify(workflowReaction, null, 2) }}
+        </pre
+            >
+          </div>
         </div>
       </div>
-
     </ModalComponent>
   </div>
 </template>
