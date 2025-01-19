@@ -51,8 +51,8 @@ func NewUserController(
 		actionService:   actionService,
 		serviceToken:    serviceToken,
 		workflowService: workflowService,
-		googleService: googleService,
-		githubService: githubService,
+		googleService:   googleService,
+		githubService:   githubService,
 	}
 }
 
@@ -146,8 +146,8 @@ func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.W
 			ReactionId:     workflow.ReactionId,
 			ActionName:     action.Name,
 			ReactionName:   reaction.Name,
-			ActionOption:   toolbox.MustMarshal(workflow.ActionOptions),
-			ReactionOption: toolbox.MustMarshal(workflow.ReactionOptions),
+			ActionOption:   toolbox.RealObject(workflow.ActionOptions),
+			ReactionOption: toolbox.RealObject(workflow.ReactionOptions),
 			IsActive:       workflow.IsActive,
 			CreatedAt:      workflow.CreatedAt,
 		})

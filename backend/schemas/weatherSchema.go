@@ -35,10 +35,10 @@ type WeatherReactionOptions struct {
 }
 
 type WeatherCurrentOptions struct {
-	CityName     string  `json:"city_name"`
-	LanguageCode string  `json:"language_code"`
-	Temperature  float64 `json:"temperature"`
-	CompareSign  string  `json:"compare_sign"`
+	CityName     string `json:"city_name"`
+	LanguageCode string `json:"language_code"`
+	Temperature  string `json:"temperature"`
+	CompareSign  string `json:"compare_sign"`
 }
 
 type WeatherCurrentReactionOptions struct {
