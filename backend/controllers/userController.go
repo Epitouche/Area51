@@ -140,14 +140,16 @@ func (controller *userController) GetAllWorkflows(ctx *gin.Context) ([]schemas.W
 		action := controller.actionService.FindById(workflow.ActionId)
 		reaction := controller.reactionService.FindById(workflow.ReactionId)
 		allWorkflows = append(allWorkflows, schemas.WorkflowJson{
-			Name:         workflow.Name,
-			WorkflowId:   workflow.Id,
-			ActionId:     workflow.ActionId,
-			ReactionId:   workflow.ReactionId,
-			ActionName:   action.Name,
-			ReactionName: reaction.Name,
-			IsActive:     workflow.IsActive,
-			CreatedAt:    workflow.CreatedAt,
+			Name:           workflow.Name,
+			WorkflowId:     workflow.Id,
+			ActionId:       workflow.ActionId,
+			ReactionId:     workflow.ReactionId,
+			ActionName:     action.Name,
+			ReactionName:   reaction.Name,
+			ActionOption:   toolbox.MustMarshal(workflow.ActionOptions),
+			ReactionOption: toolbox.MustMarshal(workflow.ReactionOptions),
+			IsActive:       workflow.IsActive,
+			CreatedAt:      workflow.CreatedAt,
 		})
 
 	}
