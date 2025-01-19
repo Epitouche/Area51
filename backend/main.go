@@ -24,7 +24,6 @@ func setupRouter() *gin.Engine {
 		AllowCredentials: true,
 	})
 	router.Use(fullCors)
-	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
 
@@ -63,7 +62,7 @@ func setupRouter() *gin.Engine {
 			workflow.POST("", workflowApi.CreateWorkflow)
 			workflow.PUT("/activation", workflowApi.ActivateWorkflow)
 			workflow.DELETE("", workflowApi.DeleteWorkflow)
-			workflow.GET("/reaction/latest", workflowApi.GetMostRecentReaction)
+			workflow.GET("/reaction/latest/", workflowApi.GetMostRecentReaction)
 			workflow.GET("/reactions", workflowApi.GetAllReactionsForAWorkflow)
 		}
 
@@ -95,11 +94,6 @@ func setupRouter() *gin.Engine {
 			google.POST("/callback", func(ctx *gin.Context) {
 				googleApi.HandleGoogleTokenCallback(ctx, "/callback")
 			})
-		}
-
-		action := apiRoutes.Group("/action", middlewares.Authorization())
-		{
-			action.POST("", actionApi.CreateAction)
 		}
 	}
 
