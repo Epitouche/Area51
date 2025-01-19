@@ -33,7 +33,7 @@ export default function WorkflowDetailsScreen() {
 
   const [isToggled, setIsToggled] = useState(workflow.is_active);
   const [token, setToken] = useState('');
-  const [reaction, setReaction] = useState<any>();
+  const [reaction, setReaction] = useState<any[][]>([]);
 
   const handleToggle = () => {
     setIsToggled(!isToggled);
@@ -271,14 +271,52 @@ export default function WorkflowDetailsScreen() {
                 : globalStyles.terciaryLight,
             ]}>
             {reaction &&
-              reaction.map((item: any, index: number) => (
-                <View key={index} style={styles.cardCode}>
-                  <Text style={styles.bodyText}>{item.body}</Text>
-                  <TouchableOpacity>
-                    <Text style={styles.urlText}>{item.pull_request_url}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+              reaction.map((innerArray: any[], outerIndex: number) => {
+                if (innerArray === null) {
+                  return (
+                    <Text
+                      key={outerIndex}
+                      style={[
+                        globalStyles.subtitle,
+                        isBlackTheme
+                          ? globalStyles.textColor
+                          : globalStyles.textColorBlack,
+                      ]}>
+                      No reaction
+                    </Text>
+                  );
+                } else {
+                  return (
+                    <View key={outerIndex} style={styles.cardCode}>
+                      <Text style={globalStyles.title}>
+                        Section {outerIndex + 1}
+                      </Text>
+                      {innerArray.map((item, index) => (
+                        <View key={index} style={{ gap: 10 }}>
+                          {Object.entries(item).map(([key, value]) => (
+                            <View key={key} style={{ gap: 10 }}>
+                              <Text
+                                style={[
+                                  globalStyles.textColor,
+                                  globalStyles.subtitle,
+                                ]}>
+                                {key}:
+                              </Text>
+                              <Text
+                                style={[
+                                  globalStyles.textColor,
+                                  globalStyles.textFormat,
+                                ]}>
+                                {String(value)}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      ))}
+                    </View>
+                  );
+                }
+              })}
           </View>
         </View>
       </ScrollView>
@@ -350,6 +388,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    gap: 10,
   },
   bodyText: {
     fontSize: 16,

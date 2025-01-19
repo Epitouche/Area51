@@ -1,7 +1,13 @@
 export async function sendWorkflows(
   token: string,
   apiEndpoint: string,
-  formsRegister: { action_id: number; reaction_id: number; name?: string, action_option: any, reaction_option: any },
+  formsRegister: {
+    action_id: number;
+    reaction_id: number;
+    name?: string;
+    action_option: any;
+    reaction_option: any;
+  },
 ) {
   try {
     const response = await fetch(`http://${apiEndpoint}:8080/api/workflow`, {
@@ -34,16 +40,16 @@ export async function getReaction(
 ) {
   try {
     const response = await fetch(
-      `http://${apiEndpoint}:8080/api/workflow/reaction/lastest`,
+      `http://${apiEndpoint}:8080/api/workflow/reaction/latest?workflow_id=${workflowId}`,
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         method: 'GET',
-        body: JSON.stringify({ workflow_id: workflowId }),
       },
     );
+
     const data = await response.json();
     if (response.status === 200) {
       if (data !== null) sendReaction(data);
@@ -96,7 +102,7 @@ export async function modifyWorkflows(
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         method: 'PUT',
         body: JSON.stringify({
@@ -122,22 +128,19 @@ export async function deleteWorkflow(
   reactionId: number,
 ) {
   try {
-    const response = await fetch(
-      `http://${apiEndpoint}:8080/api/workflow`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        method: 'DELETE',
-        body: JSON.stringify({
-          workflow_id: workflowId,
-          name: workflowName,
-          action_id: actionId,
-          reaction_id: reactionId,
-        }),
+    const response = await fetch(`http://${apiEndpoint}:8080/api/workflow`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
-    );
+      method: 'DELETE',
+      body: JSON.stringify({
+        workflow_id: workflowId,
+        name: workflowName,
+        action_id: actionId,
+        reaction_id: reactionId,
+      }),
+    });
     if (response.status !== 200) console.error('Error invalide token');
     return true;
   } catch (error) {

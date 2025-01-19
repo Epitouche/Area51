@@ -36,7 +36,7 @@ function OptionsInput({ options, onChange, isBlackTheme }: OptionsInputProps) {
     options: { [key: string]: any },
     parentKey?: string,
   ) => {
-    if (typeof options === 'string') {
+    if (typeof options === 'string' || typeof options === 'number') {
       return (
         <View>
           <Text
