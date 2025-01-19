@@ -27,6 +27,8 @@ func Authorization() gin.HandlerFunc {
 			ctx.JSON(http.StatusUnauthorized, schemas.BasicResponse{
 				Message: "Unauthorized",
 			})
+			ctx.Abort()
+			return
 		}
 	}
 }

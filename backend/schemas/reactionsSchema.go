@@ -30,7 +30,3 @@ type Reaction struct {
 	UpdatedAt   time.Time       `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 	Options     json.RawMessage `gorm:"type:jsonb" json:"options"`
 }
-
-type ReactionOutputJson struct {
-	WorkflowId uint64 `json:"workflow_id" binding:"required"`
-}
