@@ -26,7 +26,7 @@ const copyToClipboard = async (text: string) => {
 
 const filteredWorkflows = computed(() =>
   props.rows.map(
-    ({ checked, action_id, reaction_id, workflow_id, ...rest }) => rest
+    ({ checked, action_id, reaction_id, workflow_id, action_option, reaction_option, ...rest }) => rest
   )
 );
 
