@@ -20,11 +20,9 @@ type reactionResponseDataRepository struct {
 
 func NewReactionResponseDataRepository(conn *gorm.DB) ReactionResponseDataRepository {
 	err := conn.AutoMigrate(&schemas.ReactionResponseData{})
-
 	if err != nil {
 		panic("failed to migrate database")
 	}
-
 	return &reactionResponseDataRepository{
 		db: &schemas.Database{
 			Connection: conn,
@@ -34,14 +32,13 @@ func NewReactionResponseDataRepository(conn *gorm.DB) ReactionResponseDataReposi
 
 func (repo *reactionResponseDataRepository) Save(reactionResponseData schemas.ReactionResponseData) {
 	err := repo.db.Connection.Create(&reactionResponseData)
-
 	if err.Error != nil {
 		panic(err.Error)
 	}
 }
 
 func (repo *reactionResponseDataRepository) Update(reactionResponseData schemas.ReactionResponseData) {
-	err := repo.db.Connection.Where(schemas.ReactionResponseData{Id: reactionResponseData.Id}).Updates(&reactionResponseData)
+	err := repo.db.Connection.Save(&reactionResponseData)
 	if err.Error != nil {
 		panic(err.Error)
 	}
@@ -49,26 +46,23 @@ func (repo *reactionResponseDataRepository) Update(reactionResponseData schemas.
 
 func (repo *reactionResponseDataRepository) Delete(reactionResponseData schemas.ReactionResponseData) {
 	err := repo.db.Connection.Delete(&reactionResponseData)
-
 	if err.Error != nil {
 		panic(err.Error)
 	}
 }
 
-func (repo *reactionResponseDataRepository) FindAll() (reactionResponseData []schemas.ReactionResponseData) {
+func (repo *reactionResponseDataRepository) FindAll() []schemas.ReactionResponseData {
+	var reactionResponseData []schemas.ReactionResponseData
 	err := repo.db.Connection.Find(&reactionResponseData)
-
 	if err.Error != nil {
 		panic(err.Error)
 	}
 	return reactionResponseData
 }
 
-func (repo *reactionResponseDataRepository) FindByWorkflowId(workflowId uint64) (reactionResponseData []schemas.ReactionResponseData) {
-	err := repo.db.Connection.Where(&schemas.ReactionResponseData{
-		WorkflowId: workflowId,
-	}).Find(&reactionResponseData)
-
+func (repo *reactionResponseDataRepository) FindByWorkflowId(workflowId uint64) []schemas.ReactionResponseData {
+	var reactionResponseData []schemas.ReactionResponseData
+	err := repo.db.Connection.Where(&schemas.ReactionResponseData{WorkflowId: workflowId}).Find(&reactionResponseData)
 	if err.Error != nil {
 		panic(err.Error)
 	}

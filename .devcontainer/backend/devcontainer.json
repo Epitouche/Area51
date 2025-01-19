@@ -19,10 +19,7 @@
               "766b.go-outliner",
               "premparihar.gotestexplorer",
               "aleksandra.go-group-imports",
-              "Cardinal90.multi-cursor-case-preserve",
-              "cweijan.vscode-database-client2",
-              "cweijan.dbclient-jdbc",
-              "WakaTime.vscode-wakatime"
+              "Cardinal90.multi-cursor-case-preserve"
           ]
       }
   },

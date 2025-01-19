@@ -25,4 +25,4 @@ go.work.sum
 gin-bin
 
 # air
-tmp/
+tmp

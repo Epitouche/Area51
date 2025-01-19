@@ -70,8 +70,6 @@ services:
       - apk:/app/public/apk
     networks:
       - app-networks
-    env_file:
-      - ./mobile/.env.local
 
 networks:
   app-networks:

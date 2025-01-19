@@ -10,7 +10,7 @@ export async function getToken(
     return true;
   } catch (e) {
     console.error('Error getting the token', e);
-    setToken('Error: token not found');
+    setToken('Error: getting the token');
     return false;
   }
 }

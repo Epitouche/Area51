@@ -1,32 +1,23 @@
+import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
-import { deleteToken, logoutServices } from '../service';
-import { globalStyles } from '../styles/global_style';
+import { deleteToken } from '../service';
+import { Button } from 'react-native-paper';
 
 interface DeconnectionPopUpProps {
   service: string;
   modalVisible: boolean;
   setModalVisible: (modalVisible: boolean) => void;
-  token: string;
-  serverIp: string;
-  setNeedRefresh: (needRefresh: boolean) => void;
 }
 
 export function DeconnectionPopUp({
   service,
   modalVisible,
   setModalVisible,
-  token,
-  serverIp,
-  setNeedRefresh
 }: DeconnectionPopUpProps) {
-
-  const handleDeconnection = async () => {
-    await logoutServices(serverIp, service, token);
+  const handleDeconnection = () => {
     deleteToken(service);
     setModalVisible(false);
-    setNeedRefresh(true);
   };
-
   return (
     <View style={styles.container}>
       <Modal
@@ -42,18 +33,18 @@ export function DeconnectionPopUp({
               Tu es déjà connecté à {service}, veux-tu te déconnecter ?
             </Text>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, globalStyles.buttonFormat]}
+              <Button
+                style={styles.button}
                 onPress={handleDeconnection}>
                 <Text style={{ color: 'white', fontSize: 16 }}>
                   Déconnecter
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.cancelButton, globalStyles.buttonFormat]}
+              </Button>
+              <Button
+                style={styles.cancelButton}
                 onPress={() => setModalVisible(false)}>
                 <Text style={{ color: 'black', fontSize: 16 }}>Annuler</Text>
-              </TouchableOpacity>
+              </Button>
             </View>
           </View>
         </View>
@@ -75,7 +66,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: '70%',
+    width: "70%",
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 20,
@@ -103,5 +94,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9E9',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });

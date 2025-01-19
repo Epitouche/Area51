@@ -38,20 +38,22 @@ const confirmAction = () => {
       <main class="px-4 py-6">
         <slot />
       </main>
-      <footer v-if="showFooter" class="flex justify-end gap-2 px-4 py-2">
-        <ButtonComponent
-          text="Cancel"
-          bg-color="bg-primaryWhite-500 dark:bg-secondaryDark-500"
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontBlack dark:text-fontWhite"
-          @click="closeModal" />
-        <ButtonComponent
-          text="Confirm"
-          bg-color="bg-tertiary-500"
-          hover-color="hover:bg-accent-100 dark:hover:bg-accent-800"
-          text-color="text-fontWhite"
+      <footer
+        v-if="showFooter"
+        class="flex justify-end gap-2 px-4 py-2"
+      >
+        <button
+          class="px-4 py-2 text-sm bg-primaryWhite-500 rounded hover:bg-secondaryWhite-500 dark:text-fontWhite dark:bg-primaryDark-500 dark:hover:bg-accent-800"
+          @click="closeModal"
+        >
+          Cancel
+        </button>
+        <button
+          class="px-4 py-2 text-sm bg-tertiary-500 text-fontWhite rounded hover:bg-accent-500"
           @click="confirmAction"
-        />
+        >
+          Confirm
+        </button>
       </footer>
     </div>
   </div>

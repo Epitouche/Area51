@@ -7,39 +7,21 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
+import { Button } from 'react-native-paper';
 import { AppContext } from '../context/AppContext';
-import { loginApiCall } from '../service';
-import { AboutJson, AboutJsonParse, LoginProps } from '../types';
-import { OauthLoginButton, IpInput } from '../components';
+import { loginApiCall, githubLogin } from '../service';
+import { LoginProps } from '../types';
+import { GithubLoginButton, IpInput } from '../components';
 import { globalStyles } from '../styles/global_style';
 
-interface LoginFunctionProps {
-  serverIp: string;
-  setIsConnected: (isConnected: boolean) => void;
-  isBlackTheme: boolean;
-  aboutJson?: AboutJson;
-}
-
-interface NoIpProps {
-  isBlackTheme?: boolean;
-  setAboutJson: (aboutJson: AboutJson) => void;
-  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
-  aboutJson: AboutJson | undefined;
-  setServerIp: (serverIp: string) => void;
-  serverIp: string;
-}
-
-function Login({
-  isBlackTheme,
-  serverIp,
-  setIsConnected,
-  aboutJson,
-}: LoginFunctionProps) {
+export default function LoginScreen() {
   const [forms, setForms] = useState<LoginProps>({
     username: '',
     password: '',
   });
+  const { serverIp, setIsConnected, isBlackTheme } = useContext(AppContext);
   const [message, setMessage] = useState('');
+  const [token, setToken] = useState('');
 
   const handleLogin = async () => {
     const loginSuccessful = await loginApiCall({
@@ -52,111 +34,13 @@ function Login({
     }
   };
 
-  return (
-    <View
-      style={
-        isBlackTheme ? globalStyles.wallpaperBlack : globalStyles.wallpaper
-      }>
-      <View style={globalStyles.container}>
-        <Text
-          style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}
-          accessibilityLabel="Login">
-          LOG IN
-        </Text>
-        <View style={styles.inputBox}>
-          <TextInput
-            style={[
-              isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
-              { width: '90%' },
-            ]}
-            autoCapitalize="none"
-            placeholder="Username"
-            placeholderTextColor={isBlackTheme ? 'f5f5f5': '#0a0a0a'}
-            value={forms.username}
-            onChangeText={username => setForms({ ...forms, username })}
-            accessibilityLabel="Username"
-          />
-          <TextInput
-            style={[
-              isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
-              { width: '90%' },
-            ]}
-            secureTextEntry
-            value={forms.password}
-            placeholder="Password"
-            placeholderTextColor={isBlackTheme ? 'f5f5f5': '#0a0a0a'}
-            onChangeText={password => setForms({ ...forms, password })}
-            autoCapitalize="none"
-            accessibilityLabel="Password"
-          />
-        </View>
-        <View>
-          {message != '' && (
-            <Text style={{ color: 'red' }} accessibilityLabel="Error Message">
-              {message}
-            </Text>
-          )}
-        </View>
-        <View style={{ width: '90%' }}>
-          <TouchableOpacity
-            style={[globalStyles.buttonFormat, globalStyles.terciaryLight]}
-            onPress={handleLogin}>
-            <Text
-              style={[globalStyles.textColorBlack, globalStyles.textFormat]}
-              accessibilityLabel="Login Button">
-              Login
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={[
-            globalStyles.line,
-            isBlackTheme ? globalStyles.lineColorBlack : globalStyles.lineColor,
-          ]}
-        />
-        <View style={styles.socialButtonBox}>
-          {aboutJson &&
-            aboutJson.server.services.map((service, index) => {
-              if (!service.is_oauth) return null;
-              return (
-                <OauthLoginButton
-                  key={index}
-                  serverIp={serverIp}
-                  setIsConnected={setIsConnected}
-                  name={service.name}
-                  img={service.image}
-                  isBlackTheme={isBlackTheme}
-                />
-              );
-            })}
-        </View>
-        <View style={styles.forgotPasswordBox}>
-          <TouchableOpacity>
-            <Text
-              style={[
-                styles.forgotPassword,
-                isBlackTheme
-                  ? globalStyles.textColorBlack
-                  : globalStyles.textColor,
-              ]}
-              accessibilityLabel="Forgot Password">
-              Forgot Password?
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-}
+  const handleGithubLogin = async () => {
+    const githubLoginSuccessful = await githubLogin(serverIp, setToken);
+    if (githubLoginSuccessful) {
+      setIsConnected(true);
+    }
+  };
 
-function NoIp({
-  isBlackTheme,
-  serverIp,
-  setServerIp,
-  aboutJson,
-  setAboutJson,
-  setServicesConnected,
-}: NoIpProps) {
   return (
     <View
       style={
@@ -167,57 +51,119 @@ function NoIp({
           style={isBlackTheme ? globalStyles.titleBlack : globalStyles.title}>
           LOG IN
         </Text>
-        <IpInput
-          aboutJson={aboutJson}
-          serverIp={serverIp}
-          setServerIp={setServerIp}
-          setAboutJson={setAboutJson}
-          setServicesConnected={setServicesConnected}
-          isBlackTheme={isBlackTheme}
-        />
+        {serverIp === '' ? (
+          <IpInput />
+        ) : (
+          <>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={
+                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
+                }
+                autoCapitalize="none"
+                placeholder="Username"
+                value={forms.username}
+                onChangeText={username => setForms({ ...forms, username })}
+              />
+              <TextInput
+                style={
+                  [isBlackTheme ? globalStyles.inputBlack : globalStyles.input, { width: '90%' }]
+                }
+                secureTextEntry
+                value={forms.password}
+                placeholder="Password"
+                onChangeText={password => setForms({ ...forms, password })}
+                autoCapitalize="none"
+              />
+            </View>
+            <Button
+              mode="contained"
+              style={globalStyles.buttonColor}
+              onPress={handleLogin}>
+              <Text
+                style={[
+                  isBlackTheme ? globalStyles.textBlack : globalStyles.text,
+                  { fontSize: 14, fontWeight: 'bold' },
+                ]}>
+                Login
+              </Text>
+            </Button>
+            <View
+              style={[
+                globalStyles.line,
+                isBlackTheme
+                  ? globalStyles.lineColorBlack
+                  : globalStyles.lineColor,
+              ]}
+            />
+            <View style={styles.socialButtonBox}>
+              <GithubLoginButton handleGithubLogin={handleGithubLogin} />
+              <Button style={globalStyles.buttonColor}>
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={{
+                      uri: 'https://img.icons8.com/color/48/google-logo.png',
+                    }}
+                    style={styles.icon}
+                  />
+                  <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
+                    Google
+                  </Text>
+                </View>
+              </Button>
+            </View>
+            {message !== '' && (
+              <Text style={styles.passwordText}>{message}</Text>
+            )}
+            <View style={styles.forgotPasswordBox}>
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
     </View>
   );
 }
 
-export default function LoginScreen() {
-  const {
-    serverIp,
-    setIsConnected,
-    isBlackTheme,
-    aboutJson,
-    setAboutJson,
-    setServerIp,
-    setServicesConnected,
-  } = useContext(AppContext);
-
-  return serverIp ? (
-    <Login
-      serverIp={serverIp}
-      setIsConnected={setIsConnected}
-      isBlackTheme={isBlackTheme}
-      aboutJson={aboutJson}
-    />
-  ) : (
-    <NoIp
-      isBlackTheme={isBlackTheme}
-      aboutJson={aboutJson}
-      serverIp={serverIp}
-      setAboutJson={setAboutJson}
-      setServerIp={setServerIp}
-      setServicesConnected={setServicesConnected}
-    />
-  );
-}
-
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    padding: '3%',
+    gap: 40,
+  },
+  header: {
+    fontSize: 32,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginTop: '20%',
+  },
   inputBox: {
     width: '100%',
     alignItems: 'center',
     gap: 30,
     marginTop: '10%',
   },
+  input: {
+    width: '90%',
+    borderBottomWidth: 1,
+    borderColor: '#F7FAFB',
+    padding: 5,
+    marginVertical: 10,
+    fontSize: 16,
+    color: 'white',
+  },
+  loginButton: {
+    width: '35%',
+    backgroundColor: '#F7FAFB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  passwordText: { color: 'white' },
   forgotPassword: {
+    color: '#fff',
     textDecorationLine: 'underline',
     fontSize: 16,
   },
@@ -227,11 +173,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   socialButtonBox: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    width: '80%',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
+  },
+  button: {
+    width: '50%',
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: '#F7FAFB',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  text: {
+    color: '#5C5C5C',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  icon: {
+    marginRight: 15,
+    width: 25,
+    height: 25,
   },
 });

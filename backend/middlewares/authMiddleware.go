@@ -7,29 +7,26 @@ import (
 
 	"area51/schemas"
 	"area51/services"
-	"area51/toolbox"
 )
 
 func Authorization() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		tokenString, err := toolbox.GetBearerToken(ctx)
-		if err != nil {
+		authHeader := ctx.GetHeader("Authorization")
+		if len(authHeader) < len("Bearer ") {
 			ctx.JSON(http.StatusUnauthorized, schemas.BasicResponse{
-				Message: err.Error(),
+				Message: "Unauthorized because no token provided",
 			})
-			ctx.Abort()
 			return
 		}
+		tokenString := authHeader[len("Bearer "):]
 		token, _ := services.NewJWTService().ValidateJWTToken(tokenString)
 
-		if token.Valid {
+		if token.Valid{
 			ctx.Next()
 		} else {
 			ctx.JSON(http.StatusUnauthorized, schemas.BasicResponse{
 				Message: "Unauthorized",
-			})
-			ctx.Abort()
-			return
+				})
 		}
 	}
 }
