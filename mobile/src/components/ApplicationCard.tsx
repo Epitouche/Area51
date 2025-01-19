@@ -1,26 +1,31 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { deleteToken, saveToken } from '../service';
+import { deleteToken, saveToken, deleteUser } from '../service';
 
 interface ApplicationCardProps {
   isBlackTheme?: boolean;
   setIsBlackTheme: (isBlackTheme: boolean) => void;
   setIsConnected: (isConnected: boolean) => void;
+  token: string;
+  serverIp: string;
 }
 
 export function ApplicationCard({
   isBlackTheme,
   setIsBlackTheme,
   setIsConnected,
+  token,
+  serverIp,
 }: ApplicationCardProps) {
   const handleLogout = () => {
     setIsConnected(false);
     deleteToken('token');
+  };
+
+  const handleDeleteAccount = () => {
+    setIsConnected(false);
+    deleteToken('token');
+    deleteUser({ apiEndpoint: serverIp, token });
   };
 
   const handleTheme = async () => {
@@ -107,7 +112,7 @@ export function ApplicationCard({
               Logout ?
             </Text>
           </View>
-          <View style={{ width: '100%' }}>
+          <View style={{ width: '100%', gap: 20 }}>
             <TouchableOpacity
               style={[
                 globalStyles.buttonFormat,
@@ -120,6 +125,24 @@ export function ApplicationCard({
                 Logout
               </Text>
             </TouchableOpacity>
+            {token &&
+              (token === 'Error: token not found' || token !=='') && (
+                  <TouchableOpacity
+                    style={[
+                      globalStyles.buttonFormat,
+                      { backgroundColor: '#f44336' },
+                    ]}
+                    onPress={handleDeleteAccount}>
+                    <Text
+                      style={[
+                        globalStyles.textColorBlack,
+                        globalStyles.textFormat,
+                      ]}
+                      accessibilityLabel="Delete Account">
+                      Delete Account
+                    </Text>
+                  </TouchableOpacity>
+                )}
           </View>
         </View>
       </View>

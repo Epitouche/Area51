@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { globalStyles } from '../styles/global_style';
 import { ActionOrReaction, AppStackList, Workflow } from '../types';
-import { getWorkflows, sendWorkflows } from '../service';
+import { getWorkflows, refreshServices, sendWorkflows } from '../service';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 interface WorkflowCardProps {
@@ -16,6 +16,7 @@ interface WorkflowCardProps {
   isBlackTheme?: boolean;
   serverIp: string;
   setWorkflows: (workflows: Workflow[]) => void;
+  setRefresh: (refresh: boolean) => void;
 }
 
 export function WorkflowCard({
@@ -23,6 +24,7 @@ export function WorkflowCard({
   serverIp,
   token,
   setWorkflows,
+  setRefresh,
 }: WorkflowCardProps) {
   const navigation = useNavigation<NavigationProp<AppStackList>>();
 
@@ -63,6 +65,7 @@ export function WorkflowCard({
         options: {},
       });
       setWorkflowName('');
+      setRefresh(true);
     }
   };
 

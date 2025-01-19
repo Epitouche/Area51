@@ -2,13 +2,20 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { WorkflowCard, WorkflowTab } from '../components';
 import { AppContext } from '../context/AppContext';
-import { parseServices, checkToken, getToken, getWorkflows } from '../service';
+import {
+  parseServices,
+  checkToken,
+  getToken,
+  getWorkflows,
+  refreshServices,
+} from '../service';
 import { globalStyles } from '../styles/global_style';
 import { AppStackList } from '../types';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export default function WorkflowScreen() {
   const [token, setToken] = useState('');
+  const [refresh, setRefresh] = useState(false);
 
   const navigation = useNavigation<NavigationProp<AppStackList>>();
 
@@ -20,6 +27,7 @@ export default function WorkflowScreen() {
     setServicesConnected,
     workflows,
     setWorkflows,
+    setAboutJson,
   } = useContext(AppContext);
 
   const grabWorkflows = async () => {
@@ -47,6 +55,17 @@ export default function WorkflowScreen() {
   }, [token]);
 
   useEffect(() => {
+    if (refresh) {
+      refreshServices({
+        aboutJson,
+        serverIp,
+        setAboutJson,
+        setServicesConnected,
+      });
+    }
+  }, [refresh]);
+
+  useEffect(() => {
     setTimeout(() => {
       checkIsToken();
     }, 300);
@@ -69,6 +88,7 @@ export default function WorkflowScreen() {
             isBlackTheme={isBlackTheme}
             token={token}
             setWorkflows={setWorkflows}
+            setRefresh={setRefresh}
           />
           <View style={styles.tabContainer}>
             <WorkflowTab

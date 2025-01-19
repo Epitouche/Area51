@@ -54,11 +54,13 @@ export type ReactionParse = {
 export type Workflow = {
   action_id: number;
   action_name: string;
+  action_option: { [key: string]: any };
   created_at: string;
   is_active: boolean;
   name: string;
   reaction_id: number;
   reaction_name: string;
+  reaction_option: { [key: string]: any };
   workflow_id: number;
 };
 

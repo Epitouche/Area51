@@ -148,3 +148,41 @@ export async function deleteWorkflow(
     return false;
   }
 }
+
+export async function putWorkflows(
+  apiEndpoint: string,
+  token: string,
+  formData: {
+    workflow_id: number;
+    name: string;
+    action_option: any;
+    reaction_option: any;
+  },
+) {
+  try {
+    const response = await fetch(
+      `http://${apiEndpoint}:8080/api/user/workflows`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        method: 'PUT',
+        body: JSON.stringify({
+          workflow_id: formData.workflow_id,
+          name: formData.name,
+          action_option: formData.action_option,
+          reaction_option: formData.reaction_option,
+        }),
+      },
+    );
+    if (response.status !== 200) {
+      // console.error('Error invalide token');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error fetching Workflows data:', error);
+    return false;
+  }
+}

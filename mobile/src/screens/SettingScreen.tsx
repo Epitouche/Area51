@@ -8,10 +8,11 @@ import {
 } from 'react-native';
 import { ApplicationCard, IpInput } from '../components';
 import { AppContext } from '../context/AppContext';
-import { checkToken } from '../service';
+import { checkToken, getToken } from '../service';
 import { globalStyles } from '../styles/global_style';
 
 export default function SettingScreen() {
+  const [token, setToken] = useState('');
 
   const {
     serverIp,
@@ -27,6 +28,8 @@ export default function SettingScreen() {
   const checkIsToken = async () => {
     if ((await checkToken('token')) !== true) {
       setIsConnected(false);
+    } else {
+      await getToken('token', setToken);
     }
   };
 
@@ -41,7 +44,10 @@ export default function SettingScreen() {
       }>
       <ScrollView>
         <Text
-          style={[isBlackTheme ? globalStyles.titleBlack : globalStyles.title, { textAlign: 'center', marginTop: 80 }]}
+          style={[
+            isBlackTheme ? globalStyles.titleBlack : globalStyles.title,
+            { textAlign: 'center', marginTop: 80 },
+          ]}
           accessibilityLabel="Setting">
           Setting
         </Text>
@@ -57,6 +63,8 @@ export default function SettingScreen() {
           isBlackTheme={isBlackTheme}
           setIsBlackTheme={setIsBlackTheme}
           setIsConnected={setIsConnected}
+          serverIp={serverIp}
+          token={token}
         />
       </ScrollView>
     </View>

@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { AboutJson, AuthParamList, NoIpProps, RegisterProps } from '../types';
-import { registerApiCall } from '../service/auth';
+import { registerApiCall } from '../service';
 import { AppContext } from '../context/AppContext';
 import { OauthLoginButton, IpInput } from '../components';
 import { globalStyles } from '../styles/global_style';
