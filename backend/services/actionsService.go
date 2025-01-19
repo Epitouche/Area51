@@ -112,6 +112,14 @@ func NewActionService(
 					Id: "string",
 				}),
 			},
+			{
+				Name:        string(schemas.InterpolNewRedNotice),
+				Description: "Verify if the number of red notices has changed",
+				ServiceId:   serviceService.FindByName(schemas.Interpol).Id,
+				Options: toolbox.RealObject(schemas.InterpolActionOptions{
+					SexId: "M or F or U",
+				}),
+			},
 		},
 		allActions: []interface{}{serviceService},
 	}
