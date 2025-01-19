@@ -63,3 +63,13 @@ For users with cognitive disabilities, we have implemented the following measure
 - **Error Prevention and Recovery**: We provide helpful error messages and guidance to assist users in recovering from mistakes and completing tasks successfully.
 
 By incorporating these accessibility features, we aim to create an inclusive and user-friendly application that can be used by everyone, regardless of their abilities.
+
+
+### Useful links
+Here is the links to the markdown documentation for the frontend:
+- [Brand Guidelines](https://drive.google.com/file/d/1QANYuij2kzZfJMqEzDfA68nXjhAFg6or/view?usp=drive_link)
+- [Development Documentation](./DevFrontend.md)
+- [POC](./POC.md#frontend)
+- [Organization](./Organization.md)
+- [Main README](../README.md)
+- [Back to top](#frontend)
