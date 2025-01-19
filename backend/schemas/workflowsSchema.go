@@ -21,14 +21,16 @@ type WorkflowActivate struct {
 }
 
 type WorkflowJson struct {
-	Name         string    `json:"name"`
-	WorkflowId   uint64    `json:"workflow_id"`
-	ActionName   string    `json:"action_name"`
-	ActionId     uint64    `json:"action_id"`
-	ReactionId   uint64    `json:"reaction_id"`
-	ReactionName string    `json:"reaction_name"`
-	IsActive     bool      `json:"is_active"`
-	CreatedAt    time.Time `json:"created_at"`
+	Name           string    `json:"name"`
+	WorkflowId     uint64    `json:"workflow_id"`
+	ActionName     string    `json:"action_name"`
+	ActionId       uint64    `json:"action_id"`
+	ActionOption   string    `json:"action_option"`
+	ReactionId     uint64    `json:"reaction_id"`
+	ReactionName   string    `json:"reaction_name"`
+	ReactionOption string    `json:"reaction_option"`
+	IsActive       bool      `json:"is_active"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type Workflow struct {

@@ -26,6 +26,7 @@ type WorkflowService interface {
 	GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error)
 	DeleteWorkflow(ctx *gin.Context) error
 	Delete(workflowId uint64) error
+	Update(ctx *gin.Context) error
 }
 
 type workflowService struct {
@@ -301,6 +302,34 @@ func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 		}
 	}
 	return nil
+}
+
+func (service *workflowService) Update(ctx *gin.Context) error {
+	result := schemas.WorkflowJson{}
+	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	if err != nil {
+		return err
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	if len(authHeader) <= len("Bearer ") {
+		return fmt.Errorf("no authorization header found")
+	}
+	tokenString := authHeader[len("Bearer "):]
+
+	user, err := service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return err
+	}
+	workflows := service.repository.FindAll()
+	for _, workflow := range workflows {
+		if workflow.Id == result.WorkflowId && user.Id == workflow.UserId {
+			workflow.ActionOptions = json.RawMessage(result.ActionOption)
+			workflow.ReactionOptions = json.RawMessage(result.ReactionOption)
+			service.repository.Update(workflow)
+			return nil
+		}
+	}
+	return fmt.Errorf("workflow not found")
 }
 
 func (service *workflowService) GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error) {

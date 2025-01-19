@@ -14,6 +14,7 @@ type WorkflowController interface {
 	GetMostRecentReaction(ctx *gin.Context) ([]json.RawMessage, error)
 	GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error)
 	DeleteWorkflow(ctx *gin.Context) error
+	UpdateWorkflow(ctx *gin.Context) error
 }
 
 type workflowController struct {
@@ -52,4 +53,8 @@ func (controller *workflowController) DeleteWorkflow(ctx *gin.Context) error {
 
 func (controller *workflowController) GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error) {
 	return controller.service.GetAllReactionsForAWorkflow(ctx)
+}
+
+func (controller *workflowController) UpdateWorkflow(ctx *gin.Context) error {
+	return controller.service.Update(ctx)
 }
