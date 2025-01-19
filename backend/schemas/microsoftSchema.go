@@ -68,3 +68,14 @@ type MicrosoftSendMailOptions struct {
 	Message         MicrosoftSendMailMainMessageOptions `json:"message"`
 	SaveToSentItems string                              `json:"saveToSentItems"`
 }
+
+// message: {
+// 	body: {
+// 	  content: "This email is to confirm our trip to Chicoutimi",
+// 	  contentType: "Text",
+// 	},
+// 	subject: "We are going to Chicoutimi ?",
+// 	address: "other.email@gmail.
+//   },
+//   saveToSentItems: "true / false",
+// };
