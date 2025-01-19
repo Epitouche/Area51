@@ -81,6 +81,7 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 
 	workflow := service.workflowRepository.FindById(workflowId)
 	reaction := service.reactionRepository.FindById(workflow.ReactionId)
+	fmt.Printf("Reaction: %s\n", reaction.Name)
 	noticeType := ""
 	switch reaction.Name {
 	case string(schemas.InterpolGetRedNotices):
@@ -90,12 +91,14 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 	case string(schemas.InterpolGetUNNotices):
 		noticeType = "un"
 	}
-	options := schemas.InterpolReactionOption{}
-	err := json.Unmarshal([]byte(reaction.Options), &options)
+	fmt.Printf("Notice Type: %s\n", noticeType)
+	options := schemas.InterpolReactionOptionInfos{}
+	err := json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println("Error ->", err)
 		return
 	}
+	fmt.Printf("Options: %++v\n", options)
 
 	request, err := http.NewRequest("GET", "https://ws-public.interpol.int/notices/v1/"+noticeType+"?forename="+options.FirstName+"&name="+options.LastName, nil)
 	if err != nil {
@@ -107,6 +110,13 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 	request.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 	request.Header.Set("Connection", "keep-alive")
 	request.Header.Set("Cache-Control", "no-cache")
+	request.Header.Set("Referer", "https://www.interpol.int/")
+	request.Header.Set("Origin", "https://www.interpol.int")
+	request.Header.Set("Upgrade-Insecure-Requests", "1")
+	request.Header.Set("Sec-Fetch-Dest", "document")
+	request.Header.Set("Sec-Fetch-Mode", "navigate")
+	request.Header.Set("Sec-Fetch-Site", "none")
+	request.Header.Set("Sec-Fetch-User", "?1")
 	client := &http.Client{}
 
 	response, err := client.Do(request)
@@ -114,6 +124,7 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 		fmt.Println(err)
 		return
 	}
+	fmt.Printf("Response: %v\n", response)
 
 	result := schemas.InterpolNoticesList{}
 	err = json.NewDecoder(response.Body).Decode(&result)
@@ -121,6 +132,8 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 		fmt.Println(err)
 		return
 	}
+	defer response.Body.Close()
+	fmt.Printf("Result: %++v\n", result)
 	savedResult := schemas.ReactionResponseData{
 		WorkflowId:  workflowId,
 		ApiResponse: json.RawMessage{},
