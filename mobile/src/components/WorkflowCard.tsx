@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { globalStyles } from '../styles/global_style';
 import { ActionOrReaction, AppStackList, Workflow } from '../types';
-import { getWorkflows, sendWorkflows } from '../service';
+import { getWorkflows, refreshServices, sendWorkflows } from '../service';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 interface WorkflowCardProps {
@@ -16,6 +16,7 @@ interface WorkflowCardProps {
   isBlackTheme?: boolean;
   serverIp: string;
   setWorkflows: (workflows: Workflow[]) => void;
+  setRefresh: (refresh: boolean) => void;
 }
 
 export function WorkflowCard({
@@ -23,6 +24,7 @@ export function WorkflowCard({
   serverIp,
   token,
   setWorkflows,
+  setRefresh,
 }: WorkflowCardProps) {
   const navigation = useNavigation<NavigationProp<AppStackList>>();
 
@@ -31,19 +33,14 @@ export function WorkflowCard({
     id: 0,
     name: '',
     description: '',
-    options: [],
+    options: {},
   });
   const [reaction, setReaction] = useState<ActionOrReaction>({
     id: 0,
     name: '',
     description: '',
-    options: [],
+    options: {},
   });
-
-  const transformOptions = (options: any[]) =>
-    JSON.stringify(
-      Object.fromEntries(options.map(option => [option.name, option.value])),
-    );
 
   const handleSendWorkflow = async () => {
     if (token !== 'Error: token not found' && action && reaction) {
@@ -51,23 +48,24 @@ export function WorkflowCard({
         action_id: action.id,
         reaction_id: reaction.id,
         name: workflowName,
-        action_option: transformOptions(action.options),
-        reaction_option: transformOptions(reaction.options),
+        action_option: action.options,
+        reaction_option: reaction.options,
       });
       await getWorkflows(serverIp, token, setWorkflows);
       setAction({
         id: 0,
         name: '',
         description: '',
-        options: [],
+        options: {},
       });
       setReaction({
         id: 0,
         name: '',
         description: '',
-        options: [],
+        options: {},
       });
       setWorkflowName('');
+      setRefresh(true);
     }
   };
 
@@ -92,6 +90,7 @@ export function WorkflowCard({
           styles.input,
         ]}
         placeholder="Workflow Name"
+        placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
         value={workflowName}
         onChangeText={setWorkflowName}
       />
@@ -101,7 +100,7 @@ export function WorkflowCard({
           styles.title,
           { marginBottom: 20 },
         ]}>
-        Select a Action and a Reaction
+        Select Action and Reaction
       </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -123,7 +122,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -135,7 +134,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -162,7 +161,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -174,7 +173,7 @@ export function WorkflowCard({
                 isBlackTheme
                   ? globalStyles.textColorBlack
                   : globalStyles.textColor,
-                styles.textFormat,
+                globalStyles.textFormat,
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -234,9 +233,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-  },
-  textFormat: {
-    fontSize: 15,
   },
   disabledButton: {
     opacity: 0.5,

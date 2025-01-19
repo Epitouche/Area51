@@ -3,7 +3,6 @@ import {
   AboutJsonParse,
   ConnectedService,
   GetConnectedServiceProps,
-  Option,
   ParseConnectedServicesProps,
   ParseServicesProps,
 } from '../types';
@@ -46,27 +45,6 @@ export async function parseServices({
   }
 }
 
-function parseAndTransformOptions(optionsString: string | null): Option[] {
-  try {
-    if (!optionsString) {
-      return [];
-    }
-    const parsedOptions: Record<string, string> = JSON.parse(optionsString);
-
-    const transformedOptions: Option[] = Object.entries(parsedOptions).map(
-      ([name, type]) => ({
-        name,
-        type,
-      }),
-    );
-
-    return transformedOptions;
-  } catch (error) {
-    console.error('Erreur lors du parsing des options:', error);
-    return [];
-  }
-}
-
 export async function parseConnectedServices({
   aboutjson,
   apiEndpoint,
@@ -104,13 +82,13 @@ export async function parseConnectedServices({
         actions: service.actions
           ? service.actions.map(action => ({
               ...action,
-              options: parseAndTransformOptions(action.options),
+              options: action.options,
             }))
           : null,
         reactions: service.reactions
           ? service.reactions.map(reaction => ({
               ...reaction,
-              options: parseAndTransformOptions(reaction.options),
+              options: reaction.options,
             }))
           : null,
         image: service.image,

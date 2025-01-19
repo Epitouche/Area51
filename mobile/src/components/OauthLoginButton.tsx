@@ -46,14 +46,6 @@ export function OauthLoginButton({
 }
 
 const styles = StyleSheet.create({
-  button: {
-    width: 'auto',
-    marginTop: 10,
-    marginBottom: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -62,10 +54,5 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     marginRight: 10,
-  },
-  text: {
-    color: '#222831',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });

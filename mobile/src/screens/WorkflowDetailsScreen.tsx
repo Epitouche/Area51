@@ -33,7 +33,7 @@ export default function WorkflowDetailsScreen() {
 
   const [isToggled, setIsToggled] = useState(workflow.is_active);
   const [token, setToken] = useState('');
-  const [reaction, setReaction] = useState<any>();
+  const [reaction, setReaction] = useState<any[][]>([]);
 
   const handleToggle = () => {
     setIsToggled(!isToggled);
@@ -49,7 +49,7 @@ export default function WorkflowDetailsScreen() {
   useEffect(() => {
     const grabReaction = async () => {
       if (token !== 'Error: token not found' && token !== '')
-        await getReaction(serverIp, token, setReaction);
+        await getReaction(serverIp, token, setReaction, workflow.workflow_id);
     };
     grabReaction();
   }, [token]);
@@ -136,7 +136,6 @@ export default function WorkflowDetailsScreen() {
                     ? globalStyles.textColorBlack
                     : globalStyles.textColor,
                   globalStyles.textFormat,
-                  styles.textFormat,
                 ]}
                 accessibilityLabel={workflow.action_name}
                 numberOfLines={1}
@@ -157,7 +156,6 @@ export default function WorkflowDetailsScreen() {
                     ? globalStyles.textColorBlack
                     : globalStyles.textColor,
                   globalStyles.textFormat,
-                  styles.textFormat,
                 ]}
                 accessibilityLabel={workflow.reaction_name}
                 numberOfLines={1}
@@ -166,7 +164,6 @@ export default function WorkflowDetailsScreen() {
               </Text>
             </View>
           </View>
-
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text
               style={[
@@ -265,26 +262,11 @@ export default function WorkflowDetailsScreen() {
               Last reaction data
             </Text>
           </View>
-          <View
-            style={[
-              styles.container,
-              isBlackTheme
-                ? globalStyles.secondaryLight
-                : globalStyles.terciaryLight,
-            ]}>
-            {reaction &&
-              reaction.map((item: any, index: number) => (
-                <View key={index} style={styles.cardCode}>
-                  <Text style={styles.bodyText}>{item.body}</Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      console.log('URL clicked:', item.pull_request_url)
-                    }>
-                    <Text style={styles.urlText}>{item.pull_request_url}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-          </View>
+          {reaction && (
+            <View style={styles.cardCode}>
+              <Text>{JSON.stringify(reaction, null, 2)}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -308,9 +290,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  input: {
-    marginBottom: 20,
-  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -321,12 +300,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  textFormat: {
-    fontSize: 15,
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
   bullet: {
     fontSize: 20,
@@ -350,9 +323,6 @@ const styles = StyleSheet.create({
   toggledOff: {
     backgroundColor: '#f44336',
   },
-  toggleText: {
-    fontSize: 18,
-  },
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
@@ -361,8 +331,7 @@ const styles = StyleSheet.create({
   cardCode: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -377,5 +346,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1e90ff',
     textDecorationLine: 'underline',
+  },
+  textFomart: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  input: {
+    borderBottomWidth: 1,
+    padding: 5,
+    marginVertical: 10,
+    fontSize: 13,
+    marginBottom: 15,
   },
 });

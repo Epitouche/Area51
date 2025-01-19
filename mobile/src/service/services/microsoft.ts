@@ -7,12 +7,27 @@ export async function microsoftLogin(
 ) {
   const setToken = async (accessToken: string) => {
     if (sessionToken)
-      await sendServiceToken(apiEndpoint, accessToken, 'microsoft', sessionToken);
+      await sendServiceToken(
+        apiEndpoint,
+        accessToken,
+        'microsoft',
+        sessionToken,
+      );
     else await sendServiceToken(apiEndpoint, accessToken, 'microsoft');
   };
   const config = {
     clientId: MICROSOFT_CLIENT_ID,
-    scopes: ['Mail.ReadWrite', 'User.Read', 'Mail.Send', 'offline_access'],
+    scopes: [
+      'openid',
+      'profile',
+      'Calendars.Read',
+      'Calendars.ReadWrite',
+      'Calendars.ReadWrite.Shared',
+      'Calendars.Read.Shared',
+      'Chat.Read',
+      'Mail.Send',
+      'https://graph.microsoft.com/User.Read',
+    ],
     redirectUrl: 'com.area51-epitech://oauthredirect',
     serviceConfiguration: {
       authorizationEndpoint:
