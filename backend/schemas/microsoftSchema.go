@@ -30,12 +30,12 @@ type MicrosoftOutlookEventsOptions struct {
 }
 
 type MicrosoftTeamsGroupOptionsInfos struct {
-	Id string `json:"id"`
+	Name string `json:"name"`
 }
 
 type MicrosoftTeamsChatResponse struct {
 	IsOld               bool   `json:"is_old"`
-	Name                  string `json:"name"`
+	Name                string `json:"name"`
 	LastUpdatedDateTime string `json:"lastUpdatedDateTime"`
 }
 
@@ -81,8 +81,8 @@ type MicrosoftSendMailOptionsSchema struct {
 }
 
 type MicrosoftTeams struct {
-	Id string `json:"id"`
-	Topic string `json:"topic"`
+	Id       string `json:"id"`
+	Topic    string `json:"topic"`
 	ChatType string `json:"chatType"`
 }
 

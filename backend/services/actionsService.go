@@ -103,7 +103,7 @@ func NewActionService(
 				Description: "Modify a Teams group",
 				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
 				Options: toolbox.RealObject(schemas.MicrosoftTeamsGroupOptionsInfos{
-					Id: "string",
+					Name: "Area51",
 				}),
 			},
 			{
