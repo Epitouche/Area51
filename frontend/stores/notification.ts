@@ -14,7 +14,6 @@ export const useNotificationStore = defineStore('notification', {
   actions: {
     addNotification(notification: Omit<Notification, 'id'>) {
       const id = Date.now().toString();
-      console.log('Adding notification', id, notification);
       this.notifications.push({ id, ...notification });
 
       setTimeout(() => {

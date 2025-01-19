@@ -1,37 +1,99 @@
 <script setup lang="ts">
-import type { ServerResponse, Service } from "~/src/types";
+import type { AboutResponse } from "~/src/types";
+
+interface RedirectResponse {
+  service_authentication_url: string;
+}
 
 type ServiceCard = {
   name: string;
   description: string;
   image: string;
   isConnected: boolean;
+  isAllowed: boolean;
+  is_oauth: boolean;
 };
+
+const notificationStore = useNotificationStore();
+
+function triggerNotification(
+  type: "success" | "error" | "warning",
+  title: string,
+  message: string
+) {
+  notificationStore.addNotification({
+    type,
+    title,
+    message,
+  });
+}
 
 const allServices = reactive<ServiceCard[]>([]);
 
 const token = useCookie("access_token");
 
-// Fetch services from the API
-onMounted(async () => {
+const isConnected = computed(() => {
+  return token.value !== undefined;
+});
 
-  // fetch the services
-  const response = await $fetch<ServerResponse>(
+async function changeConnection(service: ServiceCard) {
+  if (service.isAllowed === false) {
+    triggerNotification(
+      "error",
+      "Service used for login",
+      "You cannot disconnect the service used for login"
+    );
+    service.isConnected = true;
+    return;
+  }
+  if (service.isConnected) {
+    await fetch(`/api/auth/logoutService`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+      body: JSON.stringify({
+        service_name: service.name.toLowerCase(),
+      }),
+    });
+  } else {
+    const { service_authentication_url }: RedirectResponse = await $fetch(
+      `http://localhost:8080/api/${service.name.toLowerCase()}/auth`,
+      {
+        method: "GET",
+      }
+    );
+    if (service_authentication_url) {
+      localStorage.setItem("serviceConnect", service.name.toLowerCase());
+      window.location.href = service_authentication_url;
+    } else {
+      triggerNotification(
+        "error",
+        `${service} authentication URL not found`,
+        "Please try again later"
+      );
+    }
+  }
+  service.isConnected = !service.isConnected;
+}
+
+onMounted(async () => {
+  const response = await $fetch<AboutResponse>(
     "http://localhost:8080/about.json"
   );
 
-  // create a new array with the services
-  response.server.services.forEach((service: Service) => {
+  response.server.services.forEach((service) => {
     allServices.push({
       name: service.name,
       description:
-        "Description of the service. This text has to be long enough to be able to see the overflow of the text.",
-      image: "IMG",
+        service.description || "No description available for this service.",
+      image: service.image || "IMG",
       isConnected: false,
+      isAllowed: true,
+      is_oauth: service.is_oauth,
     });
   });
 
-  // fetch the connected services
   const connectedServices = await $fetch<ServiceCard[]>(
     "http://localhost:8080/api/user/services",
     {
@@ -42,16 +104,21 @@ onMounted(async () => {
     }
   );
 
-  // if the service is connected, set the isConnected property to true
   allServices.forEach((service) => {
     connectedServices.forEach((connectedService) => {
-      if (service.name === connectedService.name) {
+      if (service.name === connectedService.name || !service.is_oauth) {
         service.isConnected = true;
       }
     });
   });
 
-  // capitalize the first letter of the service name
+  const serviceUsedLogin = useCookie("serviceUsedLogin");
+  if (serviceUsedLogin.value) {
+    allServices.forEach((service) => {
+      if (service.name === serviceUsedLogin.value) service.isAllowed = false;
+    });
+  }
+
   allServices.forEach((service) => {
     service.name = service.name.charAt(0).toUpperCase() + service.name.slice(1);
   });
@@ -60,56 +127,109 @@ onMounted(async () => {
 <template>
   <div
     class="flex flex-col min-h-screen bg-secondaryWhite-500 dark:bg-primaryDark-500"
+    aria-label="Services management screen"
   >
-    <div class="m-20">
-      <h1 class="text-6xl font-bold text-fontBlack dark:text-fontWhite">
-        Services
-      </h1>
-    </div>
-    <div class="flex justify-center">
-      <hr
-        class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-11/12"
-      >
-    </div>
-    <div class="grid grid-cols-3 gap-4 m-20">
+    <div v-if="isConnected" aria-label="Connected services">
+      <div class="m-5 sm:m-10">
+        <h1
+          class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
+          aria-label="Services heading"
+        >
+          Services
+        </h1>
+      </div>
+      <div class="flex justify-center">
+        <hr
+          class="border-primaryWhite-500 dark:border-secondaryDark-500 border-2 w-full sm:w-11/12"
+          aria-hidden="true"
+        >
+      </div>
       <div
-        v-for="(service, index) in allServices"
-        :key="index"
-        class="flex justify-center"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 m-5 sm:m-10"
+        aria-label="List of available services"
       >
         <div
-          class="flex flex-col w-full p-7 bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-lg shadow-lg gap-5"
+          v-for="(service, index) in allServices"
+          :key="index"
+          class="flex justify-center"
+          aria-label="Service item"
         >
-          <div class="flex items-center justify-between w-full">
-            <div
-              class="w-12 h-12 bg-primaryWhite-400 dark:bg-secondaryDark-400 rounded-full flex items-center justify-center"
-            >
-              <p>{{ service.image }}</p>
-            </div>
-            <div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  :checked="service.isConnected"
-                  class="sr-only peer"
+          <div
+            class="flex flex-col w-full p-5 sm:p-7 bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-lg shadow-lg gap-4 sm:gap-5"
+            aria-label="Service card for {{ service.name }}"
+          >
+            <div class="flex items-center justify-between w-full">
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-primaryWhite-400 dark:bg-secondaryDark-400 rounded-full flex items-center justify-center"
+                aria-label="Service image or initial"
+              >
+                <img
+                  v-if="service.image !== 'IMG'"
+                  :src="service.image"
+                  :alt="`${service.name} image`"
                 >
-                <div
-                  class="w-11 h-6 bg-primaryWhite-500 dark:bg-secondaryDark-400 rounded-full peer peer-checked:bg-tertiary-500 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                />
-              </label>
+                <p
+                  v-else
+                  class="text-lg sm:text-xl text-fontBlack dark:text-fontWhite"
+                  aria-label="Service initial"
+                >
+                  {{ service.name.charAt(0) }}
+                </p>
+              </div>
+              <div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    :checked="service.isConnected"
+                    :disabled="!service.isAllowed"
+                    class="sr-only peer"
+                    aria-label="Toggle connection for {{ service.name }}"
+                    @click="changeConnection(service)"
+                  >
+                  <div
+                    :class="{
+                      'cursor-not-allowed dark:bg-secondaryDark-400 peer-checked:bg-tertiary-500':
+                        !service.isAllowed,
+                      'bg-secondaryWhite-500 dark:bg-secondaryDark-400 peer-checked:bg-tertiary-500':
+                        service.isAllowed,
+                    }"
+                    class="w-10 h-5 sm:w-11 sm:h-6 rounded-full peer peer-checked:after:translate-x-4 sm:peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 sm:after:h-5 after:w-4 sm:after:w-5 after:transition-all"
+                  />
+                </label>
+              </div>
             </div>
-          </div>
-          <div class="flex flex-col gap-2">
-            <h3
-              class="text-2xl font-semibold text-fontBlack dark:text-fontWhite"
-            >
-              {{ service.name }}
-            </h3>
-            <p class="text-fontBlack dark:text-fontWhite">
-              {{ service.description }}
-            </p>
+            <div class="flex flex-col gap-1 sm:gap-2">
+              <h3
+                class="text-lg sm:text-xl md:text-2xl font-semibold text-fontBlack dark:text-fontWhite"
+                aria-label="Service name: {{ service.name }}"
+              >
+                {{ service.name }}
+              </h3>
+              <p
+                class="text-sm sm:text-base text-fontBlack dark:text-fontWhite"
+                aria-label="Service description: {{ service.description }}"
+              >
+                {{ service.description }}
+              </p>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+    <div v-else aria-label="Error screen">
+      <div class="flex flex-col gap-4 justify-center items-center h-full">
+        <h1
+          class="text-3xl sm:text-4xl md:text-6xl font-bold text-fontBlack dark:text-fontWhite"
+          aria-label="Error 404 heading"
+        >
+          ERROR 404 !
+        </h1>
+        <h2
+          class="text-2xl sm:text-3xl font-bold text-fontBlack dark:text-fontWhite"
+          aria-label="Not connected message"
+        >
+          You are not connected, please log in to access this page.
+        </h2>
       </div>
     </div>
   </div>
