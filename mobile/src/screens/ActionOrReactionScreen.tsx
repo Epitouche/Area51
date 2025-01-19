@@ -9,17 +9,70 @@ import {
 } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
-import { AppStackList, ServicesParse, OptionValues } from '../types';
+import { AppStackList, ServicesParse } from '../types';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 
 interface Values {
   id: number;
   name: string;
   description: string;
-  options: OptionValues[] | null;
+  options: { [key: string]: any };
 }
 
+type Options = {
+  [key: string]: any;
+};
+
 type ActionOrReactionProps = RouteProp<AppStackList, 'Options'>;
+
+interface OptionsInputProps {
+  options: Options;
+  onChange: (key?: string, value?: string) => void;
+  isBlackTheme?: boolean;
+}
+
+function OptionsInput({ options, onChange, isBlackTheme }: OptionsInputProps) {
+  const renderOptions = (
+    options: { [key: string]: any },
+    parentKey?: string,
+  ) => {
+    if (typeof options === 'string' || typeof options === 'number') {
+      return (
+        <View>
+          <Text
+            style={[
+              isBlackTheme
+                ? globalStyles.textColor
+                : globalStyles.textColorBlack,
+              globalStyles.textFormat,
+            ]}>
+            {parentKey
+              ? (parentKey.split('.').pop()?.charAt(0).toUpperCase() ?? '') +
+                (parentKey.split('.').pop()?.slice(1) ?? '')
+              : ''}
+          </Text>
+          <TextInput
+            style={isBlackTheme ? globalStyles.input : globalStyles.inputBlack}
+            value={options}
+            onChangeText={text => onChange(parentKey, text)}
+            autoCapitalize="none"
+            placeholder={options || `Enter ${parentKey}`}
+            placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
+          />
+        </View>
+      );
+    } else if (typeof options === 'object' && options !== null) {
+      return Object.keys(options).map(key => (
+        <View key={key}>
+          {renderOptions(options[key], parentKey ? `${parentKey}.${key}` : key)}
+        </View>
+      ));
+    }
+    return null;
+  };
+
+  return <View>{renderOptions(options)}</View>;
+}
 
 function NoService() {
   const { isBlackTheme } = useContext(AppContext);
@@ -57,12 +110,53 @@ function ActionOrReaction() {
     useState<ServicesParse>(defaultService);
   const [selectedActionOrReactionId, setSelectedActionOrReactionId] =
     useState<Values>();
+  const [options, setOptions] = useState<{ [key: string]: any }>({});
   const { isAction, setValues } = route.params;
   const { servicesConnected, isBlackTheme } = useContext(AppContext);
 
   useEffect(() => {
     setSelectedActionOrReactionId(undefined);
+    setOptions({});
   }, [selectedService]);
+
+  useEffect(() => {
+    if (selectedActionOrReactionId) {
+      setOptions(selectedActionOrReactionId.options || {});
+    }
+  }, [selectedActionOrReactionId]);
+
+  const handleOptionsChange = (key: string | undefined, value?: string) => {
+    let updatedOptions = { ...options };
+
+    const updateNestedValue = (obj: any, key: string, value: string): any => {
+      const keys = key.split('.');
+      const lastKey = keys.pop();
+
+      if (keys.length > 0) {
+        const parentObj = keys.reduce(
+          (acc, currentKey) => acc[currentKey],
+          obj,
+        );
+        if (parentObj && typeof parentObj === 'object') {
+          parentObj[lastKey as string] = value;
+        }
+      } else if (lastKey) {
+        obj[lastKey] = value;
+      }
+
+      return obj;
+    };
+
+    if (key) {
+      if (typeof updatedOptions === 'object') {
+        updatedOptions = updateNestedValue(updatedOptions, key, value || '');
+      }
+    } else {
+      updatedOptions = { ...updatedOptions, value: value || '' };
+    }
+
+    setOptions(updatedOptions);
+  };
 
   return (
     <View
@@ -184,11 +278,7 @@ function ActionOrReaction() {
                             id: action.action_id,
                             name: action.name,
                             description: action.description,
-                            options:
-                              action.options?.map(option => ({
-                                ...option,
-                                value: '',
-                              })) || null,
+                            options: action.options,
                           });
                         }}>
                         <Text
@@ -232,11 +322,7 @@ function ActionOrReaction() {
                           id: reaction.reaction_id,
                           name: reaction.name,
                           description: reaction.description,
-                          options:
-                            reaction.options?.map(option => ({
-                              ...option,
-                              value: '',
-                            })) || null,
+                          options: reaction.options,
                         });
                       }}>
                       <Text
@@ -263,72 +349,37 @@ function ActionOrReaction() {
                   No Reaction Available
                 </Text>
               )}
-              {selectedActionOrReactionId?.options &&
-                selectedActionOrReactionId.options.length > 0 && (
-                  <>
-                    <View
-                      style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Text
-                        style={[
-                          styles.bullet,
-                          isBlackTheme
-                            ? globalStyles.textColor
-                            : globalStyles.textColorBlack,
-                        ]}
-                        accessibilityLabel="Bullet">
-                        •
-                      </Text>
-                      <Text
-                        style={[
-                          isBlackTheme
-                            ? globalStyles.textColor
-                            : globalStyles.textColorBlack,
-                          styles.subtitle,
-                        ]}
-                        accessibilityLabel={'Enter the Options'}>
-                        Enter the Options
-                      </Text>
-                    </View>
-                    {selectedActionOrReactionId.options.map((option, index) => {
-                      return (
-                        <TextInput
-                          key={index}
-                          placeholder={`Enter ${option.name}`}
-                          defaultValue={String(option.value)}
-                          accessibilityLabel={
-                            'Enter the Options for ' +
-                            option.name +
-                            ' de type ' +
-                            option.type
-                          }
-                          keyboardType={
-                            option.type === 'string' ? 'default' : 'numeric'
-                          }
-                          style={[
-                            isBlackTheme
-                              ? globalStyles.input
-                              : globalStyles.inputBlack,
-                          ]}
-                          onChangeText={text => {
-                            const updatedOptions =
-                              selectedActionOrReactionId.options?.map(
-                                (opt, idx) => {
-                                  if (idx === index) {
-                                    return { ...opt, value: text };
-                                  }
-                                  return opt;
-                                },
-                              ) || [];
-                            setSelectedActionOrReactionId({
-                              ...selectedActionOrReactionId,
-                              options: updatedOptions,
-                            });
-                          }}
-                        />
-                      );
-                    })}
-                  </>
-                )}
+              {selectedActionOrReactionId?.options && (
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text
+                      style={[
+                        styles.bullet,
+                        isBlackTheme
+                          ? globalStyles.textColor
+                          : globalStyles.textColorBlack,
+                      ]}
+                      accessibilityLabel="Bullet">
+                      •
+                    </Text>
+                    <Text
+                      style={[
+                        isBlackTheme
+                          ? globalStyles.textColor
+                          : globalStyles.textColorBlack,
+                        styles.subtitle,
+                      ]}
+                      accessibilityLabel={'Enter the Options'}>
+                      Enter the Options
+                    </Text>
+                  </View>
+                  <OptionsInput
+                    options={options}
+                    onChange={handleOptionsChange}
+                    isBlackTheme={isBlackTheme}
+                  />
+                </>
+              )}
             </View>
           )}
           <TouchableOpacity
@@ -344,7 +395,7 @@ function ActionOrReaction() {
                   id: selectedActionOrReactionId.id,
                   name: selectedActionOrReactionId.name,
                   description: selectedActionOrReactionId.description,
-                  options: selectedActionOrReactionId.options || [],
+                  options: options,
                 });
               }
               navigation.goBack();
@@ -404,14 +455,6 @@ const styles = StyleSheet.create({
   bullet: {
     fontSize: 20,
     marginRight: 10,
-  },
-  saveButton: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    marginBottom: 40,
-    padding: 10,
   },
   subtitle: {
     fontSize: 16,

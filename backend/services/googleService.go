@@ -220,17 +220,18 @@ func (service *googleService) GetEmailAction(channel chan string, workflowId uin
 		return
 	}
 
-	if ResultSizeEstimate < googleOption.ResultSizeEstimate {
-		existingRecords["ResultSizeEstimate"] = googleOption.ResultSizeEstimate
-		jsonData, err := json.Marshal(existingRecords)
-		if err != nil {
-			fmt.Println("Error marshalling existingRecords:", err)
-			return
-		}
-		workflow.Utils = jsonData
-		workflow.ReactionTrigger = true
-		service.workflowRepository.Update(workflow)
+	existingRecords["ResultSizeEstimate"] = googleOption.ResultSizeEstimate
+	jsonData, err := json.Marshal(existingRecords)
+	if err != nil {
+		fmt.Println("Error marshalling existingRecords:", err)
+		return
 	}
+	workflow.Utils = jsonData
+	if ResultSizeEstimate < googleOption.ResultSizeEstimate {
+		workflow.ReactionTrigger = true
+		service.workflowRepository.UpdateReactionTrigger(workflow)
+	}
+	service.workflowRepository.UpdateUtils(workflow)
 	channel <- "Emails fetched"
 }
 

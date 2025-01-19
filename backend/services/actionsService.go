@@ -1,18 +1,12 @@
 package services
 
 import (
-	"encoding/json"
-	"time"
-
-	"github.com/gin-gonic/gin"
-
 	"area51/repository"
 	"area51/schemas"
 	"area51/toolbox"
 )
 
 type ActionService interface {
-	CreateAction(ctx *gin.Context) (string, error)
 	FindAll() []schemas.Action
 	SaveAllAction()
 	FindById(actionId uint64) schemas.Action
@@ -91,7 +85,7 @@ func NewActionService(
 				Options: toolbox.RealObject(schemas.WeatherCurrentOptions{
 					CityName:     "Bordeaux",
 					LanguageCode: "FR",
-					Temperature:  0,
+					Temperature:  "0",
 					CompareSign:  "> or < or =",
 				}),
 			},
@@ -125,40 +119,6 @@ func NewActionService(
 	}
 	newActionService.SaveAllAction()
 	return newActionService
-}
-
-func (service *actionService) CreateAction(ctx *gin.Context) (string, error) {
-	result := schemas.ActionResult{}
-
-	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
-	if err != nil {
-		return "", err
-	}
-
-	tokenString, err := toolbox.GetBearerToken(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	_, err = service.userService.GetUserInfos(tokenString)
-	if err != nil {
-		return "", err
-	}
-
-	optionValue := toolbox.RealObject(result.Options)
-
-	serviceInfo := service.serviceService.FindByName(schemas.Github)
-	newAction := schemas.Action{
-		Name:        result.Name,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		Description: result.Description,
-		ServiceId:   serviceInfo.Id,
-		Options:     optionValue,
-	}
-
-	service.repository.Save(newAction)
-	return "Action Created successfully", nil
 }
 
 func (service *actionService) FindAll() []schemas.Action {

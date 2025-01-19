@@ -10,6 +10,7 @@ type SpotifyReaction string
 
 const (
 	SpotifyAddTrackReaction SpotifyReaction = "add_track_reaction"
+	SpotifyCreatePlaylist   SpotifyReaction = "create_playlist"
 )
 
 type SpotifyResponseToken struct {
@@ -46,4 +47,11 @@ type SpotifyTracksInfos struct {
 
 type SpotifyPlaylistInfos struct {
 	Tracks SpotifyTracksInfos `json:"tracks"`
+}
+
+type SpotifyPlaylistOptions struct {
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Public        bool `json:"public"`
+	Collaborative bool `json:"collaborative"`
 }

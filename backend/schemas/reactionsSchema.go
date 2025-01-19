@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 )
 
@@ -31,6 +32,6 @@ type Reaction struct {
 	Options     json.RawMessage `gorm:"type:jsonb" json:"options"`
 }
 
-type ReactionOutputJson struct {
-	WorkflowId uint64 `json:"workflow_id" binding:"required"`
-}
+var (
+	ErrReactionNotFound = errors.New("reaction not found")
+)
