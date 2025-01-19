@@ -69,6 +69,17 @@ type MicrosoftSendMailOptions struct {
 	SaveToSentItems string                              `json:"saveToSentItems"`
 }
 
+type MicrosoftSendMailMainMessageOptionsSchema struct {
+	Subject string                       `json:"subject"`
+	Body    MicrosoftSendMailBodyOptions `json:"body"`
+	Address string                       `json:"address"`
+}
+
+type MicrosoftSendMailOptionsSchema struct {
+	Message         MicrosoftSendMailMainMessageOptionsSchema `json:"message"`
+	SaveToSentItems string                                    `json:"saveToSentItems"`
+}
+
 // message: {
 // 	body: {
 // 	  content: "This email is to confirm our trip to Chicoutimi",

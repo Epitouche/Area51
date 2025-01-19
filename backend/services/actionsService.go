@@ -85,7 +85,7 @@ func NewActionService(
 				Options: toolbox.RealObject(schemas.WeatherCurrentOptions{
 					CityName:     "Bordeaux",
 					LanguageCode: "FR",
-					Temperature:  0,
+					Temperature:  "0",
 					CompareSign:  "> or < or =",
 				}),
 			},
