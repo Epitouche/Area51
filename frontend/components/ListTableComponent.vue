@@ -10,7 +10,19 @@ const props = defineProps<{
 }>();
 
 const modalOpen = ref(false);
-const workflowName = ref("");
+
+const copyIcon = ref("material-symbols:content-copy-outline-rounded");
+
+const workflowReaction = reactive<unknown[]>([]);
+
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    copyIcon.value = "material-symbols:check-rounded";
+  } catch (err) {
+    console.error("Erreur lors de la copie :", err);
+  }
+};
 
 const filteredWorkflows = computed(() =>
   props.rows.map(
@@ -65,8 +77,9 @@ const token = useCookie("access_token");
 
 async function launchAction(option: string, workflow: Workflow) {
   switch (option) {
-    case "Edit":
-    modalOpen.value = true;
+    case "Last Reaction":
+      await fetchWorkflowReaction(workflow);
+      modalOpen.value = true;
     activeDropdownIndex.value = null;
       break;
     case "Switch Activity":
@@ -98,6 +111,28 @@ async function deleteWorkflow(workflow:Workflow) {
       }),
     });
     window.location.reload();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function fetchWorkflowReaction(workflow: Workflow) {
+  try {
+    const response = await $fetch("/api/workflows/lastReaction", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workflow_id: workflow.workflow_id,
+      }),
+    });
+    
+    if (response !== undefined) {
+      workflowReaction.push(response);
+    }
+
   } catch (error) {
     console.error(error);
   }
@@ -210,7 +245,7 @@ onBeforeUnmount(() => {
               >
                 <button
                   v-for="(option, index) in [
-                    'Edit',
+                    'Last Reaction',
                     'Switch Activity',
                     'Delete',
                   ]"
@@ -235,17 +270,34 @@ onBeforeUnmount(() => {
     </table>
     <ModalComponent
       v-motion-pop
-      title="Edit Workflow"
+      title="Last Reaction"
       :is-open="modalOpen"
       @close="modalOpen = false"
       @confirm="modalOpen = false"
       >
-       <InputComponent
-         id="workflowName"
-         v-model="workflowName"
-         type="text"
-         label="Workflow Name"
-        />
+      <div class="flex justify-center m-5 sm:m-10">
+        <div
+          class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-full sm:w-10/12"
+          aria-label="Workflow result JSON"
+        >
+          <button
+            class="absolute top-2 right-2 sm:top-4 sm:right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
+            aria-label="Copy workflow result JSON"
+            @click="
+              copyToClipboard(JSON.stringify(workflowReaction, null, 2))
+            "
+          >
+            <Icon :name="copyIcon" />
+          </button>
+          <pre
+            class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200 p-4"
+          >
+    {{ JSON.stringify(workflowReaction, null, 2) }}
+    </pre
+          >
+        </div>
+      </div>
+
     </ModalComponent>
   </div>
 </template>

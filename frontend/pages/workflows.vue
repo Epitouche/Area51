@@ -364,7 +364,9 @@ async function getLastWorkflowResult() {
       }
     );
 
-    lastWorkflowResult.push(...response);
+    if (response !== undefined) {
+      lastWorkflowResult.push(...response);
+    }
   } catch (error) {
     console.error("Error getting last workflow:", error);
   }

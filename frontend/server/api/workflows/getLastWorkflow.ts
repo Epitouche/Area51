@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
         });
     }
     try {
-        const response = await $fetch("http://server:8080/api/workflow/reaction", {
+        const response = await $fetch("http://server:8080/api/workflow/reactions", {
             method: "GET",
             headers: {
                 "Authorization": access_token ? `${access_token}` : "",
