@@ -10,7 +10,19 @@ const props = defineProps<{
 }>();
 
 const modalOpen = ref(false);
-const workflowName = ref("");
+
+const copyIcon = ref("material-symbols:content-copy-outline-rounded");
+
+const workflowReaction = reactive<unknown[]>([]);
+
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    copyIcon.value = "material-symbols:check-rounded";
+  } catch (err) {
+    console.error("Erreur lors de la copie :", err);
+  }
+};
 
 const filteredWorkflows = computed(() =>
   props.rows.map(
@@ -65,9 +77,10 @@ const token = useCookie("access_token");
 
 async function launchAction(option: string, workflow: Workflow) {
   switch (option) {
-    case "Edit":
-    modalOpen.value = true;
-    activeDropdownIndex.value = null;
+    case "Last Reaction":
+      await fetchWorkflowReaction(workflow);
+      modalOpen.value = true;
+      activeDropdownIndex.value = null;
       break;
     case "Switch Activity":
       await switchState(workflow);
@@ -82,7 +95,7 @@ async function launchAction(option: string, workflow: Workflow) {
   }
 }
 
-async function deleteWorkflow(workflow:Workflow) {
+async function deleteWorkflow(workflow: Workflow) {
   try {
     await $fetch("/api/workflows/deleteWorkflow", {
       method: "DELETE",
@@ -98,6 +111,27 @@ async function deleteWorkflow(workflow:Workflow) {
       }),
     });
     window.location.reload();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function fetchWorkflowReaction(workflow: Workflow) {
+  try {
+    const response = await $fetch("/api/workflows/lastReaction", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        workflow_id: workflow.workflow_id,
+      },
+    });
+
+    if (response !== undefined) {
+      workflowReaction.push(response);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -142,7 +176,7 @@ onBeforeUnmount(() => {
           <th
             class="px-3 py-2 sm:px-6 sm:py-3 text-center text-xs sm:text-sm text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
-            <input type="checkbox" :checked="headCheckbox" @click="checkAll" >
+            <input type="checkbox" :checked="headCheckbox" @click="checkAll">
           </th>
           <th
             v-for="column in columns"
@@ -210,7 +244,7 @@ onBeforeUnmount(() => {
               >
                 <button
                   v-for="(option, index) in [
-                    'Edit',
+                    'Last Reaction',
                     'Switch Activity',
                     'Delete',
                   ]"
@@ -235,17 +269,35 @@ onBeforeUnmount(() => {
     </table>
     <ModalComponent
       v-motion-pop
-      title="Edit Workflow"
+      title="Last Reaction"
       :is-open="modalOpen"
       @close="modalOpen = false"
       @confirm="modalOpen = false"
-      >
-       <InputComponent
-         id="workflowName"
-         v-model="workflowName"
-         type="text"
-         label="Workflow Name"
-        />
+    >
+      <div class="flex justify-center m-5 sm:m-10">
+        <div
+          class="relative flex justify-center bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-2xl w-full sm:w-10/12"
+          aria-label="Workflow result JSON"
+        >
+          <button
+            class="absolute top-2 right-2 sm:top-4 sm:right-4 text-fontBlack dark:text-fontWhite hover:text-accent-200 dark:hover:text-accent-500 transition duration-200"
+            aria-label="Copy workflow result JSON"
+            @click="copyToClipboard(JSON.stringify(workflowReaction, null, 2))"
+          >
+            <Icon :name="copyIcon" />
+          </button>
+          <div
+            class="max-h-96 overflow-auto w-full p-4"
+            aria-label="Scrollable content"
+          >
+            <pre
+              class="whitespace-pre-wrap break-words text-xs sm:text-sm text-primaryWhite-800 dark:text-primaryWhite-200"
+              >{{ JSON.stringify(workflowReaction, null, 2) }}
+        </pre
+            >
+          </div>
+        </div>
+      </div>
     </ModalComponent>
   </div>
 </template>
