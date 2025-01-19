@@ -7,7 +7,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { ActionOrReaction, AppStackList, Workflow } from '../types';
+import {
+  ActionOrReaction,
+  AppStackList,
+  OptionValues,
+  Workflow,
+} from '../types';
 import { getWorkflows, sendWorkflows } from '../service';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
@@ -40,35 +45,73 @@ export function WorkflowCard({
     options: [],
   });
 
-  const transformOptions = (options: any[]) =>
-    JSON.stringify(
-      Object.fromEntries(options.map(option => [option.name, option.value])),
-    );
+  const transformOptions = (options: OptionValues[]): any => {
+    const result: any = {};
+    const traverseOptions = (options: OptionValues[], result: any) => {
+      options.forEach(option => {
+        if (typeof option.var === 'object' && option.var !== null) {
+          result[option.name] = {};
+          traverseOptions(
+            Object.entries(option.var).map(([name, value]) => ({
+              name,
+              var: value,
+              value: option.value,
+            })),
+            result[option.name],
+          );
+        } else {
+          result[option.name] = option.value;
+        }
+      });
+    };
+    traverseOptions(options, result);
+    return result;
+  };
+
+  const logValues = (options: OptionValues[], parentKey: string = ''): void => {
+    options.forEach(option => {
+      const key = parentKey ? `${parentKey}.${option.name}` : option.name;
+      console.log(`${key}: ${option.value}`);
+      if (typeof option.var === 'object' && option.var !== null) {
+        logValues(
+          Object.entries(option.var).map(([name, value]) => ({
+            name,
+            var: value,
+            value: option.value,
+          })),
+          key,
+        );
+      }
+    });
+  };
 
   const handleSendWorkflow = async () => {
-    if (token !== 'Error: token not found' && action && reaction) {
-      await sendWorkflows(token, serverIp, {
-        action_id: action.id,
-        reaction_id: reaction.id,
-        name: workflowName,
-        action_option: transformOptions(action.options),
-        reaction_option: transformOptions(reaction.options),
-      });
-      await getWorkflows(serverIp, token, setWorkflows);
-      setAction({
-        id: 0,
-        name: '',
-        description: '',
-        options: [],
-      });
-      setReaction({
-        id: 0,
-        name: '',
-        description: '',
-        options: [],
-      });
-      setWorkflowName('');
-    }
+    console.log(logValues(action.options));
+    console.log('-------------------');
+    console.log(logValues(reaction.options));
+    // if (token !== 'Error: token not found' && action && reaction) {
+    //   await sendWorkflows(token, serverIp, {
+    //     action_id: action.id,
+    //     reaction_id: reaction.id,
+    //     name: workflowName,
+    //     action_option: action.options,
+    //     reaction_option: reaction.options,
+    //   });
+    //   await getWorkflows(serverIp, token, setWorkflows);
+    //   setAction({
+    //     id: 0,
+    //     name: '',
+    //     description: '',
+    //     options: [],
+    //   });
+    //   setReaction({
+    //     id: 0,
+    //     name: '',
+    //     description: '',
+    //     options: [],
+    //   });
+    //   setWorkflowName('');
+    // }
   };
 
   const isDisabled = action.name === '' || reaction.name === '';
@@ -92,6 +135,7 @@ export function WorkflowCard({
           styles.input,
         ]}
         placeholder="Workflow Name"
+        placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
         value={workflowName}
         onChangeText={setWorkflowName}
       />

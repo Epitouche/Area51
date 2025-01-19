@@ -1,7 +1,7 @@
 export async function sendWorkflows(
   token: string,
   apiEndpoint: string,
-  formsRegister: { action_id: number; reaction_id: number; name?: string, action_option: string, reaction_option: string },
+  formsRegister: { action_id: number; reaction_id: number; name?: string, action_option: any, reaction_option: any },
 ) {
   try {
     const response = await fetch(`http://${apiEndpoint}:8080/api/workflow`, {

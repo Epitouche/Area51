@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { globalStyles } from '../styles/global_style';
-import { AppStackList, ServicesParse, OptionValues } from '../types';
+import { AppStackList, ServicesParse, OptionValues, Option } from '../types';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 
 interface Values {
@@ -20,6 +20,44 @@ interface Values {
 }
 
 type ActionOrReactionProps = RouteProp<AppStackList, 'Options'>;
+
+const processOptions = (
+  options: OptionValues[],
+  updateValue: (key: string, value: string) => void,
+  isBlackTheme: boolean,
+) => {
+  const elements: React.ReactNode[] = [];
+
+  const traverseOptions = (options: OptionValues[], parentKey: string = '') => {
+    options.forEach(option => {
+      const key = parentKey ? `${parentKey}.${option.name}` : option.name;
+
+      if (Array.isArray(option.var)) {
+        traverseOptions(option.var, key);
+      } else {
+        elements.push(
+          <View key={key} style={{ marginBottom: 10 }}>
+            <Text style={[globalStyles.textColor, globalStyles.textFormat]}>
+              {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
+            </Text>
+            <TextInput
+              placeholder={`Ex: ${option.var}`}
+              placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
+              onChangeText={value => updateValue(key, value)} // Appel de updateValue
+              accessibilityLabel={`Enter the Options for ${option.name} de type ${option.var}`}
+              style={
+                isBlackTheme ? globalStyles.input : globalStyles.inputBlack
+              }
+            />
+          </View>,
+        );
+      }
+    });
+  };
+
+  traverseOptions(options);
+  return elements;
+};
 
 function NoService() {
   const { isBlackTheme } = useContext(AppContext);
@@ -64,64 +102,39 @@ function ActionOrReaction() {
     setSelectedActionOrReactionId(undefined);
   }, [selectedService]);
 
-  const renderOptionFields = (
-    options: OptionValues[],
-    isBlackTheme: boolean,
-  ) => {
-    return options.map((option: OptionValues, index: number) => {
-      if (
-        typeof option.var === 'object' &&
-        !Array.isArray(option.var) &&
-        option.value !== null
-      ) {
-        return (
-          <View key={index}>
-            <Text style={[globalStyles.textColor, globalStyles.textFormat]}>
-              {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
-            </Text>
-            <View style={{ marginLeft: 20 }}>
-              {renderOptionFields(
-                Object.entries(option.var).map(([name, value]) => ({
-                  name,
-                  value: '',
-                  var: value,
-                })),
-                isBlackTheme,
-              )}
-            </View>
-          </View>
-        );
-      }
-      return (
-        <>
-          <Text style={[globalStyles.textColor, globalStyles.textFormat]}>
-            {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
-          </Text>
-          <TextInput
-            key={index}
-            placeholder={`Ex: ${option.var}`}
-            defaultValue={String(option.value)}
-            accessibilityLabel={`Enter the Options for ${option.name} de type ${option.var}`}
-            style={[
-              isBlackTheme ? globalStyles.input : globalStyles.inputBlack,
-            ]}
-            onChangeText={text => {
-              const updatedOptions =
-                options.map((opt: OptionValues, idx: number) => {
-                  if (idx === index) {
-                    return { ...opt, value: text };
-                  }
-                  return opt;
-                }) || [];
-              setSelectedActionOrReactionId({
-                ...selectedActionOrReactionId,
-                options: updatedOptions,
-              } as Values);
-            }}
-          />
-        </>
+  const updateValue = (key: string, value: string) => {
+    if (selectedActionOrReactionId?.options) {
+      const traverseAndUpdate = (
+        options: OptionValues[],
+        parentKey: string = '',
+      ): OptionValues[] => {
+        return options.map(option => {
+          const optionKey = parentKey
+            ? `${parentKey}.${option.name}`
+            : option.name;
+
+          if (optionKey === key) {
+            return { ...option, value };
+          } else if (Array.isArray(option.var)) {
+            return {
+              ...option,
+              var: traverseAndUpdate(option.var, optionKey),
+            };
+          } else {
+            return option;
+          }
+        });
+      };
+
+      const updatedOptions = traverseAndUpdate(
+        selectedActionOrReactionId.options,
       );
-    });
+
+      setSelectedActionOrReactionId(prevState => ({
+        ...prevState!,
+        options: updatedOptions,
+      }));
+    }
   };
 
   return (
@@ -349,47 +362,13 @@ function ActionOrReaction() {
                         Enter the Options
                       </Text>
                     </View>
-                    {renderOptionFields(
-                      selectedActionOrReactionId.options,
-                      isBlackTheme,
-                    )}
-                    {/* // return (
-                      //   <TextInput
-                      //     key={index}
-                      //     placeholder={`Enter ${option.name}`}
-                      //     defaultValue={String(option.value)}
-                      //     accessibilityLabel={
-                      //       'Enter the Options for ' +
-                      //       option.name +
-                      //       ' de type ' +
-                      //       option.type
-                      //     }
-                      //     keyboardType={
-                      //       option.type === 'string' ? 'default' : 'numeric'
-                      //     }
-                      //     style={[
-                      //       isBlackTheme
-                      //         ? globalStyles.input
-                      //         : globalStyles.inputBlack,
-                      //     ]}
-                      //     onChangeText={text => {
-                      //       const updatedOptions =
-                      //         selectedActionOrReactionId.options?.map(
-                      //           (opt, idx) => {
-                      //             if (idx === index) {
-                      //               return { ...opt, value: text };
-                      //             }
-                      //             return opt;
-                      //           },
-                      //         ) || [];
-                      //       setSelectedActionOrReactionId({
-                      //         ...selectedActionOrReactionId,
-                      //         options: updatedOptions,
-                      //       });
-                      //     }}
-                      //   />
-                      // ); */}
-                    {/* })} */}
+                    {selectedActionOrReactionId.options
+                      ? processOptions(
+                          selectedActionOrReactionId.options,
+                          updateValue,
+                          isBlackTheme,
+                        )
+                      : null}
                   </>
                 )}
             </View>
@@ -402,7 +381,12 @@ function ActionOrReaction() {
                 : globalStyles.primaryLight,
             ]}
             onPress={() => {
-              if (selectedActionOrReactionId) {
+              if (
+                selectedActionOrReactionId &&
+                selectedActionOrReactionId.options
+              ) {
+                console.log(logValues(selectedActionOrReactionId.options));
+                console.log('[---------------------]');
                 setValues({
                   id: selectedActionOrReactionId.id,
                   name: selectedActionOrReactionId.name,
@@ -481,3 +465,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+
+const logValues = (options: OptionValues[], parentKey: string = ''): void => {
+  options.forEach(option => {
+    const key = parentKey ? `${parentKey}.${option.name}` : option.name;
+    console.log(`${key}: ${JSON.stringify(option.value, null, 2)}`);
+
+    if (Array.isArray(option.var)) {
+      logValues(option.var, key); // Appel récursif pour les sous-options
+    }
+  });
+};

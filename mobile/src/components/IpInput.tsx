@@ -76,6 +76,7 @@ export function IpInput({
             { width: '50%' },
           ]}
           placeholder="Server IP"
+          placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
           keyboardType="numeric"
           value={ipTmp}
           onChangeText={setIpTmp}
