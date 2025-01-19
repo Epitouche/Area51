@@ -13,7 +13,7 @@ type RegisterCredentials struct {
 
 type MobileToken struct {
 	Token   string      `json:"token" binding:"required"`
-	Service ServiceName `json:"service"`
+	Service ServiceName `json:"service" binding:"required"`
 }
 
 type OAuth2CodeCredentials struct {
