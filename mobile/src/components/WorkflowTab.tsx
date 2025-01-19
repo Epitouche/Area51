@@ -1,81 +1,140 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Button } from 'react-native-paper';
-import { DetailsModals } from './DetailsModals';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { globalStyles } from '../styles/global_style';
+import { AppStackList, Workflow } from '../types';
+import { NavigationProp } from '@react-navigation/native';
 
-type Workflow = {
-  name: string;
-  action_id: number;
-  reaction_id: number;
-  is_active: boolean;
-  created_at: string;
+type WorkflowTabProps = {
+  workflows?: Workflow[];
+  isBlackTheme?: boolean;
+  navigation: NavigationProp<AppStackList>;
 };
 
-type WorkflowTableProps = {
-  workflows: Workflow[];
-  detailsModalVisible: boolean;
-  setDetailsModalVisible: (detailsModalVisible: boolean) => void;
-};
-
-export function WorkflowTable({
+export function WorkflowTab({
   workflows,
-  setDetailsModalVisible,
-  detailsModalVisible,
-}: WorkflowTableProps) {
+  isBlackTheme,
+  navigation,
+}: WorkflowTabProps) {
   return (
-    <>
-      <View style={styles.container}>
-        <View style={styles.headerRow}>
-          <Text style={styles.headerCell}>Name</Text>
-          <Text style={styles.headerCell}>Is Active</Text>
-        </View>
-        {workflows !== null &&
-          workflows.map((workflow, index) => (
-            <View key={index} style={styles.row}>
-              <Text style={styles.cell}>{workflow.name}</Text>
-              <Text style={styles.cell}>
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.headerRow,
+          isBlackTheme
+            ? globalStyles.secondaryLight
+            : globalStyles.secondaryDark,
+        ]}>
+        <Text
+          style={[
+            styles.headerCell,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.textFormat,
+          ]}>
+          Name
+        </Text>
+        <Text
+          style={[
+            styles.headerCell,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.textFormat,
+          ]}>
+          Is Active
+        </Text>
+        <Text
+          style={[
+            styles.headerCell,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.textFormat,
+          ]}>
+          Details
+        </Text>
+      </View>
+      {workflows &&
+        workflows.map((workflow, index) => (
+          <View
+            key={index}
+            style={[
+              styles.row,
+              isBlackTheme
+                ? globalStyles.secondaryLight
+                : globalStyles.secondaryDark,
+            ]}>
+            <View style={styles.cell}>
+              <Text
+                style={
+                  isBlackTheme
+                    ? globalStyles.textColor
+                    : globalStyles.textColorBlack
+                }>
+                {workflow.name}
+              </Text>
+            </View>
+            <View style={styles.cell}>
+              <Text
+                style={
+                  isBlackTheme
+                    ? globalStyles.textColor
+                    : globalStyles.textColorBlack
+                }>
                 {workflow.is_active ? 'Yes' : 'No'}
               </Text>
-              <Button
-                onPress={() => setDetailsModalVisible(!detailsModalVisible)}>
-                <Text>details</Text>
-              </Button>
             </View>
-          ))}
-      </View>
-    </>
+            <View style={styles.cell}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('Workflow Details', { workflow })
+                }>
+                <Text
+                  style={
+                    isBlackTheme
+                      ? globalStyles.textColor
+                      : globalStyles.textColorBlack
+                  }>
+                  ...
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    alignContent: 'center',
+    justifyContent: 'center',
+    width: '90%',
   },
   headerRow: {
+    alignContent: 'center',
     flexDirection: 'row',
-    backgroundColor: '#f8f8f8',
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
   headerCell: {
+    width: '33%',
     flex: 1,
     padding: 10,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: '#333',
   },
   row: {
+    height: 40,
+    alignContent: 'center',
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    justifyContent: 'center',
   },
   cell: {
-    flex: 1,
-    padding: 10,
-    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '33%',
+  },
+  buttonText: {
+    color: '#fff',
   },
 });

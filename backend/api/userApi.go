@@ -7,6 +7,7 @@ import (
 
 	"area51/controllers"
 	"area51/schemas"
+	"area51/toolbox"
 )
 
 type UserDependencies struct {
@@ -24,41 +25,70 @@ func NewUserApi(controller controllers.UserController) *UserApi {
 }
 
 func (api *UserApi) Login(ctx *gin.Context) {
-	token, err := api.userController.Login(ctx)
-	if err != nil {
+	if token, err := api.userController.Login(ctx); err != nil {
 		ctx.JSON(http.StatusUnauthorized, &schemas.BasicResponse{
 			Message: err.Error(),
 		})
-		return
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.JWT{
+			Token: token,
+		})
 	}
-	ctx.JSON(http.StatusOK, &schemas.JWT{
-		Token: token,
-	})
 }
 
 func (api *UserApi) Register(ctx *gin.Context) {
-	token, err := api.userController.Register(ctx)
-	if err != nil {
+	if token, err := api.userController.Register(ctx); err != nil {
 		ctx.JSON(http.StatusConflict, &schemas.BasicResponse{
 			Message: err.Error(),
 		})
-		return
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.JWT{
+			Token: token,
+		})
 	}
-	ctx.JSON(http.StatusOK, &schemas.JWT{
-		Token: token,
-	})
 }
 
-func (api *UserApi) GetAccessToken(ctx *gin.Context) {
-	token, err := api.userController.GetAccessToken(ctx)
+func (api *UserApi) GetServices(ctx *gin.Context) {
+	if allServices, err := api.userController.GetAllServices(ctx); err != nil {
+		ctx.JSON(http.StatusOK, []schemas.Service{})
+	} else {
+		toolbox.HandleError(ctx, err, allServices)
+	}
+}
+
+func (api *UserApi) GetWorkflows(ctx *gin.Context) {
+	allWorkflows, err := api.userController.GetAllWorkflows(ctx)
+	if allWorkflows == nil {
+		ctx.JSON(http.StatusOK, []schemas.WorkflowJson{})
+		return
+	}
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, &schemas.BasicResponse{
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, allWorkflows)
+}
+
+func (api *UserApi) LogoutService(ctx *gin.Context) {
+	if err := api.userController.LogoutService(ctx); err != nil {
+		ctx.JSON(http.StatusNotFound, &schemas.BasicResponse{
 			Message: err.Error(),
 		})
-		return
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.BasicResponse{
+			Message: "Successfully logged out",
+		})
 	}
-	ctx.JSON(http.StatusOK, &schemas.JWT{
-		Token: token,
-	})
 }
 
+func (api *UserApi) DeleteAccount(ctx *gin.Context) {
+	if err := api.userController.DeleteAccount(ctx); err != nil {
+		ctx.JSON(http.StatusBadRequest, &schemas.BasicResponse{
+			Message: err.Error(),
+		})
+	} else {
+		ctx.JSON(http.StatusOK, &schemas.BasicResponse{
+			Message: "Account successfully deleted",
+		})
+	}
+}

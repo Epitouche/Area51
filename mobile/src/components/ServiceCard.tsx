@@ -1,22 +1,66 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { useContext } from 'react';
-import { AppContext } from '../context/AppContext';
-import { Button } from 'react-native-paper';
+import { selectServicesParams } from '../service';
+import { AboutJson } from '../types';
+import { useEffect, useState } from 'react';
 
 interface ServiceCardProps {
   title: string;
   image: string;
-  status: string;
+  status: boolean;
+  isBlackTheme?: boolean;
+  aboutJson: AboutJson;
+  serverIp: string;
+  token: string;
+  oauth: boolean;
+  setNeedRefresh: (needRefresh: boolean) => void;
+  setModalVisible: (modalvisible: boolean) => void;
+  setSelectedService: (selectedServices: string) => void;
 }
 
-export function ServiceCard({ image, status, title }: ServiceCardProps) {
-  const { isBlackTheme } = useContext(AppContext);
+export function ServiceCard({
+  image,
+  status,
+  title,
+  isBlackTheme,
+  serverIp,
+  token,
+  oauth,
+  setNeedRefresh,
+  setModalVisible,
+  setSelectedService,
+}: ServiceCardProps) {
+  const [isConnected, setIsConnected] = useState(status);
+
+  useEffect(() => {
+    if (!oauth) setIsConnected(true);
+    else setIsConnected(status);
+  }, [status]);
+
+  const handleOauthLogin = async (
+    isConnected: boolean,
+    serviceName: string,
+  ) => {
+    if (!oauth) return;
+    if (isConnected) {
+      setModalVisible(true);
+      setSelectedService(serviceName);
+    } else {
+      await selectServicesParams({
+        serverIp,
+        serviceName: serviceName,
+        sessionToken: token,
+      });
+      setNeedRefresh(true);
+    }
+  };
+
   return (
     <View
       style={[
+        isBlackTheme ? globalStyles.primaryLight : globalStyles.terciaryLight,
         styles.card,
-        status === 'Connected' ? styles.connected : styles.disconnected,
+        status ? styles.connected : styles.disconnected,
       ]}>
       <Image
         source={{
@@ -26,19 +70,22 @@ export function ServiceCard({ image, status, title }: ServiceCardProps) {
       />
       <Text
         style={[
-          isBlackTheme ? globalStyles.text : globalStyles.textBlack,
+          isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
           styles.title,
         ]}>
         {title[0].toLocaleUpperCase() + title.slice(1)}
       </Text>
-      <Button
-        onPress={() => console.log('Button pressed')}
+      <TouchableOpacity
+        onPress={() => handleOauthLogin(status, title)}
+        disabled={!oauth}
         style={[
           styles.statusBar,
-          status === 'Connected' ? styles.connectedBar : styles.disconnectedBar,
+          isConnected ? styles.connectedBar : styles.disconnectedBar,
         ]}>
-        <Text style={styles.statusText}>{status}</Text>
-      </Button>
+        <Text style={styles.statusText}>
+          {status ? 'Connected' : 'Disconnected'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -47,7 +94,6 @@ const styles = StyleSheet.create({
   card: {
     width: 110,
     borderRadius: 10,
-    backgroundColor: '#f0f0f0',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -69,6 +115,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
+    padding: 8,
   },
   statusText: {
     fontSize: 12,

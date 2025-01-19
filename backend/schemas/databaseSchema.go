@@ -1,7 +1,15 @@
 package schemas
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 type Database struct {
 	Connection *gorm.DB
 }
+
+var (
+	ErrorHashingPassword = errors.New("error while hashing password")
+)
