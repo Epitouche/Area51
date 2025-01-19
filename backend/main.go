@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -19,6 +21,14 @@ import (
 )
 
 func setupRouter() *gin.Engine {
+	appPort := toolbox.GetInEnv("APP_PORT")
+
+	docs.SwaggerInfo.Title = "Area51 API"
+	docs.SwaggerInfo.Description = "Area51 - Web API"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "localhost:" + appPort
+	docs.SwaggerInfo.BasePath = ""
+	docs.SwaggerInfo.Schemes = []string{"http"}
 
 	router := gin.Default()
 	fullCors := cors.New(cors.Config{
@@ -31,16 +41,10 @@ func setupRouter() *gin.Engine {
 	router.Use(fullCors)
 	// router.Use(cors.Default())
 
-	appPort := toolbox.GetInEnv("APP_PORT")
-
-	docs.SwaggerInfo.Title = "Area51 API"
-	docs.SwaggerInfo.Description = "Area51 - Web API"
-	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:" + appPort
-	docs.SwaggerInfo.BasePath = "/api"
-	docs.SwaggerInfo.Schemes = []string{"http"}
-
 	router.GET("/about.json", servicesApi.AboutJson)
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
 
 	apiRoutes := router.Group(docs.SwaggerInfo.BasePath)
 	{
@@ -192,8 +196,11 @@ var (
 // 	dependencies.UserApi = api.NewUserApi(userController)
 // }
 
+// @securityDefinitions.apiKey    bearerAuth
+// @in                            header
+// @name                        Authorization
+// @description                Use "Bearer <token>" as the format for the Authorization header.
 func main() {
-
 	// schemas.Dependencies
 	// pass the reference of the dependencies struct to the initDependencies function
 	// initDependencies(&api.UserDependencies{})

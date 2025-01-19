@@ -1,9 +1,8 @@
 package swagger
 
 import (
-	"fmt"
-
 	"area51/schemas"
+	"fmt"
 )
 
 type SwaggerRouteBuildFile interface {
@@ -13,13 +12,13 @@ type SwaggerRouteBuildFile interface {
 }
 
 func BuildRouteEntry(route schemas.Route) map[string]interface{} {
-	return map[string]interface{} {
+	return map[string]interface{}{
 		route.Method: map[string]interface{}{
-			"tags": route.Tags,
+			"tags":        route.Tags,
 			"description": route.Description,
-			"produces": route.Product,
-			"parameters": BuildParameters(route.Params, route.ParamQueryType),
-			"responses": BuildResponses(route.Responses),
+			"produces":    route.Product,
+			"parameters":  BuildParameters(route.Params, route.ParamQueryType),
+			"responses":   BuildResponses(route.Responses),
 		},
 	}
 }
@@ -28,11 +27,11 @@ func BuildParameters(params map[string]string, paramType string) []map[string]in
 	var parameters []map[string]interface{}
 	for name, typ := range params {
 		parameters = append(parameters, map[string]interface{}{
-			"type": typ,
+			"type":        typ,
 			"description": typ,
-			"name": name,
-			"in": paramType,
-			"required": true,
+			"name":        name,
+			"in":          paramType,
+			"required":    true,
 		})
 	}
 	return parameters
@@ -40,7 +39,6 @@ func BuildParameters(params map[string]string, paramType string) []map[string]in
 
 func BuildResponses(responses map[int][]string) map[string]interface{} {
 	responseMap := make(map[string]interface{})
-
 	for code, descAndSchema := range responses {
 		description := descAndSchema[0]
 		schemaRef := descAndSchema[1]

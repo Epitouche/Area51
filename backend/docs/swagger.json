@@ -1,7 +1,42 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "contact": {}
-    },
-    "paths": {}
+  "info": {
+    "contact": {}
+  },
+  "paths": {
+    "/about.json": {
+      "GET": {
+        "description": "Get the AREA51 services",
+        "parameters": null,
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "About",
+            "schema": {
+              "$ref": "#/definitions/schemas.AboutJSON"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/schemas.BasicResponse"
+            }
+          }
+        },
+        "tags": [
+          "about.js"
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "bearerAuth": {
+      "description": "Use \"Bearer \u003ctoken\u003e\" as the format for the Authorization header.",
+      "in": "header",
+      "name": "Authorization",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0"
 }

@@ -2,6 +2,7 @@ package swagger
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -13,15 +14,16 @@ import (
 	"strings"
 )
 
-type SwaggerUpdateDoc interface {
-	UpdateDocTemplate(filepath string) (string, error)
-	RemoveSchemesLine(rawValue string) string
-	UpdateDocTemplateWithJSON(filepath, tmpFilepath string) error
+type SwaggerUpdatedDocFile interface {
+	UpdateDocTemplate(filePath string) (string, error)
+	RemoveSpecialLines(rawValue string) string
+	UpdateDocTemplateWithJSON(filePath, tmpFilePath string) error
 }
 
-func UpdateDocTemplate(filepath string) (string, error) {
+func UpdateDocTemplate(filePath string) (string, error) {
+	fmt.Printf("Processing file: %s\n", filePath)
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, filepath, nil, parser.AllErrors)
+	node, err := parser.ParseFile(fset, filePath, nil, parser.AllErrors)
 	if err != nil {
 		log.Fatalf("Failed to parse file: %v", err)
 	}
@@ -41,7 +43,7 @@ func UpdateDocTemplate(filepath string) (string, error) {
 			if valueSpec.Names[0].Name == "docTemplate" {
 				rawValue := valueSpec.Values[0].(*ast.BasicLit).Value
 				rawValue = strings.Trim(rawValue, "`")
-				rawValue = RemoveSchemesLine(rawValue)
+				rawValue = RemoveSpecialLines(rawValue)
 				os.WriteFile("tmp.json", []byte(rawValue), 0644)
 				return rawValue, nil
 			}
@@ -52,29 +54,82 @@ func UpdateDocTemplate(filepath string) (string, error) {
 	return "", nil
 }
 
-func RemoveSchemesLine(rawValue string) string {
+func RemoveSpecialLines(rawValue string) string {
 	re := regexp.MustCompile(`(?m)^\s*"schemes":.*\n`)
+
 	updatedValue := re.ReplaceAllString(rawValue, "")
+
+	re = regexp.MustCompile(`(?m)^\s*"basePath":.*\n`)
+	updatedValue = re.ReplaceAllString(updatedValue, "")
+
+	re = regexp.MustCompile(`(?m)^\s*"host":.*\n`)
+	updatedValue = re.ReplaceAllString(updatedValue, "")
+
+	re = regexp.MustCompile(`(?m)^\s*"info": \{\s*\n\s*"contact": \{\},\s*\n\s*"description": ".*",\s*\n\s*"title": ".*",\s*\n\s*"version": ".*"\s*\n\s*\},\s*\n`)
+	updatedValue = re.ReplaceAllString(updatedValue, "")
+
 	return updatedValue
 }
 
-func UpdateDocTemplateWithJSON(filepath, tmpFilepath string) error {
-	tmpContent, err := os.ReadFile(tmpFilepath)
+func formatHTTPMethodName(updatedJSON []byte) []byte {
+	re := regexp.MustCompile(`(?m)^\s*"POST":.*\n`)
+	updatedJSON = re.ReplaceAll(updatedJSON, []byte(`"post": {`))
+
+	re = regexp.MustCompile(`(?m)^\s*"GET":.*\n`)
+	updatedJSON = re.ReplaceAll(updatedJSON, []byte(`"get": {`))
+
+	re = regexp.MustCompile(`(?m)^\s*"DELETE":.*\n`)
+	updatedJSON = re.ReplaceAll(updatedJSON, []byte(`"delete": {`))
+
+	re = regexp.MustCompile(`(?m)^\s*"PUT":.*\n`)
+	updatedJSON = re.ReplaceAll(updatedJSON, []byte(`"put": {`))
+
+	return updatedJSON
+}
+
+func UpdateDocTemplateWithJSON(filePath, tmpFilePath string, paths map[string]interface{}) error {
+	_, err := os.ReadFile(tmpFilePath)
+
+	if err != nil {
+		return fmt.Errorf("error reading tmp.json: %w", err)
+	}
+	updatedJSON, err := json.MarshalIndent(paths, "", "  ")
+	if err != nil {
+		fmt.Printf("Error serializing JSON for file %s: %v\n", tmpFilePath, err)
+		return err
+	}
+	updatedJSON = formatHTTPMethodName(updatedJSON)
+
+	err = os.WriteFile(tmpFilePath, updatedJSON, 0644)
+	if err != nil {
+		fmt.Printf("Error writing JSON to file %s: %v\n", tmpFilePath, err)
+		return err
+	}
+
+	tmpContent, err := os.ReadFile(tmpFilePath)
 	if err != nil {
 		return fmt.Errorf("error reading tmp.json: %w", err)
 	}
 
 	prefixedContent := fmt.Sprintf(`{
-		"schemes": {{ marshal .Schemes }},
-	%s`, tmpContent[1:])
+  "schemes": {{ marshal .Schemes }},
+  "basePath": "{{.BasePath}}",
+  "host": "{{.Host}}",
+  "info": {
+    "contact": {},
+    "description": "{{escape .Description}}",
+    "title": "{{.Title}}",
+    "version": "{{.Version}}"
+  },
+%s`, tmpContent[1:])
 
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, filepath, nil, parser.ParseComments)
+	node, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
 	if err != nil {
 		return fmt.Errorf("failed to parse Go file: %w", err)
 	}
 
-	found := false
+	var found bool
 	ast.Inspect(node, func(n ast.Node) bool {
 		genDecl, ok := n.(*ast.GenDecl)
 		if !ok || genDecl.Tok != token.CONST {
@@ -90,7 +145,7 @@ func UpdateDocTemplateWithJSON(filepath, tmpFilepath string) error {
 			if valueSpec.Names[0].Name == "docTemplate" {
 				rawString := fmt.Sprintf("`%s`", prefixedContent)
 				valueSpec.Values[0] = &ast.BasicLit{
-					Kind: token.STRING,
+					Kind:  token.STRING,
 					Value: rawString,
 				}
 				found = true
@@ -101,7 +156,7 @@ func UpdateDocTemplateWithJSON(filepath, tmpFilepath string) error {
 	})
 
 	if !found {
-		return fmt.Errorf("docTemplate constant not found in file: %s", filepath)
+		return fmt.Errorf("docTemplate constant not found in file: %s", filePath)
 	}
 
 	var buf bytes.Buffer
@@ -109,11 +164,11 @@ func UpdateDocTemplateWithJSON(filepath, tmpFilepath string) error {
 		return fmt.Errorf("error printing updated Go file: %w", err)
 	}
 
-	err = os.WriteFile(filepath, buf.Bytes(), 0644)
+	err = os.WriteFile(filePath, buf.Bytes(), 0644)
 	if err != nil {
 		return fmt.Errorf("error writing updated Go file: %w", err)
 	}
 
-	fmt.Printf("Successfully updated docTemplate in file: %s\n", filepath)
+	fmt.Printf("Successfully updated docTemplate in file: %s\n", filePath)
 	return nil
 }

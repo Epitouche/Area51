@@ -4,31 +4,159 @@ package docs
 import "github.com/swaggo/swag"
 
 const docTemplate = `{
-    "schemes": {{ marshal .Schemes }},
-    "swagger": "2.0",
-    "info": {
-        "description": "{{escape .Description}}",
-        "title": "{{.Title}}",
-        "contact": {},
-        "version": "{{.Version}}"
+  "schemes": {{ marshal .Schemes }},
+  "basePath": "{{.BasePath}}",
+  "host": "{{.Host}}",
+  "info": {
+    "contact": {},
+    "description": "{{escape .Description}}",
+    "title": "{{.Title}}",
+    "version": "{{.Version}}"
+  },
+  "definitions": {
+    "schemas.BasicResponse": {
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "type": "object"
     },
-    "host": "{{.Host}}",
-    "basePath": "{{.BasePath}}",
-    "paths": {}
+    "schemas.AboutJSON": {
+      "properties": {
+        "client": {
+          "properties": {
+            "host": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "server": {
+          "properties": {
+            "current_time": {
+              "type": "string"
+            },
+            "services": {
+              "items": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "actions": {
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "options": {
+                          "properties": {
+                            "option": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "action_id": {
+                          "type": "number"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "reactions": {
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "options": {
+                          "properties": {
+                            "option": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "reaction_id": {
+                          "type": "number"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "paths": {
+    "/about.json": {
+"get": {        "description": "Get the AREA51 services",
+        "parameters": null,
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "About",
+            "schema": {
+              "$ref": "#/definitions/schemas.AboutJSON"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/schemas.BasicResponse"
+            }
+          }
+        },
+        "tags": [
+          "about.js"
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "bearerAuth": {
+      "description": "Use \"Bearer \u003ctoken\u003e\" as the format for the Authorization header.",
+      "in": "header",
+      "name": "Authorization",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0"
 }`
-
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
-	InfoInstanceName: "swagger",
-	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
+	Version:		"",
+	Host:			"",
+	BasePath:		"",
+	Schemes:		[]string{},
+	Title:			"",
+	Description:		"",
+	InfoInstanceName:	"swagger",
+	SwaggerTemplate:	docTemplate,
+	LeftDelim:		"{{",
+	RightDelim:		"}}",
 }
 
 func init() {

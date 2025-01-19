@@ -1,4 +1,10 @@
 info:
   contact: {}
 paths: {}
+securityDefinitions:
+  bearerAuth:
+    description: Use "Bearer <token>" as the format for the Authorization header.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

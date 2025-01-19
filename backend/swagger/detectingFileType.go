@@ -1,19 +1,19 @@
 package swagger
 
 type SwaggerDetectedFileType interface {
-	IsJSONFile(filepath string) bool
-	IsYAMLFile(filepath string) bool
-	IsGOFile(filepath string) bool
+	IsJSONFile(filePath string) bool
+	IsYAMLFile(filePath string) bool
+	IsGOFile(filePath string) bool
 }
 
-func IsJSONFile(filepath string) bool {
-	return len(filepath) > 5 && filepath[len(filepath)-5:] == ".json"
+func IsJSONFile(filePath string) bool {
+	return len(filePath) > 5 && filePath[len(filePath)-5:] == ".json"
 }
 
-func IsYAMLFile(filepath string) bool {
-	return len(filepath) > 5 && filepath[len(filepath)-5:] == ".yaml"
+func IsYAMLFile(filePath string) bool {
+	return len(filePath) > 5 && filePath[len(filePath)-5:] == ".yaml"
 }
 
-func IsGOFile(filepath string) bool {
-	return len(filepath) > 3 && filepath[len(filepath)-3:] == ".go"
+func IsGOFile(filePath string) bool {
+	return len(filePath) > 3 && filePath[len(filePath)-3:] == ".go"
 }
