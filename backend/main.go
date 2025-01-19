@@ -3,14 +3,19 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 
 	"area51/api"
 	"area51/controllers"
 	"area51/database"
+	"area51/docs"
 	"area51/middlewares"
 	"area51/repository"
 	"area51/services"
+	"area51/swagger"
+	"area51/toolbox"
 )
 
 func setupRouter() *gin.Engine {
@@ -26,9 +31,18 @@ func setupRouter() *gin.Engine {
 	router.Use(fullCors)
 	// router.Use(cors.Default())
 
+	appPort := toolbox.GetInEnv("APP_PORT")
+
+	docs.SwaggerInfo.Title = "Area51 API"
+	docs.SwaggerInfo.Description = "Area51 - Web API"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "localhost:" + appPort
+	docs.SwaggerInfo.BasePath = "/api"
+	docs.SwaggerInfo.Schemes = []string{"http"}
+
 	router.GET("/about.json", servicesApi.AboutJson)
 
-	apiRoutes := router.Group("/api")
+	apiRoutes := router.Group(docs.SwaggerInfo.BasePath)
 	{
 		mobile := apiRoutes.Group("/mobile")
 		{
@@ -102,6 +116,8 @@ func setupRouter() *gin.Engine {
 			action.POST("", actionApi.CreateAction)
 		}
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return router
 }
@@ -183,6 +199,17 @@ func main() {
 	// initDependencies(&api.UserDependencies{})
 
 	router := setupRouter()
+	swagger.InitRoutes(swagger.Dependencies{
+		UserApi: userApi,
+		GithubApi: githubApi,
+		ServicesApi: servicesApi,
+		WorkflowApi: workflowApi,
+		ActionApi: actionApi,
+		SpotifyApi: spotifyApi,
+		MobileApi: mobileApi,
+		MicrosoftApi: microsoftApi,
+		GoogleApi: googleApi,
+	})
 
 	err := router.Run(":8080")
 	if err != nil {
