@@ -21,15 +21,14 @@ onMounted(async () => {
             activities.value.push(reaction)
         })
     }
-    console.log(activities.value)
 })
 </script>
 <template>
-    <div 
-        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6" 
+    <div
+        class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-sm p-6"
         aria-label="Recent Activity Section">
-        <h2 
-            class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6" 
+        <h2
+            class="text-lg font-semibold text-fontBlack dark:text-fontWhite mb-6"
             aria-label="Section Title: Recent Activity">
             Recent Activity
         </h2>
@@ -45,13 +44,13 @@ onMounted(async () => {
               >{{ JSON.stringify(activities, null, 2) }}
       </pre
             >
-                    <!-- <p 
-                        className="text-sm font-medium text-fontBlack dark:text-fontWhite" 
+                    <!-- <p
+                        className="text-sm font-medium text-fontBlack dark:text-fontWhite"
                         :aria-label="`Name: ${activity.name}`">
                         {{ activity.name }}
                     </p>
-                    <p 
-                        className="text-sm text-gray-500 dark:text-gray-200" 
+                    <p
+                        className="text-sm text-gray-500 dark:text-gray-200"
                         :aria-label="`Description: ${activity.description}`">
                         {{ activity.description }}
                     </p> -->
