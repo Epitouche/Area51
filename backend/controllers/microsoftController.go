@@ -189,12 +189,10 @@ func (controller *microsoftController) ServiceMicrosoftCallback(ctx *gin.Context
 
 	if isAlreadyRegistered {
 		token, _ := controller.userService.Login(newUser, microsoftService)
-		fmt.Println("true", token)
 		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
 		return token, nil
 	} else {
 		token, err := controller.userService.Register(newUser)
-		fmt.Println("false", token)
 		if err != nil {
 			return "", fmt.Errorf("unable to register user because %w", err)
 		}

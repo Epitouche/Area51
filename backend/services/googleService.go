@@ -186,7 +186,6 @@ func (service *googleService) GetEmailAction(channel chan string, workflowId uin
 	err = json.Unmarshal(bodyBytes, &googleOption)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
-		// 	channel <- err.Error()
 		return
 	}
 	existingRecords := map[string]interface{}{}
@@ -310,7 +309,6 @@ func (service *googleService) CreateEventReaction(channel chan string, workflowI
 	err = json.Unmarshal(bodyBytes, &googleCalendarIds)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
-		// 	channel <- err.Error()
 		return
 	}
 	var wantedCaledarId string

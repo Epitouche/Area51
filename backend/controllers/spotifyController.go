@@ -111,7 +111,6 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 		}
 	}
 
-	fmt.Println("spotify: ", spotifyTokenResponse)
 	spotifyService := controller.servicesService.FindByName(schemas.Spotify)
 	var ServicesUserInfos schemas.ServicesUserInfos
 	userInfos := controller.servicesService.GetUserInfosByToken(spotifyTokenResponse.AccessToken, schemas.Spotify)
@@ -203,12 +202,10 @@ func (controller *spotifyController) ServiceSpotifyCallback(ctx *gin.Context, pa
 
 	if isAlreadyRegistered {
 		token, _ := controller.userService.Login(newUser, spotifyService)
-		fmt.Println("true", token)
 		ctx.Redirect(http.StatusFound, "http://localhost:8081/callback?code="+codeCredentials.Code+"&state="+codeCredentials.State)
 		return token, nil
 	} else {
 		token, err := controller.userService.Register(newUser)
-		fmt.Println("false", token)
 		if err != nil {
 			return "", fmt.Errorf("unable to register user because %w", err)
 		}

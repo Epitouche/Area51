@@ -260,8 +260,6 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		return
 	}
 
-	// defer response.Body.Close()
-
 	var result []schemas.GithubListCommentsResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {

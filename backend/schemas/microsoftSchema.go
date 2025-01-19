@@ -89,14 +89,3 @@ type MicrosoftTeams struct {
 type MicrosoftTeamsResponse struct {
 	Value []MicrosoftTeams `json:"value"`
 }
-
-// message: {
-// 	body: {
-// 	  content: "This email is to confirm our trip to Chicoutimi",
-// 	  contentType: "Text",
-// 	},
-// 	subject: "We are going to Chicoutimi ?",
-// 	address: "other.email@gmail.
-//   },
-//   saveToSentItems: "true / false",
-// };

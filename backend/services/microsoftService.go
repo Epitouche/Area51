@@ -100,12 +100,10 @@ func (service *microsoftService) AuthGetServiceAccessToken(code string, path str
 		Timeout: time.Second * 45,
 	}
 	response, err := client.Do(req)
-	fmt.Printf("response: %++v\n", response)
 	if err != nil {
 		return schemas.MicrosoftResponseToken{}, err
 	}
 	bodyBytes, _ := io.ReadAll(response.Body)
-	fmt.Println("response body: ", string(bodyBytes))
 
 	var result schemas.MicrosoftResponseToken
 	err = json.Unmarshal(bodyBytes, &result)
@@ -369,7 +367,6 @@ func (service *microsoftService) SendMail(channel chan string, workflowId uint64
 		fmt.Println("Error creating request:", err)
 		return
 	}
-	fmt.Printf("response: %++v\n", response)
 	defer response.Body.Close()
 	workflow.ReactionTrigger = false
 	service.workflowRepository.UpdateReactionTrigger(workflow)

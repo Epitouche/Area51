@@ -81,7 +81,6 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 
 	workflow := service.workflowRepository.FindById(workflowId)
 	reaction := service.reactionRepository.FindById(workflow.ReactionId)
-	fmt.Printf("Reaction: %s\n", reaction.Name)
 	noticeType := ""
 	switch reaction.Name {
 	case string(schemas.InterpolGetRedNotices):
@@ -91,14 +90,12 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 	case string(schemas.InterpolGetUNNotices):
 		noticeType = "un"
 	}
-	fmt.Printf("Notice Type: %s\n", noticeType)
 	options := schemas.InterpolReactionOptionInfos{}
 	err := json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println("Error ->", err)
 		return
 	}
-	fmt.Printf("Options: %++v\n", options)
 
 	request, err := http.NewRequest("GET", "https://ws-public.interpol.int/notices/v1/"+noticeType+"?forename="+options.FirstName+"&name="+options.LastName, nil)
 	if err != nil {
@@ -124,7 +121,6 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("Response: %v\n", response)
 
 	result := schemas.InterpolNoticesList{}
 	err = json.NewDecoder(response.Body).Decode(&result)
@@ -133,7 +129,6 @@ func (service *interpolService) GetNotices(channel chan string, workflowId uint6
 		return
 	}
 	defer response.Body.Close()
-	fmt.Printf("Result: %++v\n", result)
 	savedResult := schemas.ReactionResponseData{
 		WorkflowId:  workflowId,
 		ApiResponse: json.RawMessage{},

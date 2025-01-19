@@ -155,26 +155,7 @@ var (
 	googleApi    *api.GoogleApi    = api.NewGoogleApi(googleController)
 )
 
-// func initDependencies(dependencies *api.UserDependencies) {
-// 	// Database connection
-// 	databaseConnection := database.Connection()
-// 	// Repositories
-// 	userRepository := repository.NewUserRepository(databaseConnection)
-// 	// Services
-// 	jwtService := services.NewJWTService()
-// 	userService := services.NewUserService(userRepository, jwtService)
-// 	// Controllers
-// 	userController := controllers.NewUserController(userService, jwtService)
-
-// 	dependencies.UserApi = api.NewUserApi(userController)
-// }
-
 func main() {
-
-	// schemas.Dependencies
-	// pass the reference of the dependencies struct to the initDependencies function
-	// initDependencies(&api.UserDependencies{})
-
 	router := setupRouter()
 
 	err := router.Run(":8080")

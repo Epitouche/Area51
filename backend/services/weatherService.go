@@ -241,7 +241,6 @@ func (service *weatherService) SunriseEvents(channel chan string, workflowId uin
 
 	var weatherResponse schemas.WeatherSpecificTimeInfos
 	bodyBytes, _ := io.ReadAll(response.Body)
-	fmt.Printf("Body: %s\n", string(bodyBytes))
 
 	err = json.Unmarshal(bodyBytes, &weatherResponse)
 	if err != nil {
@@ -261,7 +260,6 @@ func (service *weatherService) SunriseEvents(channel chan string, workflowId uin
 		workflow.ReactionTrigger = false
 		workflow.ActionOptions = toolbox.RealObject(actionData)
 		service.workflowRepository.UpdateReactionTrigger(workflow)
-		fmt.Println("Time is not equal")
 		return
 	}
 

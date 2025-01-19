@@ -128,12 +128,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
 	if actualWorkflow.Id != 0 {
 		return "", schemas.ErrorAlreadyExistingRessource
-		// if actualWorkflow.IsActive {
-		// } else {
-		// 	return "Workflow already exists and is not active", nil
-		// }
 	}
-	fmt.Println(newWorkflow)
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
 		return "", err
@@ -148,15 +143,9 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 	var result schemas.WorkflowActivate
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
-
-	// err := ctx.ShouldBind(&result)
-	fmt.Printf("Error value: %+v\n", err)
-	fmt.Printf("AAAAAYYYYYYYYOOOOOOOO\n")
 	if err != nil {
 		return schemas.ErrorBadParameter
 	}
-	fmt.Printf("SSSSSSHHHHHHHEEEEEE\n")
-
 	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return err
@@ -191,7 +180,6 @@ func (service *workflowService) InitWorkflow(workflowStartingPoint schemas.Workf
 
 func (service *workflowService) WorkflowActionChannel(workflowStartingPoint schemas.Workflow, channel chan string, actionOption json.RawMessage) {
 	go func(workflowStartingPoint schemas.Workflow, channel chan string) {
-		fmt.Println("Start of WorkflowActionChannel")
 		for service.ExistWorkflow(workflowStartingPoint.Id) {
 			workflow, err := service.repository.FindByIds(workflowStartingPoint.Id)
 			if err != nil {
