@@ -49,16 +49,9 @@ type SpotifyPlaylistInfos struct {
 	Tracks SpotifyTracksInfos `json:"tracks"`
 }
 
-type SpotifyPlaylistOptionsSchema struct {
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	Public        string `json:"public"`
-	Collaborative string `json:"collaborative"`
-}
-
 type SpotifyPlaylistOptions struct {
 	Name          string `json:"name"`
 	Description   string `json:"description"`
-	Public        bool   `json:"public"`
-	Collaborative bool   `json:"collaborative"`
+	Public        bool `json:"public"`
+	Collaborative bool `json:"collaborative"`
 }

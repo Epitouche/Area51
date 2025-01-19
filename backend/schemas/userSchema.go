@@ -16,5 +16,4 @@ type User struct {
 
 var (
 	ErrUserNotFound = errors.New("user not found")
-	ErrWhileLinking = errors.New("error while linking user to the service")
 )

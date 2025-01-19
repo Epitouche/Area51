@@ -7,7 +7,6 @@ import (
 
 	"area51/controllers"
 	"area51/schemas"
-	"area51/toolbox"
 )
 
 type UserDependencies struct {
@@ -52,7 +51,7 @@ func (api *UserApi) GetServices(ctx *gin.Context) {
 	if allServices, err := api.userController.GetAllServices(ctx); err != nil {
 		ctx.JSON(http.StatusOK, []schemas.Service{})
 	} else {
-		toolbox.HandleError(ctx, err, allServices)
+		ctx.JSON(http.StatusOK, allServices)
 	}
 }
 
