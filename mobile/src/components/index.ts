@@ -4,3 +4,4 @@ export * from './WorkflowTab';
 export * from './WorkflowCard';
 export * from './IpInput';
 export * from './ServiceCard';
+export * from './ApplicationCard';

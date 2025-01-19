@@ -71,6 +71,7 @@ function Login({
             ]}
             autoCapitalize="none"
             placeholder="Username"
+            placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
             value={forms.username}
             onChangeText={username => setForms({ ...forms, username })}
             accessibilityLabel="Username"
@@ -83,6 +84,7 @@ function Login({
             secureTextEntry
             value={forms.password}
             placeholder="Password"
+            placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
             onChangeText={password => setForms({ ...forms, password })}
             autoCapitalize="none"
             accessibilityLabel="Password"
@@ -209,40 +211,12 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: '3%',
-    gap: 40,
-  },
-  header: {
-    fontSize: 32,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginTop: '20%',
-  },
   inputBox: {
     width: '100%',
     alignItems: 'center',
     gap: 30,
     marginTop: '10%',
   },
-  input: {
-    width: '90%',
-    borderBottomWidth: 1,
-    borderColor: '#F7FAFB',
-    padding: 5,
-    marginVertical: 10,
-    fontSize: 16,
-    color: 'white',
-  },
-  loginButton: {
-    width: '35%',
-    backgroundColor: '#F7FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  passwordText: { color: 'white' },
   forgotPassword: {
     textDecorationLine: 'underline',
     fontSize: 16,
@@ -259,28 +233,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
-  },
-  button: {
-    width: '50%',
-    marginTop: 10,
-    marginBottom: 10,
-    backgroundColor: '#F7FAFB',
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  text: {
-    color: '#5C5C5C',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  icon: {
-    marginRight: 15,
-    width: 25,
-    height: 25,
   },
 });
