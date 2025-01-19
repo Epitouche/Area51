@@ -17,6 +17,7 @@ func Authorization() gin.HandlerFunc {
 			ctx.JSON(http.StatusUnauthorized, schemas.BasicResponse{
 				Message: err.Error(),
 			})
+			ctx.Abort()
 			return
 		}
 		token, _ := services.NewJWTService().ValidateJWTToken(tokenString)
