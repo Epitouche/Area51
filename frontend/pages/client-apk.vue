@@ -1,7 +1,7 @@
 <template>
-  <div aria-label="APK download status">
-    <h1 v-if="errorMessage" aria-label="Error message">{{ errorMessage }}</h1>
-    <p v-else aria-label="Downloading status">Downloading your APK...</p>
+  <div>
+    <h1 v-if="errorMessage">{{ errorMessage }}</h1>
+    <p v-else>Downloading your APK...</p>
   </div>
 </template>
 

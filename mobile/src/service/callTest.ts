@@ -8,6 +8,7 @@ export async function exempleApiCall(apiEndpoint: string, setIsWorking: (isWorki
     });
     const data = await response.json();
     if (response.status === 200) {
+      console.log('API call success:', data);
     }
     setIsWorking(true);
     return data;

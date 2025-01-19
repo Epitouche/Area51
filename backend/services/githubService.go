@@ -18,20 +18,19 @@ import (
 
 type GithubService interface {
 	AuthGetServiceAccessToken(code string, path string) (schemas.GitHubResponseToken, error)
-	FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage)
-	FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage)
-	GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos)
+	GetUserInfo(accessToken string) (schemas.GithubUserInfo, error)
+	FindActionByName(name string) func(channel chan string, option string, workflowId uint64)
+	FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken)
 }
 
 type githubService struct {
-	githubRepository            repository.GithubRepository
-	tokenRepository             repository.TokenRepository
-	userService                 UserService
-	workflowRepository          repository.WorkflowRepository
-	reactionRepository          repository.ReactionRepository
+	githubRepository repository.GithubRepository
+	tokenRepository repository.TokenRepository
+	userService UserService
+	workflowRepository repository.WorkflowRepository
+	reactionRepository repository.ReactionRepository
 	reactionResponseDataService ReactionResponseDataService
-	serviceRepository           repository.ServiceRepository
-	mutex                       sync.Mutex
+	mutex sync.Mutex
 }
 
 func NewGithubService(
@@ -41,16 +40,14 @@ func NewGithubService(
 	reactionRepository repository.ReactionRepository,
 	reactionResponseDataService ReactionResponseDataService,
 	userService UserService,
-	serviceRepository repository.ServiceRepository,
-) GithubService {
+	) GithubService {
 	return &githubService{
-		githubRepository:            githubRepository,
-		tokenRepository:             tokenRepository,
-		workflowRepository:          workflowRepository,
-		reactionRepository:          reactionRepository,
+		githubRepository: githubRepository,
+		tokenRepository: tokenRepository,
+		workflowRepository: workflowRepository,
+		reactionRepository: reactionRepository,
 		reactionResponseDataService: reactionResponseDataService,
-		userService:                 userService,
-		serviceRepository:           serviceRepository,
+		userService: userService,
 	}
 }
 
@@ -61,6 +58,7 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	appAdressHost := toolbox.GetInEnv("APP_HOST_ADDRESS")
 
 	redirectUri := appAdressHost + appPort + path
+
 	apiUrl := "https://github.com/login/oauth/access_token"
 
 	data := url.Values{}
@@ -73,41 +71,55 @@ func (service *githubService) AuthGetServiceAccessToken(code string, path string
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
-
 	req.URL.RawQuery = data.Encode()
 	req.Header.Set("Accept", "application/json")
+
 	client := &http.Client{
 		Timeout: time.Second * 45,
 	}
-
 	response, err := client.Do(req)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
-
-	resultToken := schemas.GitHubResponseToken{}
-
+	var resultToken schemas.GitHubResponseToken
 	err = json.NewDecoder(response.Body).Decode(&resultToken)
 	if err != nil {
 		return schemas.GitHubResponseToken{}, err
 	}
-
 	response.Body.Close()
 	return resultToken, nil
 }
 
-func (service *githubService) FindActionByName(name string) func(channel chan string, workflowId uint64, actionOption json.RawMessage) {
+func (service *githubService) GetUserInfo(accessToken string) (schemas.GithubUserInfo, error) {
+	request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
+	if err != nil {
+		return schemas.GithubUserInfo{}, err
+	}
+	request.Header.Set("Authorization", "Bearer "+accessToken)
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return schemas.GithubUserInfo{}, err
+	}
+	result := schemas.GithubUserInfo{}
+	err = json.NewDecoder(response.Body).Decode(&result)
+	if err != nil {
+		return schemas.GithubUserInfo{}, err
+	}
+	response.Body.Close()
+	return result, nil
+}
+
+func (service *githubService) FindActionByName(name string) func(channel chan string, option string, workflowId uint64) {
 	switch name {
 	case string(schemas.GithubPullRequest):
 		return service.LookAtPullRequest
-	case string(schemas.GithubPushOnRepo):
-		return service.LookAtPush
 	default:
 		return nil
 	}
 }
 
-func (service *githubService) FindReactionByName(name string) func(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
+func (service *githubService) FindReactionByName(name string) func(workflowId uint64, accessToken []schemas.ServiceToken) {
 	switch name {
 	case string(schemas.GithubReactionListComments):
 		return service.ListAllReviewComments
@@ -116,115 +128,59 @@ func (service *githubService) FindReactionByName(name string) func(channel chan 
 	}
 }
 
+var nbPR int
 type transportWithToken struct {
 	token string
 }
 
 func (t *transportWithToken) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", "Bearer "+t.token)
+	req.Header.Set("Authorization", "Bearer " + t.token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-func (service *githubService) LookAtPullRequest(channel chan string, workflowId uint64, actionOption json.RawMessage) {
+func (service *githubService) LookAtPullRequest(channel chan string, option string, workflowId uint64) {
 	service.mutex.Lock()
-	defer service.mutex.Unlock()
 	ctx := context.Background()
-
 	workflow, err := service.workflowRepository.FindByIds(workflowId)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	user := service.userService.GetUserById(workflow.UserId)
-	tokens := service.tokenRepository.FindByUserId(user)
-	var client *github.Client
-	searchedService := service.serviceRepository.FindByName(schemas.Github)
-
-	for _, token := range tokens {
-		if token.ServiceId == searchedService.Id {
-			client = github.NewClient(&http.Client{
-				Transport: &transportWithToken{token: token.Token},
-			})
-		}
-	}
-
-	var actionData schemas.GithubPullRequestOptions
-	err = json.Unmarshal([]byte(actionOption), &actionData)
-	if err != nil {
-		fmt.Println("Error parsing actionOption:", err)
-		return
-	}
-
-	pullRequests, _, err := client.PullRequests.List(ctx, actionData.Owner, actionData.Repo, nil)
+	token := service.tokenRepository.FindByUserId(workflow.UserId)
+	client := github.NewClient(&http.Client{
+		Transport: &transportWithToken{token: token[len(token) - 1].Token},
+	})
+	pullRequests, _, err := client.PullRequests.List(ctx, "JsuisSayker", "TestAreaGithub", nil)
 	if err != nil {
 		fmt.Println(err)
+		time.Sleep(30 * time.Second)
 		return
 	}
-
-	existingRecords := map[string]interface{}{
-		"NumPR": 0,
-		"Repo":  "",
-		"Owner": "",
+	if nbPR != len(pullRequests) {
+		nbPR = len(pullRequests)
+		reaction := service.reactionRepository.FindById(workflow.ReactionId)
+		reaction.Trigger = true
+		reaction.Id = workflow.ReactionId
+		service.reactionRepository.Update(reaction)
 	}
-	if string(workflow.Utils) != "" {
-		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
-		if err != nil {
-			fmt.Println("Error unmarshalling existingRecords:", err)
-			return
-		}
-	}
-	if existingRecords["NumPR"] == nil {
-		existingRecords["NumPR"] = 0
-		existingRecords["Repo"] = actionData.Repo
-		existingRecords["Owner"] = actionData.Owner
-		jsonData, err := json.Marshal(existingRecords)
-		if err != nil {
-			fmt.Println("Error marshalling existingRecords:", err)
-			return
-		}
-		workflow.Utils = jsonData
-		service.workflowRepository.Update(workflow)
-	}
-
-	var numPR int
-	switch v := existingRecords["NumPR"].(type) {
-	case float64:
-		numPR = int(v)
-	case int:
-		numPR = v
-	default:
-		fmt.Println("Error asserting NumPR to int or float64")
-		return
-	}
-	if numPR != len(pullRequests) {
-		existingRecords["NumPR"] = len(pullRequests)
-		updatedUtils, err := json.Marshal(existingRecords)
-		if err != nil {
-			fmt.Println("Error marshalling updatedUtils:", err)
-			return
-		}
-		workflow.Utils = updatedUtils
-		workflow.ReactionTrigger = true
-		service.workflowRepository.Update(workflow)
-	}
-	channel <- "Action workflow done"
+	channel <- "Workflow done"
+	service.mutex.Unlock()
+	time.Sleep(5 * time.Second)
 }
 
-func (service *githubService) ListAllReviewComments(channel chan string, workflowId uint64, accessToken []schemas.ServiceToken, reactionOption json.RawMessage) {
+func (service *githubService) ListAllReviewComments(workflowId uint64, accessToken []schemas.ServiceToken) {
 	service.mutex.Lock()
-	defer service.mutex.Unlock()
-
-	// Iterate over all tokens
+	// var actualReaction schemas.Reaction
 	for _, token := range accessToken {
 		actualUser := service.userService.GetUserById(token.UserId)
 		if token.UserId == actualUser.Id {
 			actualWorkflow := service.workflowRepository.FindByUserId(actualUser.Id)
 			for _, workflow := range actualWorkflow {
 				if workflow.Id == workflowId {
-					if !workflow.ReactionTrigger {
-						fmt.Println("Trigger is already false, skipping reaction.")
+					actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
+					if !actualReaction.Trigger {
 						return
 					}
 				}
@@ -232,165 +188,49 @@ func (service *githubService) ListAllReviewComments(channel chan string, workflo
 		}
 	}
 
-	var reactionData schemas.GithubListAllReviewCommentsOptions
-	err := json.Unmarshal([]byte(reactionOption), &reactionData)
+	request, err := http.NewRequest("GET", "https://api.github.com/repos/Epitouche/Area51/pulls/comments", nil)
 	if err != nil {
-		fmt.Println("Error parsing actionOption:", err)
-		return
+		fmt.Println(err)
 	}
-	request, err := http.NewRequest("GET", "https://api.github.com/repos/"+reactionData.Owner+"/"+reactionData.Repo+"/pulls/comments", nil)
-	if err != nil {
-		fmt.Println("Error creating request:", err)
-		return
-	}
-
 	request.Header.Set("Accept", "application/vnd.github+json")
-	searchedService := service.serviceRepository.FindByName(schemas.Github)
-
 	for _, token := range accessToken {
-		if token.ServiceId == searchedService.Id {
+		actualUser := service.userService.GetUserById(token.UserId)
+		if token.UserId == actualUser.Id {
 			request.Header.Set("Authorization", "Bearer "+token.Token)
 		}
 	}
-
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println("Error making request:", err)
-		return
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
+
+	result := []schemas.GithubListCommentsResponse{}
+	savedResult := schemas.ReactionResponseData{
+		WorkflowId: workflowId,
 	}
 
-	// defer response.Body.Close()
-
-	var result []schemas.GithubListCommentsResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
 	if err != nil {
-		fmt.Println("Error decoding response:", err)
-		return
+		fmt.Println(err)
 	}
 
-	workflow := service.workflowRepository.FindById(workflowId)
-	savedResult := schemas.ReactionResponseData{
-		WorkflowId:  workflowId,
-		Workflow:    workflow,
-		ApiResponse: json.RawMessage{},
-	}
 	jsonValue, err := json.Marshal(result)
 	if err != nil {
-		fmt.Println("Error marshalling response:", err)
-		return
+		fmt.Println(err)
 	}
-	savedResult.ApiResponse = jsonValue
+	savedResult.ApiResponse = json.RawMessage(jsonValue)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 	service.reactionResponseDataService.Save(savedResult)
-	workflow, err = service.workflowRepository.FindByIds(workflowId)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	workflow.ReactionTrigger = false
-	service.workflowRepository.UpdateReactionTrigger(workflow)
-	response.Body.Close()
-}
-
-func (service *githubService) LookAtPush(channel chan string, workflowId uint64, actionOption json.RawMessage) {
-	service.mutex.Lock()
-	defer service.mutex.Unlock()
-	ctx := context.Background()
-
-	workflow, err := service.workflowRepository.FindByIds(workflowId)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	user := service.userService.GetUserById(workflow.UserId)
-	tokens := service.tokenRepository.FindByUserId(user)
-	var client *github.Client
-	searchedService := service.serviceRepository.FindByName(schemas.Github)
-
-	for _, token := range tokens {
-		if token.ServiceId == searchedService.Id {
-			client = github.NewClient(&http.Client{
-				Transport: &transportWithToken{token: token.Token},
-			})
-		}
-	}
-
-	var actionData schemas.GithubPushOnRepoOptions
-	err = json.Unmarshal([]byte(actionOption), &actionData)
-	if err != nil {
-		fmt.Println("Error parsing actionOption:", err)
-		return
-	}
-	branch, _, err := client.Repositories.GetBranch(ctx, actionData.Owner, actionData.Repo, actionData.Branch, 5)
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	existingRecords := map[string]interface{}{
-		"LastCommitDate": time.Time{},
-	}
-	if string(workflow.Utils) != "" {
-		err = json.Unmarshal([]byte(workflow.Utils), &existingRecords)
-		if err != nil {
-			fmt.Println("Error unmarshalling existingRecords:", err)
-			return
-		}
-	}
-	if lastCommitDateStr, ok := existingRecords["LastCommitDate"].(string); ok {
-		lastCommitDate, err := time.Parse(time.RFC3339, lastCommitDateStr)
-		if err != nil {
-			fmt.Println("Error parsing LastCommitDate:", err)
-			return
-		}
-		existingRecords["LastCommitDate"] = lastCommitDate
-	}
-	if existingRecords["LastCommitDate"].(time.Time).IsZero() {
-		existingRecords["LastCommitDate"] = time.Time{}
-		jsonData, err := json.Marshal(existingRecords)
-		if err != nil {
-			fmt.Println("Error marshalling existingRecords:", err)
-			return
-		}
-		workflow.Utils = jsonData
-		service.workflowRepository.Update(workflow)
-	}
-
-	if !existingRecords["LastCommitDate"].(time.Time).Equal(branch.Commit.Commit.Author.Date.Time) {
-		existingRecords["LastCommitDate"] = branch.Commit.Commit.Author.Date.Time
-		updatedUtils, err := json.Marshal(existingRecords)
-		if err != nil {
-			fmt.Println("Error marshalling updatedUtils:", err)
-			return
-		}
-		workflow.Utils = updatedUtils
-		workflow.ReactionTrigger = true
-		service.workflowRepository.UpdateUtils(workflow)
-		service.workflowRepository.UpdateReactionTrigger(workflow)
-	}
-	channel <- "Action workflow done"
-}
-
-func (service *githubService) GetUserInfosByToken(accessToken string, serviceName schemas.ServiceName) func(*schemas.ServicesUserInfos) {
-	return func(userInfos *schemas.ServicesUserInfos) {
-		request, err := http.NewRequest("GET", "https://api.github.com/user", nil)
-		if err != nil {
-			return
-		}
-
-		request.Header.Set("Authorization", "Bearer "+accessToken)
-		client := &http.Client{}
-
-		response, err := client.Do(request)
-		if err != nil || response.StatusCode != http.StatusOK {
-			return
-		}
-
-		err = json.NewDecoder(response.Body).Decode(&userInfos.GithubUserInfos)
-		if err != nil {
-			return
-		}
-
-		response.Body.Close()
-	}
+	//! Need to update the trigger to false
+	workflow, _  := service.workflowRepository.FindByIds(workflowId)
+	actualReaction := service.reactionRepository.FindById(workflow.ReactionId)
+	actualReaction.Trigger = false
+	service.reactionRepository.Update(actualReaction)
+	service.mutex.Unlock()
+	time.Sleep(5 * time.Second)
 }

@@ -19,7 +19,7 @@ type reactionResponseDataService struct {
 
 func NewReactionResponseDataService(
 	repository repository.ReactionResponseDataRepository,
-) ReactionResponseDataService {
+	) ReactionResponseDataService {
 	return &reactionResponseDataService{
 		repository: repository,
 	}

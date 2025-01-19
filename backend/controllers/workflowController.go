@@ -1,37 +1,25 @@
 package controllers
 
 import (
-	"encoding/json"
-
 	"github.com/gin-gonic/gin"
 
+	"area51/schemas"
 	"area51/services"
 )
 
 type WorkflowController interface {
 	CreateWorkflow(ctx *gin.Context) (string, error)
-	ActivateWorkflow(ctx *gin.Context) error
-	GetMostRecentReaction(ctx *gin.Context) ([]json.RawMessage, error)
-	GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error)
-	DeleteWorkflow(ctx *gin.Context) error
-	UpdateWorkflow(ctx *gin.Context) error
+	GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error)
+	AboutJson(ctx *gin.Context) (allWorkflows []schemas.WorkflowJson, err error)
 }
 
 type workflowController struct {
-	service         services.WorkflowService
-	reactionService services.ReactionService
-	actionService   services.ActionService
+	service services.WorkflowService
 }
 
-func NewWorkflowController(
-	service services.WorkflowService,
-	reactionService services.ReactionService,
-	actionService services.ActionService,
-) WorkflowController {
+func NewWorkflowController(service services.WorkflowService) WorkflowController {
 	return &workflowController{
-		service:         service,
-		reactionService: reactionService,
-		actionService:   actionService,
+		service: service,
 	}
 }
 
@@ -39,22 +27,20 @@ func (controller *workflowController) CreateWorkflow(ctx *gin.Context) (string, 
 	return controller.service.CreateWorkflow(ctx)
 }
 
-func (controller *workflowController) ActivateWorkflow(ctx *gin.Context) error {
-	return controller.service.ActivateWorkflow(ctx)
+func (controller *workflowController) AboutJson(ctx *gin.Context) (allWorkflowsJson []schemas.WorkflowJson, err error) {
+	allWorkflows := controller.service.FindAll()
+	for _, oneWorkflow := range allWorkflows {
+		allWorkflowsJson = append(allWorkflowsJson, schemas.WorkflowJson{
+			Name: oneWorkflow.Name,
+			ActionId: oneWorkflow.ActionId,
+			ReactionId: oneWorkflow.ReactionId,
+			IsActive: oneWorkflow.IsActive,
+			CreatedAt: oneWorkflow.CreatedAt,
+		})
+	}
+	return allWorkflowsJson, nil
 }
 
-func (controller *workflowController) GetMostRecentReaction(ctx *gin.Context) ([]json.RawMessage, error) {
+func (controller *workflowController) GetMostRecentReaction(ctx *gin.Context) ([]schemas.GithubListCommentsResponse, error) {
 	return controller.service.GetMostRecentReaction(ctx)
-}
-
-func (controller *workflowController) DeleteWorkflow(ctx *gin.Context) error {
-	return controller.service.DeleteWorkflow(ctx)
-}
-
-func (controller *workflowController) GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error) {
-	return controller.service.GetAllReactionsForAWorkflow(ctx)
-}
-
-func (controller *workflowController) UpdateWorkflow(ctx *gin.Context) error {
-	return controller.service.Update(ctx)
 }

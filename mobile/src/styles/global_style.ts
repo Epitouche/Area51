@@ -9,10 +9,13 @@ export const globalStyles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    padding: '1%',
+    padding: '5%',
     paddingTop: '20%',
     alignItems: 'center',
     gap: 20,
+  },
+  buttonColor: {
+    backgroundColor: '#B454FD',
   },
   line: {
     width: '90%',
@@ -20,35 +23,24 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 2,
     marginBottom: 16,
   },
-  textFormat: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  buttonFormat: {
-    width: 'auto',
-    padding: 10,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
 
   // White Theme
   wallpaper: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#F7FAFB',
+    backgroundColor: '#E8E9E9',
   },
-  textColor: {
-    color: '#0a0a0a',
+  text: {
+    color: '#1A1A1A',
   },
   title: {
     fontSize: 30,
-    color: '#0a0a0a',
+    color: '#1A1A1A',
     fontWeight: 'bold',
   },
   subtitle: {
     fontSize: 20,
-    color: '#0a0a0a',
+    color: '#1A1A1A',
     fontWeight: 'semibold',
   },
   input: {
@@ -57,7 +49,7 @@ export const globalStyles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     fontSize: 16,
-    color: '#0a0a0a',
+    color: 'black',
   },
   lineColor: {
     backgroundColor: '#1A1A1A',
@@ -67,19 +59,19 @@ export const globalStyles = StyleSheet.create({
   wallpaperBlack: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#222831',
+    backgroundColor: '#1A1A1A',
   },
-  textColorBlack: {
-    color: '#f5f5f5',
+  textBlack: {
+    color: '#1A1A1A',
   },
   titleBlack: {
     fontSize: 30,
-    color: '#f5f5f5',
+    color: '#F7FAFB',
     fontWeight: 'bold',
   },
   subtitleBlack: {
     fontSize: 20,
-    color: '#f5f5f5',
+    color: '#F7FAFB',
     fontWeight: 'semibold',
   },
   inputBlack: {
@@ -88,33 +80,9 @@ export const globalStyles = StyleSheet.create({
     padding: 5,
     marginVertical: 10,
     fontSize: 16,
-    color: '#f5f5f5',
+    color: 'white',
   },
   lineColorBlack: {
     backgroundColor: '#F7FAFB',
-  },
-
-  //color
-  primaryDark: {
-    backgroundColor: '#1A1A1A',
-  },
-  secondaryDark: {
-    backgroundColor: '#222831',
-  },
-  secondaryDark400: {
-    backgroundColor: '#4e535a',
-  },
-  terciaryDark: {
-    backgroundColor: '#550195',
-  },
-
-  primaryLight: {
-    backgroundColor: '#E8E9E9',
-  },
-  secondaryLight: {
-    backgroundColor: '#F7FAFB',
-  },
-  terciaryLight: {
-    backgroundColor: '#8d01f9',
   },
 });
