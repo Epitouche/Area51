@@ -54,11 +54,11 @@ func NewReactionService(
 				Name:        string(schemas.SpotifyCreatePlaylist),
 				Description: "Create a new Playlist",
 				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
-				Options: toolbox.RealObject(schemas.SpotifyPlaylistOptions{
-					Name: "Playlist Hardstyle",
-					Description: "BOOM BOOM BOOM",
-					Public: true,
-					Collaborative: false,
+				Options: toolbox.RealObject(schemas.SpotifyPlaylistOptionsSchema{
+					Name:          "Playlist Hardstyle",
+					Description:   "BOOM BOOM BOOM",
+					Public:        "true",
+					Collaborative: "false",
 				}),
 			},
 			{

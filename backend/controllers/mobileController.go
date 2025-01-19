@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -37,17 +36,26 @@ func NewMobileController(
 func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, error) {
 	var result schemas.MobileToken
 	var isAlreadyRegistered bool = false
-	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	err := ctx.BindJSON(&result)
 	if err != nil {
-		return "", err
+		return "", schemas.ErrorBadParameter
 	}
 	githubService := controller.servicesService.FindByName(result.Service)
 	if githubService == (schemas.Service{}) {
-		return "", fmt.Errorf("service %s not found", result.Service)
+		return "", schemas.ErrorNoServiceFound
 	}
 	var servicesUserInfos schemas.ServicesUserInfos
 	userInfos := controller.servicesService.GetUserInfosByToken(result.Token, result.Service)
 	userInfos(&servicesUserInfos)
+
+	if servicesUserInfos == (schemas.ServicesUserInfos{
+		GithubUserInfos:    nil,
+		SpotifyUserInfos:   nil,
+		GoogleUserInfos:    nil,
+		MicrosoftUserInfos: nil,
+	}) {
+		return "", schemas.ErrorInvalidToken
+	}
 	var infos schemas.MobileUsefulInfos
 	switch result.Service {
 	case schemas.Github:
@@ -90,18 +98,18 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 		token := authHeader[len("Bearer "):]
 		user, err := controller.userService.GetUserInfos(token)
 		if err != nil {
-			return "", err
+			return "", schemas.ErrUserNotFound
 		}
 		if user.Username != "" {
 			err := controller.userService.AddServiceToUser(user, schemas.ServiceToken{
 				Token:     result.Token,
 				Service:   controller.servicesService.FindByName(result.Service),
 				UserId:    user.Id,
-				User: 	user,
+				User:      user,
 				ServiceId: controller.servicesService.FindByName(result.Service).Id,
 			})
 			if err != nil {
-				return "", err
+				return "", schemas.ErrWhileLinking
 			}
 			newSessionToken, _ := controller.userService.Login(user, controller.servicesService.FindByName(result.Service))
 			return newSessionToken, nil
@@ -111,7 +119,7 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 	var newUser schemas.User
 	password, err := database.HashPassword(toolbox.GetInEnv("DEFAULT_PASSWORD"))
 	if err != nil {
-		return "", fmt.Errorf("unable to hash password because %w", err)
+		return "", schemas.ErrorHashingPassword
 	}
 	serviceToken, _ := controller.userService.GetServiceByIdForUser(actualUser, githubService.Id)
 	if isAlreadyRegistered {
@@ -149,7 +157,7 @@ func (controller *mobileController) StoreMobileToken(ctx *gin.Context) (string, 
 		}
 		err = controller.userService.AddServiceToUser(actualUser, newGithubToken)
 		if err != nil {
-			return "", fmt.Errorf("unable to add service to user because %w", err)
+			return "", schemas.ErrWhileLinking
 		}
 		isAlreadyRegistered = true
 	}

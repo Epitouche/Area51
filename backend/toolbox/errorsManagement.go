@@ -40,6 +40,22 @@ func HandleError(ctx *gin.Context, err error, statusOKValue interface{}) {
 		ctx.JSON(http.StatusNotFound, schemas.ErrorResponse{
 			Message: err.Error(),
 		})
+	case schemas.ErrorNoServiceFound:
+		ctx.JSON(http.StatusNotFound, schemas.ErrorResponse{
+			Message: err.Error(),
+		})
+	case schemas.ErrorInvalidToken:
+		ctx.JSON(http.StatusUnauthorized, schemas.ErrorResponse{
+			Message: err.Error(),
+		})
+	case schemas.ErrWhileLinking:
+		ctx.JSON(http.StatusInternalServerError, schemas.ErrorResponse{
+			Message: err.Error(),
+		})
+	case schemas.ErrorHashingPassword:
+		ctx.JSON(http.StatusInternalServerError, schemas.ErrorResponse{
+			Message: err.Error(),
+		})
 	case schemas.ErrNoAuthorizationHeaderFound:
 		return
 	default:
