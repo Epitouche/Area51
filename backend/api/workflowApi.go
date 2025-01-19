@@ -83,3 +83,18 @@ func (api *WorkflowApi) DeleteWorkflow(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, schemas.BasicResponse{Message: "Workflow Deleted"})
 }
+
+func (api *WorkflowApi) UpdateWorkflow(ctx *gin.Context) {
+	err := api.workflowController.UpdateWorkflow(ctx)
+	if err != nil && err.Error() == "workflow not found" {
+		ctx.JSON(http.StatusNotFound, err)
+		return
+	}
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+	} else {
+		ctx.JSON(http.StatusOK, schemas.BasicResponse{
+			Message: "Workflow updated",
+		})
+	}
+}
