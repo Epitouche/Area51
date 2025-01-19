@@ -1,4 +1,10 @@
-import { AboutJson, AboutJsonParse, ActionParse, ReactionParse, Workflow } from './aboutJson';
+import {
+  AboutJson,
+  AboutJsonParse,
+  ActionParse,
+  ReactionParse,
+  Workflow,
+} from './aboutJson';
 
 export type AuthParamList = {
   Login: undefined;
@@ -28,18 +34,12 @@ export type AppStackList = {
 };
 
 // For Workflows Creation
-export interface OptionValues {
-  name: string;
-  value: string;
-  var: any;
-}
 export interface ActionOrReaction {
   id: number;
   name: string;
   description: string;
-  options: OptionValues[];
+  options: { [key: string]: any };
 }
-
 
 export interface NoIpProps {
   isBlackTheme?: boolean;

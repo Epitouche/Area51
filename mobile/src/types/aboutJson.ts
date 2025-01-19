@@ -3,13 +3,14 @@ import { ConnectedService } from './servicesModals';
 export type ServiceAction = {
   name: string;
   description: string;
-  options: any;
+  options: { [key: string]: any };
   action_id: number;
 };
+
 export type ServiceReaction = {
   name: string;
   description: string;
-  options: any;
+  options: { [key: string]: any };
   reaction_id: number;
 };
 
@@ -21,10 +22,12 @@ export type Service = {
   image: string;
   is_oauth: boolean;
 };
+
 export type Server = {
   current_time: string;
   services: Service[];
 };
+
 export type Client = {
   host: string;
 };
@@ -38,14 +41,14 @@ export type ActionParse = {
   action_id: number;
   name: string;
   description: string;
-  options: Option[] | null;
+  options: { [key: string]: any };
 };
 
 export type ReactionParse = {
   reaction_id: number;
   name: string;
   description: string;
-  options: Option[] | null;
+  options: { [key: string]: any };
 };
 
 export type Workflow = {
@@ -96,8 +99,3 @@ export interface ParseServicesProps {
   serverIp: string;
   setServicesConnected: (servicesConnected: AboutJsonParse) => void;
 }
-
-export type Option = {
-  name: string;
-  var: any;
-};
