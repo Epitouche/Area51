@@ -1,10 +1,11 @@
 package toolbox
 
 import (
-	"area51/schemas"
 	"errors"
 
 	"github.com/gin-gonic/gin"
+
+	"area51/schemas"
 )
 
 type Bearer interface {

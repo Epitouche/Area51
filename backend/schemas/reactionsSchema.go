@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 )
 
@@ -30,3 +31,7 @@ type Reaction struct {
 	UpdatedAt   time.Time       `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 	Options     json.RawMessage `gorm:"type:jsonb" json:"options"`
 }
+
+var (
+	ErrReactionNotFound = errors.New("reaction not found")
+)
