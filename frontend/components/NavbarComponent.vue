@@ -8,6 +8,8 @@ const registered = computed(() => {
   );
 });
 
+const isModalOpen = ref(false);
+
 async function deleteAccount() {
 
   try {
@@ -49,7 +51,7 @@ async function deleteAccount() {
             hover-color="hover:bg-accent-500"
             text-color="text-fontWhite"
             text="Delete Account"
-            @click="deleteAccount"
+            @click="isModalOpen = true"
           />
         </div>
         <div v-if="registered" class="space-x-9 flex items-center" aria-label="User navigation">
@@ -91,5 +93,14 @@ async function deleteAccount() {
         />
       </div>
     </nav>
+    <ModalComponent
+      title="Delete Account"
+      :is-open="isModalOpen && registered"
+      @close="isModalOpen = false"
+      @confirm="deleteAccount"
+    >
+      <p class="text-fontBlack dark:text-fontWhite text-lg text-center"
+      >Are you sure you want to delete your account ? All your data will be lost.</p>
+    </ModalComponent>
   </div>
 </template>
