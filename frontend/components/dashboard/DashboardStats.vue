@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import type { Workflow, Reaction } from "~/src/types";
+import type { Workflow } from "~/src/types";
 
 const stats = ref([
     {
@@ -15,14 +15,14 @@ const stats = ref([
         icon: 'jam:thunder',
         color: 'bg-tertiary-500'
     },
+    // {
+    //     name: 'Last 24h Executions',
+    //     value: 0,
+    //     icon: 'ic:round-loop',
+    //     color: 'bg-green-500'
+    // },
     {
-        name: 'Last 24h Executions',
-        value: 0,
-        icon: 'ic:round-loop',
-        color: 'bg-green-500'
-    },
-    {
-        name: 'Last Execution',
+        name: 'Last Workflow added',
         value: 'N/A',
         icon: 'solar:history-bold',
         color: 'bg-blue-500'
@@ -45,21 +45,19 @@ onMounted(async () => {
     response.forEach(() => {
         stats.value[0].value = Number(stats.value[0].value) + 1;
     })
-    const reactions = await $fetch<Reaction[]>(
-      "http://localhost:8080/api/workflow/reactions",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    if (response != null) {
+      stats.value[2].value = response[response.length - 1].name;
+    }
+    const reactions = await $fetch<unknown[]>("/api/workflows/getLastWorkflow", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+    });
     if (reactions != null) {
       stats.value[1].value = Number(reactions.length);
-      stats.value[3].value = reactions[reactions.length - 1].name;
     }
-    console.log(reactions)
 })
 </script>
 <template>
