@@ -1,6 +1,9 @@
 // src/services/api.js
 
-export async function exempleApiCall(apiEndpoint: string, setIsWorking: (isWorking: boolean) => void) {
+export async function exempleApiCall(
+  apiEndpoint: string,
+  setIsWorking: (isWorking: boolean) => void,
+) {
   try {
     const response = await fetch(`http://${apiEndpoint}:8080/about.json`, {
       method: 'GET',
@@ -8,7 +11,6 @@ export async function exempleApiCall(apiEndpoint: string, setIsWorking: (isWorki
     });
     const data = await response.json();
     if (response.status === 200) {
-      console.log('API call success:', data);
     }
     setIsWorking(true);
     return data;

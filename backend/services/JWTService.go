@@ -1,11 +1,12 @@
 package services
 
 import (
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+
+	"area51/toolbox"
 )
 
 type JWTService interface {
@@ -16,7 +17,7 @@ type JWTService interface {
 
 type jwtService struct {
 	secretKey string
-	issuer	string
+	issuer    string
 }
 
 type jwtCustomClaims struct {
@@ -25,20 +26,11 @@ type jwtCustomClaims struct {
 	jwt.StandardClaims
 }
 
-
 func NewJWTService() JWTService {
 	return &jwtService{
-		secretKey: getSecretKey(),
+		secretKey: toolbox.GetInEnv("JWT_SECRET"),
 		issuer:    "email@example.com",
 	}
-}
-
-func getSecretKey() string {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic("JWT_SECRET is not set")
-	}
-	return secret
 }
 
 func (service *jwtService) GenerateJWTToken(userId string, username string, isAdmin bool) string {
@@ -48,8 +40,8 @@ func (service *jwtService) GenerateJWTToken(userId string, username string, isAd
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 			Issuer:    service.issuer,
-			IssuedAt: time.Now().Unix(),
-			Id: userId,
+			IssuedAt:  time.Now().Unix(),
+			Id:        userId,
 		},
 	}
 
@@ -58,6 +50,7 @@ func (service *jwtService) GenerateJWTToken(userId string, username string, isAd
 	if err != nil {
 		panic(err)
 	}
+
 	return signedToken
 }
 
@@ -75,6 +68,7 @@ func (service *jwtService) GetUserIdFromToken(tokenString string) (userId uint64
 	if err != nil {
 		return 0, err
 	}
+
 	if token.Valid {
 		claims := token.Claims.(jwt.MapClaims)
 		if jti, ok := claims["jti"].(string); ok {

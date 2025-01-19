@@ -2,7 +2,7 @@ package controllers
 
 import "area51/services"
 
-type ReactionResponseDataController interface {}
+type ReactionResponseDataController interface{}
 
 type reactionResponseDataController struct {
 	service services.ReactionResponseDataService

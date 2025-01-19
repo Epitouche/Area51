@@ -1,63 +1,156 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { globalStyles } from '../styles/global_style';
-import { Button } from 'react-native-paper';
-import { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../context/AppContext';
+import { useEffect, useState } from 'react';
+import { getToken, refreshServices, saveToken } from '../service';
+import { AboutJson, AboutJsonParse } from '../types';
+interface IpInputProps {
+  isBlackTheme?: boolean;
+  setAboutJson: (aboutJson: AboutJson) => void;
+  setServicesConnected: (servicesConnected: AboutJsonParse) => void;
+  aboutJson: AboutJson | undefined;
+  setServerIp: (serverIp: string) => void;
+  serverIp: string;
+}
 
-export function IpInput() {
+export function IpInput({
+  aboutJson,
+  setAboutJson,
+  setServicesConnected,
+  serverIp,
+  setServerIp,
+  isBlackTheme,
+}: IpInputProps) {
   const [ipTmp, setIpTmp] = useState('');
-  const { setServerIp, serverIp, isBlackTheme } = useContext(AppContext);
+  const [checkIp, setcheckIp] = useState('');
 
-  // const validateIp = (ip: string) => {
-  //   const ipPattern =
-  //     /^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$/;
-  //   return ipPattern.test(ip);
-  // };
+  useEffect(() => {
+    const getIp = async () => {
+      await getToken('serverIp', setcheckIp);
+    };
+    getIp();
+  }, []);
 
   useEffect(() => {
     setIpTmp(serverIp);
   }, [serverIp]);
 
   const handleSave = () => {
-    // if (validateIp(serverIp)) {
     setServerIp(ipTmp);
-    // } else {
-    //   alert('Please enter a valid IP address');
-    //   setIsValidIp(false);
-    // }
+    saveToken('serverIp', ipTmp);
   };
 
   return (
-    <View style={styles.ipBox}>
-      <TextInput
-        style={[
-          isBlackTheme ? globalStyles.inputBlack : globalStyles.input,
-          { width: '48%' },
-        ]}
-        placeholder="Server IP"
-        keyboardType="numeric"
-        value={ipTmp}
-        onChangeText={setIpTmp}
-      />
-      <Button
-        onPress={handleSave}
-        style={[globalStyles.buttonColor, styles.button]}>
-        <Text style={isBlackTheme ? globalStyles.textBlack : globalStyles.text}>
-          Save
+    <View
+      style={[
+        isBlackTheme ? globalStyles.primaryLight : globalStyles.terciaryLight,
+        styles.card,
+      ]}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text
+          style={[
+            styles.bullet,
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+          ]}
+          accessibilityLabel="Bullet">
+          •
         </Text>
-      </Button>
+        <Text
+          style={[
+            isBlackTheme ? globalStyles.textColor : globalStyles.textColorBlack,
+            globalStyles.subtitle,
+          ]}
+          accessibilityLabel="Set a server Ip">
+          Set a server Ip
+        </Text>
+      </View>
+      <View style={styles.ipBox}>
+        <TextInput
+          style={[
+            isBlackTheme ? globalStyles.input : globalStyles.inputBlack,
+            { width: '50%' },
+          ]}
+          placeholder="Server IP"
+          placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
+          keyboardType="numeric"
+          value={ipTmp}
+          onChangeText={setIpTmp}
+        />
+        <TouchableOpacity
+          onPress={handleSave}
+          style={[
+            globalStyles.buttonFormat,
+            isBlackTheme
+              ? globalStyles.secondaryDark
+              : globalStyles.primaryLight,
+          ]}>
+          <Text
+            style={[
+              isBlackTheme
+                ? globalStyles.textColorBlack
+                : globalStyles.textColor,
+              globalStyles.textFormat,
+              styles.button,
+            ]}>
+            Save
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        style={[
+          globalStyles.buttonFormat,
+          isBlackTheme ? globalStyles.secondaryDark : globalStyles.primaryLight,
+        ]}
+        onPress={() =>
+          refreshServices({
+            serverIp,
+            setAboutJson,
+            setServicesConnected,
+            aboutJson,
+          })
+        }>
+        <Text
+          style={[
+            isBlackTheme ? globalStyles.textColorBlack : globalStyles.textColor,
+            globalStyles.textFormat,
+          ]}>
+          Refresh
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  card: {
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+    margin: 20,
+  },
   button: {
-    width: '40%',
+    width: '100%',
   },
   ipBox: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
+    width: '100%',
+    marginBottom: 20,
   },
+  bullet: {
+    fontSize: 20,
+    marginRight: 10,
+  },
+
 });
