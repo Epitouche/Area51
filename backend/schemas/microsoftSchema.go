@@ -35,7 +35,7 @@ type MicrosoftTeamsGroupOptionsInfos struct {
 
 type MicrosoftTeamsChatResponse struct {
 	IsOld               bool   `json:"is_old"`
-	Id                  string `json:"id"`
+	Name                  string `json:"name"`
 	LastUpdatedDateTime string `json:"lastUpdatedDateTime"`
 }
 
@@ -78,6 +78,16 @@ type MicrosoftSendMailMainMessageOptionsSchema struct {
 type MicrosoftSendMailOptionsSchema struct {
 	Message         MicrosoftSendMailMainMessageOptionsSchema `json:"message"`
 	SaveToSentItems string                                    `json:"saveToSentItems"`
+}
+
+type MicrosoftTeams struct {
+	Id string `json:"id"`
+	Topic string `json:"topic"`
+	ChatType string `json:"chatType"`
+}
+
+type MicrosoftTeamsResponse struct {
+	Value []MicrosoftTeams `json:"value"`
 }
 
 // message: {
