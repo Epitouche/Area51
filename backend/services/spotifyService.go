@@ -286,13 +286,29 @@ func (service *spotifyService) CreatePlaylist(channel chan string, workflowId ui
 		return
 	}
 
-	options := schemas.SpotifyPlaylistOptions{}
+	options := schemas.SpotifyPlaylistOptionsSchema{}
 	err = json.Unmarshal([]byte(reactionOption), &options)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	optionsJSON, err := json.Marshal(options)
+	public, err := toolbox.StringToBoolean(options.Public)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	collaborative, err := toolbox.StringToBoolean(options.Collaborative)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	trueOptions := schemas.SpotifyPlaylistOptions{
+		Name:          options.Name,
+		Description:   options.Description,
+		Public:        public,
+		Collaborative: collaborative,
+	}
+	optionsJSON, err := json.Marshal(trueOptions)
 	if err != nil {
 		fmt.Println(err)
 		return
