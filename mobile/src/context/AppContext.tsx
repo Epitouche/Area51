@@ -1,6 +1,6 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { AboutJson, AboutJsonParse, Workflow } from '../types';
-import { getAboutJson, checkToken, getToken, saveToken } from '../service';
+import { getAboutJson, checkToken, getToken } from '../service';
 
 interface AppContextProps {
   serverIp: string;

@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { globalStyles } from '../styles/global_style';
 import { ActionOrReaction, AppStackList, Workflow } from '../types';
-import { getWorkflows, refreshServices, sendWorkflows } from '../service';
+import { getWorkflows, sendWorkflows } from '../service';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 interface WorkflowCardProps {

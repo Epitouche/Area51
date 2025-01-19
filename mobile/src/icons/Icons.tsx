@@ -43,9 +43,21 @@ const registerSvg = `
 </svg>
 `;
 
-export const HomeIcon = (props: SvgProps) => <SvgXml xml={homeSvg} {...props} />;
-export const SettingIcon = (props: SvgProps) => <SvgXml xml={settingSvg} {...props} />;
-export const ServiceIcon = (props: SvgProps) => <SvgXml xml={serviceSvg} {...props} />;
-export const WorkflowIcon = (props: SvgProps) => <SvgXml xml={workflowSvg} {...props} />;
-export const LoginIcon = (props: SvgProps) => <SvgXml xml={loginSvg} {...props} />;
-export const RegisterIcon = (props: SvgProps) => <SvgXml xml={registerSvg} {...props} />;
+export const HomeIcon = (props: SvgProps) => (
+  <SvgXml xml={homeSvg} {...props} />
+);
+export const SettingIcon = (props: SvgProps) => (
+  <SvgXml xml={settingSvg} {...props} />
+);
+export const ServiceIcon = (props: SvgProps) => (
+  <SvgXml xml={serviceSvg} {...props} />
+);
+export const WorkflowIcon = (props: SvgProps) => (
+  <SvgXml xml={workflowSvg} {...props} />
+);
+export const LoginIcon = (props: SvgProps) => (
+  <SvgXml xml={loginSvg} {...props} />
+);
+export const RegisterIcon = (props: SvgProps) => (
+  <SvgXml xml={registerSvg} {...props} />
+);
