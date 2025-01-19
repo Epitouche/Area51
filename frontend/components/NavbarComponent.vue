@@ -94,6 +94,7 @@ async function deleteAccount() {
       </div>
     </nav>
     <ModalComponent
+      v-motion-pop
       title="Delete Account"
       :is-open="isModalOpen && registered"
       @close="isModalOpen = false"
