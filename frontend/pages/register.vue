@@ -132,7 +132,7 @@ onMounted(fetchOauthServices);
     aria-label="Registration screen"
   >
     <div
-      class="w-full transform -translate-x-3/4 max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
+      class="w-full transform max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
       aria-label="Registration form container"
     >
       <h2 
