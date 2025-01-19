@@ -51,6 +51,17 @@ func NewReactionService(
 				}),
 			},
 			{
+				Name:        string(schemas.SpotifyCreatePlaylist),
+				Description: "Create a new Playlist",
+				ServiceId:   serviceService.FindByName(schemas.Spotify).Id,
+				Options: toolbox.RealObject(schemas.SpotifyPlaylistOptions{
+					Name: "Playlist Hardstyle",
+					Description: "BOOM BOOM BOOM",
+					Public: true,
+					Collaborative: false,
+				}),
+			},
+			{
 				Name:        string(schemas.GoogleCreateEventReaction),
 				Description: "Create an event in Google Calendar",
 				ServiceId:   serviceService.FindByName(schemas.Google).Id,
