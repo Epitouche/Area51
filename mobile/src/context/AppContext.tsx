@@ -69,7 +69,7 @@ export default function AppProvider({ children }: AppProviderProps) {
 
     const getAppTheme = async () => {
       const setTheme = (theme: string) => {
-        if (theme !== 'true') setIsBlackTheme(false);
+        if (theme == 'false') setIsBlackTheme(false);
         else setIsBlackTheme(true);
       };
       await getToken('isBlackTheme', setTheme);
