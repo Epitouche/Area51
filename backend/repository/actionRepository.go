@@ -101,11 +101,11 @@ func (repo *actionRepository) FindByServiceByName(
 	var actions []schemas.Action
 	err := repo.db.Connection.Where(&schemas.Action{
 		ServiceId: serviceId,
-		Name: actionName,
+		Name:      actionName,
 	}).Find(&actions)
 
 	if err.Error != nil {
-		panic(err.Error)
+		return []schemas.Action{}
 	}
 	return actions
 }
@@ -117,7 +117,7 @@ func (repo *actionRepository) FindById(actionId uint64) schemas.Action {
 	}).First(&action)
 
 	if err.Error != nil {
-		panic(err.Error)
+		return schemas.Action{}
 	}
 	return action
 }
@@ -129,7 +129,7 @@ func (repo *actionRepository) FindAllByName(actionName string) []schemas.Action 
 	}).Find(&actions)
 
 	if err.Error != nil {
-		panic(err.Error)
+		return []schemas.Action{}
 	}
 	return actions
 }

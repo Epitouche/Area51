@@ -1,5 +1,7 @@
 package schemas
 
+import "errors"
+
 type User struct {
 	Id       uint64         `json:"id,omitempty" gorm:"primary_key;auto_increment;"`
 	Name     string         `json:"name" gorm:"type:varchar(100)"`
@@ -11,3 +13,7 @@ type User struct {
 	IsAdmin  bool           `json:"is_admin" gorm:"type:boolean"`
 	Services []ServiceToken `gorm:"many2many:user_service_tokens;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
 }
+
+var (
+	ErrUserNotFound = errors.New("user not found")
+)

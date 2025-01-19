@@ -1,4 +1,3 @@
-// src/context/AppContext.tsx
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { AboutJson, AboutJsonParse, Workflow } from '../types';
 import { getAboutJson, checkToken, getToken, saveToken } from '../service';
@@ -30,9 +29,9 @@ const AppContext = createContext<AppContextProps>({
   servicesConnected: {
     services: [],
   },
-  setServicesConnected: () => { },
+  setServicesConnected: () => {},
   workflows: [],
-  setWorkflows: () => { },
+  setWorkflows: () => {},
 });
 
 interface AppProviderProps {
@@ -67,6 +66,15 @@ export default function AppProvider({ children }: AppProviderProps) {
       if (await checkToken('serverIp')) getToken('serverIp', setServerIp);
     };
     checkAndGrapServerIp();
+
+    const getAppTheme = async () => {
+      const setTheme = (theme: string) => {
+        if (theme !== 'true') setIsBlackTheme(false);
+        else setIsBlackTheme(true);
+      };
+      await getToken('isBlackTheme', setTheme);
+    };
+    getAppTheme();
   }, []);
 
   return (
