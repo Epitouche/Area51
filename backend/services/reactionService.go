@@ -114,20 +114,14 @@ func NewReactionService(
 				Name:        string(schemas.MicrosoftMailReaction),
 				Description: "Send an email",
 				ServiceId:   serviceService.FindByName(schemas.Microsoft).Id,
-				Options: toolbox.RealObject(schemas.MicrosoftSendMailOptions{
-					Message: schemas.MicrosoftSendMailMainMessageOptions{
+				Options: toolbox.RealObject(schemas.MicrosoftSendMailOptionsSchema{
+					Message: schemas.MicrosoftSendMailMainMessageOptionsSchema{
 						Subject: "We are going to Chicoutimi ?",
 						Body: schemas.MicrosoftSendMailBodyOptions{
 							ContentType: "Text",
 							Content:     "This email is to confirm our trip to Chicoutimi",
 						},
-						ToRecipients: []schemas.MicrosoftSendMailRecipientsOptions{
-							{
-								EmailAdress: schemas.MicrosoftSendMailAdressOptions{
-									Address: "other.email@gmail.com",
-								},
-							},
-						},
+						Address: "my.email@gmail.com",
 					},
 					SaveToSentItems: "true / false",
 				}),
