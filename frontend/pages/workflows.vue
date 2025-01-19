@@ -3,10 +3,10 @@ import { useNotificationStore } from "@/stores/notification";
 
 import type {
   Service,
-  WorkflowResponse,
   Workflow,
   AboutResponse,
   OptionWorkflow,
+  NestedObject,
 } from "~/src/types";
 
 const notificationStore = useNotificationStore();
@@ -34,7 +34,7 @@ const sorts = ["Name", "Creation Date", "Action ID", "Reaction ID"];
 
 const services = reactive<Service[]>([]);
 const workflowsInList = reactive<Workflow[]>([]);
-const lastWorkflowResult = reactive<WorkflowResponse[]>([]);
+const lastWorkflowResult = reactive<unknown[]>([]);
 
 const actionString = ref("");
 const reactionString = ref("");
@@ -84,21 +84,23 @@ const closeModalAction = () => {
 const confirmModalAction = () => {
   closeModalAction();
 
-  const actions =
-    services
-      .flatMap((service) => service.actions)
-      .find((action) => action?.name === actionString.value)?.options || "";
+  const actionSelected = services
+    .flatMap((service) => service.actions)
+    .find((action) => action && action.name === actionString.value);
 
-  const parsedOptions: Record<string, string> = JSON.parse(actions);
+  const transformedOptions: OptionWorkflow[] = [];
 
-  const transformedOptions: OptionWorkflow[] = Object.entries(
-    parsedOptions
-  ).map(([name, type]) => ({
-    name,
-    type,
-    input: "",
-  }));
-
+  if (actionSelected?.options) {
+    traverseObject(actionSelected.options, (key, value, path) => {
+      if (typeof value !== "object" || Array.isArray(value)) {
+        transformedOptions.push({
+          name: path,
+          type: typeof value === "object" ? "object" : String(typeof value),
+          input: typeof value !== "object" ? String(value) : "",
+        });
+      }
+    });
+  }
   actionOption.value = transformedOptions;
 };
 
@@ -112,21 +114,24 @@ const closeModalReaction = () => {
 
 const confirmModalReaction = () => {
   closeModalReaction();
-  const reactions =
-    services
-      .flatMap((service) => service.reactions)
-      .find((reaction) => reaction?.name === reactionString.value)?.options ||
-    "";
 
-  const parsedOptions: Record<string, string> = JSON.parse(reactions);
+  const reactionSelected = services
+    .flatMap((service) => service.reactions)
+    .find((reaction) => reaction && reaction.name === reactionString.value);
 
-  const transformedOptions: OptionWorkflow[] = Object.entries(
-    parsedOptions
-  ).map(([name, type]) => ({
-    name,
-    type,
-    input: "",
-  }));
+  const transformedOptions: OptionWorkflow[] = [];
+
+  if (reactionSelected?.options) {
+    traverseObject(reactionSelected.options, (key, value, path) => {
+      if (typeof value !== "object" || Array.isArray(value)) {
+        transformedOptions.push({
+          name: path,
+          type: typeof value === "object" ? "object" : String(typeof value),
+          input: typeof value !== "object" ? String(value) : "",
+        });
+      }
+    });
+  }
 
   reactionOption.value = transformedOptions;
 };
@@ -147,6 +152,27 @@ const sortWorkflows = () => {
     }
   });
 };
+
+function traverseObject<T extends NestedObject>(
+  obj: T,
+  callback: (
+    key: string,
+    value: string | number | boolean | NestedObject,
+    path: string
+  ) => void,
+  path = ""
+): void {
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key];
+    const currentPath = path ? `${path}.${key}` : key;
+
+    callback(key, value, currentPath);
+
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      traverseObject(value as NestedObject, callback, currentPath);
+    }
+  });
+}
 
 async function fetchServices() {
   try {
@@ -190,7 +216,7 @@ async function fetchServices() {
                 name: action.name,
                 action_id: action.action_id || 0,
                 description: action.description || "",
-                options: action.options || "",
+                options: action.options || null,
               }))
             : null,
           reactions: Array.isArray(service.reactions)
@@ -198,7 +224,7 @@ async function fetchServices() {
                 name: reaction.name,
                 reaction_id: reaction.reaction_id || 0,
                 description: reaction.description || "",
-                options: reaction.options || "",
+                options: reaction.options || null,
               }))
             : null,
           created_at: new Date().toISOString(),
@@ -244,13 +270,24 @@ async function fetchWorkflows() {
   }
 }
 
-async function transformOptions(options: OptionWorkflow[]): Promise<string> {
-  const transformed = options.reduce((acc, option) => {
-    acc[option.name] = option.input;
-    return acc;
-  }, {} as Record<string, string>);
+async function transformOptions(options: OptionWorkflow[]) {
+  const result: NestedObject = {};
 
-  return JSON.stringify(transformed);
+  options.forEach((option) => {
+    const keys = option.name.split(".");
+    let current = result;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      if (!current[keys[i]]) {
+        current[keys[i]] = {};
+      }
+      current = current[keys[i]] as NestedObject;
+    }
+
+    current[keys[keys.length - 1]] = option.input;
+  });
+
+  return result;
 }
 
 async function addWorkflow() {
@@ -271,8 +308,8 @@ async function addWorkflow() {
         action_id: number;
         reaction_id: number;
         name?: string;
-        action_option?: string;
-        reaction_option?: string;
+        action_option?: NestedObject;
+        reaction_option?: NestedObject;
       } = {
         action_id: actionSelected.action_id,
         reaction_id: reactionSelected.reaction_id,
@@ -316,7 +353,7 @@ async function addWorkflow() {
 
 async function getLastWorkflowResult() {
   try {
-    const response = await $fetch<WorkflowResponse[]>(
+    const response = await $fetch<unknown[]>(
       "/api/workflows/getLastWorkflow",
       {
         method: "GET",
@@ -326,6 +363,7 @@ async function getLastWorkflowResult() {
         },
       }
     );
+
     lastWorkflowResult.push(...response);
   } catch (error) {
     console.error("Error getting last workflow:", error);
