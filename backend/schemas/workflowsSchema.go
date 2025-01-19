@@ -16,7 +16,7 @@ type WorkflowResult struct {
 
 type WorkflowActivate struct {
 	WorkflowId    uint64 `json:"workflow_id" binding:"required"`
-	WorkflowState bool   `json:"workflow_state"`
+	WorkflowState bool   `json:"workflow_state" binding:"required"`
 }
 
 type WorkflowJson struct {

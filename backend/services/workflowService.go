@@ -128,7 +128,12 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
 	if actualWorkflow.Id != 0 {
 		return "", schemas.ErrorAlreadyExistingRessource
+		// if actualWorkflow.IsActive {
+		// } else {
+		// 	return "Workflow already exists and is not active", nil
+		// }
 	}
+	fmt.Println(newWorkflow)
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
 	if err != nil {
 		return "", err
@@ -141,14 +146,16 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 }
 
 func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
-	result := schemas.WorkflowActivate{}
-	err := ctx.ShouldBind(&result)
+	var result schemas.WorkflowActivate
+	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+
+	// err := ctx.ShouldBind(&result)
+	fmt.Printf("Error value: %+v\n", err)
+	fmt.Printf("AAAAAYYYYYYYYOOOOOOOO\n")
 	if err != nil {
 		return schemas.ErrorBadParameter
 	}
-	if !result.WorkflowState && result.WorkflowState {
-		return schemas.ErrorBadParameter
-	}
+	fmt.Printf("SSSSSSHHHHHHHEEEEEE\n")
 
 	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
@@ -201,6 +208,7 @@ func (service *workflowService) WorkflowActionChannel(workflowStartingPoint sche
 			}
 			time.Sleep(30 * time.Second)
 		}
+		fmt.Println("Clear")
 		channel <- "Workflow finished"
 	}(workflowStartingPoint, channel)
 }
@@ -221,7 +229,9 @@ func (service *workflowService) WorkflowReactionChannel(workflowStartingPoint sc
 			}
 
 			if workflow.IsActive {
+				result := <-channel
 				reaction(channel, workflow.Id, githubServiceToken, reactionOption)
+				fmt.Printf("result value: %+v\n", result)
 			}
 			time.Sleep(30 * time.Second)
 		}
