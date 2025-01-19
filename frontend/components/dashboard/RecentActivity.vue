@@ -1,16 +1,27 @@
 <script setup lang="ts">
-const activities = ref([
-    {
-        name: 'GitHub Issue Notifications',
-        time: '2 minutes ago',
-        description: 'Successfully notified team about new issue #123'
-    },
-    {
-        name: 'New Spotify song',
-        time: '15 minutes ago',
-        description: 'Successfully notified of a new song'
+import type { Reaction } from '~/src/types';
+
+const activities = ref<Reaction[]>([]);
+
+const token = useCookie("access_token");
+
+onMounted(async () => {
+    const reactions = await $fetch<Reaction[]>(
+      "http://localhost:8080/api/workflow/reactions",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (reactions != null) {
+        reactions.forEach((reaction) => {
+            activities.value.push(reaction)
+        })
     }
-])
+})
 </script>
 <template>
     <div 
@@ -38,11 +49,11 @@ const activities = ref([
                         :aria-label="`Description: ${activity.description}`">
                         {{ activity.description }}
                     </p>
-                    <p 
+                    <!-- <p 
                         className="text-xs text-gray-400 dark:text-gray-400 mt-1" 
                         :aria-label="`Time: ${activity.time}`">
                         {{ activity.time }}
-                    </p>
+                    </p> -->
                 </div>
             </div>
         </div>

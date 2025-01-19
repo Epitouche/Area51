@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import type { Workflow } from "~/src/types";
+import type { Workflow, Reaction } from "~/src/types";
 
 const stats = ref([
     {
@@ -11,19 +11,19 @@ const stats = ref([
     },
     {
         name: 'Total Executions',
-        value: 12,
+        value: 0,
         icon: 'jam:thunder',
         color: 'bg-tertiary-500'
     },
     {
         name: 'Last 24h Executions',
-        value: 4,
+        value: 0,
         icon: 'ic:round-loop',
         color: 'bg-green-500'
     },
     {
-        name: 'Last Executions',
-        value: '2m ago',
+        name: 'Last Execution',
+        value: 'N/A',
         icon: 'solar:history-bold',
         color: 'bg-blue-500'
     }
@@ -45,16 +45,21 @@ onMounted(async () => {
     response.forEach(() => {
         stats.value[0].value = Number(stats.value[0].value) + 1;
     })
-    // const reaction = await $fetch<Reaction[]>(
-    //   "http://localhost:8080/api/workflow/reaction",
-    //   {
-    //     method: "GET",
-    //     headers: {
-    //       Authorization: `Bearer ${token.value}`,
-    //       "Content-Type": "application/json",
-    //     },
-    //   }
-    // );
+    const reactions = await $fetch<Reaction[]>(
+      "http://localhost:8080/api/workflow/reactions",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (reactions != null) {
+      stats.value[1].value = Number(reactions.length);
+      stats.value[3].value = reactions[reactions.length - 1].name;
+    }
+    console.log(reactions)
 })
 </script>
 <template>

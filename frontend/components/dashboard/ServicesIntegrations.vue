@@ -24,6 +24,12 @@ const systemes = ref([
         icon: 'line-md:spotify',
         connected: false,
         color: 'bg-emerald-500'
+    },
+    {
+        name: 'Microsoft',
+        icon: 'mdi:microsoft',
+        connected: false,
+        color: 'bg-blue-500'
     }
 ]);
 
