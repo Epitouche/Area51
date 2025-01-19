@@ -148,14 +148,7 @@ func (service *microsoftService) ModifyTeamGroup(channel chan string, workflowId
 		return
 	}
 
-	options := schemas.MicrosoftTeamsChatResponse{}
-	err = json.Unmarshal([]byte(actionOption), &options)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	url := "https://graph.microsoft.com/v1.0/me/chats/" + options.Id
+	url := "https://graph.microsoft.com/v1.0/me/chats"
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		channel <- err.Error()
@@ -175,24 +168,66 @@ func (service *microsoftService) ModifyTeamGroup(channel chan string, workflowId
 		return
 	}
 
-	result := schemas.MicrosoftTeamsChatResponse{}
-	err = json.NewDecoder(response.Body).Decode(&result)
+	teams := schemas.MicrosoftTeamsResponse{}
+	err = json.NewDecoder(response.Body).Decode(&teams)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+	options := schemas.MicrosoftTeamsChatResponse{}
+	err = json.Unmarshal([]byte(workflow.ActionOptions), &options)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	teamId := ""
+	for _, team := range teams.Value {
+		if team.ChatType == "group" && options.Name == team.Topic {
+			teamId = team.Id
+		}
+	}
+	if teamId == "" {
+		fmt.Println("Couldn't find the teams group")
+		return
+	}
+	url = "https://graph.microsoft.com/v1.0/me/chats/" + teamId
+	request, err = http.NewRequest("GET", url, nil)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
+	searchedService = service.serviceRepository.FindByName(schemas.Microsoft)
+	for _, token := range allTokens {
+		if token.ServiceId == searchedService.Id {
+			request.Header.Set("Authorization", "Bearer "+token.Token)
+		}
+	}
+	client = &http.Client{}
+	request.Header.Set("Accept", "application/json")
+	response, err = client.Do(request)
 	if err != nil {
 		channel <- err.Error()
 		return
 	}
 
+	chats := schemas.MicrosoftTeamsChatResponse{}
+	err = json.NewDecoder(response.Body).Decode(&chats)
+	if err != nil {
+		channel <- err.Error()
+		return
+	}
 	if options.IsOld {
-		if options.LastUpdatedDateTime != result.LastUpdatedDateTime {
+		if options.LastUpdatedDateTime != chats.LastUpdatedDateTime {
 			workflow.ReactionTrigger = true
 			service.workflowRepository.UpdateReactionTrigger(workflow)
-			options.LastUpdatedDateTime = result.LastUpdatedDateTime
+			options.LastUpdatedDateTime = chats.LastUpdatedDateTime
 			workflow.ActionOptions = toolbox.RealObject(options)
 			service.workflowRepository.Update(workflow)
 		}
 	} else {
 		options.IsOld = true
-		options.LastUpdatedDateTime = result.LastUpdatedDateTime
+		options.LastUpdatedDateTime = chats.LastUpdatedDateTime
 		workflow.ActionOptions = toolbox.RealObject(options)
 		service.workflowRepository.Update(workflow)
 	}

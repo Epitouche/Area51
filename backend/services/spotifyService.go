@@ -284,6 +284,9 @@ func (service *spotifyService) CreatePlaylist(channel chan string, workflowId ui
 		fmt.Println(err)
 		return
 	}
+	if !workflow.ReactionTrigger {
+		return
+	}
 
 	options := schemas.SpotifyPlaylistOptions{}
 	err = json.Unmarshal([]byte(reactionOption), &options)
