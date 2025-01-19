@@ -71,9 +71,9 @@ func (service *workflowService) FindAll() []schemas.Workflow {
 
 func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error) {
 	result := schemas.WorkflowResult{}
-	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	err := ctx.ShouldBind(&result)
 	if err != nil {
-		return "", err
+		return "", schemas.ErrorBadParameter
 	}
 
 	tokenString, err := toolbox.GetBearerToken(ctx)
@@ -83,7 +83,7 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 
 	user, err := service.userService.GetUserInfos(tokenString)
 	if err != nil {
-		return "", err
+		return "", schemas.ErrUserNotFound
 	}
 
 	workflowName := result.Name
@@ -101,7 +101,18 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 		workflowName = "Workflow " + workflowValue
 	}
 
-	serviceToken, _ := service.serviceToken.GetTokenByUserId(user.Id)
+	reaction := service.reactionService.FindById(result.ReactionId)
+	action := service.actionService.FindById(result.ActionId)
+	if reaction.Id == 0 {
+		return "", schemas.ErrReactionNotFound
+	}
+	if action.Id == 0 {
+		return "", schemas.ErrActionNotFound
+	}
+	serviceToken, err := service.serviceToken.GetTokenByUserId(user.Id)
+	if err != nil {
+		return "", err
+	}
 	newWorkflow := schemas.Workflow{
 		UserId:          user.Id,
 		User:            user,
@@ -116,11 +127,11 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 	}
 	actualWorkflow := service.repository.FindExistingWorkflow(newWorkflow)
 	if actualWorkflow.Id != 0 {
-		if actualWorkflow.IsActive {
-			return "Workflow already exists and is active", nil
-		} else {
-			return "Workflow already exists and is not active", nil
-		}
+		return "", schemas.ErrorAlreadyExistingRessource
+		// if actualWorkflow.IsActive {
+		// } else {
+		// 	return "Workflow already exists and is not active", nil
+		// }
 	}
 	fmt.Println(newWorkflow)
 	workflowId, err := service.repository.SaveWorkflow(newWorkflow)
@@ -137,28 +148,33 @@ func (service *workflowService) CreateWorkflow(ctx *gin.Context) (string, error)
 func (service *workflowService) ActivateWorkflow(ctx *gin.Context) error {
 	var result schemas.WorkflowActivate
 	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+
+	// err := ctx.ShouldBind(&result)
+	fmt.Printf("Error value: %+v\n", err)
+	fmt.Printf("AAAAAYYYYYYYYOOOOOOOO\n")
+	if err != nil {
+		return schemas.ErrorBadParameter
+	}
+	fmt.Printf("SSSSSSHHHHHHHEEEEEE\n")
+
+	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return err
 	}
-	authHeader := ctx.GetHeader("Authorization")
-	if len(authHeader) <= len("Bearer ") {
-		return fmt.Errorf("no authorization header found")
-	}
-	tokenString := authHeader[len("Bearer "):]
 
 	user, err := service.userService.GetUserInfos(tokenString)
 	if err != nil {
-		return err
+		return schemas.ErrUserNotFound
 	}
 	workflow, err := service.repository.FindByIds(result.WorkflowId)
-	if err != nil {
-		return err
+	if err != nil || workflow.Id == 0 {
+		return schemas.ErrorNoWorkflowFound
 	}
 	newWorkflow := schemas.Workflow{
 		Id:              workflow.Id,
 		UserId:          user.Id,
-		IsActive:        result.WorflowState,
-		ReactionTrigger: result.WorflowState,
+		IsActive:        result.WorkflowState,
+		ReactionTrigger: result.WorkflowState,
 		ActionOptions:   workflow.ActionOptions,
 		ReactionOptions: workflow.ReactionOptions,
 	}
@@ -246,7 +262,7 @@ func (service *workflowService) Delete(workflowId uint64) error {
 func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]json.RawMessage, error) {
 	result := ctx.Query("workflow_id")
 
-	_, err := toolbox.GetBearerToken(ctx)
+	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -255,8 +271,12 @@ func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]json.
 	if err != nil {
 		return nil, schemas.ErrorBadParameter
 	}
+	user, err := service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return nil, schemas.ErrUserNotFound
+	}
 	workflow := service.repository.FindById(workflowId)
-	if workflow.Id == 0 {
+	if workflow.Id == 0 || workflow.UserId != user.Id {
 		return nil, schemas.ErrorNoWorkflowFound
 	}
 	reactionResponse := []json.RawMessage{}
@@ -273,77 +293,82 @@ func (service *workflowService) GetMostRecentReaction(ctx *gin.Context) ([]json.
 
 func (service *workflowService) DeleteWorkflow(ctx *gin.Context) error {
 	var result schemas.WorkflowJson
-	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	err := ctx.ShouldBind(&result)
+	if err != nil {
+		return schemas.ErrorBadParameter
+	}
+
+	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return err
 	}
-	authHeader := ctx.GetHeader("Authorization")
-	if len(authHeader) <= len("Bearer ") {
-		return fmt.Errorf("no authorization header found")
-	}
-	tokenString := authHeader[len("Bearer "):]
 
 	user, err := service.userService.GetUserInfos(tokenString)
 	if err != nil {
-		return err
+		return schemas.ErrUserNotFound
 	}
-	workflow := service.repository.FindAll()
-	for _, wf := range workflow {
-		if wf.Name == result.Name && wf.UserId == user.Id && wf.ReactionId == result.ReactionId && wf.ActionId == result.ActionId {
-			actualReactionData := service.reactionResponseDataService.FindByWorkflowId(wf.Id)
-			for _, data := range actualReactionData {
-				service.reactionResponseDataService.Delete(data)
-			}
-			err := service.repository.Delete(wf.Id)
-			if err != nil {
-				return err
-			}
-			return nil
+	workflow := service.repository.FindById(result.WorkflowId)
+	if workflow.Id == 0 {
+		return schemas.ErrorNoWorkflowFound
+	}
+	if workflow.UserId == user.Id && workflow.ReactionId == result.ReactionId && workflow.ActionId == result.ActionId {
+		actualReactionData := service.reactionResponseDataService.FindByWorkflowId(workflow.Id)
+		for _, data := range actualReactionData {
+			service.reactionResponseDataService.Delete(data)
 		}
+		err := service.repository.Delete(workflow.Id)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-	return nil
+	return schemas.ErrorNoWorkflowFound
 }
 
 func (service *workflowService) Update(ctx *gin.Context) error {
-	result := schemas.WorkflowJson{}
-	err := json.NewDecoder(ctx.Request.Body).Decode(&result)
+	result := schemas.WorkflowUpdateJson{}
+	err := ctx.ShouldBind(&result)
+	if err != nil {
+		return schemas.ErrorBadParameter
+	}
+
+	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return err
 	}
-	authHeader := ctx.GetHeader("Authorization")
-	if len(authHeader) <= len("Bearer ") {
-		return fmt.Errorf("no authorization header found")
-	}
-	tokenString := authHeader[len("Bearer "):]
 
 	user, err := service.userService.GetUserInfos(tokenString)
 	if err != nil {
-		return err
+		return schemas.ErrUserNotFound
 	}
-	workflows := service.repository.FindAll()
-	for _, workflow := range workflows {
-		if workflow.Id == result.WorkflowId && user.Id == workflow.UserId {
-			workflow.ActionOptions = json.RawMessage(result.ActionOption)
-			workflow.ReactionOptions = json.RawMessage(result.ReactionOption)
-			service.repository.Update(workflow)
-			return nil
-		}
+	workflow := service.repository.FindById(result.WorkflowId)
+	if workflow.Id == 0 {
+		return schemas.ErrorNoWorkflowFound
 	}
-	return fmt.Errorf("workflow not found")
+	if workflow.Id == result.WorkflowId && user.Id == workflow.UserId {
+		workflow.ActionOptions = json.RawMessage(result.ActionOption)
+		workflow.ReactionOptions = json.RawMessage(result.ReactionOption)
+		workflow.Name = result.Name
+		service.repository.Update(workflow)
+		return nil
+	}
+	return schemas.ErrorNoWorkflowFound
 }
 
 func (service *workflowService) GetAllReactionsForAWorkflow(ctx *gin.Context) ([]json.RawMessage, error) {
-	authHeader := ctx.GetHeader("Authorization")
-	if len(authHeader) <= len("Bearer ") {
-		return nil, fmt.Errorf("no authorization header found")
-	}
-	tokenString := authHeader[len("Bearer "):]
-
-	user, err := service.userService.GetUserInfos(tokenString)
+	tokenString, err := toolbox.GetBearerToken(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	user, err := service.userService.GetUserInfos(tokenString)
+	if err != nil {
+		return nil, schemas.ErrUserNotFound
+	}
 	workflow := service.repository.FindByUserId(user.Id)
+	if len(workflow) == 0 {
+		return []json.RawMessage{}, nil
+	}
 	var reactionResponse []json.RawMessage
 	for _, wf := range workflow {
 		if wf.UserId == user.Id {

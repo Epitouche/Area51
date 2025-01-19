@@ -111,7 +111,7 @@ func (repo *reactionRepository) FindById(reactionId uint64) (reaction schemas.Re
 	}).First(&reaction)
 
 	if err.Error != nil {
-		panic(err.Error)
+		return schemas.Reaction{}
 	}
 	return reaction
 }

@@ -7,30 +7,36 @@ import (
 )
 
 type WorkflowResult struct {
-	UserId         uint64          `json:"user_id"`
 	ActionOption   json.RawMessage `gorm:"type:jsonb" json:"action_option"   binding:"required"`
-	ActionId       uint64          `json:"action_id"`
+	ActionId       uint64          `json:"action_id" binding:"required"`
 	ReactionOption json.RawMessage `gorm:"type:jsonb" json:"reaction_option" binding:"required"`
 	Name           string          `json:"name"`
-	ReactionId     uint64          `json:"reaction_id"`
+	ReactionId     uint64          `json:"reaction_id" binding:"required"`
 }
 
 type WorkflowActivate struct {
-	WorkflowId   uint64 `json:"workflow_id" binding:"required"`
-	WorflowState bool   `json:"workflow_state" binding:"required"`
+	WorkflowId    uint64 `json:"workflow_id" binding:"required"`
+	WorkflowState bool   `json:"workflow_state" binding:"required"`
 }
 
 type WorkflowJson struct {
 	Name           string    `json:"name"`
-	WorkflowId     uint64    `json:"workflow_id"`
+	WorkflowId     uint64    `json:"workflow_id" binding:"required"`
 	ActionName     string    `json:"action_name"`
-	ActionId       uint64    `json:"action_id"`
+	ActionId       uint64    `json:"action_id" binding:"required"`
 	ActionOption   string    `json:"action_option"`
-	ReactionId     uint64    `json:"reaction_id"`
+	ReactionId     uint64    `json:"reaction_id" binding:"required"`
 	ReactionName   string    `json:"reaction_name"`
 	ReactionOption string    `json:"reaction_option"`
 	IsActive       bool      `json:"is_active"`
 	CreatedAt      time.Time `json:"created_at"`
+}
+
+type WorkflowUpdateJson struct {
+	WorkflowId     uint64          `json:"workflow_id" binding:"required"`
+	ActionOption   json.RawMessage `json:"action_option" binding:"required"`
+	ReactionOption json.RawMessage `json:"reaction_option" binding:"required"`
+	Name           string          `json:"name" binding:"required"`
 }
 
 type Workflow struct {
@@ -52,6 +58,7 @@ type Workflow struct {
 }
 
 var (
-	ErrorBadParameter    = errors.New("invalid JSON format or structure")
-	ErrorNoWorkflowFound = errors.New("no workflow found")
+	ErrorBadParameter             = errors.New("invalid JSON format or structure")
+	ErrorNoWorkflowFound          = errors.New("no workflow found")
+	ErrorAlreadyExistingRessource = errors.New("ressource already exists")
 )
