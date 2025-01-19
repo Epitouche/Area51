@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  TextInput,
 } from 'react-native';
 import { globalStyles } from '../styles/global_style';
 import { AppStackList } from '../types';
@@ -22,72 +21,9 @@ import {
   getToken,
   getWorkflows,
   modifyWorkflows,
-  putWorkflows,
 } from '../service';
 
 type WorkflowDetailsProps = RouteProp<AppStackList, 'Workflow Details'>;
-
-type Options = {
-  [key: string]: any;
-};
-
-interface OptionsInputProps {
-  options: Options;
-  onChange: (key?: string, value?: string, isAction?: boolean) => void;
-  isBlackTheme?: boolean;
-  isAction: boolean;
-}
-
-function OptionsDispay({
-  options,
-  onChange,
-  isBlackTheme,
-  isAction,
-}: OptionsInputProps) {
-  const renderOptions = (
-    options: { [key: string]: any },
-    parentKey?: string,
-  ) => {
-    if (typeof options === 'string' || typeof options === 'number') {
-      return (
-        <View>
-          <Text
-            style={[
-              isBlackTheme
-                ? globalStyles.textColor
-                : globalStyles.textColorBlack,
-              styles.textFomart,
-            ]}>
-            {parentKey
-              ? (parentKey.split('.').pop()?.charAt(0).toUpperCase() ?? '') +
-                (parentKey.split('.').pop()?.slice(1) ?? '')
-              : ''}
-          </Text>
-          <TextInput
-            style={[
-              isBlackTheme ? globalStyles.input : globalStyles.inputBlack,
-              styles.input,
-            ]}
-            value={options}
-            onChangeText={text => onChange(parentKey, text, isAction)}
-            autoCapitalize="none"
-            placeholder={options || `Enter ${parentKey}`}
-            placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
-          />
-        </View>
-      );
-    } else if (typeof options === 'object' && options !== null) {
-      return Object.keys(options).map(key => (
-        <View key={key}>
-          {renderOptions(options[key], parentKey ? `${parentKey}.${key}` : key)}
-        </View>
-      ));
-    }
-    return null;
-  };
-
-  return <>{renderOptions(options)}</>;
-}
 
 export default function WorkflowDetailsScreen() {
   const route = useRoute<WorkflowDetailsProps>();
@@ -97,10 +33,6 @@ export default function WorkflowDetailsScreen() {
 
   const [isToggled, setIsToggled] = useState(workflow.is_active);
   const [token, setToken] = useState('');
-  const [optionsAction, setOptionsAction] = useState(workflow.action_option);
-  const [optionsReaction, setOptionsReaction] = useState(
-    workflow.reaction_option,
-  );
   const [reaction, setReaction] = useState<any[][]>([]);
 
   const handleToggle = () => {
@@ -122,22 +54,10 @@ export default function WorkflowDetailsScreen() {
     grabReaction();
   }, [token]);
 
-  useEffect(() => {
-    setOptionsAction(workflow.action_option);
-    setOptionsReaction(workflow.reaction_option);
-    setIsToggled(workflow.is_active);
-  }, [workflow]);
-
   const handleSave = async () => {
     if (token !== 'Error: token not found' && token !== '') {
       await modifyWorkflows(serverIp, token, isToggled, workflow.workflow_id);
       await getWorkflows(serverIp, token, setWorkflows);
-      await putWorkflows(serverIp, token, {
-        name: workflow.name,
-        workflow_id: workflow.workflow_id,
-        action_option: optionsAction,
-        reaction_option: optionsReaction,
-      });
       nav.goBack();
     }
   };
@@ -154,49 +74,6 @@ export default function WorkflowDetailsScreen() {
       );
       await getWorkflows(serverIp, token, setWorkflows);
       nav.goBack();
-    }
-  };
-
-  const handleOptionsChange = (
-    key: string | undefined,
-    value?: string,
-    isAction?: boolean,
-  ) => {
-    let updatedOptions = isAction
-      ? { ...optionsAction }
-      : { ...optionsReaction };
-
-    const updateNestedValue = (obj: any, key: string, value: string): any => {
-      const keys = key.split('.');
-      const lastKey = keys.pop();
-
-      if (keys.length > 0) {
-        const parentObj = keys.reduce(
-          (acc, currentKey) => acc[currentKey],
-          { ...obj },
-        );
-        if (parentObj && typeof parentObj === 'object') {
-          parentObj[lastKey as string] = value;
-        }
-      } else if (lastKey) {
-        obj = { ...obj, [lastKey]: value };
-      }
-
-      return obj;
-    };
-
-    if (key) {
-      if (typeof updatedOptions === 'object') {
-        updatedOptions = updateNestedValue(updatedOptions, key, value || '');
-      }
-    } else {
-      updatedOptions = { ...updatedOptions, value: value || '' };
-    }
-
-    if (isAction) {
-      setOptionsAction(updatedOptions);
-    } else {
-      setOptionsReaction(updatedOptions);
     }
   };
 
@@ -287,67 +164,6 @@ export default function WorkflowDetailsScreen() {
               </Text>
             </View>
           </View>
-          {/* <View style={{ gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text
-                style={[
-                  styles.bullet,
-                  isBlackTheme
-                    ? globalStyles.textColor
-                    : globalStyles.textColorBlack,
-                ]}
-                accessibilityLabel="Bullet">
-                •
-              </Text>
-              <Text
-                style={[
-                  isBlackTheme
-                    ? globalStyles.textColor
-                    : globalStyles.textColorBlack,
-                  styles.subtitle,
-                ]}
-                accessibilityLabel="Action options">
-                Action options
-              </Text>
-            </View>
-            <OptionsDispay
-              options={optionsAction}
-              isBlackTheme={isBlackTheme}
-              onChange={handleOptionsChange}
-              isAction={true}
-            />
-          </View>
-          <View style={{ gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text
-                style={[
-                  styles.bullet,
-                  isBlackTheme
-                    ? globalStyles.textColor
-                    : globalStyles.textColorBlack,
-                ]}
-                accessibilityLabel="Bullet">
-                •
-              </Text>
-              <Text
-                style={[
-                  isBlackTheme
-                    ? globalStyles.textColor
-                    : globalStyles.textColorBlack,
-                  styles.subtitle,
-                ]}
-                accessibilityLabel="Reaction options">
-                Reaction options
-              </Text>
-            </View>
-            <OptionsDispay
-              options={optionsReaction}
-              isBlackTheme={isBlackTheme}
-              onChange={handleOptionsChange}
-              isAction={false}
-            />
-          </View> */}
-
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text
               style={[
