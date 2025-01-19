@@ -69,7 +69,7 @@ export function Register({
             keyboardType="default"
             autoCapitalize="none"
             value={forms.username}
-            placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
+            placeholderTextColor={isBlackTheme ? 'f5f5f5': '#0a0a0a'}
             onChangeText={text => setForms({ ...forms, username: text })}
             accessibilityLabel="Username"
           />
@@ -82,7 +82,7 @@ export function Register({
             keyboardType="email-address"
             autoCapitalize="none"
             value={forms.email}
-            placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
+            placeholderTextColor={isBlackTheme ? 'f5f5f5': '#0a0a0a'}
             onChangeText={text => setForms({ ...forms, email: text })}
             accessibilityLabel="Email"
           />
@@ -94,7 +94,7 @@ export function Register({
             secureTextEntry
             placeholder="Password"
             value={forms.password}
-            placeholderTextColor={isBlackTheme ? '#0a0a0a' : 'f5f5f5'}
+            placeholderTextColor={isBlackTheme ? 'f5f5f5': '#0a0a0a'}
             onChangeText={text => setForms({ ...forms, password: text })}
             autoCapitalize="none"
             accessibilityLabel="Password"
