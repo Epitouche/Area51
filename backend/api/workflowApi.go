@@ -45,14 +45,35 @@ func (api *WorkflowApi) ActivateWorkflow(ctx *gin.Context) {
 
 func (api *WorkflowApi) GetMostRecentReaction(ctx *gin.Context) {
 	reaction, err := api.workflowController.GetMostRecentReaction(ctx)
+	switch err {
+	case schemas.ErrorBadParameter:
+		ctx.JSON(http.StatusBadRequest, schemas.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	case schemas.ErrorNoWorkflowFound:
+		ctx.JSON(http.StatusNotFound, schemas.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	case schemas.ErrNoAuthorizationHeaderFound:
+		return
+	default:
+		ctx.JSON(http.StatusOK, reaction)
+	}
+}
+
+func (api *WorkflowApi) GetAllReactionsForAWorkflow(ctx *gin.Context) {
+	reactions, err := api.workflowController.GetAllReactionsForAWorkflow(ctx)
 	if err != nil && err.Error() == "no authorization header found" {
 		return
 	}
+
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, err.Error())
 		return
 	} else {
-		ctx.JSON(http.StatusOK, reaction)
+		ctx.JSON(http.StatusOK, reactions)
 	}
 }
 

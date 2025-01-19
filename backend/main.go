@@ -24,7 +24,6 @@ func setupRouter() *gin.Engine {
 		AllowCredentials: true,
 	})
 	router.Use(fullCors)
-	// router.Use(cors.Default())
 
 	router.GET("/about.json", servicesApi.AboutJson)
 
@@ -63,7 +62,8 @@ func setupRouter() *gin.Engine {
 			workflow.POST("", workflowApi.CreateWorkflow)
 			workflow.PUT("/activation", workflowApi.ActivateWorkflow)
 			workflow.DELETE("", workflowApi.DeleteWorkflow)
-			workflow.GET("/reaction", workflowApi.GetMostRecentReaction)
+			workflow.GET("/reaction/latest/", workflowApi.GetMostRecentReaction)
+			workflow.GET("/reactions", workflowApi.GetAllReactionsForAWorkflow)
 		}
 
 		spotify := apiRoutes.Group("/spotify")
@@ -94,11 +94,6 @@ func setupRouter() *gin.Engine {
 			google.POST("/callback", func(ctx *gin.Context) {
 				googleApi.HandleGoogleTokenCallback(ctx, "/callback")
 			})
-		}
-
-		action := apiRoutes.Group("/action", middlewares.Authorization())
-		{
-			action.POST("", actionApi.CreateAction)
 		}
 	}
 
@@ -140,7 +135,6 @@ var (
 	// Controllers
 	userController      controllers.UserController      = controllers.NewUserController(userService, jwtService, servicesService, reactionService, actionService, serviceToken, workflowsService, googleService, githubService)
 	githubController    controllers.GithubController    = controllers.NewGithubController(githubService, userService, serviceToken, servicesService)
-	actionController    controllers.ActionController    = controllers.NewActionController(actionService)
 	servicesController  controllers.ServicesController  = controllers.NewServiceController(servicesService, actionService, reactionService)
 	workflowController  controllers.WorkflowController  = controllers.NewWorkflowController(workflowsService, reactionService, actionService)
 	spotifyController   controllers.SpotifyController   = controllers.NewSpotifyController(spotifyService, servicesService, userService, serviceToken)
@@ -154,7 +148,6 @@ var (
 	githubApi    *api.GithubApi    = api.NewGithubApi(githubController)
 	servicesApi  *api.ServicesApi  = api.NewServicesApi(servicesController, workflowController)
 	workflowApi  *api.WorkflowApi  = api.NewWorkflowApi(workflowController)
-	actionApi    *api.ActionApi    = api.NewActionApi(actionController)
 	spotifyApi   *api.SpotifyApi   = api.NewSpotifyApi(spotifyController)
 	mobileApi    *api.MobileApi    = api.NewMobileApi(mobileController)
 	microsoftApi *api.MicrosoftApi = api.NewMicrosoftApi(microsoftController)
