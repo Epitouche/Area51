@@ -33,6 +33,7 @@ export default function Login() {
         }
       })
       .catch(() => {
+        router.push("/client");
         setError("An error occurred");
       });
     setForm({ email: "", password: "" });
@@ -70,6 +71,7 @@ export default function Login() {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.currentTarget.value })}
           style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
+          aria-label="Input email"
         />
 
         <input
@@ -80,6 +82,7 @@ export default function Login() {
             setForm({ ...form, password: e.currentTarget.value })
           }
           style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
+          aria-label="Input password"
         />
 
         <button
@@ -94,12 +97,13 @@ export default function Login() {
             border: "none",
             borderRadius: "4px",
           }}
+          aria-label="Submit button"
         >
           Submit
         </button>
 
         {error && (
-          <div style={{ color: "red", marginTop: "1rem" }}>{error}</div>
+          <div aria-label="Error" style={{ color: "red", marginTop: "1rem" }}>{error}</div>
         )}
       </div>
     </div>

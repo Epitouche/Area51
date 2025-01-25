@@ -6,7 +6,6 @@ if (!process.env.BACKEND_API_URL) {
 }
 
 export async function loginCall(email: string, password: string) {
-  const cookie = cookies();
   const response = await fetch(`${process.env.BACKEND_API_URL}auth/login`, {
     method: "POST",
     headers: {

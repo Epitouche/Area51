@@ -14,7 +14,7 @@ authRouter.post("/login", async (req: any, res: any) => {
   if (email === "test" || password === "test") {
     return res.sendStatus(200);
   } else
-    return res.sendStatus(401);
+    return res.sendStatus(400);
 });
 
 authRouter.post("/register", async (req: any, res: any) => {
