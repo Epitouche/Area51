@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useAttrs } from "vue";
 
 const props = defineProps<{
     bgColor?: string;
@@ -8,6 +6,7 @@ const props = defineProps<{
     icon?: string;
     iconHeight?: number;
     iconWidth?: number;
+    ariaLabel?: string;
 }>();
 
 const attrs = useAttrs();
@@ -26,12 +25,16 @@ const computedIconWidth = computed(() => props.iconWidth ?? defaulticonWidth);
 </script>
 
 <template>
-    <div :class="[
+    <div
+    :class="[
         'p-3 rounded-xl shadow-lg transform hover:scale-110 transition-transform duration-200',
         computedBgColor,
         computedTextColor,
     ]" v-bind="attrs">
-        <Icon :name="computedIcon" :class="[
+        <Icon
+        :name="computedIcon"
+        :aria-label="props.ariaLabel"
+        :class="[
             'mx-1 mt-1',
             `h-${computedIconHeight}`,
             `w-${computedIconWidth}`

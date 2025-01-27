@@ -152,6 +152,7 @@ onMounted(fetchOauthServices);
             v-model="username"
             type="text"
             label="Username"
+            force-dark="true"
             aria-label="Username input field"
           />
         </div>
@@ -161,6 +162,7 @@ onMounted(fetchOauthServices);
             v-model="email"
             type="email"
             label="Email"
+            force-dark="true"
             aria-label="Email input field"
           />
         </div>
@@ -170,6 +172,7 @@ onMounted(fetchOauthServices);
             v-model="password"
             type="password"
             label="Password"
+            force-dark="true"
             aria-label="Password input field"
           />
         </div>
@@ -194,7 +197,7 @@ onMounted(fetchOauthServices);
         </div>
       </form>
       <hr class="border-primaryWhite-400" aria-hidden="true">
-      <div class="flex justify-around space-x-4" aria-label="Third-party registration buttons">
+      <div class="flex justify-around space-x-4" role="group" aria-label="Third-party registration buttons">
         <ButtonComponent
           v-for="(service, index) in services"
           :key="index"
@@ -203,7 +206,7 @@ onMounted(fetchOauthServices);
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
-          aria-label="Register with {{ service.name }}"
+          :aria-label="`Register with ${ service.name }`"
           @click="redirectToService(index)"
         />
       </div>

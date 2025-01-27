@@ -8,6 +8,7 @@ const props = defineProps<{
   hoverColor?: string;
   icon?: string;
   onClick?: () => void;
+  ariaLabel?: string;
 }>();
 
 const defaultBgColor = "bg-primaryWhite-500 dark:bg-primaryDark-500";
@@ -24,6 +25,7 @@ const computedHoverColor = computed(
 
 <template>
   <button
+    :aria-label="props.ariaLabel"
     :class="[
       'rounded-full px-4 py-2 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 flex flex-row gap-2 justify-center items-center',
       computedBgColor,
