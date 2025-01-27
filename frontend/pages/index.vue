@@ -118,14 +118,14 @@ const features = ref([
                 Automatize
               </h1>
               <h1
-                class="text-5xl sm:text-6xl md:text-8xl font-bold text-tertiary-500 mt-2"
+                class="text-5xl sm:text-6xl md:text-8xl font-bold text-tertiary-500 dark:text-tertiary-300 mt-2"
               >
                 Everything.
               </h1>
               <p
                 class="my-4 text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-fontWhite"
               >
-                Make your favorite apps connect with each other <br />
+                Make your favorite apps connect with each other <br>
                 and let us automatize tasks for you!
               </p>
               <NuxtLink
@@ -154,20 +154,20 @@ const features = ref([
                   aria-label="Workflow card"
                 >
                   <div class="mx-6">
-                    <h3 class="text-md mb-4 text-fontBlack dark:text-fontWhite" aria-label="Workflow title">
+                    <h2 class="text-md mb-4 text-fontBlack dark:text-fontWhite" aria-label="Workflow title">
                       {{ workflow.hero_card.title }}
-                    </h3>
+                    </h2>
                     <div class="flex items-center space-x-4 mb-4" aria-label="Workflow details">
                       <div class="flex flex-col items-center">
                         <IconComponent
                           :bg-color="workflow.hero_card.first_logo.color"
                           text-color="text-white"
                           :icon="workflow.hero_card.first_logo.icon"
-                          aria-label="{{ workflow.hero_card.first_logo.label }} icon"
+                          :aria-label="`${workflow.hero_card.first_logo.label} icon`"
                         />
                         <span
                           class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite"
-                          aria-label="{{ workflow.hero_card.first_logo.label }}"
+                          :aria-label="workflow.hero_card.first_logo.label"
                         >{{ workflow.hero_card.first_logo.label }}</span>
                       </div>
                       <Icon
@@ -180,11 +180,11 @@ const features = ref([
                           :bg-color="workflow.hero_card.trigger.color"
                           text-color="text-white"
                           :icon="workflow.hero_card.trigger.icon"
-                          aria-label="{{ workflow.hero_card.trigger.label }} icon"
+                          :aria-label="`${workflow.hero_card.trigger.label} icon`"
                         />
                         <span
                           class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite"
-                          aria-label="{{ workflow.hero_card.trigger.label }}"
+                          :aria-label="workflow.hero_card.trigger.label"
                         >{{ workflow.hero_card.trigger.label }}</span>
                       </div>
                       <Icon
@@ -197,11 +197,11 @@ const features = ref([
                           :bg-color="workflow.hero_card.second_logo.color"
                           text-color="text-white"
                           :icon="workflow.hero_card.second_logo.icon"
-                          aria-label="{{ workflow.hero_card.second_logo.label }} icon"
+                          :aria-label="`${workflow.hero_card.second_logo.label} icon`"
                         />
                         <span
                           class="mt-2 text-sm font-medium text-gray-600 dark:text-fontWhite"
-                          aria-label="{{ workflow.hero_card.second_logo.label }}"
+                          :aria-label="workflow.hero_card.second_logo.label"
                         >{{ workflow.hero_card.second_logo.label }}</span>
                       </div>
                     </div>
@@ -233,21 +233,21 @@ const features = ref([
             class="bg-primaryWhite-500 dark:bg-secondaryDark-500 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
             aria-label="Workflow example card"
           >
-            <h3
+            <h2
               class="text-xl font-semibold mb-4 text-fontBlack dark:text-fontWhite"
               aria-label="Workflow example title"
             >
               {{ workflow.title }}
-            </h3>
+            </h2>
             <div class="flex items-center space-x-4 mb-4" aria-label="Workflow example details">
               <div class="flex items-center">
                 <IconComponent
                   bg-color="bg-purple-100"
                   text-color="text-purple-700"
                   :icon="workflow.trigger.icon"
-                  aria-label="{{ workflow.trigger.name }} icon"
+                  :aria-label="`${ workflow.trigger.name } icon`"
                 />
-                <span class="ml-4 text-fontBlack dark:text-fontWhite" aria-label="{{ workflow.trigger.name }}">
+                <span class="ml-4 text-fontBlack dark:text-fontWhite" :aria-label="workflow.trigger.name">
                   {{ workflow.trigger.name }}
                 </span>
               </div>
@@ -261,9 +261,9 @@ const features = ref([
                   bg-color="bg-purple-100"
                   text-color="text-purple-700"
                   :icon="workflow.action.icon"
-                  aria-label="{{ workflow.action.name }} icon"
+                  :aria-label="`${ workflow.action.name } icon`"
                 />
-                <span class="ml-4 text-fontBlack dark:text-fontWhite" aria-label="{{ workflow.action.name }}">
+                <span class="ml-4 text-fontBlack dark:text-fontWhite" :aria-label="workflow.action.name">
                   {{ workflow.action.name }}
                 </span>
               </div>
@@ -305,14 +305,14 @@ const features = ref([
                 text-color="text-tertiary-700"
                 :icon="feature.icon"
                 class="w-14 h-14 flex justify-center mb-4"
-                aria-label="{{ feature.title }} icon"
+                :aria-label="`${ feature.title } icon`"
               />
-              <h3
+              <h2
                 class="text-xl font-semibold mb-2 text-fontBlack dark:text-fontWhite"
                 aria-label="Feature title"
               >
                 {{ feature.title }}
-              </h3>
+              </h2>
               <p class="text-gray-600 dark:text-fontWhite" aria-label="Feature description">
                 {{ feature.description }}
               </p>
@@ -324,7 +324,7 @@ const features = ref([
           >
             You can see the documentation
             <a
-              class="text-tertiary-500 dark:text-tertiary-300"
+              class="underline-offset-2 underline"
               href="https://github.com/Epitouche/Area51/blob/main/README.md"
               aria-label="Link to documentation"
             >here</a

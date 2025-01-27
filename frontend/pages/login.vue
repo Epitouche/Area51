@@ -99,7 +99,7 @@ interface RedirectResponse {
 async function redirectToService(index: number) {
   try {
     const selectedService = services.value[index];
-    
+
     const { service_authentication_url }: RedirectResponse = await $fetch(
       `http://localhost:8080/api/${selectedService.name.toLowerCase()}/auth`,
       {
@@ -131,16 +131,13 @@ onMounted(() => {
       class="w-full transform max-w-md p-8 space-y-10 bg-gradient-to-b from-tertiary-500 to-tertiary-600 dark:from-tertiary-600 dark:to-tertiary-500 text-fontWhite rounded-lg shadow-lg"
       aria-label="Login form container"
     >
-      <h2 
-        class="text-2xl font-bold text-center"
-        aria-label="Login heading"
-      >
+      <h2 class="text-2xl font-bold text-center" aria-label="Login heading">
         LOG IN
       </h2>
-      <form 
+      <form
         class="space-y-6"
-        @submit.prevent="onSubmit"
         aria-label="Login form"
+        @submit.prevent="onSubmit"
       >
         <div>
           <InputComponent
@@ -149,6 +146,7 @@ onMounted(() => {
             type="text"
             label="Username"
             icon="fas fa-user"
+            force-dark="true"
             aria-label="Username input field"
           />
         </div>
@@ -159,6 +157,7 @@ onMounted(() => {
             type="password"
             label="Password"
             icon="fas fa-lock"
+            force-dark="true"
             aria-label="Password input field"
           />
         </div>
@@ -183,7 +182,11 @@ onMounted(() => {
         </div>
       </form>
       <hr class="border-primaryWhite-400" aria-hidden="true">
-      <div class="flex justify-around flex-wrap gap-5" aria-label="Third-party login buttons">
+      <div
+        class="flex justify-around flex-wrap gap-5"
+        role="group"
+        aria-label="Third-party login buttons"
+      >
         <ButtonComponent
           v-for="(service, index) in services"
           :key="index"
@@ -192,14 +195,14 @@ onMounted(() => {
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
+          :aria-label="`Login with ${service.name}`"
           @click="redirectToService(index)"
-          aria-label="Login with {{ service.name }}"
         />
       </div>
       <div class="flex justify-around">
         <p class="text-center text-sm">
-          <NuxtLink 
-            to="/register" 
+          <NuxtLink
+            to="/register"
             class="text-fontWhite underline"
             aria-label="Navigate to registration page"
           >
@@ -207,7 +210,11 @@ onMounted(() => {
           </NuxtLink>
         </p>
         <p class="text-center text-sm">
-          <a href="#" class="text-fontWhite underline" aria-label="Navigate to forgot password page">
+          <a
+            href="#"
+            class="text-fontWhite underline"
+            aria-label="Navigate to forgot password page"
+          >
             Forgot password?
           </a>
         </p>
