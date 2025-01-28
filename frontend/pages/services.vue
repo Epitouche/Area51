@@ -199,12 +199,12 @@ onMounted(async () => {
               </div>
             </div>
             <div class="flex flex-col gap-1 sm:gap-2">
-              <h3
+              <h2
                 class="text-lg sm:text-xl md:text-2xl font-semibold text-fontBlack dark:text-fontWhite"
                 aria-label="Service name: {{ service.name }}"
               >
                 {{ service.name }}
-              </h3>
+              </h2>
               <p
                 class="text-sm sm:text-base text-fontBlack dark:text-fontWhite"
                 aria-label="Service description: {{ service.description }}"

@@ -139,8 +139,8 @@ onMounted(() => {
       </h2>
       <form 
         class="space-y-6"
-        @submit.prevent="onSubmit"
         aria-label="Login form"
+        @submit.prevent="onSubmit"
       >
         <div>
           <InputComponent
@@ -149,6 +149,7 @@ onMounted(() => {
             type="text"
             label="Username"
             icon="fas fa-user"
+            :force-dark="true"
             aria-label="Username input field"
           />
         </div>
@@ -159,6 +160,7 @@ onMounted(() => {
             type="password"
             label="Password"
             icon="fas fa-lock"
+            :force-dark="true"
             aria-label="Password input field"
           />
         </div>
@@ -192,8 +194,8 @@ onMounted(() => {
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
-          @click="redirectToService(index)"
           aria-label="Login with {{ service.name }}"
+          @click="redirectToService(index)"
         />
       </div>
       <div class="flex justify-around">

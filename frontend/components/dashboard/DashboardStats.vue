@@ -32,33 +32,43 @@ const stats = ref([
 const token = useCookie("access_token");
 
 onMounted(async () => {
-    const response = await $fetch<Workflow[]>(
-      "http://localhost:8080/api/user/workflows",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    response.forEach(() => {
-        stats.value[0].value = Number(stats.value[0].value) + 1;
-    })
-    if (response != null) {
-      stats.value[2].value = response[response.length - 1].name;
+    try {
+        const response = await $fetch<Workflow[]>(
+            "http://localhost:8080/api/user/workflows",
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token.value}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        if (response && response.length > 0) {
+            stats.value[0].value = response.length;
+
+            const lastWorkflow = response[response.length - 1];
+            stats.value[2].value = lastWorkflow.name || "N/A";
+        }
+
+        const reactions = await $fetch<unknown[]>(
+            "/api/workflows/getLastWorkflow",
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token.value}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        if (reactions) {
+            stats.value[1].value = reactions.length;
+        }
+    } catch (error) {
+        console.error("Error fetching data:", error);
     }
-    const reactions = await $fetch<unknown[]>("/api/workflows/getLastWorkflow", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        "Content-Type": "application/json",
-      },
-    });
-    if (reactions != null) {
-      stats.value[1].value = Number(reactions.length);
-    }
-})
+});
 </script>
 <template>
     <div 

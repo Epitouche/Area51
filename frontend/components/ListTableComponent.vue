@@ -176,7 +176,7 @@ onBeforeUnmount(() => {
           <th
             class="px-3 py-2 sm:px-6 sm:py-3 text-center text-xs sm:text-sm text-fontBlack dark:text-gray-300 uppercase tracking-wider"
           >
-            <input type="checkbox" :checked="headCheckbox" @click="checkAll">
+            <input type="checkbox" aria-label="Checkbox that check all workflows" :checked="headCheckbox" @click="checkAll">
           </th>
           <th
             v-for="column in columns"

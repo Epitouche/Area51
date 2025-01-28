@@ -18,8 +18,8 @@ const currentYear = computed(() => {
                 </p>
             </div>
             <div aria-label="User links">
-                <h3 class="font-semibold text-gray-900" aria-label="User section title">User</h3>
-                <div class="text-gray-500 hover:text-brand-purple transition-colors mt-4">
+                <h2 class="font-semibold text-fontBlack dark:text-fontWhite" aria-label="User section title">User</h2>
+                <div class="text-fontBlack dark:text-fontWhite hover:text-brand-purple transition-colors mt-4">
                     <NuxtLink to="/login" aria-label="Login page link">Login</NuxtLink>
                 </div>
                 <div class="text-gray-500 hover:text-brand-purple transition-colors">
@@ -27,8 +27,8 @@ const currentYear = computed(() => {
                 </div>
             </div>
             <div aria-label="Documentation links">
-                <h3 class="font-semibold text-gray-900" aria-label="Documentation section title">Documentation</h3>
-                <div class="text-gray-500 hover:text-brand-purple mt-4">
+                <h2 class="font-semibold text-fontBlack dark:text-fontWhite" aria-label="Documentation section title">Documentation</h2>
+                <div class="text-fontBlack dark:text-fontWhite hover:text-brand-purple mt-4">
                     <a href="https://github.com/Epitouche/Area51/blob/main/README.md" aria-label="GitHub documentation link">Github Documentation</a>
                 </div>
                 <div class="text-gray-500 hover:text-brand-purple">

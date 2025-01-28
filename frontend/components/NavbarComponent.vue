@@ -44,15 +44,8 @@ async function deleteAccount() {
     <nav class="p-4 border-b border-secondaryDark-100 dark:border-secondaryDark-500" aria-label="Primary navigation">
       <div class="container mx-auto flex justify-between items-center text-fontBlack dark:text-fontWhite" aria-label="Navigation container">
         <div class="flex  gap-4 text-lg font-bold" aria-label="Website logo">
-          <NuxtLink to="/" aria-label="Homepage link"><img src="/logo_Area51.png" alt="Logo of the Website 'Area51'" class="h-10 w-auto"></NuxtLink>
-          <ButtonComponent
-            v-if="registered"
-            bg-color="bg-tertiary-500"
-            hover-color="hover:bg-accent-500"
-            text-color="text-fontWhite"
-            text="Delete Account"
-            @click="isModalOpen = true"
-          />
+          <NuxtLink v-if="registered" to="/dashboard" aria-label="Dashboard link"><img src="/logo_Area51.png" alt="Logo of the Website 'Area51'" class="h-10 w-auto"></NuxtLink>
+          <NuxtLink v-else to="/" aria-label="Homepage link"><img src="/logo_Area51.png" alt="Logo of the Website 'Area51'" class="h-10 w-auto"></NuxtLink>
         </div>
         <div v-if="registered" class="space-x-9 flex items-center" aria-label="User navigation">
           <ThemeSwitch aria-label="Theme switcher: dark/light mode" />
@@ -73,24 +66,34 @@ async function deleteAccount() {
             />
           </NuxtLink>
         </div>
-        <ButtonComponent
+        <div v-if="registered" class="flex gap-4">
+          <ButtonComponent
           v-if="registered"
           bg-color="bg-tertiary-500"
           hover-color="hover:bg-accent-500"
           text-color="text-fontWhite"
           text="Logout"
-          @click="
-            () => {
-              const accessToken = useCookie('access_token');
-              const serviceUsedLogin = useCookie('serviceUsedLogin');
-
-              accessToken.value = null;
-              serviceUsedLogin.value = null;
-
-              navigateTo('/login');
-            }
-          "
-        />
+            @click="
+              () => {
+                const accessToken = useCookie('access_token');
+                const serviceUsedLogin = useCookie('serviceUsedLogin');
+  
+                accessToken.value = null;
+                serviceUsedLogin.value = null;
+  
+                navigateTo('/login');
+              }
+            "
+          />
+              <ButtonComponent
+                  v-if="registered"
+                  bg-color="bg-tertiary-500"
+                  hover-color="hover:bg-accent-500"
+                  text-color="text-fontWhite"
+                  text="Delete Account"
+                  @click="isModalOpen = true"
+                />
+        </div>
       </div>
     </nav>
     <ModalComponent
