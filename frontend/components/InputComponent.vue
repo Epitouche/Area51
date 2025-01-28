@@ -1,19 +1,19 @@
 <script setup lang="ts">
-
 const props = defineProps<{
   id?: string;
   type: string;
   label: string;
   modelValue: string;
+  forceDark?: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void;
+  (e: "update:modelValue", value: string): void;
 }>();
 
 const updateValue = (event: Event) => {
   const input = event.target as HTMLInputElement;
-  emit('update:modelValue', input.value);
+  emit("update:modelValue", input.value);
 };
 </script>
 

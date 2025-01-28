@@ -202,7 +202,7 @@ onMounted(fetchOauthServices);
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"
-          aria-label="Register with {{ service.name }}"
+          :aria-label="`Register with ${ service.name }`"
           @click="redirectToService(index)"
         />
       </div>
