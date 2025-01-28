@@ -146,7 +146,7 @@ onMounted(() => {
             type="text"
             label="Username"
             icon="fas fa-user"
-            force-dark="true"
+            :force-dark="true"
             aria-label="Username input field"
           />
         </div>
@@ -157,7 +157,7 @@ onMounted(() => {
             type="password"
             label="Password"
             icon="fas fa-lock"
-            force-dark="true"
+            :force-dark="true"
             aria-label="Password input field"
           />
         </div>

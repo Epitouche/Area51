@@ -49,9 +49,6 @@ async function onSubmit() {
     );
 
     if (access_token) {
-      const tokenCookie = useCookie("access_token");
-      tokenCookie.value = access_token;
-
       triggerNotification(
         "success",
         "Registration successful",
@@ -113,7 +110,6 @@ async function redirectToService(index: number) {
       }
     );
     if (service_authentication_url) {
-      useCookie("serviceUsedLogin").value = selectedService.name.toLowerCase();
       window.location.href = service_authentication_url;
     } else {
       console.error("${selectedService} authentication URL not found");
@@ -152,7 +148,7 @@ onMounted(fetchOauthServices);
             v-model="username"
             type="text"
             label="Username"
-            force-dark="true"
+            :force-dark="true"
             aria-label="Username input field"
           />
         </div>
@@ -162,7 +158,7 @@ onMounted(fetchOauthServices);
             v-model="email"
             type="email"
             label="Email"
-            force-dark="true"
+            :force-dark="true"
             aria-label="Email input field"
           />
         </div>
@@ -172,8 +168,8 @@ onMounted(fetchOauthServices);
             v-model="password"
             type="password"
             label="Password"
-            force-dark="true"
             aria-label="Password input field"
+            :force-dark="true"
           />
         </div>
         <!-- <div class="flex items-center gap-2">
@@ -197,12 +193,12 @@ onMounted(fetchOauthServices);
         </div>
       </form>
       <hr class="border-primaryWhite-400" aria-hidden="true">
-      <div class="flex justify-around space-x-4" role="group" aria-label="Third-party registration buttons">
+      <div class="flex justify-around flex-wrap gap-5" role="group" aria-label="Third-party registration buttons">
         <ButtonComponent
           v-for="(service, index) in services"
           :key="index"
           :text="service.name"
-          class="w-full"
+          class="w-1/4"
           bg-color="bg-primaryWhite-500"
           hover-color="hover:bg-secondaryWhite-500"
           text-color="text-fontBlack"

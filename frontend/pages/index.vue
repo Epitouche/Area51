@@ -115,7 +115,7 @@ const features = ref([
               <h1
                 class="text-4xl sm:text-5xl md:text-6xl font-bold mx-2 text-fontBlack dark:text-fontWhite"
               >
-                Automatize
+                Automate
               </h1>
               <h1
                 class="text-5xl sm:text-6xl md:text-8xl font-bold text-tertiary-500 dark:text-tertiary-300 mt-2"
@@ -126,7 +126,7 @@ const features = ref([
                 class="my-4 text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-fontWhite"
               >
                 Make your favorite apps connect with each other <br>
-                and let us automatize tasks for you!
+                and let us automate tasks for you!
               </p>
               <NuxtLink
                 to="/register"

@@ -26,12 +26,12 @@ const updateValue = (event: Event) => {
   >
     <i
       class="fas fa-user"
-      :class="props.forceDark ? 'text-fontWhite' : 'text-fontBlack'"
+      :class="props.forceDark ? 'text-fontWhite' : 'text-fontBlack dark:text-fontWhite'"
     />
     <div class="flex-1">
       <label
         :for="props.id"
-        :class="props.forceDark ? 'text-fontWhite' : 'text-fontBlack'"
+        :class="props.forceDark ? 'text-fontWhite' : 'text-fontBlack dark:text-fontWhite'"
       >
         {{ props.label }}
       </label>
@@ -39,11 +39,12 @@ const updateValue = (event: Event) => {
         :id="props.id"
         :type="props.type"
         :value="props.modelValue"
+        aria-label="input"
         :class="[
           'w-full bg-transparent border-b-2 border-primaryDark-500 focus:border-secondaryDark-500 focus:outline-none focus:ring-0',
           props.forceDark
-          ? 'dark:border-primaryWhite-500 dark:text-fontWhite dark:focus:border-secondaryWhite-500'
-          : 'border-fontBlack dark:border-primaryWhite-500',
+          ? 'text-fontWhite dark:border-fontWhite dark:text-fontWhite dark:focus:border-secondaryWhite-500'
+          : 'text-fontBlack dark:text-fontWhite border-fontBlack dark:border-fontWhite',
         ]"
         @input="updateValue"
       >

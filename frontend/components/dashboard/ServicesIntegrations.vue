@@ -91,13 +91,13 @@ const shouldOverflow = computed(() => systemes.value.length > 4);
                 </div>
                 <span 
                     v-if="systeme.connected" 
-                    class="text-sm text-green-500 bg-green-50 px-3 py-1 rounded-full" 
+                    class="text-sm text-green-700 font-bold bg-green-50 px-3 py-1 rounded-full" 
                     aria-label="Status: Connected">
                     Connected
                 </span>
                 <span 
                     v-else 
-                    class="text-sm text-red-500 bg-red-50 px-3 py-1 rounded-full" 
+                    class="text-sm text-red-700 font-bold bg-red-50 px-3 py-1 rounded-full" 
                     aria-label="Status: Disconnected">
                     Disconnected
                 </span>
