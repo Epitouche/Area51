@@ -30,6 +30,7 @@ async function deleteAccount() {
 
     if (response) {
       navigateTo("/login");
+      isModalOpen.value = false;
     } else {
       throw new Error("Failed to delete account");
     }
