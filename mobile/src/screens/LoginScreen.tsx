@@ -71,7 +71,7 @@ function Login({
             ]}
             autoCapitalize="none"
             placeholder="Username"
-            placeholderTextColor={isBlackTheme ? 'f5f5f5': '#0a0a0a'}
+            placeholderTextColor={isBlackTheme ? '#f5f5f5': '#0a0a0a'}
             value={forms.username}
             onChangeText={username => setForms({ ...forms, username })}
             accessibilityLabel="Username"
@@ -84,7 +84,7 @@ function Login({
             secureTextEntry
             value={forms.password}
             placeholder="Password"
-            placeholderTextColor={isBlackTheme ? 'f5f5f5': '#0a0a0a'}
+            placeholderTextColor={isBlackTheme ? '#f5f5f5': '#0a0a0a'}
             onChangeText={password => setForms({ ...forms, password })}
             autoCapitalize="none"
             accessibilityLabel="Password"
