@@ -115,3 +115,13 @@ Here is the links to the markdown documentation for this project:
 - [*Backend*](./docs/Backend.md)
 - [*Frontend*](./docs/Frontend.md)
 - [*Mobile*](./docs/Mobile.md)
+
+## Visual
+### Web view
+#### Dashboard Page
+![DashboardPage](./screen/dashboardPage.png)
+#### Service Page
+![ServicePage](./screen/servicePage.png)
+#### Workflows Page
+![WorkflowPage](./screen/workflowPage.png)
+
